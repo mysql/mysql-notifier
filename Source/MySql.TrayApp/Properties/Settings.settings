@@ -1,0 +1,36 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MySql.TrayApp.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="EnableAutoRefresh" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="AutoRefreshType" Type="System.String" Scope="User">
+      <Value Profile="(Default)">OnDemand</Value>
+    </Setting>
+    <Setting Name="AutoRefreshFrequency" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="AutoRefreshNotifyChanges" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="RefreshMethod" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Soft</Value>
+    </Setting>
+    <Setting Name="ScanForServicesType" Type="System.String" Scope="User">
+      <Value Profile="(Default)">StartsWith</Value>
+    </Setting>
+    <Setting Name="ServicesStartWith" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MYSQL</Value>
+    </Setting>
+    <Setting Name="RunAtStartup" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="AutoCheckForUpdates" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="CheckForUpdatesFrequency" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
