@@ -32,5 +32,11 @@
     <Setting Name="CheckForUpdatesFrequency" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">4</Value>
     </Setting>
+    <Setting Name="ServicesMonitor" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ServicesInstalled" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

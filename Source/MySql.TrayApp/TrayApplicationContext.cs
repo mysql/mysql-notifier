@@ -32,13 +32,10 @@ namespace MySql.TrayApp
 {
   class TrayApplicationContext : ApplicationContext
   {
-    # region Private Members
-
+    
     private bool disposed = false;
     private readonly TrayApp trayApp;
-
-    # endregion Private Members
-
+    
     /// <summary>
     /// This class should be created and passed into Application.Run( ... )
     /// </summary>
@@ -50,8 +47,7 @@ namespace MySql.TrayApp
       this.trayApp = new TrayApp(hasAdminPrivileges);
       this.trayApp.Exit += trayApp_Exit;
     }
-
-    #region Dispose Pattern Methods
+    
 
     /// <summary>
     /// Disposes of managed and unmanaged resources.
@@ -72,18 +68,11 @@ namespace MySql.TrayApp
       this.disposed = true;
     }
 
-    #endregion Dispose Pattern Methods
-
-    #region Events
 
     private void trayApp_Exit(object sender, EventArgs e)
     {
       this.ExitThread();
     }
-
-    #endregion Events
-
-    #region Methods
 
     /// <summary>
     /// If we are presently showing a form, clean it up.
@@ -93,6 +82,5 @@ namespace MySql.TrayApp
       base.ExitThreadCore();
     }
 
-    #endregion Methods
   }
 }

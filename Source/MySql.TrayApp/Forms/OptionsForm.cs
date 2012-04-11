@@ -11,55 +11,53 @@ namespace MySql.TrayApp
 {
   public partial class OptionsForm : Form
   {
-    #region Private Members
-
-    private TrayAppSettingValues settingValues;
-
-    #endregion Private Members
+    
+    private TrayAppSettingValues _settingValues;
 
     internal OptionsForm(TrayAppSettingValues settingValues)
     {
       InitializeComponent();
-      this.settingValues = settingValues;
+      _settingValues = settingValues;
     }
 
     private void OptionsForm_Load(object sender, EventArgs e)
     {
-      #region Load Settings
-      
-      this.chkEnableAutoRefresh.Checked = Properties.Settings.Default.EnableAutoRefresh;
-      this.radOnDemand.Checked = Properties.Settings.Default.AutoRefreshType == this.settingValues.autoRefreshTypeOnDemandValue;
-      this.radByTimer.Checked = Properties.Settings.Default.AutoRefreshType == this.settingValues.autoRefreshTypeByTimerValue;
-      this.numAutoRefreshFrequency.Value = Properties.Settings.Default.AutoRefreshFrequency;
-      this.chkNotifyChanges.Checked = Properties.Settings.Default.AutoRefreshNotifyChanges;
-      this.radHardRefresh.Checked = Properties.Settings.Default.RefreshMethod == this.settingValues.refreshMethodHardValue;
-      this.radSoftRefresh.Checked = Properties.Settings.Default.RefreshMethod == this.settingValues.refreshMethodSoftValue;
-      this.radInstanceName.Checked = Properties.Settings.Default.ScanForServicesType == this.settingValues.scanForServicesTypeStartsWithValue;
-      this.radServicesRunning.Checked = Properties.Settings.Default.ScanForServicesType == this.settingValues.scanForServicesTypeMysqldValue;
-      this.txtStartsWith.Text = Properties.Settings.Default.ServicesStartWith;
-      this.chkRunAtStartup.Checked = Properties.Settings.Default.RunAtStartup;
-      this.chkAutoCheckUpdates.Checked = Properties.Settings.Default.AutoCheckForUpdates;
-      this.numCheckUpdatesWeeks.Value = Properties.Settings.Default.CheckForUpdatesFrequency;
+          
+      chkEnableAutoRefresh.Checked = Properties.Settings.Default.EnableAutoRefresh;
+      radOnDemand.Checked = Properties.Settings.Default.AutoRefreshType == _settingValues.autoRefreshTypeOnDemandValue;
+      radByTimer.Checked = Properties.Settings.Default.AutoRefreshType == _settingValues.autoRefreshTypeByTimerValue;
+      numAutoRefreshFrequency.Value = Properties.Settings.Default.AutoRefreshFrequency;
+      chkNotifyChanges.Checked = Properties.Settings.Default.AutoRefreshNotifyChanges;
+      radHardRefresh.Checked = Properties.Settings.Default.RefreshMethod == _settingValues.refreshMethodHardValue;
+      radSoftRefresh.Checked = Properties.Settings.Default.RefreshMethod == _settingValues.refreshMethodSoftValue;
+      radInstanceName.Checked = Properties.Settings.Default.ScanForServicesType == _settingValues.scanForServicesTypeStartsWithValue;
+      radServicesRunning.Checked = Properties.Settings.Default.ScanForServicesType == _settingValues.scanForServicesTypeMysqldValue;
+      txtStartsWith.Text = Properties.Settings.Default.ServicesStartWith;
+      chkRunAtStartup.Checked = Properties.Settings.Default.RunAtStartup;
+      chkAutoCheckUpdates.Checked = Properties.Settings.Default.AutoCheckForUpdates;
+      numCheckUpdatesWeeks.Value = Properties.Settings.Default.CheckForUpdatesFrequency;
+      lstExistingServices.Items.Add(Properties.Settings.Default.ServicesInstalled);
+      lstMonitoredServices.Items.Add(Properties.Settings.Default.ServicesMonitor);
 
-      #endregion Load Settings
     }
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-      #region Save Settings
 
+      Properties.Settings.Default.ServicesInstalled.Clear();
+      Properties.Settings.Default.ServicesMonitor.Clear();
       Properties.Settings.Default.EnableAutoRefresh = this.chkEnableAutoRefresh.Checked;
-      Properties.Settings.Default.AutoRefreshType = (this.radOnDemand.Checked ? this.settingValues.autoRefreshTypeOnDemandValue : this.settingValues.autoRefreshTypeByTimerValue);
+      Properties.Settings.Default.AutoRefreshType = (this.radOnDemand.Checked ? _settingValues.autoRefreshTypeOnDemandValue : _settingValues.autoRefreshTypeByTimerValue);
       Properties.Settings.Default.AutoRefreshFrequency = Convert.ToInt32(this.numAutoRefreshFrequency.Value);
       Properties.Settings.Default.AutoRefreshNotifyChanges = this.chkNotifyChanges.Checked;
-      Properties.Settings.Default.RefreshMethod = (this.radHardRefresh.Checked ? this.settingValues.refreshMethodHardValue : this.settingValues.refreshMethodSoftValue);
-      Properties.Settings.Default.ScanForServicesType = (this.radInstanceName.Checked ? this.settingValues.scanForServicesTypeStartsWithValue : this.settingValues.scanForServicesTypeMysqldValue);
+      Properties.Settings.Default.RefreshMethod = (this.radHardRefresh.Checked ? _settingValues.refreshMethodHardValue : _settingValues.refreshMethodSoftValue);
+      Properties.Settings.Default.ScanForServicesType = (this.radInstanceName.Checked ? _settingValues.scanForServicesTypeStartsWithValue : _settingValues.scanForServicesTypeMysqldValue);
       Properties.Settings.Default.ServicesStartWith = this.txtStartsWith.Text;
       Properties.Settings.Default.RunAtStartup = this.chkRunAtStartup.Checked;
       Properties.Settings.Default.AutoCheckForUpdates = this.chkAutoCheckUpdates.Checked;
-      Properties.Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(this.numCheckUpdatesWeeks.Value);
-
-      #endregion Save Settings
+      Properties.Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(this.numCheckUpdatesWeeks.Value);      
+      Properties.Settings.Default.ServicesInstalled.AddRange(lstExistingServices.Items.Cast<string>().ToArray());
+      Properties.Settings.Default.ServicesMonitor.AddRange(lstMonitoredServices.Items.Cast<string>().ToArray());
     }
 
     private void chkEnableAutoRefresh_CheckedChanged(object sender, EventArgs e)
@@ -84,6 +82,11 @@ namespace MySql.TrayApp
     private void chkAutoCheckUpdates_CheckedChanged(object sender, EventArgs e)
     {
       this.numCheckUpdatesWeeks.Enabled = this.chkAutoCheckUpdates.Checked;
+    }
+
+    private void btnRefreshAll_Click(object sender, EventArgs e)
+    {
+
     }
   }
 }

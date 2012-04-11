@@ -29,20 +29,21 @@ using System.ServiceProcess;
 
 namespace MySql.TrayApp
 {
+
   /// <summary>
   /// Contains a group of ToolStripMenuItem instances for each of the corresponding MySQLService’s context menu items.
   /// </summary>
   class ServiceMenuGroup : IDisposable
   {
-    #region Private Members
+
+    public enum AvailableActions
+    { Start, Stop, ReStart };
+
 
     private bool disposed = false;
     private MySQLService boundService;
     private ToolStripMenuItem[] serviceMenuItems;
 
-    #endregion Private Members
-
-    #region Private Properties
 
     private ToolStripMenuItem mainMenuItem
     {
@@ -62,10 +63,6 @@ namespace MySql.TrayApp
       get { return (this.serviceMenuItems.Length > 0 ? this.serviceMenuItems[2] : null); }
     }
 
-    #endregion Private Properties
-
-    #region Public Properties
-
     public string BoundServiceName
     {
       get { return this.boundService.ServiceName; }
@@ -80,8 +77,6 @@ namespace MySql.TrayApp
     {
       get { return this.serviceMenuItems; }
     }
-
-    #endregion Public Properties
 
     public ServiceMenuGroup(MySQLService boundService)
     {
@@ -114,8 +109,6 @@ namespace MySql.TrayApp
       }
       this.RefreshMenus(this.BoundServiceName, this.BoundServiceStatus);
     }
-
-    #region Dispose Pattern Methods
 
     /// <summary>
     /// Cleans-up resources
@@ -154,18 +147,13 @@ namespace MySql.TrayApp
       this.disposed = true;
     }
 
-    #endregion Dispose Pattern Methods
-
-    #region Methods
-
     /// <summary>
     /// Enables and disables menus based on the current Service Status
     /// </summary>
     /// <param name="boundServiceName">Service Name</param>
     /// <param name="boundServiceStatus">Service Status</param>
     public void RefreshMenus(string boundServiceName, ServiceControllerStatus boundServiceStatus)
-    {
-      #region Refresh Service Menu
+    {      
 
       this.mainMenuItem.Text = String.Format("{0} - {1}",
                                              boundServiceName,
@@ -188,10 +176,7 @@ namespace MySql.TrayApp
           break;
       }
       this.mainMenuItem.Image = image;
-
-      #endregion Refresh Service Menu
-      #region Refresh Service's Actions SubMenus
-
+      
       foreach (ToolStripMenuItem subMenuItem in this.mainMenuItem.DropDownItems)
       {
         subMenuItem.Enabled = false;
@@ -216,13 +201,8 @@ namespace MySql.TrayApp
             break;
         }
       }
-
-      #endregion Refresh Service's Actions SubMenus
     }
 
-    #endregion Methods
-
-    #region Static Methods
 
     /// <summary>
     /// Adds a new item to the Notify Icon's context menu.
@@ -306,10 +286,6 @@ namespace MySql.TrayApp
       return ToolStripMenuItemWithHandler(displayText, null, eventHandler);
     }
 
-    #endregion Static Methods
-
-    #region Events
-
     private void configureInstanceItem_Click(object sender, EventArgs e)
     {
       if (sender == null)
@@ -348,12 +324,10 @@ namespace MySql.TrayApp
       Cursor.Current = Cursors.Default;
     }
 
-    void boundService_StatusChanged(object sender, ServiceStatusChangedArgs args)
+    void boundService_StatusChanged(object sender, ServiceStatus args)
     {
       this.RefreshMenus(args.ServiceName, args.CurrentStatus);
     }
-
-    #endregion Events
 
   }
 }

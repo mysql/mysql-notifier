@@ -52,12 +52,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ServiceStatus.cs" />
     <Compile Include="Forms\OptionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\OptionsForm.Designer.cs">
       <DependentUpon>OptionsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MySqlServicesList.cs" />
     <Compile Include="ServiceMenuGroup.cs" />
     <Compile Include="MySQLService.cs" />
     <Compile Include="Program.cs" />
@@ -101,7 +103,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MySQLTrayApp_default.ico" />
     <None Include="Resources\app_default.ico" />
     <Content Include="Resources\iconDB.jpg" />
     <None Include="Resources\stop.png" />

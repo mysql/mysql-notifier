@@ -44,6 +44,8 @@ namespace MySql.TrayApp
     public bool runAtStartup;
     public bool autoCheckForUpdates;
     public int checkForUpdatesFrequency;
+    public List<string> servicesMonitor;
+    public List<string> servicesInstalled;
   }
 
   struct TrayAppSettingValues
@@ -54,23 +56,26 @@ namespace MySql.TrayApp
     public string refreshMethodSoftValue;
     public string scanForServicesTypeStartsWithValue;
     public string scanForServicesTypeMysqldValue;
+    public string servicesMonitorValue;
+    public string servicesInstalledValue;
   }
 
   class TrayApp : IDisposable
   {
-    #region Private Members
 
     private TrayAppSettings trayAppSettings;
     private TrayAppSettingValues trayAppSettingValues;
 
     private static readonly int MAX_TOOLTIP_LENGHT = 63; // framework constraint for notify icons
+
+
     private int timeOutMilliSec = MySQLService.DefaultTimeOut;
     private bool disposed = false;
-    private readonly bool hasAdminPrivileges = false;
-    private readonly string balloonTitleForServiceStatusChanges;
-    private readonly string balloonTextForServiceStatusChanges;
-    private readonly string balloonTitleForServiceListChanges;
-    private readonly string balloonTextForServiceListChanges;
+    private bool hasAdminPrivileges { get; set;}
+    private string balloonTitleForServiceStatusChanges { get; set; }
+    private string balloonTextForServiceStatusChanges { get; set; }
+    private string balloonTitleForServiceListChanges { get; set; }
+    private string balloonTextForServiceListChanges { get; set; }
 
     private static Object lockObject = new Object();
     private static bool refreshingMenus = false;
@@ -78,69 +83,53 @@ namespace MySql.TrayApp
     private System.ComponentModel.IContainer components;
     private ToolStripMenuItem[] staticMenuItems;
     private NotifyIcon notifyIcon;
-    private MySQLServicesList mySQLServicesList;
-    private System.Timers.Timer timer;
+    private MySQLServicesList mySQLServicesList {get; set;}
+    private System.Timers.Timer timer {get; set;}
 
     private OptionsForm optionsDialog;
 
-    #endregion Private Members
-
-    #region Private Properties
-
     private ToolStripMenuItem actionsMenuItem
     {
-      set { if (this.staticMenuItems != null && this.staticMenuItems.Length > 0) this.staticMenuItems[0] = value; }
-      get { return (this.staticMenuItems != null && this.staticMenuItems.Length > 0 ? this.staticMenuItems[0] : null); }
+      set { if (staticMenuItems != null && staticMenuItems.Length > 0) staticMenuItems[0] = value; }
+      get { return (staticMenuItems != null && staticMenuItems.Length > 0 ? staticMenuItems[0] : null); }
     }
 
     private ToolStripMenuItem optionsMenuItem
     {
-      set { if (this.staticMenuItems != null && this.staticMenuItems.Length > 1) this.staticMenuItems[1] = value; }
-      get { return (this.staticMenuItems != null && this.staticMenuItems.Length > 1 ? this.staticMenuItems[1] : null); }
+      set { if (staticMenuItems != null && staticMenuItems.Length > 1) staticMenuItems[1] = value; }
+      get { return (staticMenuItems != null && staticMenuItems.Length > 1 ? staticMenuItems[1] : null); }
     }
 
     private ToolStripMenuItem exitMenuItem
     {
-      set { if (this.staticMenuItems != null && this.staticMenuItems.Length > 2) this.staticMenuItems[2] = value; }
-      get { return (this.staticMenuItems != null && this.staticMenuItems.Length > 2 ? this.staticMenuItems[2] : null); }
+      set { if (staticMenuItems != null && staticMenuItems.Length > 2) staticMenuItems[2] = value; }
+      get { return (staticMenuItems != null && staticMenuItems.Length > 2 ? staticMenuItems[2] : null); }
     }
 
-    #endregion Private Properties
-
-    #region Public Properties
-
-    public int ServicesCount
+   public int ServicesCount
     {
-      get { return this.mySQLServicesList.InstalledMySQLServicesQuantity; }
+      get { return mySQLServicesList.InstalledMySQLServicesQuantity; }
     }
 
-    #endregion Public Properties
 
     public TrayApp(bool adminPrivileges)
     {
-      this.hasAdminPrivileges = adminPrivileges;
-      this.mySQLServicesList = new MySQLServicesList(this.hasAdminPrivileges);
-      this.mySQLServicesList.ServiceStatusChanged += mySQLServicesList_ServiceStatusChanged;
-      this.mySQLServicesList.ServicesListChanged += mySQLServicesList_ServicesListChanged;
+      hasAdminPrivileges = adminPrivileges;
+      mySQLServicesList = new MySQLServicesList(hasAdminPrivileges);
+      mySQLServicesList.ServiceStatusChanged += mySQLServicesList_ServiceStatusChanged;
+      mySQLServicesList.ServicesListChanged += mySQLServicesList_ServicesListChanged;
 
-      #region Settings
 
-      #region Load Setting Values from Resources
+      trayAppSettingValues.autoRefreshTypeOnDemandValue = Properties.Resources.AutoRefreshTypeOnDemand;
+      trayAppSettingValues.autoRefreshTypeByTimerValue = Properties.Resources.AutoRefreshTypeByTimer;
+      trayAppSettingValues.refreshMethodHardValue = Properties.Resources.RefreshMethodHard;
+      trayAppSettingValues.refreshMethodSoftValue = Properties.Resources.RefreshMethodSoft;
+      trayAppSettingValues.scanForServicesTypeStartsWithValue = Properties.Resources.ScanForServicesTypeStartsWith;
+      trayAppSettingValues.scanForServicesTypeMysqldValue = Properties.Resources.ScanForServicesTypeMysqld;
 
-      this.trayAppSettingValues.autoRefreshTypeOnDemandValue = Properties.Resources.AutoRefreshTypeOnDemand;
-      this.trayAppSettingValues.autoRefreshTypeByTimerValue = Properties.Resources.AutoRefreshTypeByTimer;
-      this.trayAppSettingValues.refreshMethodHardValue = Properties.Resources.RefreshMethodHard;
-      this.trayAppSettingValues.refreshMethodSoftValue = Properties.Resources.RefreshMethodSoft;
-      this.trayAppSettingValues.scanForServicesTypeStartsWithValue = Properties.Resources.ScanForServicesTypeStartsWith;
-      this.trayAppSettingValues.scanForServicesTypeMysqldValue = Properties.Resources.ScanForServicesTypeMysqld;
+      trayAppSettings = new TrayAppSettings();
+      loadSettings();
 
-      #endregion Load Setting Values from Resources
-
-      this.trayAppSettings = new TrayAppSettings();
-      this.loadSettings();
-
-      #endregion Settings
-      #region Notify Icon initialization
 
       Bitmap iconBitmap = Properties.Resources.default_icon;
 
@@ -151,21 +140,19 @@ namespace MySql.TrayApp
                       Icon = Icon.FromHandle(iconBitmap.GetHicon()),
                       Visible = true
                     };
-      this.notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-      this.notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleTextServiceStatus;
+      notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+      notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleTextServiceStatus;
       balloonTitleForServiceStatusChanges = Properties.Resources.BalloonTitleTextServiceStatus;
       balloonTextForServiceStatusChanges = Properties.Resources.BalloonTextServiceStatus;
       balloonTitleForServiceListChanges = Properties.Resources.BalloonTitleTextServiceList;
       balloonTextForServiceListChanges = Properties.Resources.BalloonTextServiceList;
 
-      #endregion Notify Icon initialization
-      #region Context Menu Initialization
 
-      this.notifyIcon.ContextMenuStrip.Opening += ContextMenuStrip_Opening;
+      notifyIcon.ContextMenuStrip.Opening += ContextMenuStrip_Opening;
 
-      this.staticMenuItems = new ToolStripMenuItem[3];
-      this.actionsMenuItem = ServiceMenuGroup.ToolStripMenuItemWithHandler(Properties.Resources.Actions, null);
-      this.actionsMenuItem.DropDownItems.Add(ServiceMenuGroup.ToolStripMenuItemWithHandler(Properties.Resources.RefreshServices, refreshServicesItem_Click, !this.trayAppSettings.enableAutoRefresh));
+      staticMenuItems = new ToolStripMenuItem[3];
+      actionsMenuItem = ServiceMenuGroup.ToolStripMenuItemWithHandler(Properties.Resources.Actions, null);
+      actionsMenuItem.DropDownItems.Add(ServiceMenuGroup.ToolStripMenuItemWithHandler(Properties.Resources.RefreshServices, refreshServicesItem_Click, ! trayAppSettings.enableAutoRefresh));
       var manageServicesSubMenu = ServiceMenuGroup.ToolStripMenuItemWithHandler(Properties.Resources.ManageServices, manageServicesItem_Click, !adminPrivileges);
       var shieldBitmap = SystemIcons.Shield.ToBitmap();
       shieldBitmap.SetResolution(16, 16);
@@ -175,13 +162,8 @@ namespace MySql.TrayApp
       this.actionsMenuItem.DropDownItems.Add(ServiceMenuGroup.ToolStripMenuItemWithHandler(Properties.Resources.CheckUpdates, checkUpdatesItem_Click, false));
       this.optionsMenuItem = ServiceMenuGroup.ToolStripMenuItemWithHandler(Properties.Resources.Options, optionsItem_Click);
       this.exitMenuItem = ServiceMenuGroup.ToolStripMenuItemWithHandler(Properties.Resources.Exit, exitItem_Click);
-
-      #endregion Context Menu Initialization
-
-      this.refreshServicesMenus();
+      refreshServicesMenus();
     }
-
-    #region Dispose Pattern Methods
 
     /// <summary>
     /// Cleans-up resources
@@ -204,8 +186,8 @@ namespace MySql.TrayApp
       {
         if (disposing)
         {
-          if (this.mySQLServicesList != null)
-            this.mySQLServicesList.Dispose();
+          if (mySQLServicesList != null)
+             mySQLServicesList.Dispose();
           if (this.actionsMenuItem != null)
           {
             if (this.actionsMenuItem.DropDownItems[0] != null && this.actionsMenuItem.DropDownItems[0] is ToolStripMenuItem)
@@ -232,9 +214,6 @@ namespace MySql.TrayApp
       this.disposed = true;
     }
 
-    #endregion Dispose Pattern Methods
-
-    # region Events
 
     /// <summary>
     /// Notifies that the TrayApp wants to quit
@@ -247,21 +226,17 @@ namespace MySql.TrayApp
     /// <param name="e">Event arguments</param>
     protected virtual void OnExit(EventArgs e)
     {
-      #region Cleanup
-
       this.notifyIcon.Visible = false; // should remove lingering tray icon
       if (this.optionsDialog != null)
         this.optionsDialog.Close();
 
-      #endregion Cleanup
-      
       if (this.Exit != null)
         this.Exit(this, e);
     }
 
     private void mySQLServicesList_ServicesListChanged(object sender, ServicesListChangedArgs args)
     {
-      if (this.trayAppSettings.enableAutoRefresh && this.trayAppSettings.autoRefreshType == this.trayAppSettingValues.autoRefreshTypeByTimerValue && this.trayAppSettings.autoRefreshNotifyChanges)
+      if (trayAppSettings.enableAutoRefresh && trayAppSettings.autoRefreshType == trayAppSettingValues.autoRefreshTypeByTimerValue && trayAppSettings.autoRefreshNotifyChanges)
       {
         this.notifyIcon.BalloonTipTitle = balloonTitleForServiceListChanges;
         this.notifyIcon.BalloonTipText = String.Format(balloonTextForServiceListChanges,
@@ -271,9 +246,9 @@ namespace MySql.TrayApp
       }
     }
 
-    private void mySQLServicesList_ServiceStatusChanged(object sender, ServiceStatusChangedArgs args)
+    private void mySQLServicesList_ServiceStatusChanged(object sender, ServiceStatus args)
     {
-      if (this.trayAppSettings.enableAutoRefresh && this.trayAppSettings.autoRefreshType == this.trayAppSettingValues.autoRefreshTypeByTimerValue && this.trayAppSettings.autoRefreshNotifyChanges)
+      if (trayAppSettings.enableAutoRefresh && trayAppSettings.autoRefreshType == trayAppSettingValues.autoRefreshTypeByTimerValue && trayAppSettings.autoRefreshNotifyChanges)
       {
         this.notifyIcon.BalloonTipTitle = balloonTitleForServiceStatusChanges;
         this.notifyIcon.BalloonTipText = String.Format(balloonTextForServiceStatusChanges,
@@ -288,23 +263,21 @@ namespace MySql.TrayApp
     {
       e.Cancel = false;
 
-      if (this.trayAppSettings.enableAutoRefresh && this.trayAppSettings.autoRefreshType == this.trayAppSettingValues.autoRefreshTypeOnDemandValue)
-        this.refreshServicesMenus();
+      if (trayAppSettings.enableAutoRefresh && trayAppSettings.autoRefreshType == trayAppSettingValues.autoRefreshTypeOnDemandValue)
+        refreshServicesMenus();
     }
 
     private void refreshServicesItem_Click(object sender, EventArgs e)
     {
-      this.refreshServicesMenus();
+      refreshServicesMenus();
     }
 
     private void manageServicesItem_Click(object sender, EventArgs e)
     {
       bool ranElevated = false;
 
-      if (this.hasAdminPrivileges)
-        return;
-
-      #region Run Elevated
+      if (hasAdminPrivileges)
+        return;      
 
       ProcessStartInfo processInfo = new ProcessStartInfo();
       processInfo.Verb = "runas";
@@ -321,9 +294,7 @@ namespace MySql.TrayApp
       catch (Exception ex)
       {
         MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
-
-      #endregion Run Elevated
+      }      
 
       //Close this instance because we have an elevated a second instance
       if (ranElevated)
@@ -343,7 +314,7 @@ namespace MySql.TrayApp
     private void optionsItem_Click(object sender, EventArgs e)
     {
       if (this.optionsDialog == null)
-        this.optionsDialog = new OptionsForm(this.trayAppSettingValues);
+        this.optionsDialog = new OptionsForm(trayAppSettingValues);
       DialogResult dg = this.optionsDialog.ShowDialog();
       if (dg == DialogResult.OK)
         this.loadSettings();
@@ -363,12 +334,9 @@ namespace MySql.TrayApp
     {
       if (refreshingMenus)
         return;
-      this.refreshServicesMenus();
+      refreshServicesMenus();
     }
 
-    #endregion Events
-
-    # region Context Menus
 
     /// <summary>
     /// Sets the text displayed in the notify icon's tooltip
@@ -383,55 +351,50 @@ namespace MySql.TrayApp
       this.notifyIcon.Text = (toolTipText.Length >= MAX_TOOLTIP_LENGHT ? toolTipText.Substring(0, MAX_TOOLTIP_LENGHT - 3) + "..." : toolTipText);
     }
 
-    # endregion Context Menus
-
-    #region Methods
 
     /// <summary>
     /// Loads all seetings into a local struct
     /// </summary>
     private void loadSettings()
     {
-      this.trayAppSettings.enableAutoRefresh = Properties.Settings.Default.EnableAutoRefresh;
-      this.trayAppSettings.autoRefreshType = Properties.Settings.Default.AutoRefreshType;
-      this.trayAppSettings.autoRefreshFrequency = Properties.Settings.Default.AutoRefreshFrequency;
-      this.trayAppSettings.autoRefreshNotifyChanges = Properties.Settings.Default.AutoRefreshNotifyChanges;
-      this.trayAppSettings.refreshMethod = Properties.Settings.Default.RefreshMethod;
-      this.trayAppSettings.scanForServicesType = Properties.Settings.Default.ScanForServicesType;
-      this.trayAppSettings.servicesStartWith = Properties.Settings.Default.ServicesStartWith;
-      this.trayAppSettings.runAtStartup = Properties.Settings.Default.RunAtStartup;
-      this.trayAppSettings.autoCheckForUpdates = Properties.Settings.Default.AutoCheckForUpdates;
-      this.trayAppSettings.checkForUpdatesFrequency = Properties.Settings.Default.CheckForUpdatesFrequency;
+      trayAppSettings.enableAutoRefresh = Properties.Settings.Default.EnableAutoRefresh;
+      trayAppSettings.autoRefreshType = Properties.Settings.Default.AutoRefreshType;
+      trayAppSettings.autoRefreshFrequency = Properties.Settings.Default.AutoRefreshFrequency;
+      trayAppSettings.autoRefreshNotifyChanges = Properties.Settings.Default.AutoRefreshNotifyChanges;
+      trayAppSettings.refreshMethod = Properties.Settings.Default.RefreshMethod;
+      trayAppSettings.scanForServicesType = Properties.Settings.Default.ScanForServicesType;
+      trayAppSettings.servicesStartWith = Properties.Settings.Default.ServicesStartWith;
+      trayAppSettings.runAtStartup = Properties.Settings.Default.RunAtStartup;
+      trayAppSettings.autoCheckForUpdates = Properties.Settings.Default.AutoCheckForUpdates;
+      trayAppSettings.checkForUpdatesFrequency = Properties.Settings.Default.CheckForUpdatesFrequency;
+              
+      foreach (var item in Properties.Settings.Default.ServicesMonitor)	    
+		    trayAppSettings.servicesMonitor.Add(item);
+    	
+      
+      foreach (var item in Properties.Settings.Default.ServicesInstalled)
+	       trayAppSettings.servicesInstalled.Add(item);
 
-      #region AutoRefresh Settings
 
-      if (this.actionsMenuItem != null && this.actionsMenuItem.DropDownItems.Count > 0)
-        this.actionsMenuItem.DropDownItems[0].Enabled = !this.trayAppSettings.enableAutoRefresh;
+      if (actionsMenuItem != null && this.actionsMenuItem.DropDownItems.Count > 0)
+        actionsMenuItem.DropDownItems[0].Enabled = !trayAppSettings.enableAutoRefresh;
 
-      #endregion AutoRefresh Settings
-      # region Timer Settings
+      timer = new System.Timers.Timer();
 
-      if (this.trayAppSettings.enableAutoRefresh && this.trayAppSettings.autoRefreshType == this.trayAppSettingValues.autoRefreshTypeByTimerValue)
-      {
-        if (this.timer == null)
+      if (trayAppSettings.enableAutoRefresh && trayAppSettings.autoRefreshType == trayAppSettingValues.autoRefreshTypeByTimerValue)
+      {      
+        timer.AutoReset = true;
+        timer.Elapsed += timer_Elapsed;
+
+        if (!timer.Enabled)
         {
-          this.timer = new System.Timers.Timer();
-          this.timer.AutoReset = true;
-          this.timer.Elapsed += timer_Elapsed;
-        }
-        this.timer.Interval = this.trayAppSettings.autoRefreshFrequency * 1000;
-        this.timer.Enabled = true;
+          timer.Interval = trayAppSettings.autoRefreshFrequency * 1000;
+          timer.Enabled = true;
+        }       
       }
       else
-        if (this.timer != null)
-          this.timer.Enabled = false;
+        timer.Enabled = false;      
 
-      # endregion Timer Settings
-      #region Scan For Services Settings
-
-      this.mySQLServicesList.ScanForServicesPrefix = this.trayAppSettings.servicesStartWith;
-
-      #endregion Scan For Services Settings
     }
 
     /// <summary>
@@ -442,33 +405,29 @@ namespace MySql.TrayApp
       bool changesDuringRefresh = false;
       refreshingMenus = true;
 
-      if (this.trayAppSettings.refreshMethod == this.trayAppSettingValues.refreshMethodHardValue || this.notifyIcon.ContextMenuStrip.Items.Count == 0)
-        changesDuringRefresh = this.mySQLServicesList.HardRefreshMySQLServices(false);
-      else if (this.trayAppSettings.refreshMethod == this.trayAppSettingValues.refreshMethodSoftValue)
-        changesDuringRefresh = this.mySQLServicesList.SoftRefreshMySQLServices();
+      //if (trayAppSettings.refreshMethod == _trayAppSettingValues.refreshMethodHardValue || this.notifyIcon.ContextMenuStrip.Items.Count == 0)
+      //  changesDuringRefresh = _mySQLServicesList.HardRefreshMySQLServices(false);
+      //else if (trayAppSettings.refreshMethod == _trayAppSettingValues.refreshMethodSoftValue)
+      //  changesDuringRefresh = _mySQLServicesList.SoftRefreshMySQLServices();
 
-      if (changesDuringRefresh)
-      {
-        this.notifyIcon.ContextMenuStrip.Items.Clear();
-        foreach (MySQLService mySqlServ in this.mySQLServicesList.InstalledMySQLServicesList)
-        {
-          foreach (ToolStripMenuItem item in mySqlServ.MenuGroup.ServiceMenuItems)
-          {
-            this.notifyIcon.ContextMenuStrip.Items.Add(item);
-          }
-          this.notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-        }
-        foreach (ToolStripMenuItem item in this.staticMenuItems)
-        {
-          this.notifyIcon.ContextMenuStrip.Items.Add(item);
-        }
-        this.SetNotifyIconToolTip();
-      }
-
+      //if (changesDuringRefresh)
+      //{
+      //  this.notifyIcon.ContextMenuStrip.Items.Clear();
+      //  foreach (MySQLService mySqlServ in _mySQLServicesList.InstalledMySQLServicesList)
+      //  {
+      //    foreach (ToolStripMenuItem item in mySqlServ.MenuGroup.ServiceMenuItems)
+      //    {
+      //      this.notifyIcon.ContextMenuStrip.Items.Add(item);
+      //    }
+      //    this.notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+      //  }
+      //  foreach (ToolStripMenuItem item in _staticMenuItems)
+      //  {
+      //    this.notifyIcon.ContextMenuStrip.Items.Add(item);
+      //  }
+      //  this.SetNotifyIconToolTip();
+      //}
       refreshingMenus = false;
-    }
-
-    #endregion Methods
-
+    }    
   }
 }
