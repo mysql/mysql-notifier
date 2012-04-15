@@ -52,6 +52,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Forms\About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\AddServiceDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AddServiceDlg.Designer.cs">
+      <DependentUpon>AddServiceDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\ManageServicesDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ManageServicesDlg.Designer.cs">
+      <DependentUpon>ManageServicesDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MySqlServiceInformation.cs" />
     <Compile Include="ServiceStatus.cs" />
     <Compile Include="Forms\OptionsForm.cs">
       <SubType>Form</SubType>
@@ -66,6 +85,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TrayApp.cs" />
     <Compile Include="TrayApplicationContext.cs" />
+    <Compile Include="Utilities.cs" />
+    <EmbeddedResource Include="Forms\About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\AddServiceDlg.resx">
+      <DependentUpon>AddServiceDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ManageServicesDlg.resx">
+      <DependentUpon>ManageServicesDlg.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\OptionsForm.resx">
       <DependentUpon>OptionsForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -83,11 +112,13 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -111,6 +142,7 @@
     <None Include="Resources\MySQLTrayApp_stopped.png" />
     <None Include="Resources\MySQLTrayApp_default.png" />
     <None Include="Resources\MySQLTrayApp_running.png" />
+    <Content Include="Resources\logo-mysql.png" />
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
   </ItemGroup>

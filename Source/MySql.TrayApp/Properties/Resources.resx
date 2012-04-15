@@ -187,14 +187,6 @@
     <value>There was a problem retrieving Windows Services</value>
     <comment>Exception message shown when refreshing services</comment>
   </data>
-  <data name="AutoRefreshTypeByTimer" xml:space="preserve">
-    <value>ByTimer</value>
-    <comment>Value stored in Settings for AutoRefreshType setting</comment>
-  </data>
-  <data name="AutoRefreshTypeOnDemand" xml:space="preserve">
-    <value>OnDemand</value>
-    <comment>Value stored in Settings for AutoRefreshType setting</comment>
-  </data>
   <data name="RefreshMethodHard" xml:space="preserve">
     <value>Hard</value>
     <comment>Value stored in Settings for RefreshMethod setting</comment>
@@ -202,14 +194,6 @@
   <data name="RefreshMethodSoft" xml:space="preserve">
     <value>Soft</value>
     <comment>Value stored in Settings for RefreshMethod setting</comment>
-  </data>
-  <data name="ScanForServicesTypeMysqld" xml:space="preserve">
-    <value>mysqld</value>
-    <comment>Value stored in Settings for ScanForServicesType setting</comment>
-  </data>
-  <data name="ScanForServicesTypeStartsWith" xml:space="preserve">
-    <value>StartsWith</value>
-    <comment>Value stored in Settings for ScanForServicesType setting</comment>
   </data>
   <data name="CheckUpdates" xml:space="preserve">
     <value>Check for Updates...</value>
@@ -263,5 +247,11 @@
   <data name="BalloonTitleTextServiceList" xml:space="preserve">
     <value>Services List Changed</value>
     <comment>Title of the Balloon Notification</comment>
+  </data>
+  <data name="UnSupportedWBXMLVersion" xml:space="preserve">
+    <value>Unsupported XML File Version</value>
+  </data>
+  <data name="logo_mysql" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\logo-mysql.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

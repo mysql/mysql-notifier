@@ -35,18 +35,18 @@ namespace MySql.TrayApp
   class MySQLService : IDisposable
   {   
     private const int DEFAULT_TIMEOUT = 5000;
-    private int _timeoutMilliseconds = DEFAULT_TIMEOUT;
-    private ServiceControllerStatus _previousStatus;
-    private bool _disposed = false;
-    private readonly bool _hasAdminPrivileges = false;
+    private int timeoutMilliseconds = DEFAULT_TIMEOUT;
+    private ServiceControllerStatus previousStatus;
+    private bool disposed = false;
+    private readonly bool hasAdminPrivileges = false;
 
-    private ServiceController _winService;
-    private ServiceMenuGroup _menuGroup;
+    private ServiceController winService;
+    private ServiceMenuGroup menuGroup;
    
 
     public bool HasAdminPrivileges
     {
-      get { return _hasAdminPrivileges; }
+      get { return hasAdminPrivileges; }
     }
 
     public static int DefaultTimeOut
@@ -57,33 +57,33 @@ namespace MySql.TrayApp
     public int TimeOutMilliseconds
     {
       set {
-          _timeoutMilliseconds = value; 
+          timeoutMilliseconds = value; 
       }
-      get { return _timeoutMilliseconds; 
+      get { return timeoutMilliseconds; 
       }
     }
 
     public string ServiceName
     {
-      get { return _winService.ServiceName; }
+      get { return winService.ServiceName; }
     }
 
     public ServiceMenuGroup MenuGroup
     {
-      get { return _menuGroup; }
+      get { return menuGroup; }
     }
 
     public ServiceControllerStatus RefreshStatus
     {
       get
       {
-        _winService.Refresh();
-        var newStatus = _winService.Status;
-        var copyPrevStatus = _previousStatus;
-        if (! _previousStatus.Equals(newStatus))
+        winService.Refresh();
+        var newStatus = winService.Status;
+        var copyPrevStatus = previousStatus;
+        if (!previousStatus.Equals(newStatus))
         {
-          _previousStatus = newStatus;
-          OnStatusChanged(new ServiceStatus(_winService.ServiceName, copyPrevStatus, newStatus));
+          previousStatus = newStatus;
+          OnStatusChanged(new ServiceStatus(winService.ServiceName, copyPrevStatus, newStatus));
         }
         return newStatus;
       }
@@ -91,28 +91,28 @@ namespace MySql.TrayApp
 
     public ServiceControllerStatus CurrentStatus
     {
-      get { return _winService.Status; }
+      get { return winService.Status; }
     }
 
     public ServiceControllerStatus PreviousStatus
     {
-      get { return _previousStatus; }
+      get { return previousStatus; }
     }
 
 
     public MySQLService(string serviceName, bool adminPrivileges)
     {
-      _hasAdminPrivileges = adminPrivileges;
-      _winService = new ServiceController(serviceName);
+      hasAdminPrivileges = adminPrivileges;
+      winService = new ServiceController(serviceName);
       try
       {
-        _previousStatus = _winService.Status;
-        _menuGroup = new ServiceMenuGroup(this);
+        previousStatus = winService.Status;
+        menuGroup = new ServiceMenuGroup(this);
       }
       catch (InvalidOperationException ioEx)
       {
         MessageBox.Show(ioEx.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        _winService = null;
+        winService = null;
       }
     }
 
@@ -133,17 +133,17 @@ namespace MySql.TrayApp
     /// reference other objects. Only unmanaged resources can be disposed.</param>
     protected virtual void Dispose(bool disposing)
     {
-      if (!_disposed)
+      if (!disposed)
       {
         if (disposing)
         {
-          if (_winService != null)
-            _winService.Dispose();
-          if (_menuGroup != null)
-            _menuGroup.Dispose();
+          if (winService != null)
+            winService.Dispose();
+          if (menuGroup != null)
+            menuGroup.Dispose();
         }
       }
-      _disposed = true;
+      disposed = true;
     }
 
     public delegate void StatusChangedHandler(object sender, ServiceStatus args);
@@ -185,16 +185,16 @@ namespace MySql.TrayApp
     /// <returns>Flag indicating if the action completed succesfully</returns>
     public bool Start()
     {
-      if (_winService == null)
+      if (winService == null)
         return false;
 
       bool success = false;
       try
       {
-        TimeSpan timeout = TimeSpan.FromMilliseconds(_timeoutMilliseconds);
-        _winService.Start();
-        _winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
-        _previousStatus = this.RefreshStatus;
+        TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
+        winService.Start();
+        winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
+        previousStatus = RefreshStatus;
         success = true;
       }
       catch (ArgumentException argEx)
@@ -218,17 +218,17 @@ namespace MySql.TrayApp
     /// <returns>Flag indicating if the action completed succesfully</returns>
     public bool Stop()
     {
-      if (_winService == null || !_winService.CanStop)
+      if (winService == null || !winService.CanStop)
         return false;
 
       bool success = false;
       try
       {
-        TimeSpan timeout = TimeSpan.FromMilliseconds(_timeoutMilliseconds);
-        _winService.Stop();
-        _winService.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
+        TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
+        winService.Stop();
+        winService.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
         success = true;
-        _previousStatus = this.RefreshStatus;
+        previousStatus = this.RefreshStatus;
       }
       catch (ArgumentException argEx)
       {
@@ -251,27 +251,27 @@ namespace MySql.TrayApp
     /// <returns>Flag indicating if the action completed succesfully</returns>
     public bool Restart()
     {
-      if (_winService == null)
+      if (winService == null)
         return false;
 
       bool success = false;
       try
       {
         int millisec1 = Environment.TickCount;
-        TimeSpan timeout = TimeSpan.FromMilliseconds(_timeoutMilliseconds);
+        TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
 
-        _winService.Stop();
-        _winService.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
+        winService.Stop();
+        winService.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
 
         // count the rest of the timeout
         int millisec2 = Environment.TickCount;
-        timeout = TimeSpan.FromMilliseconds(_timeoutMilliseconds - (millisec2 - millisec1));
+        timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds - (millisec2 - millisec1));
 
-        _winService.Start();
-        _winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
+        winService.Start();
+        winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
 
         success = true;
-        _previousStatus = this.RefreshStatus;
+        previousStatus = this.RefreshStatus;
       }
       catch (ArgumentException argEx)
       {

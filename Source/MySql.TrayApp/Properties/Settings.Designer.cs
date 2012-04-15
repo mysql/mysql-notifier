@@ -73,42 +73,6 @@ namespace MySql.TrayApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Soft")]
-        public string RefreshMethod {
-            get {
-                return ((string)(this["RefreshMethod"]));
-            }
-            set {
-                this["RefreshMethod"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("StartsWith")]
-        public string ScanForServicesType {
-            get {
-                return ((string)(this["ScanForServicesType"]));
-            }
-            set {
-                this["ScanForServicesType"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("MYSQL")]
-        public string ServicesStartWith {
-            get {
-                return ((string)(this["ServicesStartWith"]));
-            }
-            set {
-                this["ServicesStartWith"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool RunAtStartup {
             get {
@@ -156,12 +120,13 @@ namespace MySql.TrayApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection ServicesInstalled {
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AutoAddServicesToMonitor {
             get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["ServicesInstalled"]));
+                return ((bool)(this["AutoAddServicesToMonitor"]));
             }
             set {
-                this["ServicesInstalled"] = value;
+                this["AutoAddServicesToMonitor"] = value;
             }
         }
     }

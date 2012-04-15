@@ -14,15 +14,6 @@
     <Setting Name="AutoRefreshNotifyChanges" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="RefreshMethod" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Soft</Value>
-    </Setting>
-    <Setting Name="ScanForServicesType" Type="System.String" Scope="User">
-      <Value Profile="(Default)">StartsWith</Value>
-    </Setting>
-    <Setting Name="ServicesStartWith" Type="System.String" Scope="User">
-      <Value Profile="(Default)">MYSQL</Value>
-    </Setting>
     <Setting Name="RunAtStartup" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
@@ -35,8 +26,8 @@
     <Setting Name="ServicesMonitor" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="ServicesInstalled" Type="System.Collections.Specialized.StringCollection" Scope="User">
-      <Value Profile="(Default)" />
+    <Setting Name="AutoAddServicesToMonitor" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
     </Setting>
   </Settings>
 </SettingsFile>
