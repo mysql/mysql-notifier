@@ -30,8 +30,6 @@
     {
       this.bntOK = new System.Windows.Forms.Button();
       this.btnCancel = new System.Windows.Forms.Button();
-      this.serviceOptions = new System.Windows.Forms.GroupBox();
-      this.checkBox1 = new System.Windows.Forms.CheckBox();
       this.btnDelete = new System.Windows.Forms.Button();
       this.btnAdd = new System.Windows.Forms.Button();
       this.label1 = new System.Windows.Forms.Label();
@@ -39,13 +37,12 @@
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-      this.serviceOptions.SuspendLayout();
       this.SuspendLayout();
       // 
       // bntOK
       // 
       this.bntOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.bntOK.Location = new System.Drawing.Point(333, 293);
+      this.bntOK.Location = new System.Drawing.Point(333, 216);
       this.bntOK.Name = "bntOK";
       this.bntOK.Size = new System.Drawing.Size(75, 23);
       this.bntOK.TabIndex = 15;
@@ -56,32 +53,12 @@
       // btnCancel
       // 
       this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.btnCancel.Location = new System.Drawing.Point(414, 293);
+      this.btnCancel.Location = new System.Drawing.Point(414, 216);
       this.btnCancel.Name = "btnCancel";
       this.btnCancel.Size = new System.Drawing.Size(75, 23);
       this.btnCancel.TabIndex = 14;
       this.btnCancel.Text = "Cancel";
       this.btnCancel.UseVisualStyleBackColor = true;
-      // 
-      // serviceOptions
-      // 
-      this.serviceOptions.Controls.Add(this.checkBox1);
-      this.serviceOptions.Location = new System.Drawing.Point(15, 206);
-      this.serviceOptions.Name = "serviceOptions";
-      this.serviceOptions.Size = new System.Drawing.Size(381, 70);
-      this.serviceOptions.TabIndex = 12;
-      this.serviceOptions.TabStop = false;
-      this.serviceOptions.Text = "Service Options";
-      // 
-      // checkBox1
-      // 
-      this.checkBox1.AutoSize = true;
-      this.checkBox1.Location = new System.Drawing.Point(25, 32);
-      this.checkBox1.Name = "checkBox1";
-      this.checkBox1.Size = new System.Drawing.Size(117, 17);
-      this.checkBox1.TabIndex = 0;
-      this.checkBox1.Text = "Auto-restart service";
-      this.checkBox1.UseVisualStyleBackColor = true;
       // 
       // btnDelete
       // 
@@ -106,7 +83,7 @@
       // label1
       // 
       this.label1.AutoSize = true;
-      this.label1.Location = new System.Drawing.Point(12, 12);
+      this.label1.Location = new System.Drawing.Point(12, 18);
       this.label1.Name = "label1";
       this.label1.Size = new System.Drawing.Size(98, 13);
       this.label1.TabIndex = 9;
@@ -147,10 +124,9 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(502, 328);
+      this.ClientSize = new System.Drawing.Size(502, 261);
       this.Controls.Add(this.bntOK);
       this.Controls.Add(this.btnCancel);
-      this.Controls.Add(this.serviceOptions);
       this.Controls.Add(this.btnDelete);
       this.Controls.Add(this.btnAdd);
       this.Controls.Add(this.label1);
@@ -161,8 +137,6 @@
       this.Name = "ManageServicesDlg";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Manage Services";
-      this.serviceOptions.ResumeLayout(false);
-      this.serviceOptions.PerformLayout();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -172,8 +146,6 @@
 
     private System.Windows.Forms.Button bntOK;
     private System.Windows.Forms.Button btnCancel;
-    private System.Windows.Forms.GroupBox serviceOptions;
-    private System.Windows.Forms.CheckBox checkBox1;
     private System.Windows.Forms.Button btnDelete;
     private System.Windows.Forms.Button btnAdd;
     private System.Windows.Forms.Label label1;
