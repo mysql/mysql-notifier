@@ -6,6 +6,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySql.MutexHandler", "Source\MySql.Mutex\MySql.MutexHandler.csproj", "{CE119D2D-F9B6-4FCF-B527-40CAEAEF029C}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Installer", "Installer\Installer.wixproj", "{EC7DAD39-2206-484C-9966-AB256269A6D4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F} = {64030920-03D5-4DFD-BE1C-2A50EBC3A49F}
+		{CE119D2D-F9B6-4FCF-B527-40CAEAEF029C} = {CE119D2D-F9B6-4FCF-B527-40CAEAEF029C}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
