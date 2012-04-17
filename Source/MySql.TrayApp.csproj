@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Forms\About.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,9 +84,11 @@
     <Compile Include="MySQLService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SingleInstance.cs" />
     <Compile Include="TrayApp.cs" />
     <Compile Include="TrayApplicationContext.cs" />
     <Compile Include="Utilities.cs" />
+    <Compile Include="WinAPI.cs" />
     <EmbeddedResource Include="Forms\About.resx">
       <DependentUpon>About.cs</DependentUpon>
     </EmbeddedResource>
@@ -126,12 +129,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\signal-red.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MySql.Mutex\MySql.MutexHandler.csproj">
-      <Project>{CE119D2D-F9B6-4FCF-B527-40CAEAEF029C}</Project>
-      <Name>MySql.MutexHandler</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\app_default.ico" />

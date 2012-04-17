@@ -74,7 +74,7 @@ namespace MySql.TrayApp
       if (Instances.Count > 0)
       {
         var Services = Instances.Where(t => t.GetPropertyValue("PathName").ToString().Contains(EXE_PATH_NAME)).ToList();
-        Services.AddRange(Instances.Where(t => t.GetPropertyValue("PathName").ToString().Contains(EXE_PATH_NAME_NT)));
+        //Services.AddRange(Instances.Where(t => t.GetPropertyValue("PathName").ToString().Contains(EXE_PATH_NAME_NT)));
         return Services;
       }
       return null;

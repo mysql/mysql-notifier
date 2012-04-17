@@ -23,7 +23,7 @@
 using System;
 using System.Reflection;
 
-namespace MySql.MutexHandler
+namespace MySql.TrayApp
 {
   /// <summary>
   /// Gets information about the application.
@@ -47,22 +47,22 @@ namespace MySql.MutexHandler
       }
     }
 
-      static internal string AssemblyTitle
+    static internal string AssemblyTitle
+    {
+      get
       {
-        get
+        object[] attributes = Assembly.GetEntryAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
+        if (attributes.Length > 0)
         {
-          object[] attributes = Assembly.GetEntryAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute), false);
-          if (attributes.Length > 0)
+          AssemblyTitleAttribute titleAttribute = (AssemblyTitleAttribute)attributes[0];
+          if (titleAttribute.Title != String.Empty)
           {
-            AssemblyTitleAttribute titleAttribute = (AssemblyTitleAttribute)attributes[0];
-            if (titleAttribute.Title != String.Empty)
-            {
-              return titleAttribute.Title;
-            }
+            return titleAttribute.Title;
           }
-          return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().CodeBase);
         }
+        return System.IO.Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().CodeBase);
       }
+    }
 
   }
 }

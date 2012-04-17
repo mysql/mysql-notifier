@@ -31,47 +31,30 @@ using System.Management;
 
 namespace MySql.TrayApp
 {
-
-  class MySQLService : IDisposable
-  {   
+  class MySQLService
+  {
     private const int DEFAULT_TIMEOUT = 5000;
-    private int timeoutMilliseconds = DEFAULT_TIMEOUT;
     private ServiceControllerStatus previousStatus;
     private bool disposed = false;
-    private readonly bool hasAdminPrivileges = false;
 
     private ServiceController winService;
-    private ServiceMenuGroup menuGroup;
-   
 
-    public bool HasAdminPrivileges
-    {
-      get { return hasAdminPrivileges; }
-    }
+
+    public bool HasAdminPrivileges { get; private set; }
 
     public static int DefaultTimeOut
     {
       get { return DEFAULT_TIMEOUT; }
     }
 
-    public int TimeOutMilliseconds
-    {
-      set {
-          timeoutMilliseconds = value; 
-      }
-      get { return timeoutMilliseconds; 
-      }
-    }
+    public int TimeOutMilliseconds { get; set; }
 
     public string ServiceName
     {
       get { return winService.ServiceName; }
     }
 
-    public ServiceMenuGroup MenuGroup
-    {
-      get { return menuGroup; }
-    }
+    public ServiceMenuGroup MenuGroup { get; private set; }
 
     public ServiceControllerStatus RefreshStatus
     {
@@ -102,48 +85,19 @@ namespace MySql.TrayApp
 
     public MySQLService(string serviceName, bool adminPrivileges)
     {
-      hasAdminPrivileges = adminPrivileges;
+      TimeOutMilliseconds = DEFAULT_TIMEOUT;
+      HasAdminPrivileges = adminPrivileges;
       winService = new ServiceController(serviceName);
       try
       {
         previousStatus = winService.Status;
-        menuGroup = new ServiceMenuGroup(this);
+        MenuGroup = new ServiceMenuGroup(this);
       }
       catch (InvalidOperationException ioEx)
       {
         MessageBox.Show(ioEx.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         winService = null;
       }
-    }
-
-    /// <summary>
-    /// Cleans-up resources
-    /// </summary>
-    public void Dispose()
-    {
-      Dispose(true);
-      GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Disposes of managed and unmanaged resources.
-    /// </summary>
-    /// <param name="disposing">If true, the method has been called directly or indirectly by a user's code. Managed and unmanaged
-    /// resources can be disposed. If false, the method has been called by the runtime from inside the finalizer and you should not
-    /// reference other objects. Only unmanaged resources can be disposed.</param>
-    protected virtual void Dispose(bool disposing)
-    {
-      if (!disposed)
-      {
-        if (disposing)
-        {
-          if (winService != null)
-            winService.Dispose();
-          if (menuGroup != null)
-            menuGroup.Dispose();
-        }
-      }
-      disposed = true;
     }
 
     public delegate void StatusChangedHandler(object sender, ServiceStatus args);
@@ -154,11 +108,6 @@ namespace MySql.TrayApp
     public event StatusChangedHandler StatusChanged;
 
     /// <summary>
-    /// Notifies that this object is in the process of being disposed
-    /// </summary>
-    public event EventHandler Disposing;
-
-    /// <summary>
     /// Invokes StatusChanged event when an action causes a status change
     /// </summary>
     /// <param name="e">Event arguments</param>
@@ -167,17 +116,6 @@ namespace MySql.TrayApp
       if (this.StatusChanged != null)
         this.StatusChanged(this, args);
     }
-
-    /// <summary>
-    /// Invokes Disposing event just before this object is disposed
-    /// </summary>
-    /// <param name="e">Event arguments</param>
-    protected virtual void OnDisposing(EventArgs e)
-    {
-      if (this.Disposing != null)
-        this.Disposing(this, e);
-    }
-
 
     /// <summary>
     /// Attempts to start the current MySQL Service
@@ -191,19 +129,11 @@ namespace MySql.TrayApp
       bool success = false;
       try
       {
-        TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
+        TimeSpan timeout = TimeSpan.FromMilliseconds(TimeOutMilliseconds);
         winService.Start();
         winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
         previousStatus = RefreshStatus;
         success = true;
-      }
-      catch (ArgumentException argEx)
-      {
-        MessageBox.Show(argEx.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
-      catch (System.ServiceProcess.TimeoutException toEx)
-      {
-        MessageBox.Show(toEx.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
       catch (Exception ex)
       {
@@ -224,19 +154,11 @@ namespace MySql.TrayApp
       bool success = false;
       try
       {
-        TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
+        TimeSpan timeout = TimeSpan.FromMilliseconds(TimeOutMilliseconds);
         winService.Stop();
         winService.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
         success = true;
         previousStatus = this.RefreshStatus;
-      }
-      catch (ArgumentException argEx)
-      {
-        MessageBox.Show(argEx.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
-      catch (System.ServiceProcess.TimeoutException toEx)
-      {
-        MessageBox.Show(toEx.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
       catch (Exception ex)
       {
@@ -258,28 +180,20 @@ namespace MySql.TrayApp
       try
       {
         int millisec1 = Environment.TickCount;
-        TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
+        TimeSpan timeout = TimeSpan.FromMilliseconds(TimeOutMilliseconds);
 
         winService.Stop();
         winService.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
 
         // count the rest of the timeout
         int millisec2 = Environment.TickCount;
-        timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds - (millisec2 - millisec1));
+        timeout = TimeSpan.FromMilliseconds(TimeOutMilliseconds - (millisec2 - millisec1));
 
         winService.Start();
         winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
 
         success = true;
         previousStatus = this.RefreshStatus;
-      }
-      catch (ArgumentException argEx)
-      {
-        MessageBox.Show(argEx.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
-      catch (System.ServiceProcess.TimeoutException toEx)
-      {
-        MessageBox.Show(toEx.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
       catch (Exception ex)
       {
@@ -294,7 +208,7 @@ namespace MySql.TrayApp
   /// </summary>
   class ServicesListChangedArgs : EventArgs
   {
-    
+
     private ArrayList addedServicesList;
     private ArrayList removedServicesList;
 

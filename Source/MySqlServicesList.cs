@@ -61,7 +61,7 @@ namespace MySql.TrayApp
     /// <param name="service"></param>
     private void DisposeService(MySQLService service)
     {
-      service.Dispose();
+      //service.Dispose();
     }
 
     /// <summary>
@@ -144,10 +144,10 @@ namespace MySql.TrayApp
       
       try 
       { 
-          if (mySqlServices.Count <= 0)
-          {
-            throw new Exception(Properties.Resources.NoServicesExceptionMessage);        
-          }
+          //if (mySqlServices.Count <= 0)
+          //{
+          //  throw new Exception(Properties.Resources.NoServicesExceptionMessage);        
+          //}
 
           var mysqlServicesNames = mySqlServices.Select(t => t.Properties["Name"].Value).Cast<String>().ToList();
           var mysqlMonitoringNames = monitoredMySQLServicesList.Select(t => t.ServiceName).Cast<String>().ToList();
@@ -164,7 +164,7 @@ namespace MySql.TrayApp
                 {
                   if (monitoredMySQLServicesList.Where(t => t.ServiceName == mservice.ServiceName).Count() > 0)
                   {
-                    monitoredMySQLServicesList.Where(t => t.ServiceName == mservice.ServiceName).First().Dispose();
+                    //monitoredMySQLServicesList.Where(t => t.ServiceName == mservice.ServiceName).First().Dispose();
                     monitoredMySQLServicesList.Remove(monitoredMySQLServicesList.Where(t => t.ServiceName == mservice.ServiceName).First());                    
                   }
                   
@@ -178,8 +178,8 @@ namespace MySql.TrayApp
                 if (!mySqlServices.Exists(delegate(ManagementObject service) { return service.Properties["Name"].Value.ToString() == mService; }))
                 {
                 
-                  if (monitoredMySQLServicesList.Remove(monitoredMySQLServicesList.Where(t => t.ServiceName == mService).First()))
-                    monitoredMySQLServicesList.Where(t => t.ServiceName == mService).First().Dispose();
+                  //if (monitoredMySQLServicesList.Remove(monitoredMySQLServicesList.Where(t => t.ServiceName == mService).First()))
+                    //monitoredMySQLServicesList.Where(t => t.ServiceName == mService).First().Dispose();
 
                   monitoredServices.Remove(mService);
 

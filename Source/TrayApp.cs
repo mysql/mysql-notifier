@@ -485,8 +485,6 @@ namespace MySql.TrayApp
 
       if (trayAppSettings.autoAddNewServices)
       {
-        try
-        {
           var state = ((ManagementBaseObject)e["TargetInstance"])["State"].ToString().Trim();
           string newService = ((ManagementBaseObject)e["TargetInstance"])["DisplayName"].ToString().Trim();
           switch (state)
@@ -495,10 +493,6 @@ namespace MySql.TrayApp
               UpdateMonitoredList(newService);
               break;            
           }
-        }
-        catch (Exception ex)
-        { throw ex; }
-
       }
     }
 
