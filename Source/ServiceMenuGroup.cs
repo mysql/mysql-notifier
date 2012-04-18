@@ -28,6 +28,8 @@ using System.Windows.Forms;
 using System.ServiceProcess;
 using System.Diagnostics;
 using System.IO;
+using MySql.TrayApp.Properties;
+using System.Drawing;
 
 namespace MySql.TrayApp
 {
@@ -35,16 +37,18 @@ namespace MySql.TrayApp
   /// <summary>
   /// Contains a group of ToolStripMenuItem instances for each of the corresponding MySQLService’s context menu items.
   /// </summary>
-  class ServiceMenuGroup : IDisposable
+  public class ServiceMenuGroup
   {
+    private ToolStripMenuItem statusMenu;
+    private ToolStripMenuItem configureMenu;
+    private ToolStripMenuItem editorMenu;
+    private ToolStripSeparator separator;
 
     public enum AvailableActions
     { Start, Stop, ReStart };
 
 
-    private bool disposed = false;
     private MySQLService boundService;
-    private ToolStripMenuItem[] serviceMenuItems;
     
     private string connectionStringName
     {
@@ -61,107 +65,72 @@ namespace MySql.TrayApp
       }
     }
 
-    private ToolStripMenuItem mainMenuItem
-    {
-      set { if (serviceMenuItems.Length > 0) serviceMenuItems[0] = value; }
-      get { return (serviceMenuItems.Length > 0 ? serviceMenuItems[0] : null); }
-    }
-
-    private ToolStripMenuItem configureMenuItem
-    {
-      set { if (serviceMenuItems.Length > 1) serviceMenuItems[1] = value; }
-      get { return (serviceMenuItems.Length > 0 ? serviceMenuItems[1] : null); }
-    }
-
-    private ToolStripMenuItem sqlEditorMenuItem
-    {
-      set { if (serviceMenuItems.Length > 2) serviceMenuItems[2] = value; }
-      get { return (serviceMenuItems.Length > 0 ? serviceMenuItems[2] : null); }
-    }
-
     public string BoundServiceName
     {
       get { return boundService.ServiceName; }
     }
 
-    public ServiceControllerStatus BoundServiceStatus
-    {
-      get { return boundService.CurrentStatus; }
-    }
-
-    public ToolStripMenuItem[] ServiceMenuItems
-    {
-      get { return serviceMenuItems; }
-    }
-
     public ServiceMenuGroup(MySQLService mySQLBoundService)
     {
       boundService = mySQLBoundService;
-      boundService.StatusChanged += boundService_StatusChanged;
 
-      serviceMenuItems = new ToolStripMenuItem[3];
-      mainMenuItem = ToolStripMenuItemWithHandler(String.Empty, String.Format("mnuService{0}", boundService.ServiceName), null, null);
-      configureMenuItem = ToolStripMenuItemWithHandler(Properties.Resources.ConfigureInstance, "mnuServiceConfigure", null, configureInstanceItem_Click);
-      sqlEditorMenuItem = ToolStripMenuItemWithHandler(Properties.Resources.SQLEditor, "mnuServiceSQLEditor", null, sqlEditorItem_Click);
+      //serviceMenuItems = new ToolStripMenuItem[3];
+      statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.ServiceName, boundService.Status));
+      configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
+      editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
       
       //Enables/Disables options that require with Workbench
-      sqlEditorMenuItem.Enabled = Utilities.IsApplicationInstalled("Workbench") && connectionStringName != String.Empty;
+      editorMenu.Enabled = Utilities.IsApplicationInstalled("Workbench") && connectionStringName != String.Empty;
+      configureMenu.Enabled = Utilities.IsApplicationInstalled("Workbench") && serverName != String.Empty;
 
-      configureMenuItem.Enabled = Utilities.IsApplicationInstalled("Workbench") && serverName != String.Empty;
+      separator = new ToolStripSeparator(); 
 
-      System.Drawing.Font menuItemFont = new System.Drawing.Font(mainMenuItem.Font, System.Drawing.FontStyle.Bold);
-      System.Drawing.Font subMenuItemFont = new System.Drawing.Font(mainMenuItem.Font, System.Drawing.FontStyle.Regular);
-      mainMenuItem.Font = menuItemFont;
+      Font menuItemFont = new Font(statusMenu.Font, FontStyle.Bold);
+      Font subMenuItemFont = new Font(statusMenu.Font, FontStyle.Regular);
+      statusMenu.Font = menuItemFont;
 
-      foreach (string action in Enum.GetNames(typeof(AvailableActions)))
-      {
-        var subMenuItem = ToolStripMenuItemWithHandler(action, serviceActionItem_Click);
-        subMenuItem.Font = subMenuItemFont;
-        switch (action)
-        {
-          case "Start":
-            subMenuItem.Image = Properties.Resources.play;
-            break;
-          case "Stop":
-            subMenuItem.Image = Properties.Resources.stop;
-            break;
-        }
-        mainMenuItem.DropDownItems.Add(subMenuItem);
-      }
-      RefreshMenus(BoundServiceName, BoundServiceStatus);
+      ToolStripMenuItem start = new ToolStripMenuItem("Start", Resources.play);
+      start.Click += new EventHandler(start_Click);
+      ToolStripMenuItem stop = new ToolStripMenuItem("Stop", Resources.stop);
+      stop.Click += new EventHandler(stop_Click);
+      ToolStripMenuItem restart = new ToolStripMenuItem("Restart");
+      restart.Click += new EventHandler(restart_Click);
+      statusMenu.DropDownItems.Add(start);
+      statusMenu.DropDownItems.Add(stop);
+      statusMenu.DropDownItems.Add(restart);
+
+      Update();
     }
 
-    /// <summary>
-    /// Cleans-up resources
-    /// </summary>
-    public void Dispose()
+    void restart_Click(object sender, EventArgs e)
     {
-      Dispose(true);
-      GC.SuppressFinalize(this);
+      boundService.Restart();
     }
 
-    /// <summary>
-    /// Disposes of managed and unmanaged resources.
-    /// </summary>
-    /// <param name="disposing">If true, the method has been called directly or indirectly by a user's code. Managed and unmanaged
-    /// resources can be disposed. If false, the method has been called by the runtime from inside the finalizer and you should not
-    /// reference other objects. Only unmanaged resources can be disposed.</param>
-    protected virtual void Dispose(bool disposing)
+    void stop_Click(object sender, EventArgs e)
     {
-      if (!disposed)
-      {
-        if (disposing)
-        {
+      boundService.Stop();
+    }
 
-          var copyOfSM = serviceMenuItems;
-          foreach (ToolStripMenuItem subMenuItem in copyOfSM)
-          {
-            if (subMenuItem != null)
-              serviceMenuItems.First(t => t == subMenuItem).Dispose();                                
-          }
-        }
-      }
-      disposed = true;
+    void start_Click(object sender, EventArgs e)
+    {
+      boundService.Start();
+    }
+
+    public void AddToContextMenu(ContextMenuStrip menu)
+    {
+      menu.Items.Insert(0, statusMenu);
+      menu.Items.Insert(1, configureMenu);
+      menu.Items.Insert(2, editorMenu);
+      menu.Items.Insert(3, separator);
+    }
+
+    public void RemoveFromContextMenu(ContextMenuStrip menu)
+    {
+      menu.Items.Remove(statusMenu);
+      menu.Items.Remove(configureMenu);
+      menu.Items.Remove(editorMenu);
+      menu.Items.Remove(separator);
     }
 
     /// <summary>
@@ -169,52 +138,52 @@ namespace MySql.TrayApp
     /// </summary>
     /// <param name="boundServiceName">Service Name</param>
     /// <param name="boundServiceStatus">Service Status</param>
-    public void RefreshMenus(string boundServiceName, ServiceControllerStatus boundServiceStatus)
+    public void Update()
     {      
 
-      mainMenuItem.Text = String.Format("{0} - {1}",
-                                             boundServiceName,
-                                             boundServiceStatus.ToString());
-      System.Drawing.Image image = null;
-      switch (boundServiceStatus)
+      //statusMenu.Text = String.Format("{0} - {1}",
+      //                                       boundServiceName,
+      //                                       boundServiceStatus.ToString());
+      Image image = null;
+      switch (boundService.Status)
       {
         case ServiceControllerStatus.ContinuePending:
         case ServiceControllerStatus.Paused:
         case ServiceControllerStatus.PausePending:
         case ServiceControllerStatus.StartPending:
         case ServiceControllerStatus.StopPending:
-          image = Properties.Resources.starting_icon;
+          image = Resources.starting_icon;
           break;
         case ServiceControllerStatus.Stopped:
-          image = Properties.Resources.stopped_icon;
+          image = Resources.stopped_icon;
           break;
         case ServiceControllerStatus.Running:
-          image = Properties.Resources.running_icon;
+          image = Resources.running_icon;
           break;
       }
-      mainMenuItem.Image = image;
-      
-      foreach (ToolStripMenuItem subMenuItem in mainMenuItem.DropDownItems)
+      statusMenu.Image = image;
+
+      foreach (ToolStripMenuItem subMenuItem in statusMenu.DropDownItems)
       {
         subMenuItem.Enabled = false;
       }
 
       if (boundService.HasAdminPrivileges)
       {
-        switch (boundServiceStatus)
+        switch (boundService.Status)
         {
           case ServiceControllerStatus.ContinuePending:
           case ServiceControllerStatus.Paused:
           case ServiceControllerStatus.PausePending:
           case ServiceControllerStatus.StartPending:
           case ServiceControllerStatus.StopPending:
-            mainMenuItem.DropDownItems[1].Enabled = true;
+            statusMenu.DropDownItems[1].Enabled = true;
             break;
           case ServiceControllerStatus.Stopped:
-            mainMenuItem.DropDownItems[0].Enabled = true;
+            statusMenu.DropDownItems[0].Enabled = true;
             break;
           case ServiceControllerStatus.Running:
-            mainMenuItem.DropDownItems[1].Enabled = serviceMenuItems[0].DropDownItems[2].Enabled = true;
+            statusMenu.DropDownItems[1].Enabled = false; //serviceMenuItems[0].DropDownItems[2].Enabled = true;
             break;
         }
       }
@@ -339,39 +308,6 @@ namespace MySql.TrayApp
       {
         MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
       }      
-
     }
-
-    private void serviceActionItem_Click(object sender, EventArgs e)
-    {
-      if (sender == null)
-        return;
-
-      var subMenuItem = sender as ToolStripMenuItem;
-
-      bool actionSuccesful = false;
-
-      Cursor.Current = Cursors.WaitCursor;
-      switch (subMenuItem.Text)
-      {
-        case "Stop":
-          actionSuccesful = boundService.Stop();
-          break;
-        case "Start":
-          actionSuccesful = boundService.Start();
-          break;
-        case "ReStart":
-          actionSuccesful = boundService.Restart();
-          break;
-      }
-      mainMenuItem.ForeColor = (actionSuccesful ? System.Drawing.Color.Black : System.Drawing.Color.Red);
-      Cursor.Current = Cursors.Default;
-    }
-
-    void boundService_StatusChanged(object sender, ServiceStatus args)
-    {
-      RefreshMenus(args.ServiceName, args.CurrentStatus);
-    }
-
   }
 }

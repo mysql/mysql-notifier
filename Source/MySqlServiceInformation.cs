@@ -44,22 +44,15 @@ namespace MySql.TrayApp
     {
       string status = "Unknown";
       string service = string.Format("Win32_Service.Name='{0}'", serviceName);
-      try
+      ManagementObject mo = new ManagementObject(new ManagementPath(service));
+      if (mo != null)
       {
-        ManagementObject mo = new ManagementObject(new ManagementPath(service));
-        if (mo != null)
-        {
-          status = mo.Properties["State"].Value.ToString().Trim();
-          location = Dns.GetHostName(); // by now will be only the local computer
-        }
-        else
-          location = "Not Found";
-        return status;
+        status = mo.Properties["State"].Value.ToString().Trim();
+        location = Dns.GetHostName(); // by now will be only the local computer
       }
-      catch
-      {
-        throw;
-      }
+      else
+        location = "Not Found";
+      return status;
     }
 
 
@@ -67,21 +60,28 @@ namespace MySql.TrayApp
     /// Gets all services using mysqld or mysqld-nt
     /// </summary>
     /// <returns></returns>
-    public static List<ManagementObject> GetMySqlInstances()
+    public static List<ManagementObject> GetInstances(string filter)
     {
+      List<ManagementObject> list = new List<ManagementObject>();
+
       ManagementClass mc = new ManagementClass("Win32_Service");
       var Instances = mc.GetInstances().Cast<ManagementObject>().ToList();
-      if (Instances.Count > 0)
+      foreach (ManagementObject o in Instances)
       {
-        var Services = Instances.Where(t => t.GetPropertyValue("PathName").ToString().Contains(EXE_PATH_NAME)).ToList();
-        //Services.AddRange(Instances.Where(t => t.GetPropertyValue("PathName").ToString().Contains(EXE_PATH_NAME_NT)));
-        return Services;
+        if (String.IsNullOrEmpty(filter))
+          list.Add(o);
+        else
+        {
+          object path = o.GetPropertyValue("PathName");
+          if (path != null && path.ToString().Contains(filter))
+            list.Add(o);
+        }
       }
-      return null;
+      return list;
     }
 
-    
-     /// <summary>
+
+    /// <summary>
     /// Gets the first connection string that is a local connection and
     /// is related with the service
     /// </summary>
@@ -101,60 +101,63 @@ namespace MySql.TrayApp
     /// </summary>
     /// <returns></returns>   
     private static String GetConnectionString()
-    {     
+    {
       var version = string.Empty;
+      //TODO: fix this
+      return "";
       if (!FileExists("connections.xml", out version) || string.Compare(version, WB_XMLVERSION, StringComparison.InvariantCultureIgnoreCase) != 0)
       {
-          throw new Exception(Properties.Resources.UnSupportedWBXMLVersion);    
+        throw new Exception(Properties.Resources.UnSupportedWBXMLVersion);
       }
-      
+
       XmlTextReader reader = new XmlTextReader(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)
                     + @"\MySQL\Workbench\" + "connections.xml");
       XmlDocument doc = new XmlDocument();
       doc.Load(reader);
       reader.Close();
 
-        try
+      try
+      {
+        // find first local connection
+        XmlElement root = doc.DocumentElement;
+        XmlNodeList nodesText = root.SelectNodes("/data/value[@content-struct-name='db.mgmt.Connection']");
+        foreach (XmlNode node in nodesText)
+        {
+          foreach (XmlNode child in node.ChildNodes)
           {
-            // find first local connection
-            XmlElement root = doc.DocumentElement;
-            XmlNodeList nodesText = root.SelectNodes("/data/value[@content-struct-name='db.mgmt.Connection']");
-            foreach (XmlNode node in nodesText)
+            string driver = child.SelectSingleNode("//link[@key='driver']") != null ?
+                            child.SelectSingleNode("//link[@key='driver']").InnerText : string.Empty;
+            string host = child.SelectSingleNode("./value[@key='hostIdentifier']") != null ?
+                          child.SelectSingleNode("./value[@key='hostIdentifier']").InnerText : string.Empty;
+            if (!(string.IsNullOrEmpty(driver) || string.IsNullOrEmpty(host)))
             {
-              foreach (XmlNode child in node.ChildNodes)
+              if (driver.Contains("com.mysql.rdbms.mysql.driver.native")
+                    && (String.Compare(host, "localhost", StringComparison.InvariantCultureIgnoreCase) >= 0
+                    || String.Compare(host, "127.0.0.1", StringComparison.InvariantCulture) >= 0))
               {
-                string driver = child.SelectSingleNode("//link[@key='driver']") != null ?
-                                child.SelectSingleNode("//link[@key='driver']").InnerText : string.Empty;
-                string host = child.SelectSingleNode("./value[@key='hostIdentifier']") != null ?
-                              child.SelectSingleNode("./value[@key='hostIdentifier']").InnerText : string.Empty;
-                if (!(string.IsNullOrEmpty(driver) || string.IsNullOrEmpty(host)))
+                string connection = child.SelectSingleNode("./value[@key='name']") != null ?
+                                    child.SelectSingleNode("./value[@key='name']").InnerText : string.Empty;
+                if (connection != null)
                 {
-                  if (driver.Contains("com.mysql.rdbms.mysql.driver.native")
-                        && (String.Compare(host, "localhost", StringComparison.InvariantCultureIgnoreCase) >= 0
-                        || String.Compare(host, "127.0.0.1", StringComparison.InvariantCulture) >= 0))
-                  {
-                    string connection = child.SelectSingleNode("./value[@key='name']") != null ?
-                                        child.SelectSingleNode("./value[@key='name']").InnerText : string.Empty;
-                    if (connection != null)
-                    {
-                      return connection;
-                    }
-                  }
+                  return connection;
                 }
               }
             }
           }
-          catch
-          {
-            return string.Empty;
-          }
-      
+        }
+      }
+      catch
+      {
         return string.Empty;
+      }
+
+      return string.Empty;
     }
 
 
     public static String GetServerName(string serviceName)
     {
+      return "";
       var version = string.Empty;
       if (!FileExists("server_instances.xml", out version) || string.Compare(version, WB_XMLVERSION, StringComparison.InvariantCultureIgnoreCase) != 0)
       {
@@ -177,12 +180,12 @@ namespace MySql.TrayApp
           var xPathServiceName = string.Format("//data/value[@content-struct-name='db.mgmt.ServerInstance']/value[@struct-name='db.mgmt.ServerInstance']/value[@key='serverInfo']/value[(text() = '{0}')]", serviceName);
           var somenode = ((XmlElement)item).ParentNode.SelectSingleNode(xPathServiceName);
           if (somenode != null)
-          {            
-            return somenode.ParentNode.NextSibling.InnerText;           
+          {
+            return somenode.ParentNode.NextSibling.InnerText;
           }
         }
       }
-      catch 
+      catch
       {
         return string.Empty;
       }
@@ -190,8 +193,8 @@ namespace MySql.TrayApp
     }
 
     private static bool FileExists(string name, out string version)
-    { 
-      version = string.Empty;    
+    {
+      version = string.Empty;
       // Get path to the Application Data folder
       var appDataPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData);
       if (File.Exists(appDataPath + @"\MySQL\Workbench\" + name))

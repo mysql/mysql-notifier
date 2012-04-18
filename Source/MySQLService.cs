@@ -31,16 +31,17 @@ using System.Management;
 
 namespace MySql.TrayApp
 {
-  class MySQLService
+  public class MySQLService
   {
     private const int DEFAULT_TIMEOUT = 5000;
-    private ServiceControllerStatus previousStatus;
-    private bool disposed = false;
+//    private ServiceControllerStatus previousStatus;
+    //private bool disposed = false;
 
     private ServiceController winService;
 
 
     public bool HasAdminPrivileges { get; private set; }
+    public ServiceControllerStatus Status { get; private set; }
 
     public static int DefaultTimeOut
     {
@@ -56,31 +57,31 @@ namespace MySql.TrayApp
 
     public ServiceMenuGroup MenuGroup { get; private set; }
 
-    public ServiceControllerStatus RefreshStatus
-    {
-      get
-      {
-        winService.Refresh();
-        var newStatus = winService.Status;
-        var copyPrevStatus = previousStatus;
-        if (!previousStatus.Equals(newStatus))
-        {
-          previousStatus = newStatus;
-          OnStatusChanged(new ServiceStatus(winService.ServiceName, copyPrevStatus, newStatus));
-        }
-        return newStatus;
-      }
-    }
+    //public ServiceControllerStatus RefreshStatus
+    //{
+    //  get
+    //  {
+    //    winService.Refresh();
+    //    var newStatus = winService.Status;
+    //    var copyPrevStatus = previousStatus;
+    //    if (!previousStatus.Equals(newStatus))
+    //    {
+    //      previousStatus = newStatus;
+    //      OnStatusChanged(new ServiceStatus(winService.ServiceName, copyPrevStatus, newStatus));
+    //    }
+    //    return newStatus;
+    //  }
+    //}
 
-    public ServiceControllerStatus CurrentStatus
-    {
-      get { return winService.Status; }
-    }
+    //public ServiceControllerStatus CurrentStatus
+    //{
+    //  get { return winService.Status; }
+    //}
 
-    public ServiceControllerStatus PreviousStatus
-    {
-      get { return previousStatus; }
-    }
+    //public ServiceControllerStatus PreviousStatus
+    //{
+    //  get { return previousStatus; }
+    //}
 
 
     public MySQLService(string serviceName, bool adminPrivileges)
@@ -90,7 +91,7 @@ namespace MySql.TrayApp
       winService = new ServiceController(serviceName);
       try
       {
-        previousStatus = winService.Status;
+        Status = winService.Status;
         MenuGroup = new ServiceMenuGroup(this);
       }
       catch (InvalidOperationException ioEx)
@@ -117,65 +118,44 @@ namespace MySql.TrayApp
         this.StatusChanged(this, args);
     }
 
+    public void SetStatus(string statusString)
+    {
+      ServiceControllerStatus newStatus;
+      bool parsed = Enum.TryParse(statusString, out newStatus);
+      if (parsed)
+      {
+        if (newStatus == Status) return;
+        ServiceControllerStatus copyPreviousStatus = Status;
+        Status = newStatus;
+        MenuGroup.Update();
+        OnStatusChanged(new ServiceStatus(winService.ServiceName, copyPreviousStatus, Status));
+      }
+    }
+
     /// <summary>
     /// Attempts to start the current MySQL Service
     /// </summary>
     /// <returns>Flag indicating if the action completed succesfully</returns>
-    public bool Start()
+    public void Start()
     {
-      if (winService == null)
-        return false;
-
-      bool success = false;
-      try
-      {
-        TimeSpan timeout = TimeSpan.FromMilliseconds(TimeOutMilliseconds);
-        winService.Start();
-        winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
-        previousStatus = RefreshStatus;
-        success = true;
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
-      return success;
+      winService.Start();
     }
 
     /// <summary>
     /// Attempts to stop the current MySQL Service
     /// </summary>
     /// <returns>Flag indicating if the action completed succesfully</returns>
-    public bool Stop()
+    public void Stop()
     {
-      if (winService == null || !winService.CanStop)
-        return false;
-
-      bool success = false;
-      try
-      {
-        TimeSpan timeout = TimeSpan.FromMilliseconds(TimeOutMilliseconds);
-        winService.Stop();
-        winService.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
-        success = true;
-        previousStatus = this.RefreshStatus;
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
-      return success;
+      winService.Stop();
     }
 
     /// <summary>
     /// Attempts to stop and then start the current MySQL Service
     /// </summary>
     /// <returns>Flag indicating if the action completed succesfully</returns>
-    public bool Restart()
+    public void Restart()
     {
-      if (winService == null)
-        return false;
-
       bool success = false;
       try
       {
@@ -190,16 +170,15 @@ namespace MySql.TrayApp
         timeout = TimeSpan.FromMilliseconds(TimeOutMilliseconds - (millisec2 - millisec1));
 
         winService.Start();
-        winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
+  //      winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
 
         success = true;
-        previousStatus = this.RefreshStatus;
+//        previousStatus = this.RefreshStatus;
       }
       catch (Exception ex)
       {
         MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
-      return success;
     }
   }
 

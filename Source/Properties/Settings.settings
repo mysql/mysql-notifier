@@ -2,18 +2,6 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MySql.TrayApp.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="EnableAutoRefresh" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="AutoRefreshType" Type="System.String" Scope="User">
-      <Value Profile="(Default)">OnDemand</Value>
-    </Setting>
-    <Setting Name="AutoRefreshFrequency" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">10</Value>
-    </Setting>
-    <Setting Name="AutoRefreshNotifyChanges" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
     <Setting Name="RunAtStartup" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
@@ -28,6 +16,12 @@
     </Setting>
     <Setting Name="AutoAddServicesToMonitor" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="NotifyOfServiceAddition" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="AutoAddPattern" Type="System.String" Scope="User">
+      <Value Profile="(Default)">.*mysqld.*</Value>
     </Setting>
   </Settings>
 </SettingsFile>

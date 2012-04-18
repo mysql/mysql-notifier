@@ -1,6 +1,6 @@
 ﻿namespace MySql.TrayApp
 {
-  partial class About
+  partial class AboutDialog
   {
     /// <summary>
     /// Required designer variable.

@@ -28,40 +28,28 @@
     /// </summary>
     private void InitializeComponent()
     {
-      this.bntOK = new System.Windows.Forms.Button();
-      this.btnCancel = new System.Windows.Forms.Button();
+      this.btnClose = new System.Windows.Forms.Button();
       this.btnDelete = new System.Windows.Forms.Button();
       this.btnAdd = new System.Windows.Forms.Button();
       this.label1 = new System.Windows.Forms.Label();
       this.lstMonitoredServices = new System.Windows.Forms.ListView();
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-      this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.SuspendLayout();
       // 
-      // bntOK
+      // btnClose
       // 
-      this.bntOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.bntOK.Location = new System.Drawing.Point(333, 216);
-      this.bntOK.Name = "bntOK";
-      this.bntOK.Size = new System.Drawing.Size(75, 23);
-      this.bntOK.TabIndex = 15;
-      this.bntOK.Text = "OK";
-      this.bntOK.UseVisualStyleBackColor = true;
-      this.bntOK.Click += new System.EventHandler(this.bntOK_Click);
-      // 
-      // btnCancel
-      // 
-      this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.btnCancel.Location = new System.Drawing.Point(414, 216);
-      this.btnCancel.Name = "btnCancel";
-      this.btnCancel.Size = new System.Drawing.Size(75, 23);
-      this.btnCancel.TabIndex = 14;
-      this.btnCancel.Text = "Cancel";
-      this.btnCancel.UseVisualStyleBackColor = true;
+      this.btnClose.DialogResult = System.Windows.Forms.DialogResult.OK;
+      this.btnClose.Location = new System.Drawing.Point(414, 216);
+      this.btnClose.Name = "btnClose";
+      this.btnClose.Size = new System.Drawing.Size(75, 23);
+      this.btnClose.TabIndex = 14;
+      this.btnClose.Text = "Close";
+      this.btnClose.UseVisualStyleBackColor = true;
       // 
       // btnDelete
       // 
+      this.btnDelete.Enabled = false;
       this.btnDelete.Location = new System.Drawing.Point(414, 75);
       this.btnDelete.Name = "btnDelete";
       this.btnDelete.Size = new System.Drawing.Size(75, 23);
@@ -94,7 +82,6 @@
       this.lstMonitoredServices.CheckBoxes = true;
       this.lstMonitoredServices.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
-            this.columnHeader2,
             this.columnHeader3});
       this.lstMonitoredServices.FullRowSelect = true;
       this.lstMonitoredServices.Location = new System.Drawing.Point(12, 43);
@@ -104,16 +91,12 @@
       this.lstMonitoredServices.TabIndex = 8;
       this.lstMonitoredServices.UseCompatibleStateImageBehavior = false;
       this.lstMonitoredServices.View = System.Windows.Forms.View.Details;
+      this.lstMonitoredServices.SelectedIndexChanged += new System.EventHandler(this.lstMonitoredServices_SelectedIndexChanged);
       // 
       // columnHeader1
       // 
       this.columnHeader1.Text = "Service Name";
-      this.columnHeader1.Width = 206;
-      // 
-      // columnHeader2
-      // 
-      this.columnHeader2.Text = "Location";
-      this.columnHeader2.Width = 100;
+      this.columnHeader1.Width = 301;
       // 
       // columnHeader3
       // 
@@ -125,8 +108,7 @@
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(502, 261);
-      this.Controls.Add(this.bntOK);
-      this.Controls.Add(this.btnCancel);
+      this.Controls.Add(this.btnClose);
       this.Controls.Add(this.btnDelete);
       this.Controls.Add(this.btnAdd);
       this.Controls.Add(this.label1);
@@ -144,14 +126,12 @@
 
     #endregion
 
-    private System.Windows.Forms.Button bntOK;
-    private System.Windows.Forms.Button btnCancel;
+    private System.Windows.Forms.Button btnClose;
     private System.Windows.Forms.Button btnDelete;
     private System.Windows.Forms.Button btnAdd;
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.ListView lstMonitoredServices;
     private System.Windows.Forms.ColumnHeader columnHeader1;
-    private System.Windows.Forms.ColumnHeader columnHeader2;
     private System.Windows.Forms.ColumnHeader columnHeader3;
   }
 }

@@ -49,26 +49,6 @@ namespace MySql.TrayApp
     }
     
 
-    /// <summary>
-    /// Disposes of managed and unmanaged resources.
-    /// </summary>
-    /// <param name="disposing">If true, the method has been called directly or indirectly by a user's code. Managed and unmanaged
-    /// resources can be disposed. If false, the method has been called by the runtime from inside the finalizer and you should not
-    /// reference other objects. Only unmanaged resources can be disposed.</param>
-    protected override void Dispose(bool disposing)
-    {
-      if (!this.disposed)
-      {
-        if (disposing)
-        {
-          if (this.trayApp != null)
-            this.trayApp.Dispose();
-        }
-      }
-      this.disposed = true;
-    }
-
-
     private void trayApp_Exit(object sender, EventArgs e)
     {
       this.ExitThread();

@@ -34,7 +34,7 @@ namespace MySql.TrayApp
   /// <summary>
   /// Event Arguments used with the StatusChanged event containing information about the Service's status change.
   /// </summary>
-  class ServiceStatus : EventArgs
+  public class ServiceStatus : EventArgs
   {
     private string serviceName;
     private ServiceControllerStatus currentStatus;

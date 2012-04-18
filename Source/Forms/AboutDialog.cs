@@ -9,12 +9,11 @@ using System.Windows.Forms;
 
 namespace MySql.TrayApp
 {
-  public partial class About : Form
+  public partial class AboutDialog : Form
   {
-    public About()
+    public AboutDialog()
     {
       InitializeComponent();
-      
     }
 
   

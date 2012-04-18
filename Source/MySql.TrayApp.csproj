@@ -15,7 +15,7 @@
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -53,11 +53,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Forms\About.cs">
+    <Compile Include="Forms\AboutDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\About.Designer.cs">
-      <DependentUpon>About.cs</DependentUpon>
+    <Compile Include="Forms\AboutDialog.Designer.cs">
+      <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\AddServiceDlg.cs">
       <SubType>Form</SubType>
@@ -71,14 +71,14 @@
     <Compile Include="Forms\ManageServicesDlg.Designer.cs">
       <DependentUpon>ManageServicesDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="MySqlServiceInformation.cs" />
-    <Compile Include="ServiceStatus.cs" />
-    <Compile Include="Forms\OptionsForm.cs">
+    <Compile Include="Forms\OptionsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\OptionsForm.Designer.cs">
-      <DependentUpon>OptionsForm.cs</DependentUpon>
+    <Compile Include="Forms\OptionsDialog.Designer.cs">
+      <DependentUpon>OptionsDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="MySqlServiceInformation.cs" />
+    <Compile Include="ServiceStatus.cs" />
     <Compile Include="MySqlServicesList.cs" />
     <Compile Include="ServiceMenuGroup.cs" />
     <Compile Include="MySQLService.cs" />
@@ -89,17 +89,14 @@
     <Compile Include="TrayApplicationContext.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="WinAPI.cs" />
-    <EmbeddedResource Include="Forms\About.resx">
-      <DependentUpon>About.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\AddServiceDlg.resx">
       <DependentUpon>AddServiceDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ManageServicesDlg.resx">
       <DependentUpon>ManageServicesDlg.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\OptionsForm.resx">
-      <DependentUpon>OptionsForm.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\OptionsDialog.resx">
+      <DependentUpon>OptionsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

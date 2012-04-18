@@ -241,7 +241,7 @@
     <value>..\Resources\app_default.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="BalloonTextServiceList" xml:space="preserve">
-    <value>Services list changed. {0} removed services / {1} added services...</value>
+    <value>New service added to monitored list: {0}</value>
     <comment>Text of the Balloon Notification</comment>
   </data>
   <data name="BalloonTitleTextServiceList" xml:space="preserve">

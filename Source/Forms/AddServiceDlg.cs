@@ -11,13 +11,28 @@ namespace MySql.TrayApp
 {
   public partial class AddServiceDlg : Form
   {
+    private string lastFilter = String.Empty;
+
     public AddServiceDlg()
     {      
       InitializeComponent();
+      server.SelectedIndex = 0;
+      filterText.Text = "mysqld.exe";
+      RefreshList();
+    }
+
+    public string ServiceToAdd { get; private set; }
+
+    private void RefreshList()
+    {
       try
       {
+        string currentFilter = filter.Checked ? filterText.Text.Trim() : null;
+        if (currentFilter == lastFilter) return;
+
+        lastFilter = currentFilter;
         lstServices.Items.Clear();
-        var services = MySqlServiceInformation.GetMySqlInstances();
+        var services = MySqlServiceInformation.GetInstances(lastFilter);
         foreach (var item in services)
         {
           ListViewItem newItem = new ListViewItem();
@@ -25,9 +40,8 @@ namespace MySql.TrayApp
           newItem.SubItems.Add(item.Properties["Name"].Value.ToString());
           newItem.SubItems.Add(item.Properties["State"].Value.ToString());
 
-          lstServices.Items.Add(newItem);          
+          lstServices.Items.Add(newItem);
         }
-
       }
       catch (Exception ex)
       {
@@ -38,10 +52,22 @@ namespace MySql.TrayApp
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-      if (lstServices.SelectedItems.Count > 0 && lstServices.SelectedItems[0].Text != String.Empty)
-      {
-        ManageServicesDlg.addServiceName = lstServices.SelectedItems[0].SubItems[0].Text;
-      }
+      ServiceToAdd = lstServices.SelectedItems[0].SubItems[0].Text;
+    }
+
+    private void textBox1_TextChanged(object sender, EventArgs e)
+    {
+      RefreshList();
+    }
+
+    private void filter_CheckedChanged(object sender, EventArgs e)
+    {
+      RefreshList();
+    }
+
+    private void lstServices_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      btnOK.Enabled = lstServices.SelectedItems.Count > 0;
     }
     
   }
