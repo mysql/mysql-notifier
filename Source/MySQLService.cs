@@ -28,25 +28,17 @@ using System.Windows.Forms;
 using System.Linq;
 using System.Globalization;
 using System.Management;
+using System.ComponentModel;
 
 namespace MySql.TrayApp
 {
   public class MySQLService
   {
-    private const int DEFAULT_TIMEOUT = 5000;
-
     private ServiceController winService;
 
 
     public bool HasAdminPrivileges { get; private set; }
     public ServiceControllerStatus Status { get; private set; }
-
-    public static int DefaultTimeOut
-    {
-      get { return DEFAULT_TIMEOUT; }
-    }
-
-    public int TimeOutMilliseconds { get; set; }
 
     public string ServiceName
     {
@@ -57,7 +49,6 @@ namespace MySql.TrayApp
 
     public MySQLService(string serviceName, bool adminPrivileges)
     {
-      TimeOutMilliseconds = DEFAULT_TIMEOUT;
       HasAdminPrivileges = adminPrivileges;
       winService = new ServiceController(serviceName);
       try
@@ -72,17 +63,23 @@ namespace MySql.TrayApp
       }
     }
 
+    /// <summary>
+    /// This event system handles the case where the service failed to move to a proposed status
+    /// </summary>
+    public delegate void StatusChangeErrorHandler(object sender, Exception ex);
+    public event StatusChangeErrorHandler StatusChangeError;
+
+    private void OnStatusChangeError(Exception ex)
+    {
+      if (StatusChangeError != null)
+        StatusChangeError(this, ex);
+    }
+
+    /// <summary>
+    /// This event system handles the case where the service successfully moved to a new status
+    /// </summary>
     public delegate void StatusChangedHandler(object sender, ServiceStatus args);
-
-    /// <summary>
-    /// Notifies that the status of the Windows Service has changed
-    /// </summary>
     public event StatusChangedHandler StatusChanged;
-
-    /// <summary>
-    /// Invokes StatusChanged event when an action causes a status change
-    /// </summary>
-    /// <param name="e">Event arguments</param>
     protected virtual void OnStatusChanged(ServiceStatus args)
     {
       if (this.StatusChanged != null)
@@ -109,7 +106,7 @@ namespace MySql.TrayApp
     /// <returns>Flag indicating if the action completed succesfully</returns>
     public void Start()
     {
-      winService.Start();
+      ChangeServiceStatus(1);
     }
 
     /// <summary>
@@ -118,7 +115,7 @@ namespace MySql.TrayApp
     /// <returns>Flag indicating if the action completed succesfully</returns>
     public void Stop()
     {
-      winService.Stop();
+      ChangeServiceStatus(0);
     }
 
     /// <summary>
@@ -127,28 +124,46 @@ namespace MySql.TrayApp
     /// <returns>Flag indicating if the action completed succesfully</returns>
     public void Restart()
     {
-      bool success = false;
-      try
-      {
-        int millisec1 = Environment.TickCount;
-        TimeSpan timeout = TimeSpan.FromMilliseconds(TimeOutMilliseconds);
+      ChangeServiceStatus(2);
+    }
 
+    private void ChangeServiceStatus(int action)
+    {
+      BackgroundWorker worker = new BackgroundWorker();
+      worker.WorkerSupportsCancellation = false;
+      worker.WorkerReportsProgress = false;
+      worker.DoWork += new DoWorkEventHandler(worker_DoWork);
+      worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+      worker.RunWorkerAsync(action);
+    }
+
+    void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+    {
+      if (e.Error != null)
+        OnStatusChangeError(e.Error);
+      else
+      {
+        // else no error
+        winService.Refresh();
+        SetStatus(winService.Status.ToString());
+      }
+    }
+
+    void worker_DoWork(object sender, DoWorkEventArgs e)
+    {
+      TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
+      BackgroundWorker worker = sender as BackgroundWorker;
+      int action = (int)e.Argument;
+
+      if (action == 1)
+      {
+        winService.Start();
+        winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
+      }
+      else if (action == 0)
+      {
         winService.Stop();
         winService.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
-
-        // count the rest of the timeout
-        int millisec2 = Environment.TickCount;
-        timeout = TimeSpan.FromMilliseconds(TimeOutMilliseconds - (millisec2 - millisec1));
-
-        winService.Start();
-  //      winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
-
-        success = true;
-//        previousStatus = this.RefreshStatus;
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
     }
   }

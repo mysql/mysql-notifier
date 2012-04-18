@@ -95,6 +95,15 @@ namespace MySql.TrayApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The service {0} failed the most recent status change request with the message {1}..
+        /// </summary>
+        internal static string BalloonTextFailedStatusChange {
+            get {
+                return ResourceManager.GetString("BalloonTextFailedStatusChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New service added to monitored list: {0}.
         /// </summary>
         internal static string BalloonTextServiceList {
@@ -109,6 +118,15 @@ namespace MySql.TrayApp.Properties {
         internal static string BalloonTextServiceStatus {
             get {
                 return ResourceManager.GetString("BalloonTextServiceStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        internal static string BalloonTitleFailedStatusChange {
+            get {
+                return ResourceManager.GetString("BalloonTitleFailedStatusChange", resourceCulture);
             }
         }
         

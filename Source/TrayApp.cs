@@ -39,16 +39,11 @@ namespace MySql.TrayApp
 {
   class TrayApp
   {
-    private int timeOutMilliSec = MySQLService.DefaultTimeOut;
     private bool hasAdminPrivileges { get; set; }
-
     private System.ComponentModel.IContainer components;
     private NotifyIcon notifyIcon;
     private MySQLServicesList mySQLServicesList { get; set; }
-
     private ManagementEventWatcher watcher;
-
-    private delegate void AutoAddNewServiceDelegate(string ServiceName);
 
     public TrayApp(bool adminPrivileges)
     {
@@ -137,6 +132,7 @@ namespace MySql.TrayApp
 
       // the rest of this is for additions
       service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
+      service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
       if (changeType == ServiceListChangeType.AutoAdd)
       {
         notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
@@ -144,6 +140,15 @@ namespace MySql.TrayApp
         notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.ServiceName);
         notifyIcon.ShowBalloonTip(1500);
       }
+    }
+
+    void service_StatusChangeError(object sender, Exception ex)
+    {
+      MySQLService service = (MySQLService)sender;
+      notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
+      notifyIcon.BalloonTipTitle = Resources.BalloonTitleFailedStatusChange;
+      notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextFailedStatusChange, service.ServiceName, ex.Message);
+      notifyIcon.ShowBalloonTip(1500);
     }
 
     void mySQLServicesList_ServiceListChanged(object sender, MySQLService service, ServiceListChangeType changeType)
