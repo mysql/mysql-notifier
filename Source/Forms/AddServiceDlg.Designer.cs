@@ -35,10 +35,8 @@
       this.server = new System.Windows.Forms.ComboBox();
       this.lstServices = new System.Windows.Forms.ListView();
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-      this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.filter = new System.Windows.Forms.CheckBox();
-      this.filterText = new System.Windows.Forms.TextBox();
       this.SuspendLayout();
       // 
       // btnOK
@@ -101,7 +99,6 @@
             | System.Windows.Forms.AnchorStyles.Right)));
       this.lstServices.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
-            this.columnHeader2,
             this.columnHeader3});
       this.lstServices.FullRowSelect = true;
       this.lstServices.Location = new System.Drawing.Point(20, 133);
@@ -116,12 +113,7 @@
       // columnHeader1
       // 
       this.columnHeader1.Text = "Display Name";
-      this.columnHeader1.Width = 206;
-      // 
-      // columnHeader2
-      // 
-      this.columnHeader2.Text = "Service Name";
-      this.columnHeader2.Width = 100;
+      this.columnHeader1.Width = 304;
       // 
       // columnHeader3
       // 
@@ -133,26 +125,17 @@
       this.filter.AutoSize = true;
       this.filter.Location = new System.Drawing.Point(75, 65);
       this.filter.Name = "filter";
-      this.filter.Size = new System.Drawing.Size(239, 17);
+      this.filter.Size = new System.Drawing.Size(243, 17);
       this.filter.TabIndex = 14;
-      this.filter.Text = "Show services with executable that contains:";
+      this.filter.Text = "Only show services that match auto-add filter?\r\n";
       this.filter.UseVisualStyleBackColor = true;
       this.filter.CheckedChanged += new System.EventHandler(this.filter_CheckedChanged);
-      // 
-      // filterText
-      // 
-      this.filterText.Location = new System.Drawing.Point(312, 61);
-      this.filterText.Name = "filterText";
-      this.filterText.Size = new System.Drawing.Size(100, 20);
-      this.filterText.TabIndex = 15;
-      this.filterText.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
       // 
       // AddServiceDlg
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(433, 416);
-      this.Controls.Add(this.filterText);
       this.Controls.Add(this.filter);
       this.Controls.Add(this.lstServices);
       this.Controls.Add(this.btnOK);
@@ -180,9 +163,7 @@
     private System.Windows.Forms.ComboBox server;
     private System.Windows.Forms.ListView lstServices;
     private System.Windows.Forms.ColumnHeader columnHeader1;
-    private System.Windows.Forms.ColumnHeader columnHeader2;
     private System.Windows.Forms.ColumnHeader columnHeader3;
     private System.Windows.Forms.CheckBox filter;
-    private System.Windows.Forms.TextBox filterText;
   }
 }

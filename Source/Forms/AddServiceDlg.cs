@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using MySql.TrayApp.Properties;
 
 namespace MySql.TrayApp
 {
@@ -17,7 +18,6 @@ namespace MySql.TrayApp
     {      
       InitializeComponent();
       server.SelectedIndex = 0;
-      filterText.Text = "mysqld.exe";
       RefreshList();
     }
 
@@ -27,7 +27,7 @@ namespace MySql.TrayApp
     {
       try
       {
-        string currentFilter = filter.Checked ? filterText.Text.Trim() : null;
+        string currentFilter = filter.Checked ? Settings.Default.AutoAddPattern.Trim() : null;
         if (currentFilter == lastFilter) return;
 
         lastFilter = currentFilter;
@@ -37,7 +37,6 @@ namespace MySql.TrayApp
         {
           ListViewItem newItem = new ListViewItem();
           newItem.Text = item.Properties["DisplayName"].Value.ToString();
-          newItem.SubItems.Add(item.Properties["Name"].Value.ToString());
           newItem.SubItems.Add(item.Properties["State"].Value.ToString());
 
           lstServices.Items.Add(newItem);
@@ -52,7 +51,7 @@ namespace MySql.TrayApp
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-      ServiceToAdd = lstServices.SelectedItems[0].SubItems[0].Text;
+      ServiceToAdd = lstServices.SelectedItems[0].Text;
     }
 
     private void textBox1_TextChanged(object sender, EventArgs e)

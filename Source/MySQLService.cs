@@ -34,8 +34,6 @@ namespace MySql.TrayApp
   public class MySQLService
   {
     private const int DEFAULT_TIMEOUT = 5000;
-//    private ServiceControllerStatus previousStatus;
-    //private bool disposed = false;
 
     private ServiceController winService;
 
@@ -52,37 +50,10 @@ namespace MySql.TrayApp
 
     public string ServiceName
     {
-      get { return winService.ServiceName; }
+      get { return winService.DisplayName; }
     }
 
     public ServiceMenuGroup MenuGroup { get; private set; }
-
-    //public ServiceControllerStatus RefreshStatus
-    //{
-    //  get
-    //  {
-    //    winService.Refresh();
-    //    var newStatus = winService.Status;
-    //    var copyPrevStatus = previousStatus;
-    //    if (!previousStatus.Equals(newStatus))
-    //    {
-    //      previousStatus = newStatus;
-    //      OnStatusChanged(new ServiceStatus(winService.ServiceName, copyPrevStatus, newStatus));
-    //    }
-    //    return newStatus;
-    //  }
-    //}
-
-    //public ServiceControllerStatus CurrentStatus
-    //{
-    //  get { return winService.Status; }
-    //}
-
-    //public ServiceControllerStatus PreviousStatus
-    //{
-    //  get { return previousStatus; }
-    //}
-
 
     public MySQLService(string serviceName, bool adminPrivileges)
     {
@@ -181,38 +152,4 @@ namespace MySql.TrayApp
       }
     }
   }
-
-  /// <summary>
-  /// Event Arguments used with the ServicesListChanged event containing information about the change.
-  /// </summary>
-  class ServicesListChangedArgs : EventArgs
-  {
-
-    private ArrayList addedServicesList;
-    private ArrayList removedServicesList;
-
-
-    public ArrayList AddedServicesList
-    {
-      get { return this.addedServicesList; }
-    }
-
-    public ArrayList RemovedServicesList
-    {
-      get { return this.removedServicesList; }
-    }
-
-    public int ChangedServicesCount
-    {
-      get { return this.addedServicesList.Count + this.removedServicesList.Count; }
-    }
-
-
-    public ServicesListChangedArgs(ArrayList addedServices, ArrayList removedServices)
-    {
-      this.addedServicesList = addedServices;
-      this.removedServicesList = removedServices;
-    }
-  }
-
 }

@@ -68,7 +68,7 @@
       // chkEnabledAutoAddServices
       // 
       this.chkEnabledAutoAddServices.AutoSize = true;
-      this.chkEnabledAutoAddServices.Location = new System.Drawing.Point(18, 56);
+      this.chkEnabledAutoAddServices.Location = new System.Drawing.Point(18, 47);
       this.chkEnabledAutoAddServices.Name = "chkEnabledAutoAddServices";
       this.chkEnabledAutoAddServices.Size = new System.Drawing.Size(265, 17);
       this.chkEnabledAutoAddServices.TabIndex = 4;
@@ -133,7 +133,7 @@
       this.btnCancel.Text = "Cancel";
       this.btnCancel.UseVisualStyleBackColor = true;
       // 
-      // OptionsForm
+      // OptionsDialog
       // 
       this.AcceptButton = this.btnOK;
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -146,7 +146,7 @@
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
       this.MaximizeBox = false;
       this.MinimizeBox = false;
-      this.Name = "OptionsForm";
+      this.Name = "OptionsDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Options";
       this.grpOtherOptions.ResumeLayout(false);

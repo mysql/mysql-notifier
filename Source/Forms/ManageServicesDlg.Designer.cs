@@ -79,7 +79,6 @@
       // 
       // lstMonitoredServices
       // 
-      this.lstMonitoredServices.CheckBoxes = true;
       this.lstMonitoredServices.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader3});

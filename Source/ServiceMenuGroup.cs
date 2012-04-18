@@ -40,41 +40,18 @@ namespace MySql.TrayApp
   public class ServiceMenuGroup
   {
     private ToolStripMenuItem statusMenu;
+    private ToolStripMenuItem startMenu;
+    private ToolStripMenuItem stopMenu;
+    private ToolStripMenuItem restartMenu;
     private ToolStripMenuItem configureMenu;
     private ToolStripMenuItem editorMenu;
     private ToolStripSeparator separator;
-
-    public enum AvailableActions
-    { Start, Stop, ReStart };
-
-
     private MySQLService boundService;
     
-    private string connectionStringName
-    {
-      get {
-        return MySqlServiceInformation.GetConnectionString(boundService.ServiceName);
-      }    
-    }
-
-    private string serverName
-    {
-      get
-      {
-        return MySqlServiceInformation.GetServerName(boundService.ServiceName);      
-      }
-    }
-
-    public string BoundServiceName
-    {
-      get { return boundService.ServiceName; }
-    }
-
     public ServiceMenuGroup(MySQLService mySQLBoundService)
     {
       boundService = mySQLBoundService;
 
-      //serviceMenuItems = new ToolStripMenuItem[3];
       statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.ServiceName, boundService.Status));
       configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
       editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
@@ -89,17 +66,41 @@ namespace MySql.TrayApp
       Font subMenuItemFont = new Font(statusMenu.Font, FontStyle.Regular);
       statusMenu.Font = menuItemFont;
 
-      ToolStripMenuItem start = new ToolStripMenuItem("Start", Resources.play);
-      start.Click += new EventHandler(start_Click);
-      ToolStripMenuItem stop = new ToolStripMenuItem("Stop", Resources.stop);
-      stop.Click += new EventHandler(stop_Click);
-      ToolStripMenuItem restart = new ToolStripMenuItem("Restart");
-      restart.Click += new EventHandler(restart_Click);
-      statusMenu.DropDownItems.Add(start);
-      statusMenu.DropDownItems.Add(stop);
-      statusMenu.DropDownItems.Add(restart);
+      startMenu = new ToolStripMenuItem("Start", Resources.play);
+      startMenu.Click += new EventHandler(start_Click);
+
+      stopMenu = new ToolStripMenuItem("Stop", Resources.stop);
+      stopMenu.Click += new EventHandler(stop_Click);
+
+      restartMenu = new ToolStripMenuItem("Restart");
+      restartMenu.Click += new EventHandler(restart_Click);
+
+      statusMenu.DropDownItems.Add(startMenu);
+      statusMenu.DropDownItems.Add(stopMenu);
+      statusMenu.DropDownItems.Add(restartMenu);
 
       Update();
+    }
+
+    private string connectionStringName
+    {
+      get
+      {
+        return MySqlServiceInformation.GetConnectionString(boundService.ServiceName);
+      }
+    }
+
+    private string serverName
+    {
+      get
+      {
+        return MySqlServiceInformation.GetServerName(boundService.ServiceName);
+      }
+    }
+
+    public string BoundServiceName
+    {
+      get { return boundService.ServiceName; }
     }
 
     void restart_Click(object sender, EventArgs e)
@@ -141,9 +142,7 @@ namespace MySql.TrayApp
     public void Update()
     {      
 
-      //statusMenu.Text = String.Format("{0} - {1}",
-      //                                       boundServiceName,
-      //                                       boundServiceStatus.ToString());
+      statusMenu.Text = String.Format("{0} - {1}", boundService.ServiceName, boundService.Status);
       Image image = null;
       switch (boundService.Status)
       {
@@ -163,30 +162,10 @@ namespace MySql.TrayApp
       }
       statusMenu.Image = image;
 
-      foreach (ToolStripMenuItem subMenuItem in statusMenu.DropDownItems)
-      {
-        subMenuItem.Enabled = false;
-      }
-
-      if (boundService.HasAdminPrivileges)
-      {
-        switch (boundService.Status)
-        {
-          case ServiceControllerStatus.ContinuePending:
-          case ServiceControllerStatus.Paused:
-          case ServiceControllerStatus.PausePending:
-          case ServiceControllerStatus.StartPending:
-          case ServiceControllerStatus.StopPending:
-            statusMenu.DropDownItems[1].Enabled = true;
-            break;
-          case ServiceControllerStatus.Stopped:
-            statusMenu.DropDownItems[0].Enabled = true;
-            break;
-          case ServiceControllerStatus.Running:
-            statusMenu.DropDownItems[1].Enabled = false; //serviceMenuItems[0].DropDownItems[2].Enabled = true;
-            break;
-        }
-      }
+      bool admin = boundService.HasAdminPrivileges;
+      startMenu.Enabled = admin && boundService.Status == ServiceControllerStatus.Stopped;
+      stopMenu.Enabled = admin && boundService.Status != ServiceControllerStatus.Stopped;
+      restartMenu.Enabled = admin;
     }
 
 
