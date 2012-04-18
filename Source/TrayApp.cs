@@ -100,11 +100,13 @@ namespace MySql.TrayApp
       manageServices.Click += new EventHandler(manageServicesDialogItem_Click);
 
       ToolStripMenuItem launchInstaller = new ToolStripMenuItem("Launch Installer");
-      //TODO:  enable menu in opening handler if installer is now installed
+      bool installerInstalled = Utilities.IsMySQLInstallerInstalled();
       launchInstaller.Click += new EventHandler(launchInstallerItem_Click);
+      launchInstaller.Enabled = installerInstalled;
 
       ToolStripMenuItem checkForUpdates = new ToolStripMenuItem("Check for updates");
       checkForUpdates.Click += new EventHandler(checkUpdatesItem_Click);
+      checkForUpdates.Enabled = installerInstalled;
 
       ToolStripMenuItem actionsMenu = new ToolStripMenuItem("Actions", null, manageServices, launchInstaller, checkForUpdates);
 
@@ -262,33 +264,6 @@ namespace MySql.TrayApp
       notifyIcon.Text = (toolTipText.Length >= MAX_TOOLTIP_LENGHT ? toolTipText.Substring(0, MAX_TOOLTIP_LENGHT - 3) + "..." : toolTipText);
     }
 
-
-    /// <summary>
-    /// Refreshes services and their related menu items
-    /// </summary>
-    //private void refreshServicesMenus()
-    //{
-
-    //  refreshingMenus = true;    
-    //  mySQLServicesList.RefreshMySQLServices(ref trayAppSettings.servicesMonitor, trayAppSettings.autoAddNewServices);
-    // notifyIcon.ContextMenuStrip.Items.Clear();
-    //  foreach (MySQLService mySqlServ in mySQLServicesList.InstalledMySQLServicesList)
-    //  {
-    //    foreach (ToolStripMenuItem item in mySqlServ.MenuGroup.ServiceMenuItems)
-    //    {
-    //     notifyIcon.ContextMenuStrip.Items.Add(item);
-    //    }
-    //   notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-    //  }
-    //  foreach (ToolStripMenuItem item in staticMenuItems)
-    //  {
-    //   notifyIcon.ContextMenuStrip.Items.Add(item);
-    //  }
-    // SetNotifyIconToolTip();
-
-    //  refreshingMenus = false;
-    //}
-
     public void watcher_EventArrived(object sender, EventArrivedEventArgs args)
     {
       var e = args.NewEvent;
@@ -298,6 +273,8 @@ namespace MySql.TrayApp
       string state = o["State"].ToString().Trim();
       string serviceName = o["DisplayName"].ToString().Trim();
       string path = o["PathName"].ToString();
+
+      if (state.Contains("Pending")) return;
 
       Control c = notifyIcon.ContextMenuStrip;
       if (c.InvokeRequired)
@@ -311,47 +288,7 @@ namespace MySql.TrayApp
         mySQLServicesList.SetServiceStatus(serviceName, path, state);
         SetNotifyIconToolTip();
       }
-
-      //Debug.Print(" - Service :  has changed " + ((ManagementBaseObject)e["TargetInstance"])["DisplayName"] + " , State is " + ((ManagementBaseObject)e["TargetInstance"])["State"]);
-      // if auto add is enabled then add the service to the monitored list and update the changes to the UI 
-
-      //if (Settings.Default.AutoAddServicesToMonitor)
-      //{
-      //    var state = ((ManagementBaseObject)e["TargetInstance"])["State"].ToString().Trim();
-      //    string newService = ((ManagementBaseObject)e["TargetInstance"])["DisplayName"].ToString().Trim();
-      //    switch (state)
-      //    {
-      //      case "Running":
-      //        UpdateMonitoredList(newService);
-      //        break;            
-      //    }
-      //}
     }
-
-    private void UpdateMonitoredList(string serviceName)
-    {
-      //if (actionsMenuItem.GetCurrentParent().InvokeRequired)
-      //{
-      //  AutoAddNewServiceDelegate sd = new AutoAddNewServiceDelegate(UpdateMonitoredList);
-      //  actionsMenuItem.GetCurrentParent().Invoke(sd, new object[] { serviceName });
-      //}
-      //else
-      //{
-      //  if (!trayAppSettings.servicesMonitor.Contains(serviceName))
-      //  {
-      //    Properties.Settings.Default.ServicesMonitor.Add(serviceName);
-      //    Properties.Settings.Default.Save();
-      //    trayAppSettings.servicesMonitor = Properties.Settings.Default.ServicesMonitor.Cast<string>().ToList();
-
-      //     notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-      //     notifyIcon.BalloonTipTitle = String.Format("Service {0} has been added to the monitor list", serviceName);
-      //     notifyIcon.ShowBalloonTip(3000);
-
-      //    refreshServicesMenus();
-      //  }
-      //}
-    }
-
 
   }
 }

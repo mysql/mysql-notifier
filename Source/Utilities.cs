@@ -32,6 +32,11 @@ namespace MySql.TrayApp
 {
   public static class Utilities
   {
+    public static bool IsMySQLInstallerInstalled()
+    {
+      return IsApplicationInstalled("MySQL Installer");
+    }
+
     public static bool IsApplicationInstalled(string p_name)
     {
       string keyName;
@@ -67,7 +72,7 @@ namespace MySql.TrayApp
             using (subkey = key.OpenSubKey(kn))
             {
               displayName = subkey.GetValue(p_attributeName) as string;
-              if (String.Compare(p_name, displayName, StringComparison.OrdinalIgnoreCase) >= 0)
+              if (String.Compare(p_name, displayName, StringComparison.OrdinalIgnoreCase) == 0)
               {
                 return true;
               }
