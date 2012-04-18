@@ -19,8 +19,7 @@ namespace MySql.TrayApp
 
       notifyOfAutoAdd.Checked = Settings.Default.NotifyOfAutoServiceAddition;
       notifyOfStatusChange.Checked = Settings.Default.NotifyOfStatusChange;
-
-      chkRunAtStartup.Checked = Settings.Default.RunAtStartup;
+      chkRunAtStartup.Checked = Utilities.GetRunAtStartUp();
       chkAutoCheckUpdates.Checked = Settings.Default.AutoCheckForUpdates;
       numCheckUpdatesWeeks.Value = Settings.Default.CheckForUpdatesFrequency;
       chkEnabledAutoAddServices.Checked = Settings.Default.AutoAddServicesToMonitor;
@@ -31,12 +30,12 @@ namespace MySql.TrayApp
     {            
       Settings.Default.NotifyOfAutoServiceAddition = notifyOfAutoAdd.Checked;
       Settings.Default.NotifyOfStatusChange = notifyOfStatusChange.Checked;
-      Settings.Default.RunAtStartup = chkRunAtStartup.Checked;
       Settings.Default.AutoCheckForUpdates = chkAutoCheckUpdates.Checked;
       Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(this.numCheckUpdatesWeeks.Value);
       Settings.Default.AutoAddServicesToMonitor = chkEnabledAutoAddServices.Checked;
       Settings.Default.AutoAddPattern = autoAddRegex.Text.Trim();
       Settings.Default.Save();
+      Utilities.SetRunAtStartUp(chkRunAtStartup.Checked);
     }
 
     private void chkAutoCheckUpdates_CheckedChanged(object sender, EventArgs e)

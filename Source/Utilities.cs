@@ -27,6 +27,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Win32;
 using System.IO;
+using System.Windows.Forms;
 
 namespace MySql.TrayApp
 {
@@ -83,6 +84,26 @@ namespace MySql.TrayApp
         }
       }
       return false;
+    }
+
+    public static bool GetRunAtStartUp()
+    {
+      RegistryKey rk = Registry.CurrentUser.OpenSubKey
+          ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+      string exists = (string)rk.GetValue(Application.ProductName, "false");
+      return exists != "false";
+    }
+
+    public static void SetRunAtStartUp(bool enable)
+    {
+      RegistryKey rk = Registry.CurrentUser.OpenSubKey
+          ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+      if (enable)
+        rk.SetValue(Application.ProductName, Application.ExecutablePath.ToString());
+      else
+        rk.DeleteValue(Application.ProductName, false);
     }
 
 

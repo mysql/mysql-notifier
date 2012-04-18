@@ -26,18 +26,6 @@ namespace MySql.TrayApp.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool RunAtStartup {
-            get {
-                return ((bool)(this["RunAtStartup"]));
-            }
-            set {
-                this["RunAtStartup"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool AutoCheckForUpdates {
             get {
                 return ((bool)(this["AutoCheckForUpdates"]));
