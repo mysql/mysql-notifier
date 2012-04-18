@@ -52,7 +52,7 @@
       this.label1.TabIndex = 1;
       this.label1.Text = "MySQL Tray Application";
       // 
-      // About
+      // AboutDialog
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -60,11 +60,11 @@
       this.Controls.Add(this.label1);
       this.Controls.Add(this.pictureBox1);
       this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(88)))), ((int)(((byte)(131)))), ((int)(((byte)(158)))));
-      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
       this.MaximizeBox = false;
       this.MinimizeBox = false;
-      this.Name = "About";
-      this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+      this.Name = "AboutDialog";
+      this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
       this.Text = "About";
       this.Load += new System.EventHandler(this.About_Load);
       ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();

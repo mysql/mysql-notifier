@@ -133,7 +133,7 @@ namespace MySql.TrayApp
       // the rest of this is for additions
       service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
       service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
-      if (changeType == ServiceListChangeType.AutoAdd)
+      if (changeType == ServiceListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
       {
         notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
         notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
@@ -177,6 +177,8 @@ namespace MySql.TrayApp
 
     private void mySQLServicesList_ServiceStatusChanged(object sender, ServiceStatus args)
     {
+      if (!Settings.Default.NotifyOfStatusChange) return;
+
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceStatus;
       notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceStatus,

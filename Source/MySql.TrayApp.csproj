@@ -89,6 +89,9 @@
     <Compile Include="TrayApplicationContext.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="WinAPI.cs" />
+    <EmbeddedResource Include="Forms\AboutDialog.resx">
+      <DependentUpon>AboutDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\AddServiceDlg.resx">
       <DependentUpon>AddServiceDlg.cs</DependentUpon>
     </EmbeddedResource>

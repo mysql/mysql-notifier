@@ -85,12 +85,12 @@ namespace MySql.TrayApp.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool NotifyOfServiceAddition {
+        public bool NotifyOfAutoServiceAddition {
             get {
-                return ((bool)(this["NotifyOfServiceAddition"]));
+                return ((bool)(this["NotifyOfAutoServiceAddition"]));
             }
             set {
-                this["NotifyOfServiceAddition"] = value;
+                this["NotifyOfAutoServiceAddition"] = value;
             }
         }
         
@@ -103,6 +103,18 @@ namespace MySql.TrayApp.Properties {
             }
             set {
                 this["AutoAddPattern"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool NotifyOfStatusChange {
+            get {
+                return ((bool)(this["NotifyOfStatusChange"]));
+            }
+            set {
+                this["NotifyOfStatusChange"] = value;
             }
         }
     }
