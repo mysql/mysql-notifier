@@ -7,11 +7,45 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using MySql.TrayApp.Properties;
+using System.Collections;
 
 namespace MySql.TrayApp
 {
   public partial class AddServiceDlg : Form
   {
+
+    private class ListViewItemComparer : IComparer
+    {
+      private int col;
+      private SortOrder order;
+
+      public ListViewItemComparer()
+      {
+        col = 0;
+        order = SortOrder.Ascending;
+      }
+
+      public ListViewItemComparer(int column, SortOrder order)
+      {
+        col = column;
+        this.order = order;
+      }
+
+      public int Compare(object x, object y)
+      {
+        int returnVal = -1;
+
+        returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
+
+        if (order == SortOrder.Descending)
+          returnVal *= -1;
+
+        return returnVal;
+
+      }
+    }
+
+    private int sortColumn = -1;
     private string lastFilter = String.Empty;    
 
     public AddServiceDlg()
@@ -19,6 +53,7 @@ namespace MySql.TrayApp
       InitializeComponent();
       server.SelectedIndex = 0;
       RefreshList();
+      lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);
     }
 
     public string ServiceToAdd { get; private set; }
@@ -68,6 +103,26 @@ namespace MySql.TrayApp
     {
       btnOK.Enabled = lstServices.SelectedItems.Count > 0;
     }
-    
+
+    private void lstServices_ColumnClick(object sender, ColumnClickEventArgs e)
+    {
+      if (e.Column != sortColumn)
+      {
+        sortColumn = e.Column;
+        lstServices.Sorting = SortOrder.Ascending;
+      }
+      else
+      {
+        if (lstServices.Sorting == SortOrder.Ascending)
+          lstServices.Sorting = SortOrder.Descending;
+        else
+          lstServices.Sorting = SortOrder.Ascending;
+      }
+
+      lstServices.Sort();
+      lstServices.ListViewItemSorter = new ListViewItemComparer(e.Column, lstServices.Sorting);
+
+    }
+
   }
 }
