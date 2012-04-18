@@ -12,7 +12,7 @@ namespace MySql.TrayApp
 {
   public partial class AddServiceDlg : Form
   {
-    private string lastFilter = String.Empty;
+    private string lastFilter = String.Empty;    
 
     public AddServiceDlg()
     {      

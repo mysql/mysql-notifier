@@ -75,6 +75,10 @@ namespace MySql.TrayApp
       restartMenu = new ToolStripMenuItem("Restart");
       restartMenu.Click += new EventHandler(restart_Click);
 
+      editorMenu.Click += new EventHandler(sqlEditorItem_Click);
+
+      configureMenu.Click += new EventHandler(configureInstanceItem_Click);
+
       statusMenu.DropDownItems.Add(startMenu);
       statusMenu.DropDownItems.Add(stopMenu);
       statusMenu.DropDownItems.Add(restartMenu);

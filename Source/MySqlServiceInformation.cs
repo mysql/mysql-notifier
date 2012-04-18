@@ -102,13 +102,11 @@ namespace MySql.TrayApp
     /// <returns></returns>   
     private static String GetConnectionString()
     {
-      var version = string.Empty;
-      //TODO: fix this
-      return "";
-      if (!FileExists("connections.xml", out version) || string.Compare(version, WB_XMLVERSION, StringComparison.InvariantCultureIgnoreCase) != 0)
-      {
+      var version = string.Empty;     
+      if (!FileExists("connections.xml", out version)) return string.Empty;
+            
+      if (string.Compare(version, WB_XMLVERSION, StringComparison.InvariantCultureIgnoreCase) != 0)
         throw new Exception(Properties.Resources.UnSupportedWBXMLVersion);
-      }
 
       XmlTextReader reader = new XmlTextReader(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)
                     + @"\MySQL\Workbench\" + "connections.xml");
@@ -156,14 +154,14 @@ namespace MySql.TrayApp
 
 
     public static String GetServerName(string serviceName)
-    {
-      return "";
+    {      
       var version = string.Empty;
-      if (!FileExists("server_instances.xml", out version) || string.Compare(version, WB_XMLVERSION, StringComparison.InvariantCultureIgnoreCase) != 0)
-      {
-        throw new Exception(Properties.Resources.UnSupportedWBXMLVersion);
-      }
 
+      if (!FileExists("server_instances.xml", out version)) return string.Empty;
+
+      if (string.Compare(version, WB_XMLVERSION, StringComparison.InvariantCultureIgnoreCase) != 0)      
+        throw new Exception(Properties.Resources.UnSupportedWBXMLVersion);
+      
       XmlTextReader reader = new XmlTextReader(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)
                     + @"\MySQL\Workbench\" + "server_instances.xml");
       XmlDocument doc = new XmlDocument();

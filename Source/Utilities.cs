@@ -72,7 +72,7 @@ namespace MySql.TrayApp
             using (subkey = key.OpenSubKey(kn))
             {
               displayName = subkey.GetValue(p_attributeName) as string;
-              if (String.Compare(p_name, displayName, StringComparison.OrdinalIgnoreCase) == 0)
+              if (String.Compare(p_name, displayName, StringComparison.OrdinalIgnoreCase) >= 0)
               {
                 return true;
               }
