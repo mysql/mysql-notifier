@@ -59,6 +59,7 @@ namespace MySql.TrayApp
                       Icon = Icon.FromHandle(iconBitmap.GetHicon()),
                       Visible = true
                     };
+      notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleTextServiceStatus;
 
@@ -81,6 +82,12 @@ namespace MySql.TrayApp
       watcher = new ManagementEventWatcher(managementScope, query);
       watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);
       watcher.Start();
+    }
+
+    void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
+    {
+      foreach (MySQLService service in mySQLServicesList.Services)
+        service.MenuGroup.Update();
     }
 
     /// <summary>

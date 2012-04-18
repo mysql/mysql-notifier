@@ -145,7 +145,6 @@ namespace MySql.TrayApp
     /// <param name="boundServiceStatus">Service Status</param>
     public void Update()
     {      
-
       statusMenu.Text = String.Format("{0} - {1}", boundService.ServiceName, boundService.Status);
       Image image = null;
       switch (boundService.Status)
@@ -170,6 +169,10 @@ namespace MySql.TrayApp
       startMenu.Enabled = admin && boundService.Status == ServiceControllerStatus.Stopped;
       stopMenu.Enabled = admin && boundService.Status != ServiceControllerStatus.Stopped;
       restartMenu.Enabled = admin;
+
+      bool wbInstalled = Utilities.IsWorkbenchInstalled();
+      editorMenu.Enabled = wbInstalled;
+      configureMenu.Enabled = wbInstalled;
     }
 
 

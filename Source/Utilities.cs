@@ -37,6 +37,11 @@ namespace MySql.TrayApp
       return IsApplicationInstalled("MySQL Installer");
     }
 
+    public static bool IsWorkbenchInstalled()
+    {
+      return IsApplicationInstalled("MySQL Workbench");
+    }
+
     public static bool IsApplicationInstalled(string p_name)
     {
       string keyName;
@@ -72,10 +77,7 @@ namespace MySql.TrayApp
             using (subkey = key.OpenSubKey(kn))
             {
               displayName = subkey.GetValue(p_attributeName) as string;
-              if (String.Compare(p_name, displayName, StringComparison.OrdinalIgnoreCase) >= 0)
-              {
-                return true;
-              }
+              if (displayName != null && displayName.Contains(p_name)) return true;
             }
           }
         }
