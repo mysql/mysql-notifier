@@ -33,7 +33,15 @@ using System.Text.RegularExpressions;
 
 
 namespace MySql.TrayApp
-{ 
+{
+
+  public enum ServiceListChangeType
+  {
+    Add,
+    AutoAdd,
+    Remove
+  }
+
   public class MySQLServicesList
   {
     private bool loading;
@@ -159,107 +167,6 @@ namespace MySql.TrayApp
         OnServiceStatusChanged(args);
     }
 
-
-    ///// <summary>
-    ///// Refreshes the list of installed MySQL Services only adding or removing items if necessary
-    ///// </summary>
-    ///// <param name="monitoredServices"> Has the list of services the app is monitoring </param>
-    ///// <param name="autoAddServices">If true then add new services</param>
-    ///// <returns>Flag indicating if the services changed</returns>
-    //public bool RefreshMySQLServices(ref List<string> monitoredServices, bool autoAddServices)
-    //{      
-    //  var mySqlServices = MySqlServiceInformation.GetInstances(null);
-      
-    //  try 
-    //  { 
-    //      //if (mySqlServices.Count <= 0)
-    //      //{
-    //      //  throw new Exception(Properties.Resources.NoServicesExceptionMessage);        
-    //      //}
-
-    //      var mysqlServicesNames = mySqlServices.Select(t => t.Properties["Name"].Value).Cast<String>().ToList();
-    //      var mysqlMonitoringNames = Services.Select(t => t.ServiceName).Cast<String>().ToList();
-
-    //      if (mysqlServicesNames.Except(monitoredServices).Any() || monitoredServices.Except(mysqlMonitoringNames).Any())
-    //      {
-            
-    //       // Checked for removed services
-    //        var copyOf = Services.ToArray();
-
-    //        foreach (MySQLService mservice in copyOf)
-    //        {
-    //            if (!Services.Exists(delegate(String service) { return service == mservice.ServiceName; }))
-    //            {
-    //              if (Services.Where(t => t.ServiceName == mservice.ServiceName).Count() > 0)
-    //              {
-    //                //monitoredMySQLServicesList.Where(t => t.ServiceName == mservice.ServiceName).First().Dispose();
-    //                Services.Remove(Services.Where(t => t.ServiceName == mservice.ServiceName).First());                    
-    //              }
-                  
-    //            }
-    //        }
-  
-    //        var copyOfMS = monitoredServices.ToArray();
-    //          // Check for uninstalled services to remove them from the global list
-    //        foreach (string mService in copyOfMS)
-    //          {
-    //            if (!mySqlServices.Exists(delegate(ManagementObject service) { return service.Properties["Name"].Value.ToString() == mService; }))
-    //            {
-                
-    //              //if (monitoredMySQLServicesList.Remove(monitoredMySQLServicesList.Where(t => t.ServiceName == mService).First()))
-    //                //monitoredMySQLServicesList.Where(t => t.ServiceName == mService).First().Dispose();
-
-    //              monitoredServices.Remove(mService);
-
-    //            }
-    //          }
-
-    //          //Check if new mysql services exists that are not monitored yet
-    //          foreach (ManagementObject wService in mySqlServices)
-    //          {
-    //            if (!monitoredServices.Exists(delegate(String service) { return service == wService.Properties["Name"].Value.ToString(); }) && autoAddServices)
-    //            {
-    //              var mySQLService = new MySQLService(wService.Properties["Name"].Value.ToString(), HasAdminPrivileges);
-    //              mySQLService.StatusChanged += mySQLService_StatusChanged;
-    //              Services.Add(mySQLService);
-    //              monitoredServices.Add(wService.Properties["Name"].Value.ToString());
-    //            }
-    //          }
-
-    //          //updated new services in mysqlservices global list for UI
-    //          foreach (string mservice in monitoredServices)
-    //          {
-    //            // if its missing then add it otherwise remove it
-    //            if (!Services.Exists(delegate(MySQLService service) { return service.ServiceName == mservice; }))
-    //            {
-    //              var mySQLService = new MySQLService(mservice, HasAdminPrivileges);
-    //              mySQLService.StatusChanged += mySQLService_StatusChanged;
-    //              Services.Add(mySQLService);
-    //            }
-    //          }
-
-    //        Services.Sort(delegate(MySQLService serv1, MySQLService serv2) { return serv1.ServiceName.CompareTo(serv2.ServiceName); });
-    //        return true;
-    //      }         
-    //   }
-    //   catch (System.ComponentModel.Win32Exception win32ex)
-    //   {
-    //     MessageBox.Show(win32ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-    //   }
-    //   catch (Exception ex)
-    //   {
-    //     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-    //   }
-
-    //   return false;     
-    //}
-
   }
 
-  public enum ServiceListChangeType
-  {
-    Add,
-    AutoAdd,
-    Remove
-  }
 }

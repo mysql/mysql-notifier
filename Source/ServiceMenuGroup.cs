@@ -55,8 +55,7 @@ namespace MySql.TrayApp
       statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.ServiceName, boundService.Status));
       configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
       editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
-      
-      //Enables/Disables options that require with Workbench
+            
       editorMenu.Enabled = Utilities.IsApplicationInstalled("Workbench") && connectionStringName != String.Empty;
       configureMenu.Enabled = Utilities.IsApplicationInstalled("Workbench") && serverName != String.Empty;
 

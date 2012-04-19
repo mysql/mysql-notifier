@@ -132,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\app_default.ico" />
+    <None Include="Resources\about.png" />
     <Content Include="Resources\iconDB.jpg" />
     <None Include="Resources\stop.png" />
     <None Include="Resources\play.png" />

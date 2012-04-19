@@ -77,7 +77,7 @@ namespace MySql.TrayApp
       var managementScope = new ManagementScope(@"root\cimv2");
       managementScope.Connect();
 
-      //      WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\" AND ( TargetInstance.Name LIKE \"%MYSQL%\" OR TargetInstance.PathName LIKE \"%MYSQL%\" ) ");
+      // WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\" AND ( TargetInstance.Name LIKE \"%MYSQL%\" OR TargetInstance.PathName LIKE \"%MYSQL%\" ) ");
       WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
       watcher = new ManagementEventWatcher(managementScope, query);
       watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);
@@ -97,8 +97,7 @@ namespace MySql.TrayApp
     {
       var shieldBitmap = SystemIcons.Shield.ToBitmap();
       shieldBitmap.SetResolution(16, 16);
-      ToolStripMenuItem manageServices = new ToolStripMenuItem("Manage Services", shieldBitmap);
-      //manageServices.Enabled = hasAdminPrivileges;
+      ToolStripMenuItem manageServices = new ToolStripMenuItem("Manage Services");    
       manageServices.Click += new EventHandler(manageServicesDialogItem_Click);
 
       ToolStripMenuItem launchInstaller = new ToolStripMenuItem("Launch Installer");
@@ -115,6 +114,9 @@ namespace MySql.TrayApp
       ToolStripMenuItem optionsMenu = new ToolStripMenuItem("Options...");
       optionsMenu.Click += new EventHandler(optionsItem_Click);
 
+      ToolStripMenuItem restartAppMenu = new ToolStripMenuItem("Restart as Administrator", shieldBitmap);
+      restartAppMenu.Click += new EventHandler(restartApp_Click);
+      
       ToolStripMenuItem aboutMenu = new ToolStripMenuItem("About...");
       aboutMenu.Click += new EventHandler(aboutMenu_Click);
 
@@ -123,6 +125,7 @@ namespace MySql.TrayApp
 
       notifyIcon.ContextMenuStrip.Items.Add(actionsMenu);
       notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
+      if (!hasAdminPrivileges) notifyIcon.ContextMenuStrip.Items.Add(restartAppMenu);
       notifyIcon.ContextMenuStrip.Items.Add(optionsMenu);
       notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
       notifyIcon.ContextMenuStrip.Items.Add(aboutMenu);
@@ -195,35 +198,7 @@ namespace MySql.TrayApp
       notifyIcon.ShowBalloonTip(1500);
     }
 
-    private void manageServicesItem_Click(object sender, EventArgs e)
-    {
-      bool ranElevated = false;
-
-      if (hasAdminPrivileges)
-        return;
-
-      ProcessStartInfo processInfo = new ProcessStartInfo();
-      processInfo.Verb = "runas";
-      processInfo.FileName = Application.ExecutablePath;
-      try
-      {
-        Process.Start(processInfo);
-        ranElevated = true;
-      }
-      catch (Win32Exception)
-      {
-        //Do nothing. Probably the user canceled the UAC window
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
-
-      //Close this instance because we have an elevated a second instance
-      if (ranElevated)
-        OnExit(EventArgs.Empty);
-    }
-
+   
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
     {
       ManageServicesDlg dlg = new ManageServicesDlg(mySQLServicesList);
@@ -254,6 +229,36 @@ namespace MySql.TrayApp
       dlg.ShowDialog();
     }
 
+    private void restartApp_Click(object sender, EventArgs e)
+    {
+      bool ranElevated = false;
+
+      if (hasAdminPrivileges)
+        return;
+
+      ProcessStartInfo processInfo = new ProcessStartInfo();
+      processInfo.Verb = "runas";
+      processInfo.FileName = Application.ExecutablePath;
+      try
+      {
+        Process.Start(processInfo);
+        ranElevated = true;
+      }
+      catch (Win32Exception)
+      {
+        //Do nothing. Probably the user canceled the UAC window
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+      }
+      
+      if (ranElevated)
+        OnExit(EventArgs.Empty);
+    }
+
+
+    
     /// <summary>
     /// When the exit menu item is clicked, make a call to terminate the ApplicationContext.
     /// </summary>
