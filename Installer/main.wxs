@@ -2,7 +2,7 @@
 <?define ProductName="MySQL Tray Application 1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
-  <Product Name="MySQLTrayApp" Id ="9e9fb57a-62e3-45cf-a896-686e33407606" Manufacturer="Oracle" Language="1033" Version="1.0" 
+  <Product Name="$(var.ProductName)" Id ="9e9fb57a-62e3-45cf-a896-686e33407606" Manufacturer="Oracle" Language="1033" Version="1.0" 
            UpgradeCode="9e9fb57a-62e3-45cf-a896-686e33407606">
 		<Package Id="*" InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated"/>
 
@@ -39,12 +39,15 @@
 			<ComponentRef Id="MainExecutable" />
 		</Feature>
 
-   
+    <Property Id="LAUNCHAPPONEXIT" Value="1" />
+    
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
     <UIRef Id="WixUI_InstallDirNoLicense" />
     <WixVariable Id="WixUIBannerBmp" Value="Bitmaps/BannrBmp.bmp"/>
     <WixVariable Id="WixUIDialogBmp" Value="Bitmaps/DlgBmp.bmp"/>
     <Icon Id="TraApp.ico" SourceFile="app_default.ico" />
+
+    <CustomAction Id="LaunchApplication" FileKey="MySQLTrayEXE" ExeCommand="" Execute="immediate" Impersonate="yes" Return="asyncNoWait" />
     
   </Product>
 </Wix>

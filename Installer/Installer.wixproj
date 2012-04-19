@@ -23,6 +23,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="MyExitDialog.wxs" />
     <Compile Include="main.wxs" />
     <Compile Include="WixUI_InstallDirNoLicense.wxs" />
   </ItemGroup>
