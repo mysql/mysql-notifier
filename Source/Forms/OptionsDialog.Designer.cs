@@ -28,8 +28,10 @@
     /// </summary>
     private void InitializeComponent()
     {
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OptionsDialog));
       this.notifyOfAutoAdd = new System.Windows.Forms.CheckBox();
       this.grpOtherOptions = new System.Windows.Forms.GroupBox();
+      this.autoAddRegex = new System.Windows.Forms.TextBox();
       this.chkEnabledAutoAddServices = new System.Windows.Forms.CheckBox();
       this.lblWeeks = new System.Windows.Forms.Label();
       this.numCheckUpdatesWeeks = new System.Windows.Forms.NumericUpDown();
@@ -39,7 +41,6 @@
       this.btnCancel = new System.Windows.Forms.Button();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.notifyOfStatusChange = new System.Windows.Forms.CheckBox();
-      this.autoAddRegex = new System.Windows.Forms.TextBox();
       this.grpOtherOptions.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numCheckUpdatesWeeks)).BeginInit();
       this.groupBox1.SuspendLayout();
@@ -68,6 +69,13 @@
       this.grpOtherOptions.Size = new System.Drawing.Size(339, 161);
       this.grpOtherOptions.TabIndex = 1;
       this.grpOtherOptions.TabStop = false;
+      // 
+      // autoAddRegex
+      // 
+      this.autoAddRegex.Location = new System.Drawing.Point(42, 107);
+      this.autoAddRegex.Name = "autoAddRegex";
+      this.autoAddRegex.Size = new System.Drawing.Size(258, 20);
+      this.autoAddRegex.TabIndex = 5;
       // 
       // chkEnabledAutoAddServices
       // 
@@ -159,13 +167,6 @@
       this.notifyOfStatusChange.Text = "Notify me when a service changes status.";
       this.notifyOfStatusChange.UseVisualStyleBackColor = true;
       // 
-      // autoAddRegex
-      // 
-      this.autoAddRegex.Location = new System.Drawing.Point(42, 107);
-      this.autoAddRegex.Name = "autoAddRegex";
-      this.autoAddRegex.Size = new System.Drawing.Size(258, 20);
-      this.autoAddRegex.TabIndex = 5;
-      // 
       // OptionsDialog
       // 
       this.AcceptButton = this.btnOK;
@@ -178,6 +179,7 @@
       this.Controls.Add(this.btnCancel);
       this.Controls.Add(this.btnOK);
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+      this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
       this.Name = "OptionsDialog";

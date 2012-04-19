@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?define ProductName="MySQL Tray Application 1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Name="MySQLTrayApp" Id ="9e9fb57a-62e3-45cf-a896-686e33407606" Manufacturer="Oracle" Language="1033" Version="1.0" 
+
+  <Product Name="MySQLTrayApp" Id ="9e9fb57a-62e3-45cf-a896-686e33407606" Manufacturer="Oracle" Language="1033" Version="1.0" 
            UpgradeCode="9e9fb57a-62e3-45cf-a896-686e33407606">
 		<Package Id="*" InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated"/>
 
@@ -14,16 +15,15 @@
       <![CDATA[ Privileged  ]]>
     </Condition>
 
+
     <!-- First make sure that .NET is installed -->
     <PropertyRef Id="NETFRAMEWORK20"/>
     <Condition Message="The .NET Framework 2.0 or later must be installed before installing this package.">Installed OR NETFRAMEWORK20</Condition>
 
-    <!--// Check if there's already a version installed-->
-
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder" Name='PFiles'>
         <Directory Id='CompanyDir' Name='MySQL'>
-          <Directory Id="INSTALLDIR" Name="'$(var.ProductName)">
+          <Directory Id="INSTALLDIR" Name="$(var.ProductName)">
             <Component Id='MainExecutable' Guid='1e9fb57a-62e3-45cf-a896-686e33407606'>
               <File Id='MySQLTrayEXE' Name='MySQL.Tray.exe' Source='..\Source\MySQL.TrayApp\bin\Release\MySQL.TrayApp.exe' Vital='yes' />
               <RemoveFolder Id="INSTALLDIR" On="uninstall" />
@@ -39,8 +39,9 @@
 			<ComponentRef Id="MainExecutable" />
 		</Feature>
 
+   
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
-    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixUI_InstallDirNoLicense" />
     <WixVariable Id="WixUIBannerBmp" Value="Bitmaps/BannrBmp.bmp"/>
     <WixVariable Id="WixUIDialogBmp" Value="Bitmaps/DlgBmp.bmp"/>
     <Icon Id="TraApp.ico" SourceFile="app_default.ico" />
