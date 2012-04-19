@@ -25,7 +25,7 @@
         <Directory Id='CompanyDir' Name='MySQL'>
           <Directory Id="INSTALLDIR" Name="$(var.ProductName)">
             <Component Id='MainExecutable' Guid='1e9fb57a-62e3-45cf-a896-686e33407606'>
-              <File Id='MySQLTrayEXE' Name='MySQL.Tray.exe' Source='..\Source\MySQL.TrayApp\bin\Release\MySQL.TrayApp.exe' Vital='yes' />
+              <File Id='MySQLTrayEXE' Name='MySQL.Tray.exe' Source='..\Source\bin\Release\MySQL.TrayApp.exe' Vital='yes' />
               <RemoveFolder Id="INSTALLDIR" On="uninstall" />
             </Component>
           </Directory>
