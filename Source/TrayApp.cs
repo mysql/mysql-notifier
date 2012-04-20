@@ -125,22 +125,18 @@ namespace MySql.TrayApp
       ToolStripMenuItem optionsMenu = new ToolStripMenuItem("Options...");
       optionsMenu.Click += new EventHandler(optionsItem_Click);
 
-      ToolStripMenuItem restartAppMenu = new ToolStripMenuItem("Restart as Administrator", shieldBitmap);
-      restartAppMenu.Click += new EventHandler(restartApp_Click);
-      
       ToolStripMenuItem aboutMenu = new ToolStripMenuItem("About...");
       aboutMenu.Click += new EventHandler(aboutMenu_Click);
 
-      ToolStripMenuItem exitMenu = new ToolStripMenuItem("Exit");
+      ToolStripMenuItem exitMenu = new ToolStripMenuItem("Close MySQL Tray App");
       exitMenu.Click += new EventHandler(exitItem_Click);
 
+      actionsMenu.DropDownItems.Add(new ToolStripSeparator());
+      actionsMenu.DropDownItems.Add(optionsMenu);
+      actionsMenu.DropDownItems.Add(aboutMenu);
+      actionsMenu.DropDownItems.Add(exitMenu);
+
       notifyIcon.ContextMenuStrip.Items.Add(actionsMenu);
-      notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-      if (!hasAdminPrivileges) notifyIcon.ContextMenuStrip.Items.Add(restartAppMenu);
-      notifyIcon.ContextMenuStrip.Items.Add(optionsMenu);
-      notifyIcon.ContextMenuStrip.Items.Add(new ToolStripSeparator());
-      notifyIcon.ContextMenuStrip.Items.Add(aboutMenu);
-      notifyIcon.ContextMenuStrip.Items.Add(exitMenu);
     }
 
     private void ServiceListChanged(MySQLService service, ServiceListChangeType changeType)

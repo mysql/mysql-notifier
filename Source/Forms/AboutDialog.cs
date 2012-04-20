@@ -30,6 +30,11 @@ namespace MySql.TrayApp
         Close();        
       }
     }
+
+    private void AboutDialog_MouseClick(object sender, MouseEventArgs e)
+    {
+        Close();
+    }
     
   }
 }
