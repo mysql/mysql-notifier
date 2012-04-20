@@ -60,6 +60,7 @@ namespace MySql.TrayApp
                       Icon = Icon.FromHandle(iconBitmap.GetHicon()),
                       Visible = true
                     };
+      notifyIcon.MouseClick += notifyIcon_MouseClick;
       notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleTextServiceStatus;
@@ -83,6 +84,15 @@ namespace MySql.TrayApp
       watcher = new ManagementEventWatcher(managementScope, query);
       watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);
       watcher.Start();
+    }
+
+    void notifyIcon_MouseClick(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
+        {
+            MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
+            mi.Invoke(notifyIcon, null);
+        }
     }
 
     void ContextMenuStrip_Opening(object sender, CancelEventArgs e)

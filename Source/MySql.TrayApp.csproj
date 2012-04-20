@@ -15,7 +15,7 @@
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -36,6 +36,14 @@
   <PropertyGroup />
   <PropertyGroup>
     <ApplicationIcon>Resources\app_default.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>bin\Release\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -144,8 +152,8 @@
     <None Include="Resources\signal-yellow.gif" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\MySQL.Utility\MySQL.Utility\MySQL.Utility.csproj">
-      <Project>{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}</Project>
+    <ProjectReference Include="..\..\..\MySQL.Utility\MySQL.Utility.csproj">
+      <Project>{b8a3bd3b-3cbd-48d5-84f5-076365655e0b}</Project>
       <Name>MySQL.Utility</Name>
     </ProjectReference>
   </ItemGroup>
