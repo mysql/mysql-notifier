@@ -30,6 +30,7 @@ using System.Net;
 using System.IO;
 using System.Xml;
 using System.Xml.XPath;
+using MySQL.Utility;
 
 namespace MySql.TrayApp
 {
@@ -78,78 +79,6 @@ namespace MySql.TrayApp
         }
       }
       return list;
-    }
-
-
-    /// <summary>
-    /// Gets the first connection string that is a local connection and
-    /// is related with the service
-    /// </summary>
-    /// <returns></returns>   
-    public static String GetConnectionString(string serviceName)
-    {
-      //For beta version it will get only the first local connection
-      //since the service name is not related or server 
-      //for next version if possible
-      return GetConnectionString();
-    }
-
-
-
-    /// <summary>
-    /// Gets the first connection string that is a local connection
-    /// </summary>
-    /// <returns></returns>   
-    private static String GetConnectionString()
-    {
-      var version = string.Empty;     
-      if (!FileExists("connections.xml", out version)) return string.Empty;
-            
-      if (string.Compare(version, WB_XMLVERSION, StringComparison.InvariantCultureIgnoreCase) != 0)
-        throw new Exception(Properties.Resources.UnSupportedWBXMLVersion);
-
-      XmlTextReader reader = new XmlTextReader(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)
-                    + @"\MySQL\Workbench\" + "connections.xml");
-      XmlDocument doc = new XmlDocument();
-      doc.Load(reader);
-      reader.Close();
-
-      try
-      {
-        // find first local connection
-        XmlElement root = doc.DocumentElement;
-        XmlNodeList nodesText = root.SelectNodes("/data/value[@content-struct-name='db.mgmt.Connection']");
-        foreach (XmlNode node in nodesText)
-        {
-          foreach (XmlNode child in node.ChildNodes)
-          {
-            string driver = child.SelectSingleNode("//link[@key='driver']") != null ?
-                            child.SelectSingleNode("//link[@key='driver']").InnerText : string.Empty;
-            string host = child.SelectSingleNode("./value[@key='hostIdentifier']") != null ?
-                          child.SelectSingleNode("./value[@key='hostIdentifier']").InnerText : string.Empty;
-            if (!(string.IsNullOrEmpty(driver) || string.IsNullOrEmpty(host)))
-            {
-              if (driver.Contains("com.mysql.rdbms.mysql.driver.native")
-                    && (String.Compare(host, "localhost", StringComparison.InvariantCultureIgnoreCase) >= 0
-                    || String.Compare(host, "127.0.0.1", StringComparison.InvariantCulture) >= 0))
-              {
-                string connection = child.SelectSingleNode("./value[@key='name']") != null ?
-                                    child.SelectSingleNode("./value[@key='name']").InnerText : string.Empty;
-                if (connection != null)
-                {
-                  return connection;
-                }
-              }
-            }
-          }
-        }
-      }
-      catch
-      {
-        return string.Empty;
-      }
-
-      return string.Empty;
     }
 
 

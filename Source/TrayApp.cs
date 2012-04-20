@@ -33,6 +33,7 @@ using System.Linq;
 using System.Management;
 using MySql.TrayApp.Properties;
 using System.Threading;
+using MySQL.Utility;
 
 
 namespace MySql.TrayApp
@@ -101,7 +102,7 @@ namespace MySql.TrayApp
       manageServices.Click += new EventHandler(manageServicesDialogItem_Click);
 
       ToolStripMenuItem launchInstaller = new ToolStripMenuItem("Launch Installer");
-      bool installerInstalled = Utilities.IsMySQLInstallerInstalled();
+      bool installerInstalled = MySqlInstaller.IsInstalled;
       launchInstaller.Click += new EventHandler(launchInstallerItem_Click);
       launchInstaller.Enabled = installerInstalled;
 

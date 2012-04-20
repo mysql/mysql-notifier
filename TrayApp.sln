@@ -8,6 +8,8 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Installer", "Installer\Inst
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySql.TrayApp", "Source\MySql.TrayApp.csproj", "{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySQL.Utility", "..\..\MySQL.Utility\MySQL.Utility\MySQL.Utility.csproj", "{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,16 @@ Global
 		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Release|Mixed Platforms.Build.0 = Release|x86
 		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Release|x86.ActiveCfg = Release|x86
 		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Release|x86.Build.0 = Release|x86
+		{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

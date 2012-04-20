@@ -87,7 +87,6 @@
     <Compile Include="SingleInstance.cs" />
     <Compile Include="TrayApp.cs" />
     <Compile Include="TrayApplicationContext.cs" />
-    <Compile Include="Utilities.cs" />
     <Compile Include="WinAPI.cs" />
     <EmbeddedResource Include="Forms\AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
@@ -144,7 +143,12 @@
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\MySQL.Utility\MySQL.Utility\MySQL.Utility.csproj">
+      <Project>{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}</Project>
+      <Name>MySQL.Utility</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using MySql.TrayApp.Properties;
+using MySQL.Utility;
 
 namespace MySql.TrayApp
 {
@@ -19,7 +20,7 @@ namespace MySql.TrayApp
 
       notifyOfAutoAdd.Checked = Settings.Default.NotifyOfAutoServiceAddition;
       notifyOfStatusChange.Checked = Settings.Default.NotifyOfStatusChange;
-      chkRunAtStartup.Checked = Utilities.GetRunAtStartUp();
+      chkRunAtStartup.Checked = Utility.GetRunAtStartUp(Application.ProductName);
       chkAutoCheckUpdates.Checked = Settings.Default.AutoCheckForUpdates;
       numCheckUpdatesWeeks.Value = Settings.Default.CheckForUpdatesFrequency;
       chkEnabledAutoAddServices.Checked = Settings.Default.AutoAddServicesToMonitor;
@@ -35,7 +36,7 @@ namespace MySql.TrayApp
       Settings.Default.AutoAddServicesToMonitor = chkEnabledAutoAddServices.Checked;
       Settings.Default.AutoAddPattern = autoAddRegex.Text.Trim();
       Settings.Default.Save();
-      Utilities.SetRunAtStartUp(chkRunAtStartup.Checked);
+      Utility.SetRunAtStartUp(Application.ProductName, chkRunAtStartup.Checked);
     }
 
     private void chkAutoCheckUpdates_CheckedChanged(object sender, EventArgs e)

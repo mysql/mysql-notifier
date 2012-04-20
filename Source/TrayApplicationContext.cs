@@ -33,7 +33,6 @@ namespace MySql.TrayApp
   class TrayApplicationContext : ApplicationContext
   {
     
-    private bool disposed = false;
     private readonly TrayApp trayApp;
     
     /// <summary>

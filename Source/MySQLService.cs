@@ -29,6 +29,7 @@ using System.Linq;
 using System.Globalization;
 using System.Management;
 using System.ComponentModel;
+using MySQL.Utility;
 
 namespace MySql.TrayApp
 {
@@ -54,6 +55,7 @@ namespace MySql.TrayApp
       try
       {
         Status = winService.Status;
+        FindMatchingWBConnections();
         MenuGroup = new ServiceMenuGroup(this);
       }
       catch (InvalidOperationException ioEx)
@@ -61,6 +63,14 @@ namespace MySql.TrayApp
         MessageBox.Show(ioEx.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         winService = null;
       }
+    }
+
+    public List<MySqlWorkbenchConnection> WorkbenchConnections { get; private set; }
+
+    private void FindMatchingWBConnections()
+    {
+      // this line needs to be replaced with code that finds connections that are just for this service
+      WorkbenchConnections = MySqlWorkbench.GetConnections();
     }
 
     /// <summary>

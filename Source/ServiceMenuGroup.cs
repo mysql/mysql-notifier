@@ -30,6 +30,7 @@ using System.Diagnostics;
 using System.IO;
 using MySql.TrayApp.Properties;
 using System.Drawing;
+using MySQL.Utility;
 
 namespace MySql.TrayApp
 {
@@ -54,10 +55,9 @@ namespace MySql.TrayApp
 
       statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.ServiceName, boundService.Status));
       configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
-      editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
-            
-      editorMenu.Enabled = Utilities.IsApplicationInstalled("Workbench") && connectionStringName != String.Empty;
-      configureMenu.Enabled = Utilities.IsApplicationInstalled("Workbench") && serverName != String.Empty;
+
+      CreateEditorMenus();
+      configureMenu.Enabled = MySqlWorkbench.IsInstalled && serverName != String.Empty;
 
       separator = new ToolStripSeparator(); 
 
@@ -74,8 +74,6 @@ namespace MySql.TrayApp
       restartMenu = new ToolStripMenuItem("Restart");
       restartMenu.Click += new EventHandler(restart_Click);
 
-      editorMenu.Click += new EventHandler(sqlEditorItem_Click);
-
       configureMenu.Click += new EventHandler(configureInstanceItem_Click);
 
       statusMenu.DropDownItems.Add(startMenu);
@@ -85,11 +83,46 @@ namespace MySql.TrayApp
       Update();
     }
 
-    private string connectionStringName
+    private void CreateEditorMenus()
     {
-      get
+      editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
+      editorMenu.Enabled = false;
+      if (!MySqlWorkbench.IsInstalled) return;
+
+      // if there are 0 or 1 connections then the single menu will suffice
+      if (boundService.WorkbenchConnections.Count <= 1)
       {
-        return MySqlServiceInformation.GetConnectionString(boundService.ServiceName);
+        editorMenu.Click += new EventHandler(workbenchConnection_Clicked);
+        return;
+      }
+
+      // we have more than 1 connection so we create a submenu
+      foreach (MySqlWorkbenchConnection c in boundService.WorkbenchConnections)
+      {
+        ToolStripMenuItem menu = new ToolStripMenuItem(c.Name);
+        menu.Click += new EventHandler(workbenchConnection_Clicked);
+        editorMenu.DropDownItems.Add(menu);
+      }
+    }
+
+    void workbenchConnection_Clicked(object sender, EventArgs e)
+    {
+      try
+      {
+        if (boundService.WorkbenchConnections.Count == 0)
+          MySqlWorkbench.Launch(null);
+        else if (!editorMenu.HasDropDownItems)
+          MySqlWorkbench.Launch(boundService.WorkbenchConnections[0].Name);
+        else
+        {
+          for (int x = 0; x < editorMenu.DropDownItems.Count; x++)
+            if (sender == editorMenu.DropDownItems[x])
+              MySqlWorkbench.Launch(boundService.WorkbenchConnections[x].Name);
+        }
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show(String.Format(Resources.FailureToLaunchWorkbench, ex.Message), Resources.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
     }
 
@@ -169,7 +202,7 @@ namespace MySql.TrayApp
       stopMenu.Enabled = admin && boundService.Status != ServiceControllerStatus.Stopped;
       restartMenu.Enabled = admin;
 
-      bool wbInstalled = Utilities.IsWorkbenchInstalled();
+      bool wbInstalled = MySqlWorkbench.IsInstalled;
       editorMenu.Enabled = wbInstalled;
       configureMenu.Enabled = wbInstalled;
     }
@@ -266,7 +299,7 @@ namespace MySql.TrayApp
       {
         ProcessStartInfo startInfo = new ProcessStartInfo();
 
-        startInfo.FileName = Utilities.GetWorkBenchPath();
+        startInfo.FileName = MySqlWorkbench.GetPath();
         startInfo.Arguments = "-admin " + MySqlServiceInformation.GetServerName(boundService.ServiceName);
         Process.Start(startInfo);
       }
@@ -277,22 +310,5 @@ namespace MySql.TrayApp
 
     }
 
-    private void sqlEditorItem_Click(object sender, EventArgs e)
-    {
-      if (sender == null)
-        return;
-      try
-      {
-        ProcessStartInfo startInfo = new ProcessStartInfo();
-
-        startInfo.FileName = Utilities.GetWorkBenchPath();
-        startInfo.Arguments = "-query " + MySqlServiceInformation.GetConnectionString(boundService.ServiceName);
-        Process.Start(startInfo);
-      }      
-      catch (Exception ex)
-      {
-        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }      
-    }
   }
 }
