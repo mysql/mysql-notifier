@@ -110,14 +110,14 @@ namespace MySql.TrayApp
       try
       {
         if (boundService.WorkbenchConnections.Count == 0)
-          MySqlWorkbench.Launch(null);
+          MySqlWorkbench.LaunchSQLEditor(null);
         else if (!editorMenu.HasDropDownItems)
-          MySqlWorkbench.Launch(boundService.WorkbenchConnections[0].Name);
+          MySqlWorkbench.LaunchSQLEditor(boundService.WorkbenchConnections[0].Name);
         else
         {
           for (int x = 0; x < editorMenu.DropDownItems.Count; x++)
             if (sender == editorMenu.DropDownItems[x])
-              MySqlWorkbench.Launch(boundService.WorkbenchConnections[x].Name);
+              MySqlWorkbench.LaunchSQLEditor(boundService.WorkbenchConnections[x].Name);
         }
       }
       catch (Exception ex)
@@ -126,11 +126,29 @@ namespace MySql.TrayApp
       }
     }
 
+
+    private void configureInstanceItem_Click(object sender, EventArgs e)
+    {           
+      try
+      {
+        if (serverName != string.Empty)
+        {
+          MySqlWorkbench.LaunchAdminWindow(serverName);        
+        }
+
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+      }
+
+    }
+
     private string serverName
     {
       get
       {
-        return MySqlServiceInformation.GetServerName(boundService.ServiceName);
+        return MySqlWorkbench.GetServerNameForService(boundService.ServiceName);
       }
     }
 
@@ -288,25 +306,7 @@ namespace MySql.TrayApp
       return ToolStripMenuItemWithHandler(displayText, null, eventHandler);
     }
 
-    private void configureInstanceItem_Click(object sender, EventArgs e)
-    {
-      if (sender == null)
-        return;
-
-      try
-      {
-        ProcessStartInfo startInfo = new ProcessStartInfo();
-
-        startInfo.FileName = MySqlWorkbench.GetPath();
-        startInfo.Arguments = "-admin " + MySqlServiceInformation.GetServerName(boundService.ServiceName);
-        Process.Start(startInfo);
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }      
-
-    }
+  
 
   }
 }

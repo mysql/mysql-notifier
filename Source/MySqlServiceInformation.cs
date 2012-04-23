@@ -35,11 +35,7 @@ using MySQL.Utility;
 namespace MySql.TrayApp
 {
   internal class MySqlServiceInformation
-  {
-
-    public const string EXE_PATH_NAME = "mysqld";
-    public const string EXE_PATH_NAME_NT = "mysqld-nt";
-    public const string WB_XMLVERSION = "2.0";
+  {    
 
     public static string GetMySqlServiceInformation(string serviceName, out string location)
     {
@@ -80,65 +76,5 @@ namespace MySql.TrayApp
       }
       return list;
     }
-
-
-    public static String GetServerName(string serviceName)
-    {      
-      var version = string.Empty;
-
-      if (!FileExists("server_instances.xml", out version)) return string.Empty;
-
-      if (string.Compare(version, WB_XMLVERSION, StringComparison.InvariantCultureIgnoreCase) != 0)      
-        throw new Exception(Properties.Resources.UnSupportedWBXMLVersion);
-      
-      XmlTextReader reader = new XmlTextReader(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData)
-                    + @"\MySQL\Workbench\" + "server_instances.xml");
-      XmlDocument doc = new XmlDocument();
-      doc.Load(reader);
-      reader.Close();
-      try
-      {
-
-        XmlElement root = doc.DocumentElement;
-        var nodes = root.SelectNodes("//data/value[@content-struct-name='db.mgmt.ServerInstance']/value[@struct-name='db.mgmt.ServerInstance']/value[@key='serverInfo']/value[(text() = 'Windows')]");
-
-        foreach (var item in nodes)
-        {
-          var xPathServiceName = string.Format("//data/value[@content-struct-name='db.mgmt.ServerInstance']/value[@struct-name='db.mgmt.ServerInstance']/value[@key='serverInfo']/value[(text() = '{0}')]", serviceName);
-          var somenode = ((XmlElement)item).ParentNode.SelectSingleNode(xPathServiceName);
-          if (somenode != null)
-          {
-            return somenode.ParentNode.NextSibling.InnerText;
-          }
-        }
-      }
-      catch
-      {
-        return string.Empty;
-      }
-      return string.Empty;
-    }
-
-    private static bool FileExists(string name, out string version)
-    {
-      version = string.Empty;
-      // Get path to the Application Data folder
-      var appDataPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData);
-      if (File.Exists(appDataPath + @"\MySQL\Workbench\" + name))
-      {
-        XmlTextReader reader = new XmlTextReader(appDataPath + @"\MySQL\Workbench\" + name);
-        XmlDocument doc = new XmlDocument();
-        doc.Load(reader);
-        reader.Close();
-
-        XmlElement root = doc.DocumentElement;
-        version = root.SelectSingleNode("//data[@grt_format]").Attributes["grt_format"].Value;
-        return true;
-      }
-      else
-        return false;
-    }
-
-
   }
 }
