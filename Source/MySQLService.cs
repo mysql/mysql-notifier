@@ -30,6 +30,7 @@ using System.Globalization;
 using System.Management;
 using System.ComponentModel;
 using MySQL.Utility;
+using System.Diagnostics;
 
 namespace MySql.TrayApp
 {
@@ -38,8 +39,8 @@ namespace MySql.TrayApp
     private ServiceController winService;
 
 
-    public bool HasAdminPrivileges { get; private set; }
     public ServiceControllerStatus Status { get; private set; }
+    public string Name { get; private set; }
 
     public string ServiceName
     {
@@ -48,10 +49,10 @@ namespace MySql.TrayApp
 
     public ServiceMenuGroup MenuGroup { get; private set; }
 
-    public MySQLService(string serviceName, bool adminPrivileges)
+    public MySQLService(string serviceName)
     {
-      HasAdminPrivileges = adminPrivileges;
       winService = new ServiceController(serviceName);
+      Name = winService.ServiceName;
       try
       {
         Status = winService.Status;
@@ -167,14 +168,24 @@ namespace MySql.TrayApp
 
       if (action == 1)
       {
-        winService.Start();
-        winService.WaitForStatus(ServiceControllerStatus.Running, timeout);
+          StartOrStopService("start");
       }
       else if (action == 0)
       {
-        winService.Stop();
-        winService.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
+          StartOrStopService("stop");
       }
+    }
+
+    private void StartOrStopService(string action)
+    {
+        Process proc = new Process();
+        proc.StartInfo.Verb = "runas";
+        proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        proc.StartInfo.FileName = "sc";
+        proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, Name);
+        proc.StartInfo.UseShellExecute = true;
+        proc.Start();
+        winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running: ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
     }
   }
 }

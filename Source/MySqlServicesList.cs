@@ -45,11 +45,9 @@ namespace MySql.TrayApp
   public class MySQLServicesList
   {
     private bool loading;
-    public bool HasAdminPrivileges { get; private set; }
 
-    public MySQLServicesList(bool adminPrivileges)
+    public MySQLServicesList()
     {
-      HasAdminPrivileges = adminPrivileges;
       Services = new List<MySQLService>();
     }
 
@@ -75,7 +73,7 @@ namespace MySql.TrayApp
       foreach (MySQLService service in Services)
         if (String.Compare(service.ServiceName, serviceName, true) == 0) return;
 
-      MySQLService newService = new MySQLService(serviceName, HasAdminPrivileges);
+      MySQLService newService = new MySQLService(serviceName);
       newService.StatusChanged += new MySQLService.StatusChangedHandler(mySQLService_StatusChanged);
       Services.Add(newService);
       OnServiceListChanged(newService, changeType);

@@ -40,15 +40,13 @@ namespace MySql.TrayApp
 {
   class TrayApp
   {
-    private bool hasAdminPrivileges { get; set; }
     private System.ComponentModel.IContainer components;
     private NotifyIcon notifyIcon;
     private MySQLServicesList mySQLServicesList { get; set; }
     private ManagementEventWatcher watcher;
 
-    public TrayApp(bool adminPrivileges)
+    public TrayApp()
     {
-      hasAdminPrivileges = adminPrivileges;
       Bitmap iconBitmap = Properties.Resources.default_icon;
       if (Settings.Default.ServicesMonitor == null)
         Settings.Default.ServicesMonitor = new System.Collections.Specialized.StringCollection();
@@ -66,7 +64,7 @@ namespace MySql.TrayApp
       notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleTextServiceStatus;
 
       // Setup our service list
-      mySQLServicesList = new MySQLServicesList(hasAdminPrivileges);
+      mySQLServicesList = new MySQLServicesList();
       mySQLServicesList.ServiceStatusChanged += mySQLServicesList_ServiceStatusChanged;
       mySQLServicesList.ServiceListChanged += new MySQLServicesList.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
 
@@ -236,36 +234,6 @@ namespace MySql.TrayApp
       dlg.ShowDialog();
     }
 
-    private void restartApp_Click(object sender, EventArgs e)
-    {
-      bool ranElevated = false;
-
-      if (hasAdminPrivileges)
-        return;
-
-      ProcessStartInfo processInfo = new ProcessStartInfo();
-      processInfo.Verb = "runas";
-      processInfo.FileName = Application.ExecutablePath;
-      try
-      {
-        Process.Start(processInfo);
-        ranElevated = true;
-      }
-      catch (Win32Exception)
-      {
-        //Do nothing. Probably the user canceled the UAC window
-      }
-      catch (Exception ex)
-      {
-        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-      }
-      
-      if (ranElevated)
-        OnExit(EventArgs.Empty);
-    }
-
-
-    
     /// <summary>
     /// When the exit menu item is clicked, make a call to terminate the ApplicationContext.
     /// </summary>

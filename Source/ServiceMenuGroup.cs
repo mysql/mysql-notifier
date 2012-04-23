@@ -197,10 +197,8 @@ namespace MySql.TrayApp
       }
       statusMenu.Image = image;
 
-      bool admin = boundService.HasAdminPrivileges;
-      startMenu.Enabled = admin && boundService.Status == ServiceControllerStatus.Stopped;
-      stopMenu.Enabled = admin && boundService.Status != ServiceControllerStatus.Stopped;
-      restartMenu.Enabled = admin;
+      startMenu.Enabled = boundService.Status == ServiceControllerStatus.Stopped;
+      stopMenu.Enabled = boundService.Status != ServiceControllerStatus.Stopped;
 
       bool wbInstalled = MySqlWorkbench.IsInstalled;
       editorMenu.Enabled = wbInstalled;
