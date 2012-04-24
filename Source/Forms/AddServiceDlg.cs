@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using MySql.TrayApp.Properties;
 using System.Collections;
+using MySQL.Utility;
 
 namespace MySql.TrayApp
 {
@@ -56,7 +57,7 @@ namespace MySql.TrayApp
       lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);
     }
 
-    public string ServiceToAdd { get; private set; }
+    public List<string> ServicesToAdd { get; private set; }
 
     private void RefreshList()
     {
@@ -67,7 +68,7 @@ namespace MySql.TrayApp
 
         lastFilter = currentFilter;
         lstServices.Items.Clear();
-        var services = MySqlServiceInformation.GetInstances(lastFilter);
+        var services = Service.GetInstances(lastFilter);
         foreach (var item in services)
         {
           ListViewItem newItem = new ListViewItem();
@@ -86,7 +87,11 @@ namespace MySql.TrayApp
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-      ServiceToAdd = lstServices.SelectedItems[0].Text;
+      ServicesToAdd = new List<string>();
+      foreach (ListViewItem lvi in lstServices.SelectedItems)
+      {
+        ServicesToAdd.Add(lvi.Text);
+      }
     }
 
     private void textBox1_TextChanged(object sender, EventArgs e)

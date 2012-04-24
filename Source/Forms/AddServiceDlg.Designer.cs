@@ -103,7 +103,6 @@
             this.columnHeader3});
       this.lstServices.FullRowSelect = true;
       this.lstServices.Location = new System.Drawing.Point(20, 133);
-      this.lstServices.MultiSelect = false;
       this.lstServices.Name = "lstServices";
       this.lstServices.Size = new System.Drawing.Size(387, 223);
       this.lstServices.TabIndex = 12;

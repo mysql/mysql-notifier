@@ -31,6 +31,8 @@ using System.Management;
 using System.ComponentModel;
 using MySQL.Utility;
 using System.Diagnostics;
+using Microsoft.Win32;
+using System.Net;
 
 namespace MySql.TrayApp
 {
@@ -70,8 +72,16 @@ namespace MySql.TrayApp
 
     private void FindMatchingWBConnections()
     {
-      // this line needs to be replaced with code that finds connections that are just for this service
-      WorkbenchConnections = MySqlWorkbench.GetConnections();
+      // first we discover what parameters we were started with
+      MySQLStartupParameters parameters = GetStartupParameters();
+
+      WorkbenchConnections = new List<MySqlWorkbenchConnection>();
+      foreach (MySqlWorkbenchConnection c in MySqlWorkbench.GetConnections())
+      {
+        if (c.Host != parameters.HostIPv4) continue;
+        if (c.Port != parameters.Port) continue;
+        WorkbenchConnections.Add(c);
+      }
     }
 
     /// <summary>
@@ -107,7 +117,7 @@ namespace MySql.TrayApp
         ServiceControllerStatus copyPreviousStatus = Status;
         Status = newStatus;
         MenuGroup.Update();
-        OnStatusChanged(new ServiceStatus(winService.ServiceName, copyPreviousStatus, Status));
+        OnStatusChanged(new ServiceStatus(ServiceName, copyPreviousStatus, Status));
       }
     }
 
@@ -168,24 +178,63 @@ namespace MySql.TrayApp
 
       if (action == 1)
       {
-          StartOrStopService("start");
+        StartOrStopService("start");
       }
       else if (action == 0)
       {
-          StartOrStopService("stop");
+        StartOrStopService("stop");
       }
     }
 
     private void StartOrStopService(string action)
     {
-        Process proc = new Process();
-        proc.StartInfo.Verb = "runas";
-        proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-        proc.StartInfo.FileName = "sc";
-        proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, Name);
-        proc.StartInfo.UseShellExecute = true;
-        proc.Start();
-        winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running: ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
+      Process proc = new Process();
+      proc.StartInfo.Verb = "runas";
+      proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+      proc.StartInfo.FileName = "sc";
+      proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, Name);
+      proc.StartInfo.UseShellExecute = true;
+      proc.Start();
+      winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running : ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
     }
+
+    private MySQLStartupParameters GetStartupParameters()
+    {
+      MySQLStartupParameters parameters = new MySQLStartupParameters();
+
+      // get our host information
+      parameters.HostName = winService.MachineName;
+      parameters.HostIPv4 = Utility.GetIPv4ForHostName(parameters.HostName);
+
+      RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format(@"SYSTEM\CurrentControlSet\Services\{0}", winService.ServiceName));
+      string imagepath = (string)key.GetValue("ImagePath", null);
+      key.Close();
+      if (imagepath == null) return parameters;
+
+      string[] args = Utility.SplitArgs(imagepath);
+
+      // Parse our command line args
+      Mono.Options.OptionSet p = new Mono.Options.OptionSet()
+        .Add("defaults-file=", "", v => parameters.DefaultsFile = v)
+        .Add("port=|P=", "", v => Int32.TryParse(v, out parameters.Port))
+        .Add("socket=", "", v => parameters.PipeName = v);
+      p.Parse(args);
+      if (parameters.DefaultsFile == null) return parameters;
+
+      // we have a valid defaults file
+      IniFile f = new IniFile(parameters.DefaultsFile);
+      Int32.TryParse(f.ReadValue("mysqld", "port", parameters.Port.ToString()), out parameters.Port);
+      parameters.PipeName = f.ReadValue("mysqld", "socket", parameters.PipeName);
+      return parameters;
+    }
+  }
+
+  public struct MySQLStartupParameters
+  {
+    public string DefaultsFile;
+    public string HostName;
+    public string HostIPv4;
+    public int Port;
+    public string PipeName;
   }
 }

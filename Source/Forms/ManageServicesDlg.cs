@@ -39,13 +39,14 @@ namespace MySql.TrayApp
       AddServiceDlg dlg = new AddServiceDlg();
       if (dlg.ShowDialog() == DialogResult.Cancel) return;
 
-      if (serviceList.Contains(dlg.ServiceToAdd))
+      foreach (string service in dlg.ServicesToAdd)
       {
-        MessageBox.Show("Selected Service is already in the Monitor List", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        return;
+        if (serviceList.Contains(service))
+          MessageBox.Show("Selected Service is already in the Monitor List", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        else
+          serviceList.AddService(service);
       }
 
-      serviceList.AddService(dlg.ServiceToAdd);
       RefreshList();
     }
 
