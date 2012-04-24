@@ -15,10 +15,12 @@
       <![CDATA[ Privileged  ]]>
     </Condition>
 
-
     <!-- First make sure that .NET is installed -->
-    <PropertyRef Id="NETFRAMEWORK20"/>
-    <Condition Message="The .NET Framework 2.0 or later must be installed before installing this package.">Installed OR NETFRAMEWORK20</Condition>
+    <PropertyRef Id="NETFRAMEWORK40CLIENT"/>
+    <PropertyRef Id="NETFRAMEWORK40FULL"/>
+    <Condition Message="This application requires .NET Framework 4.0. Please install the .NET Framework then run this installer again.  For more information, please see http://go.microsoft.com/fwlink/?LinkId=181012">
+      <![CDATA[Installed OR NETFRAMEWORK40FULL OR NETFRAMEWORK40CLIENT]]>
+    </Condition>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder" Name='PFiles'>
