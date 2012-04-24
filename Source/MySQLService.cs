@@ -79,7 +79,8 @@ namespace MySql.TrayApp
       foreach (MySqlWorkbenchConnection c in MySqlWorkbench.GetConnections())
       {
         if (c.Host != parameters.HostIPv4) continue;
-        if (c.Port != parameters.Port) continue;
+        if (c.IsNamedPipe && (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0)) continue;
+        if (c.IsSocket && c.Port != parameters.Port) continue;
         WorkbenchConnections.Add(c);
       }
     }
@@ -201,6 +202,7 @@ namespace MySql.TrayApp
     private MySQLStartupParameters GetStartupParameters()
     {
       MySQLStartupParameters parameters = new MySQLStartupParameters();
+      parameters.PipeName = "mysql";
 
       // get our host information
       parameters.HostName = winService.MachineName;
@@ -217,6 +219,7 @@ namespace MySql.TrayApp
       Mono.Options.OptionSet p = new Mono.Options.OptionSet()
         .Add("defaults-file=", "", v => parameters.DefaultsFile = v)
         .Add("port=|P=", "", v => Int32.TryParse(v, out parameters.Port))
+        .Add("enable-named-pipe", v => parameters.NamedPipesEnabled = true)
         .Add("socket=", "", v => parameters.PipeName = v);
       p.Parse(args);
       if (parameters.DefaultsFile == null) return parameters;
@@ -225,6 +228,10 @@ namespace MySql.TrayApp
       IniFile f = new IniFile(parameters.DefaultsFile);
       Int32.TryParse(f.ReadValue("mysqld", "port", parameters.Port.ToString()), out parameters.Port);
       parameters.PipeName = f.ReadValue("mysqld", "socket", parameters.PipeName);
+
+      // now see if named pipes are enabled
+      parameters.NamedPipesEnabled = parameters.NamedPipesEnabled || f.HasKey("mysqld", "enable-named-pipe");
+
       return parameters;
     }
   }
@@ -236,5 +243,6 @@ namespace MySql.TrayApp
     public string HostIPv4;
     public int Port;
     public string PipeName;
+    public bool NamedPipesEnabled;
   }
 }
