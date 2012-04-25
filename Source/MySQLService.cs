@@ -33,6 +33,7 @@ using MySQL.Utility;
 using System.Diagnostics;
 using Microsoft.Win32;
 using System.Net;
+using System.IO;
 
 namespace MySql.TrayApp
 {
@@ -41,6 +42,7 @@ namespace MySql.TrayApp
     private ServiceController winService;
 
 
+    public bool IsRealMySQLService { get; private set; }
     public ServiceControllerStatus Status { get; private set; }
     public string Name { get; private set; }
 
@@ -70,12 +72,19 @@ namespace MySql.TrayApp
 
     public List<MySqlWorkbenchConnection> WorkbenchConnections { get; private set; }
 
+    private void SeeIfRealMySQLService(string cmd)
+    {
+      IsRealMySQLService = cmd.EndsWith("mysqld.exe") || cmd.EndsWith("mysqld-nt.exe") || cmd.EndsWith("mysqld") || cmd.EndsWith("mysqld-nt");
+    }
+
     private void FindMatchingWBConnections()
     {
       // first we discover what parameters we were started with
       MySQLStartupParameters parameters = GetStartupParameters();
-
       WorkbenchConnections = new List<MySqlWorkbenchConnection>();
+
+      if (!IsRealMySQLService) return;
+
       foreach (MySqlWorkbenchConnection c in MySqlWorkbench.Connections)
       {
         if (c.Host != parameters.HostIPv4) continue;
@@ -214,6 +223,7 @@ namespace MySql.TrayApp
       if (imagepath == null) return parameters;
 
       string[] args = Utility.SplitArgs(imagepath);
+      SeeIfRealMySQLService(args[0]);
 
       // Parse our command line args
       Mono.Options.OptionSet p = new Mono.Options.OptionSet()

@@ -55,6 +55,7 @@ namespace MySql.TrayApp
 
       statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.ServiceName, boundService.Status));
       configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
+      configureMenu.Click += new EventHandler(configureInstanceItem_Click);
 
       CreateEditorMenus();
 
@@ -73,7 +74,6 @@ namespace MySql.TrayApp
       restartMenu = new ToolStripMenuItem("Restart");
       restartMenu.Click += new EventHandler(restart_Click);
 
-      configureMenu.Click += new EventHandler(configureInstanceItem_Click);
 
       statusMenu.DropDownItems.Add(startMenu);
       statusMenu.DropDownItems.Add(stopMenu);
@@ -162,17 +162,24 @@ namespace MySql.TrayApp
 
     public void AddToContextMenu(ContextMenuStrip menu)
     {
-      menu.Items.Insert(0, statusMenu);
-      menu.Items.Insert(1, configureMenu);
-      menu.Items.Insert(2, editorMenu);
-      menu.Items.Insert(3, separator);
+      int index = 0;
+      menu.Items.Insert(index++, statusMenu);
+      if (boundService.IsRealMySQLService)
+      {
+        menu.Items.Insert(index++, configureMenu);
+        menu.Items.Insert(index++, editorMenu);
+      }
+      menu.Items.Insert(index++, separator);
     }
 
     public void RemoveFromContextMenu(ContextMenuStrip menu)
     {
       menu.Items.Remove(statusMenu);
-      menu.Items.Remove(configureMenu);
-      menu.Items.Remove(editorMenu);
+      if (boundService.IsRealMySQLService)
+      {
+        menu.Items.Remove(configureMenu);
+        menu.Items.Remove(editorMenu);
+      }
       menu.Items.Remove(separator);
     }
 
