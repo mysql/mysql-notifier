@@ -57,8 +57,6 @@ namespace MySql.TrayApp
       configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
 
       CreateEditorMenus();
-      MySqlWorkbenchServer server = MySqlWorkbench.Servers.FindByServiceName(boundService.ServiceName);
-      configureMenu.Enabled = MySqlWorkbench.IsInstalled &&  server != null;
 
       separator = new ToolStripSeparator(); 
 
@@ -133,7 +131,7 @@ namespace MySql.TrayApp
       try
       {
         MySqlWorkbenchServer server = MySqlWorkbench.Servers.FindByServiceName(boundService.ServiceName);
-        server.Configure();
+        MySqlWorkbench.LaunchConfigure(server);
       }
       catch (Exception ex)
       {
@@ -208,9 +206,8 @@ namespace MySql.TrayApp
       startMenu.Enabled = boundService.Status == ServiceControllerStatus.Stopped;
       stopMenu.Enabled = boundService.Status != ServiceControllerStatus.Stopped;
 
-      bool wbInstalled = MySqlWorkbench.IsInstalled;
-      editorMenu.Enabled = wbInstalled;
-      configureMenu.Enabled = wbInstalled;
+      editorMenu.Enabled = MySqlWorkbench.IsInstalled;
+      configureMenu.Enabled = MySqlWorkbench.IsInstalled;
     }
 
 
