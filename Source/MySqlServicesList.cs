@@ -30,6 +30,7 @@ using System.Globalization;
 using System.Management;
 using MySql.TrayApp.Properties;
 using System.Text.RegularExpressions;
+using MySQL.Utility;
 
 
 namespace MySql.TrayApp
@@ -55,12 +56,28 @@ namespace MySql.TrayApp
 
     public void LoadFromSettings()
     {
+      if (Settings.Default.FirstRun)
+      {
+        LoadFirstRun();
+        return;
+      }
+
       if (Settings.Default.ServicesMonitor == null) return;
 
       loading = true;
       foreach (string serviceName in Settings.Default.ServicesMonitor)
         AddService(serviceName);
       loading = false;
+    }
+
+    private void LoadFirstRun()
+    {
+      Settings.Default.FirstRun = false;
+      Settings.Default.Save();
+
+      var services = Service.GetInstances(Settings.Default.AutoAddPattern);
+      foreach (var item in services)
+        AddService(item.Properties["DisplayName"].Value.ToString());
     }
 
     public void AddService(string serviceName)
