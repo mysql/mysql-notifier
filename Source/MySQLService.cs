@@ -76,7 +76,7 @@ namespace MySql.TrayApp
       MySQLStartupParameters parameters = GetStartupParameters();
 
       WorkbenchConnections = new List<MySqlWorkbenchConnection>();
-      foreach (MySqlWorkbenchConnection c in MySqlWorkbench.GetConnections())
+      foreach (MySqlWorkbenchConnection c in MySqlWorkbench.Connections)
       {
         if (c.Host != parameters.HostIPv4) continue;
         if (c.IsNamedPipe && (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0)) continue;

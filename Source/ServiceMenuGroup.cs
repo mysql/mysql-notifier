@@ -57,7 +57,8 @@ namespace MySql.TrayApp
       configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
 
       CreateEditorMenus();
-      configureMenu.Enabled = MySqlWorkbench.IsInstalled && serverName != String.Empty;
+      MySqlWorkbenchServer server = MySqlWorkbench.Servers.FindByServiceName(boundService.ServiceName);
+      configureMenu.Enabled = MySqlWorkbench.IsInstalled &&  server != null;
 
       separator = new ToolStripSeparator(); 
 
@@ -128,28 +129,17 @@ namespace MySql.TrayApp
 
 
     private void configureInstanceItem_Click(object sender, EventArgs e)
-    {           
+    {
       try
       {
-        if (serverName != string.Empty)
-        {
-          MySqlWorkbench.LaunchAdminWindow(serverName);        
-        }
-
+        MySqlWorkbenchServer server = MySqlWorkbench.Servers.FindByServiceName(boundService.ServiceName);
+        server.Configure();
       }
       catch (Exception ex)
       {
         MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
       }
 
-    }
-
-    private string serverName
-    {
-      get
-      {
-        return MySqlWorkbench.GetServerNameForService(boundService.ServiceName);
-      }
     }
 
     public string BoundServiceName
