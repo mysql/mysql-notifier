@@ -43,8 +43,7 @@ namespace MySql.TrayApp
     private System.ComponentModel.IContainer components;
     private NotifyIcon notifyIcon;
     private MySQLServicesList mySQLServicesList { get; set; }
-    private ManagementEventWatcher watcher;
-    private int updatesFound {get; set;}
+    private ManagementEventWatcher watcher;    
 
     public TrayApp()
     {
@@ -69,6 +68,17 @@ namespace MySql.TrayApp
       mySQLServicesList.ServiceStatusChanged += mySQLServicesList_ServiceStatusChanged;
       mySQLServicesList.ServiceListChanged += new MySQLServicesList.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
 
+      // create scheduled task to check for updates 
+      // when first run
+      if (Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0)
+      {
+        if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Tray")))
+        {
+          Utility.createScheduledTask("MySQLTrayAppTask", @"""" + Utility.GetInstallLocation("MySQL Tray") + @"MySql.TrayApp.exe --c""",
+            Settings.Default.CheckForUpdatesFrequency, false);
+        }
+      }
+     
       // loads all the services from our settings file and sets up their menus
       mySQLServicesList.LoadFromSettings();
       AddStaticMenuItems();
@@ -229,8 +239,7 @@ namespace MySql.TrayApp
 
       if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()))
         throw new InvalidOperationException("MySQLInstallerNotInstalled");
-
-      updatesFound = 0;
+   
 
       if (InstallerConfiguration.Commercial)
         return; //TODO Check for the differences      
@@ -310,18 +319,22 @@ namespace MySql.TrayApp
 
     private void ProductManager_DownloadManifestCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs ae)
     {
+      int updatesFound = -1;
       try
       {
-        if (ProductManager.ActiveCatalog.Products.ToList()
+        updatesFound = ProductManager.ActiveCatalog.Products.ToList()
                           .Where(p => p.ReferencedProduct.FoundLocal)
-                          .Where(p => p.ReferencedProduct.IsUpgrade).Count() > 0)
+                          .Where(p => p.ReferencedProduct.IsUpgrade).Count();
+
+        if (updatesFound > 0)
         {
           if (MessageBox.Show(string.Format("MySQL Tray Application found {0} Update(s). Press OK to Open MySQL Installer", updatesFound), "MySQL Tray Application", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
             MySqlInstaller.LaunchInstaller();
         }
-        else {
-          MessageBox.Show(Resources.NoUpdatesFound, "MySQL Tray Application", MessageBoxButtons.OK, MessageBoxIcon.Information);        
-        }
+        else
+        {
+          MessageBox.Show(Resources.NoUpdatesFound, "MySQL Tray Application", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }               
       }
       catch
       {
