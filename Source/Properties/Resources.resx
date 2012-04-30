@@ -269,4 +269,7 @@
   <data name="FailureToLaunchWorkbench" xml:space="preserve">
     <value>Workbench failed to launch with the error: {0}</value>
   </data>
+  <data name="NoUpdatesFound" xml:space="preserve">
+    <value>Check for updates did not find any new version</value>
+  </data>
 </root>

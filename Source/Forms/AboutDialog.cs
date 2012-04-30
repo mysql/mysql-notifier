@@ -17,13 +17,13 @@ namespace MySql.TrayApp
     }
 
   
-    private void About_Load(object sender, EventArgs e)
+    private void AboutDialog_Load(object sender, EventArgs e)
     {
       KeyPreview = true;
-      KeyDown += new System.Windows.Forms.KeyEventHandler(About_KeyDown);
+      KeyDown += new System.Windows.Forms.KeyEventHandler(AboutDialog_KeyDown);
     }
    
-    private void About_KeyDown(object sender, KeyEventArgs e)
+    private void AboutDialog_KeyDown(object sender, KeyEventArgs e)
     {
       if ((Keys)e.KeyValue == Keys.Escape)
       {

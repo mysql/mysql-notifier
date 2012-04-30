@@ -31,9 +31,10 @@ using System.Management;
 using System.ComponentModel;
 using MySQL.Utility;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.Win32;
 using System.Net;
-using System.IO;
+
 
 namespace MySql.TrayApp
 {
@@ -44,7 +45,7 @@ namespace MySql.TrayApp
 
     public bool IsRealMySQLService { get; private set; }
     public ServiceControllerStatus Status { get; private set; }
-    public string Name { get; private set; }
+    public string Name { get; private set; }   
 
     public string ServiceName
     {
@@ -179,6 +180,7 @@ namespace MySql.TrayApp
         SetStatus(winService.Status.ToString());
       }
     }
+   
 
     void worker_DoWork(object sender, DoWorkEventArgs e)
     {
@@ -256,3 +258,5 @@ namespace MySql.TrayApp
     public bool NamedPipesEnabled;
   }
 }
+
+

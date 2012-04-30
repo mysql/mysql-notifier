@@ -23,26 +23,58 @@
     </Condition>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
+      
       <Directory Id="ProgramFilesFolder" Name='PFiles'>
         <Directory Id='CompanyDir' Name='MySQL'>
           <Directory Id="INSTALLDIR" Name="$(var.ProductName)">
             <Component Id='MainExecutable' Guid='1e9fb57a-62e3-45cf-a896-686e33407606'>
-              <File Id='MySQLTrayEXE' Name='MySQL.Tray.exe' Source='..\Source\bin\Release\MySQL.TrayApp.exe' Vital='yes' />
-              <RemoveFolder Id="INSTALLDIR" On="uninstall" />
-            </Component>
+              <File Id='MySQLTrayEXE' Name='MySQL.TrayApp.exe' Source='..\Source\bin\Release\MySQL.TrayApp.exe' Vital='yes' />
+              <File Id='MySQLUtilityDll' Name='MySQL.Utility.dll' Source='..\Source\Lib\MySQL.Utility.dll' Vital='yes' />
+              <RemoveFolder Id="INSTALLDIR" On="uninstall" />              
+            </Component>            
           </Directory>
         </Directory>
       </Directory>
-    </Directory>
+
+      <Directory Id="ProgramMenuFolder" Name="PMFolder">
+        <Directory Id='PMCompanyDir' Name='MySQL'>
+          <Directory Id="ShortCutDir" Name="$(var.ProductName)"/>
+        </Directory>
+      </Directory>
       
-     
+      <Directory Id="DesktopFolder"  Name="Desktop">
+        <Component Id="DesktopShortcut" Guid="1e9fb57a-62e3-45cf-a896-686e33407608">         
+          <RegistryKey Root="HKCU" Key="MySQL AB\MySQLTrayApp" Action="createAndRemoveOnUninstall">
+            <RegistryValue Name="MySQLTrayAppShortCut" Value="1" Type="integer" KeyPath="yes"/>            
+          </RegistryKey>
+          <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="MySQL Tray Application" ShortName="MySQLTAP" Icon="Icon.exe" Target="[INSTALLDIR]MySQL.TrayApp.exe" Show="normal" WorkingDirectory="INSTALLDIR">
+            <Icon Id="Icon.exe" SourceFile="..\Source\bin\Release\MySQL.TrayApp.exe" />
+          </Shortcut>
+        </Component>
+      </Directory>
+    </Directory>
 
-		<Feature Id="Complete" Level="1">		
+
+     <DirectoryRef Id="ShortCutDir">
+      <Component Id="ProgramMenuShortcutsComponent" Guid="1e9fb57a-62e3-45cf-a896-686e33407610">
+        <CreateFolder Directory="PMCompanyDir" />
+        <CreateFolder Directory="ShortCutDir" />
+        <RemoveFolder Id="RemovePMCompanyDir" Directory="PMCompanyDir" On="uninstall" />        
+        <RemoveFolder Id="RemoveShortCutDir"  Directory="ShortCutDir" On="uninstall"/>
+        <Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"   Description="MySQL Tray Application"  Target="[INSTALLDIR]MySQL.TrayApp.exe"  WorkingDirectory="INSTALLDIR"/>       
+        <RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+        <RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="location" Type="string" Value="[INSTALLDIR]"/>
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="Complete" Level="1">		
 			<ComponentRef Id="MainExecutable" />
-		</Feature>
+      <ComponentRef Id="DesktopShortcut" />
+      <ComponentRef Id="ProgramMenuShortcutsComponent"/>
+    </Feature>
 
-    <Property Id="LAUNCHAPPONEXIT" Value="1" />
-    
+    <Property Id="LAUNCHAPPONEXIT" Value="1"/>
+    <Property Id="INSTALLDESKTOPSHORTCUT" Value="1"/>    
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
     <UIRef Id="WixUI_InstallDirNoLicense" />
     <WixVariable Id="WixUIBannerBmp" Value="Bitmaps/BannrBmp.bmp"/>

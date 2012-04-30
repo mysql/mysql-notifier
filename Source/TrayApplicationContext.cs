@@ -43,7 +43,7 @@ namespace MySql.TrayApp
       WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
       bool hasAdminPrivileges = principal.IsInRole(WindowsBuiltInRole.Administrator);
 
-      this.trayApp = new TrayApp();
+      this.trayApp = new TrayApp();      
       this.trayApp.Exit += trayApp_Exit;
     }
     

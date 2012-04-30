@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using MySql.TrayApp.Properties;
 using MySQL.Utility;
 
+
 namespace MySql.TrayApp
 {
   public partial class OptionsDialog : Form
@@ -16,7 +17,7 @@ namespace MySql.TrayApp
     
     internal OptionsDialog()
     {
-      InitializeComponent();
+      InitializeComponent();     
 
       notifyOfAutoAdd.Checked = Settings.Default.NotifyOfAutoServiceAddition;
       notifyOfStatusChange.Checked = Settings.Default.NotifyOfStatusChange;
@@ -28,7 +29,11 @@ namespace MySql.TrayApp
     }
 
     private void btnOK_Click(object sender, EventArgs e)
-    {            
+    {
+      var updateTask = chkAutoCheckUpdates.Checked != Settings.Default.AutoCheckForUpdates ? true : false;
+      var deleteTask = !chkAutoCheckUpdates.Checked && Settings.Default.AutoCheckForUpdates ? true : false;
+      var deleteIfPrevious = chkAutoCheckUpdates.Checked && !Settings.Default.AutoCheckForUpdates ? false : true;
+
       Settings.Default.NotifyOfAutoServiceAddition = notifyOfAutoAdd.Checked;
       Settings.Default.NotifyOfStatusChange = notifyOfStatusChange.Checked;
       Settings.Default.AutoCheckForUpdates = chkAutoCheckUpdates.Checked;
@@ -37,6 +42,22 @@ namespace MySql.TrayApp
       Settings.Default.AutoAddPattern = autoAddRegex.Text.Trim();
       Settings.Default.Save();
       Utility.SetRunAtStartUp(Application.ProductName, chkRunAtStartup.Checked);
+
+      if (updateTask)
+      {
+
+        if (Settings.Default.AutoCheckForUpdates)
+        {
+          if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Tray")))
+          {
+            Utility.createScheduledTask("MySQLTrayAppTask", @"""" + Utility.GetInstallLocation("MySQL Tray") + @"MySql.TrayApp.exe --c""",
+              Settings.Default.CheckForUpdatesFrequency, deleteIfPrevious);
+          }
+        }
+        if (deleteTask)
+          Utility.deleteScheduledTask("MySQLTrayAppTask");
+      }
+      
     }
 
     private void chkAutoCheckUpdates_CheckedChanged(object sender, EventArgs e)
@@ -48,5 +69,6 @@ namespace MySql.TrayApp
     {
       autoAddRegex.Enabled = chkEnabledAutoAddServices.Checked;
     }
+
   }
 }

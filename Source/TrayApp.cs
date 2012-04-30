@@ -26,14 +26,14 @@ using System.Windows.Forms;
 using System.ServiceProcess;
 using System.Reflection;
 using System.Drawing;
-using System.Timers;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Linq;
 using System.Management;
 using MySql.TrayApp.Properties;
-using System.Threading;
 using MySQL.Utility;
+using WexInstaller.Core;
+
 
 
 namespace MySql.TrayApp
@@ -44,6 +44,7 @@ namespace MySql.TrayApp
     private NotifyIcon notifyIcon;
     private MySQLServicesList mySQLServicesList { get; set; }
     private ManagementEventWatcher watcher;
+    private int updatesFound {get; set;}
 
     public TrayApp()
     {
@@ -71,7 +72,7 @@ namespace MySql.TrayApp
       // loads all the services from our settings file and sets up their menus
       mySQLServicesList.LoadFromSettings();
       AddStaticMenuItems();
-      SetNotifyIconToolTip();
+      SetNotifyIconToolTip();    
 
       // listener for events
       var managementScope = new ManagementScope(@"root\cimv2");
@@ -81,7 +82,8 @@ namespace MySql.TrayApp
       WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
       watcher = new ManagementEventWatcher(managementScope, query);
       watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);
-      watcher.Start();
+      watcher.Start();    
+        
     }
 
     void notifyIcon_MouseClick(object sender, MouseEventArgs e)
@@ -213,12 +215,34 @@ namespace MySql.TrayApp
 
     private void launchInstallerItem_Click(object sender, EventArgs e)
     {
-      //TODO
+      MySqlInstaller.LaunchInstaller();
     }
 
     private void checkUpdatesItem_Click(object sender, EventArgs e)
-    {
-      //TODO
+    {                       
+      if (!MySqlInstaller.IsInstalled) return;
+
+      notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+      notifyIcon.BalloonTipTitle = "Check for Updates";
+      notifyIcon.BalloonTipText = "Getting Information from Server ...";
+      notifyIcon.ShowBalloonTip(1500);
+
+      if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()))
+        throw new InvalidOperationException("MySQLInstallerNotInstalled");
+
+      updatesFound = 0;
+
+      if (InstallerConfiguration.Commercial)
+        return; //TODO Check for the differences      
+      else
+      {
+        InstallerConfiguration.Load();
+        if (ProductManager.Load())
+        {         
+          ProductManager.DownloadManifestCompleted += new DownloadManifestCompleteHandler(ProductManager_DownloadManifestCompleted);
+          ProductManager.DownloadManifest(false);
+        }
+      }
     }
 
     private void aboutMenu_Click(object sender, EventArgs e)
@@ -231,7 +255,7 @@ namespace MySql.TrayApp
     private void optionsItem_Click(object sender, EventArgs e)
     {
       OptionsDialog dlg = new OptionsDialog();
-      dlg.ShowDialog();
+      dlg.ShowDialog();      
     }
 
     /// <summary>
@@ -284,5 +308,25 @@ namespace MySql.TrayApp
       }
     }
 
+    private void ProductManager_DownloadManifestCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs ae)
+    {
+      try
+      {
+        if (ProductManager.ActiveCatalog.Products.ToList()
+                          .Where(p => p.ReferencedProduct.FoundLocal)
+                          .Where(p => p.ReferencedProduct.IsUpgrade).Count() > 0)
+        {
+          if (MessageBox.Show(string.Format("MySQL Tray Application found {0} Update(s). Press OK to Open MySQL Installer", updatesFound), "MySQL Tray Application", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
+            MySqlInstaller.LaunchInstaller();
+        }
+        else {
+          MessageBox.Show(Resources.NoUpdatesFound, "MySQL Tray Application", MessageBoxButtons.OK, MessageBoxIcon.Information);        
+        }
+      }
+      catch
+      {
+        MessageBox.Show("There was an error while trying to get updates information", "MySQL Tray Application", MessageBoxButtons.OK, MessageBoxIcon.Information);      
+      }
+    }
   }
 }

@@ -3,4 +3,12 @@
   <PropertyGroup>
     <ProjectView>ProjectFiles</ProjectView>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <StartArguments>
+    </StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <StartArguments>
+    </StartArguments>
+  </PropertyGroup>
 </Project>

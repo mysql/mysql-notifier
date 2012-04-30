@@ -44,11 +44,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Accessibility">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="MySQL.Utility, Version=1.0.0.0, Culture=neutral, PublicKeyToken=da94e9146a1b152a, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\MySQL.Utility.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -58,6 +68,9 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="WexInstaller.Core">
+      <HintPath>Lib\WexInstaller.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
@@ -151,13 +164,11 @@
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\MySQL.Utility\MySQL.Utility.csproj">
-      <Project>{b8a3bd3b-3cbd-48d5-84f5-076365655e0b}</Project>
-      <Name>MySQL.Utility</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

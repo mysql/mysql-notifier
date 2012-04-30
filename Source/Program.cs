@@ -23,30 +23,53 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using WexInstaller.Core;
+using MySQL.Utility;
+using System.Linq;
 
 namespace MySql.TrayApp
 {
   static class Program
   {
+
+    private static int foundUpdates { get; set; }
+
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
     [STAThread]
-    static void Main()
+    static void Main(params string[] args)
     {
-      if (!SingleInstance.Start()) { return; }
-      Application.EnableVisualStyles();
-      Application.SetCompatibleTextRenderingDefault(false);
-      try
+      if (args.Length > 0)
       {
-        var applicationContext = new TrayApplicationContext();
-        Application.Run(applicationContext);
+        if (args[0] == "--c") 
+        {                  
+          foundUpdates = MySqlInstaller.CheckForUpdates();
+          if (foundUpdates > 0)
+          {
+            if (MessageBox.Show(string.Format("MySQL Tray Application found {0} Update(s). Press OK to Open MySQL Installer", foundUpdates), "MySQL Tray Application", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
+            {
+              MySqlInstaller.LaunchInstaller();
+            }
+          }                       
+        }
       }
-      catch (Exception ex)
+      else
       {
-        MessageBox.Show(ex.Message, "Program Terminated Unexpectedly", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        if (!SingleInstance.Start()) { return; }
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
+        try
+        {
+          var applicationContext = new TrayApplicationContext();
+          Application.Run(applicationContext);
+        }
+        catch (Exception ex)
+        {
+          MessageBox.Show(ex.Message, "Program Terminated Unexpectedly", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        SingleInstance.Stop();
       }
-      SingleInstance.Stop();
-    }
+    }    
   }
 }

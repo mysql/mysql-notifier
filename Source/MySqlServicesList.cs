@@ -146,15 +146,7 @@ namespace MySql.TrayApp
         AddService(serviceName, ServiceListChangeType.AutoAdd);
     }
 
-    /// <summary>
-    /// Calls the Dispose method on the passed MySQLService object
-    /// </summary>
-    /// <param name="service"></param>
-    private void DisposeService(MySQLService service)
-    {
-      //service.Dispose();
-    }
-
+  
     public delegate void ServiceListChangedHandler(object sender, MySQLService service, ServiceListChangeType changeType);
     public event ServiceListChangedHandler ServiceListChanged;
 

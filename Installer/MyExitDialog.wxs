@@ -31,10 +31,25 @@
                 <Control Id="OptionalCheckBox" Type="CheckBox" X="135" Y="190" Width="220" Height="40" Hidden="yes" Property="WIXUI_EXITDIALOGOPTIONALCHECKBOX" CheckBoxValue="1" Text="[WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT]">
                   <Condition Action="show">WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT AND NOT Installed</Condition>
                 </Control>
-                <Control Id="LaunchCheckBox" Type="CheckBox" X="10" Y="243" Width="170" Height="17" Property="LAUNCHAPPONEXIT" CheckBoxValue="1" Text="Launch MySQL Tray Application">
+                <Control Id="CheckBoxText" Type="Text" X="150" Y="135"  Width="180" Height="17" Text="Launch [ProductName]" Transparent="yes">
+                  <Condition Action="hide">
+                    <![CDATA[WixUI_InstallMode = "Remove"]]>
+                  </Condition>
+                </Control>
+                <Control Id="LaunchCheckBox" Type="CheckBox" X="135" Y="135" Width="10" Height="13" Property="LAUNCHAPPONEXIT" CheckBoxValue="1">
                   <Condition Action="hide">
                     <![CDATA[WixUI_InstallMode = "Remove"]]>
                   </Condition>                
+                </Control>               
+                <Control Id="CreateShortCut" Type="CheckBox" X="135" Y="155" Width="10" Height="13" Property="INSTALLDESKTOPSHORTCUT" CheckBoxValue="1">
+                  <Condition Action="hide">
+                    <![CDATA[WixUI_InstallMode = "Remove"]]>
+                  </Condition>
+                </Control>
+                <Control Id="CreateShortCutText" Type="Text" X="150" Y="155"  Width="220" Height="17" Text="Create a shortcut for this program on the desktop." Transparent="yes">
+                  <Condition Action="hide">
+                    <![CDATA[WixUI_InstallMode = "Remove"]]>
+                  </Condition>
                 </Control>
             </Dialog>
 
