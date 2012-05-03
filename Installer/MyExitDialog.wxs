@@ -16,7 +16,7 @@
             <Dialog Id="MyExitDialog" Width="370" Height="270" Title="!(loc.ExitDialog_Title)">
               <Control Id="Finish" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Cancel="yes" Text="!(loc.WixUIFinish)" >
                 <Publish Event="DoAction" Value="LaunchApplication" >
-                  <![CDATA[(InstallMode<>"Remove") AND (InstallMode <>"Repair") AND (InstallMode <> "Change")]]>
+                  LAUNCHAPPONEXIT AND NOT (WixUI_InstallMode = "Remove")                  
                 </Publish>
               </Control>              
                 <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Disabled="yes" Text="!(loc.WixUICancel)" />
@@ -40,17 +40,7 @@
                   <Condition Action="hide">
                     <![CDATA[WixUI_InstallMode = "Remove"]]>
                   </Condition>                
-                </Control>               
-                <Control Id="CreateShortCut" Type="CheckBox" X="135" Y="155" Width="10" Height="13" Property="INSTALLDESKTOPSHORTCUT" CheckBoxValue="1">
-                  <Condition Action="hide">
-                    <![CDATA[WixUI_InstallMode = "Remove"]]>
-                  </Condition>
-                </Control>
-                <Control Id="CreateShortCutText" Type="Text" X="150" Y="155"  Width="220" Height="17" Text="Create a shortcut for this program on the desktop." Transparent="yes">
-                  <Condition Action="hide">
-                    <![CDATA[WixUI_InstallMode = "Remove"]]>
-                  </Condition>
-                </Control>
+                </Control>                               
             </Dialog>
 
             <InstallUISequence>

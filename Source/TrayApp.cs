@@ -33,6 +33,7 @@ using System.Management;
 using MySql.TrayApp.Properties;
 using MySQL.Utility;
 using WexInstaller.Core;
+using System.IO;
 
 
 
@@ -225,7 +226,14 @@ namespace MySql.TrayApp
 
     private void launchInstallerItem_Click(object sender, EventArgs e)
     {
-      MySqlInstaller.LaunchInstaller();
+      if (!String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()))
+      {              
+        string path = @MySqlInstaller.GetInstallerPath();
+        Process proc = new Process();
+        ProcessStartInfo startInfo = new ProcessStartInfo();
+        startInfo.FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path);
+        Process.Start(startInfo);            
+      }      
     }
 
     private void checkUpdatesItem_Click(object sender, EventArgs e)
