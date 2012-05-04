@@ -35,7 +35,7 @@
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
-    <ApplicationIcon>Resources\app_default.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\oficial_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -151,8 +151,9 @@
     <None Include="Resources\signal-red.gif" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\app_default.ico" />
+    <None Include="Resources\oficial_icon.ico" />
     <None Include="Resources\about.png" />
+    <Content Include="Resources\app_default.ico" />
     <Content Include="Resources\iconDB.jpg" />
     <None Include="Resources\stop.png" />
     <None Include="Resources\play.png" />
@@ -161,6 +162,8 @@
     <None Include="Resources\MySQLTrayApp_default.png" />
     <None Include="Resources\MySQLTrayApp_running.png" />
     <Content Include="Resources\logo-mysql.png" />
+    <None Include="Resources\MySQLTrayAppIcon16x16.png" />
+    <None Include="Resources\MySQLTrayAppIcon24x24.png" />
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
   </ItemGroup>

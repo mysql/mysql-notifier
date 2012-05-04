@@ -43,7 +43,7 @@
         </Directory>
       </Directory>
 
-      <Directory Id="DesktopFolder"  Name="Desktop">
+      <!--<Directory Id="DesktopFolder"  Name="Desktop">
         <Component Id="DesktopShortcut" Guid="1e9fb57a-62e3-45cf-a896-686e33407608">
           <RegistryKey Root="HKCU" Key="MySQL AB\MySQLTrayApp" Action="createAndRemoveOnUninstall">
             <RegistryValue Name="MySQLTrayAppShortCut" Value="1" Type="integer" KeyPath="yes"/>
@@ -52,7 +52,7 @@
             <Icon Id="Icon.exe" SourceFile="..\Source\bin\Release\MySQL.TrayApp.exe" />
           </Shortcut>
         </Component>
-      </Directory>
+      </Directory>-->
     
     </Directory>
 
@@ -70,7 +70,7 @@
 
     <Feature Id="Complete" Level="1">		
 			<ComponentRef Id="MainExecutable" />
-      <ComponentRef Id="DesktopShortcut" />
+      <!--<ComponentRef Id="DesktopShortcut" />-->
       <ComponentRef Id="ProgramMenuShortcutsComponent"/>
     </Feature>
 

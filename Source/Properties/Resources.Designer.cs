@@ -85,13 +85,6 @@ namespace MySql.TrayApp.Properties {
             }
         }
         
-        internal static System.Drawing.Icon app_default {
-            get {
-                object obj = ResourceManager.GetObject("app_default", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
         /// <summary>
         ///   Looks up a localized string similar to MySQL TrayApp.
         /// </summary>
@@ -182,13 +175,6 @@ namespace MySql.TrayApp.Properties {
             }
         }
         
-        internal static System.Drawing.Bitmap default_icon {
-            get {
-                object obj = ResourceManager.GetObject("default_icon", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
         /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
@@ -222,13 +208,6 @@ namespace MySql.TrayApp.Properties {
         internal static string Help {
             get {
                 return ResourceManager.GetString("Help", resourceCulture);
-            }
-        }
-        
-        internal static System.Drawing.Bitmap iconDB {
-            get {
-                object obj = ResourceManager.GetObject("iconDB", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -272,6 +251,13 @@ namespace MySql.TrayApp.Properties {
         internal static string NoUpdatesFound {
             get {
                 return ResourceManager.GetString("NoUpdatesFound", resourceCulture);
+            }
+        }
+        
+        internal static System.Drawing.Icon oficial_icon {
+            get {
+                object obj = ResourceManager.GetObject("oficial_icon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
             }
         }
         
@@ -415,6 +401,13 @@ namespace MySql.TrayApp.Properties {
         internal static string ToolTipText {
             get {
                 return ResourceManager.GetString("ToolTipText", resourceCulture);
+            }
+        }
+        
+        internal static System.Drawing.Bitmap TrayIcon {
+            get {
+                object obj = ResourceManager.GetObject("TrayIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

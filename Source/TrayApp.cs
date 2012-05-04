@@ -48,7 +48,7 @@ namespace MySql.TrayApp
 
     public TrayApp()
     {
-      Bitmap iconBitmap = Properties.Resources.default_icon;
+      Bitmap iconBitmap = Properties.Resources.TrayIcon;
       if (Settings.Default.ServicesMonitor == null)
         Settings.Default.ServicesMonitor = new System.Collections.Specialized.StringCollection();
 
