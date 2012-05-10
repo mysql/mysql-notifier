@@ -35,9 +35,15 @@ using System.IO;
 using Microsoft.Win32;
 using System.Net;
 
-
 namespace MySql.TrayApp
-{  
+{
+  [Serializable]
+  internal class MySqlServiceSettings
+  {
+    public string Name { get; set; }
+    public bool NotifyOnStateChange { get; set; }
+  }
+
   public class MySQLService 
   {
     private ServiceController winService;
@@ -248,6 +254,7 @@ namespace MySql.TrayApp
 
       return parameters;
     }
+
   }
 
   public struct MySQLStartupParameters

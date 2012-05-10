@@ -95,7 +95,6 @@
     <Compile Include="Forms\OptionsDialog.Designer.cs">
       <DependentUpon>OptionsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="MySqlServiceOptions.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="ServiceStatus.cs" />
     <Compile Include="MySqlServicesList.cs" />

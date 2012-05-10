@@ -31,6 +31,8 @@ using System.Management;
 using MySql.TrayApp.Properties;
 using System.Text.RegularExpressions;
 using MySQL.Utility;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 
 namespace MySql.TrayApp
@@ -52,8 +54,7 @@ namespace MySql.TrayApp
       Services = new List<MySQLService>();
     }
 
-    public List<MySQLService> Services { get; private set; }
-    private List<MySqlServiceOptions> mySqlServicesOptionsList { get; set; }
+    public List<MySQLService> Services { get; private set; }    
 
     public void LoadFromSettings()
     {
@@ -64,14 +65,13 @@ namespace MySql.TrayApp
       }
 
       if (Properties.Settings.Default.ServiceSettingsList == null) return;
-
-      //load saved settings for monitored services
-      mySqlServicesOptionsList = MySqlServiceOptionsList.LoadServices();
-
+      
       loading = true;
-      foreach (MySqlServiceOptions service in mySqlServicesOptionsList)
-        AddService(service.Name, service.NotifyOnStateChange);
+      //load saved settings for monitored services
+      LoadServicesFromSettings();
+
       loading = false;
+      
     }
 
     private void LoadFirstRun()
@@ -101,10 +101,8 @@ namespace MySql.TrayApp
 
       OnServiceListChanged(newService, changeType);
       if (!loading)
-      {        
-        if (mySqlServicesOptionsList == null) mySqlServicesOptionsList = new List<MySqlServiceOptions>();
-        mySqlServicesOptionsList.Add(new MySqlServiceOptions { Name = serviceName, NotifyOnStateChange = notifyOnStateChange });
-        MySqlServiceOptionsList.Save(mySqlServicesOptionsList);
+      {                
+        SaveServicesOnSettings();        
         Properties.Settings.Default.Save();
       }
     }
@@ -125,9 +123,7 @@ namespace MySql.TrayApp
       OnServiceListChanged(serviceToDelete, ServiceListChangeType.Remove);
       if (!loading)
       {
-        int index = mySqlServicesOptionsList.FindIndex(t => t.Name.Equals(serviceToDelete.ServiceName));
-        mySqlServicesOptionsList.RemoveAt(index);
-        MySqlServiceOptionsList.Save(mySqlServicesOptionsList);        
+        SaveServicesOnSettings();
         Settings.Default.Save();
       }
     }
@@ -182,6 +178,50 @@ namespace MySql.TrayApp
     private void mySQLService_StatusChanged(object sender, ServiceStatus args)
     {
         OnServiceStatusChanged(args);
+    }
+
+
+    public void SaveServicesOnSettings()
+    {
+      List<MySqlServiceSettings> serviceSettingsList = new List<MySqlServiceSettings>();
+
+      foreach (var item in Services)
+      {
+        var serviceSettings = new MySqlServiceSettings { Name = item.Name, NotifyOnStateChange = item.notifyChangesEnabled };
+        serviceSettingsList.Add(serviceSettings);
+      }
+
+      using (MemoryStream ms = new MemoryStream())
+      {
+        using (StreamReader sr = new StreamReader(ms))
+        {
+          BinaryFormatter serviceBinaryFormatter = new BinaryFormatter();
+          serviceBinaryFormatter.Serialize(ms, serviceSettingsList);
+          ms.Position = 0;
+          byte[] buffer = new byte[(int)ms.Length];
+          ms.Read(buffer, 0, buffer.Length);
+          Properties.Settings.Default.ServiceSettingsList = Convert.ToBase64String(buffer);
+        }
+      }
+    }
+
+    public void LoadServicesFromSettings()
+    {
+     
+      if (String.IsNullOrEmpty(Properties.Settings.Default.ServiceSettingsList)) return;
+
+      List<MySqlServiceSettings> serviceSettingsList = new List<MySqlServiceSettings>();
+
+      using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(Properties.Settings.Default.ServiceSettingsList)))
+      {
+        BinaryFormatter serviceBinaryFormatter = new BinaryFormatter();
+        serviceSettingsList = (List<MySqlServiceSettings>)serviceBinaryFormatter.Deserialize(ms);
+      }
+      
+      foreach (var item in serviceSettingsList)
+      {        
+        AddService(item.Name, item.NotifyOnStateChange);       
+      }      
     }
 
   }
