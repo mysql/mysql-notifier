@@ -32,7 +32,6 @@ using System.Linq;
 using System.Management;
 using MySql.TrayApp.Properties;
 using MySQL.Utility;
-using WexInstaller.Core;
 using System.IO;
 
 
@@ -44,14 +43,13 @@ namespace MySql.TrayApp
     private System.ComponentModel.IContainer components;
     private NotifyIcon notifyIcon;
     private MySQLServicesList mySQLServicesList { get; set; }
+    
     private ManagementEventWatcher watcher;    
 
     public TrayApp()
     {
       Bitmap iconBitmap = Properties.Resources.TrayIcon;
-      if (Settings.Default.ServicesMonitor == null)
-        Settings.Default.ServicesMonitor = new System.Collections.Specialized.StringCollection();
-
+     
       components = new System.ComponentModel.Container();
       notifyIcon = new NotifyIcon(components)
                     {
@@ -83,8 +81,8 @@ namespace MySql.TrayApp
       // loads all the services from our settings file and sets up their menus
       mySQLServicesList.LoadFromSettings();
       AddStaticMenuItems();
-      SetNotifyIconToolTip();    
-
+      SetNotifyIconToolTip();
+      
       // listener for events
       var managementScope = new ManagementScope(@"root\cimv2");
       managementScope.Connect();
@@ -119,7 +117,7 @@ namespace MySql.TrayApp
     {
       var shieldBitmap = SystemIcons.Shield.ToBitmap();
       shieldBitmap.SetResolution(16, 16);
-      ToolStripMenuItem manageServices = new ToolStripMenuItem("Manage Services");    
+      ToolStripMenuItem manageServices = new ToolStripMenuItem("Manage Services...");    
       manageServices.Click += new EventHandler(manageServicesDialogItem_Click);
 
       ToolStripMenuItem launchInstaller = new ToolStripMenuItem("Launch Installer");
@@ -205,7 +203,7 @@ namespace MySql.TrayApp
 
     private void mySQLServicesList_ServiceStatusChanged(object sender, ServiceStatus args)
     {
-      if (!Settings.Default.NotifyOfStatusChange) return;
+      if (!Settings.Default.NotifyOfStatusChange && !args.NotifyOnStateChange) return;
 
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceStatus;
@@ -239,27 +237,6 @@ namespace MySql.TrayApp
     private void checkUpdatesItem_Click(object sender, EventArgs e)
     {                       
       if (!MySqlInstaller.IsInstalled) return;
-
-      notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-      notifyIcon.BalloonTipTitle = "Check for Updates";
-      notifyIcon.BalloonTipText = "Getting Information from Server ...";
-      notifyIcon.ShowBalloonTip(1500);
-
-      if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()))
-        throw new InvalidOperationException("MySQLInstallerNotInstalled");
-   
-
-      if (InstallerConfiguration.Commercial)
-        return; //TODO Check for the differences      
-      else
-      {
-        InstallerConfiguration.Load();
-        if (ProductManager.Load())
-        {         
-          ProductManager.DownloadManifestCompleted += new DownloadManifestCompleteHandler(ProductManager_DownloadManifestCompleted);
-          ProductManager.DownloadManifest(false);
-        }
-      }
     }
 
     private void aboutMenu_Click(object sender, EventArgs e)
@@ -315,38 +292,13 @@ namespace MySql.TrayApp
       if (c.InvokeRequired)
         c.Invoke((MethodInvoker)delegate
         {
-          mySQLServicesList.SetServiceStatus(serviceName, path, state);
+          mySQLServicesList.SetServiceStatus(serviceName, Settings.Default.NotifyOfStatusChange, path, state);
           SetNotifyIconToolTip();
         });
       else
       {
-        mySQLServicesList.SetServiceStatus(serviceName, path, state);
+        mySQLServicesList.SetServiceStatus(serviceName, Settings.Default.NotifyOfStatusChange, path, state);
         SetNotifyIconToolTip();
-      }
-    }
-
-    private void ProductManager_DownloadManifestCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs ae)
-    {
-      int updatesFound = -1;
-      try
-      {
-        updatesFound = ProductManager.ActiveCatalog.Products.ToList()
-                          .Where(p => p.ReferencedProduct.FoundLocal)
-                          .Where(p => p.ReferencedProduct.IsUpgrade).Count();
-
-        if (updatesFound > 0)
-        {
-          if (MessageBox.Show(string.Format("MySQL Tray Application found {0} Update(s). Press OK to Open MySQL Installer", updatesFound), "MySQL Tray Application", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
-            MySqlInstaller.LaunchInstaller();
-        }
-        else
-        {
-          MessageBox.Show(Resources.NoUpdatesFound, "MySQL Tray Application", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }               
-      }
-      catch
-      {
-        MessageBox.Show("There was an error while trying to get updates information", "MySQL Tray Application", MessageBoxButtons.OK, MessageBoxIcon.Information);      
       }
     }
   }

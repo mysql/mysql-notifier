@@ -37,15 +37,15 @@ using System.Net;
 
 
 namespace MySql.TrayApp
-{
-  public class MySQLService
+{  
+  public class MySQLService 
   {
     private ServiceController winService;
 
-
     public bool IsRealMySQLService { get; private set; }
     public ServiceControllerStatus Status { get; private set; }
-    public string Name { get; private set; }   
+    public string Name { get; private set; }
+    public bool notifyChangesEnabled { get; set; }
 
     public string ServiceName
     {
@@ -54,10 +54,11 @@ namespace MySql.TrayApp
 
     public ServiceMenuGroup MenuGroup { get; private set; }
 
-    public MySQLService(string serviceName)
+    public MySQLService(string serviceName, bool notificationOnChange)
     {
       winService = new ServiceController(serviceName);
       Name = winService.ServiceName;
+      notifyChangesEnabled = notificationOnChange;
       try
       {
         Status = winService.Status;
@@ -70,6 +71,7 @@ namespace MySql.TrayApp
         winService = null;
       }
     }
+
 
     public List<MySqlWorkbenchConnection> WorkbenchConnections { get; private set; }
 
@@ -128,7 +130,7 @@ namespace MySql.TrayApp
         ServiceControllerStatus copyPreviousStatus = Status;
         Status = newStatus;
         MenuGroup.Update();
-        OnStatusChanged(new ServiceStatus(ServiceName, copyPreviousStatus, Status));
+        OnStatusChanged(new ServiceStatus(ServiceName, notifyChangesEnabled, copyPreviousStatus, Status));
       }
     }
 

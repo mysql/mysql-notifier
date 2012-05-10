@@ -44,7 +44,7 @@ namespace MySql.TrayApp
         if (serviceList.Contains(service))
           MessageBox.Show("Selected Service is already in the Monitor List", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         else
-          serviceList.AddService(service);
+          serviceList.AddService(service, Properties.Settings.Default.NotifyOfStatusChange);
       }
 
       RefreshList();

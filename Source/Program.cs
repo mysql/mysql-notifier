@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using WexInstaller.Core;
 using MySQL.Utility;
 using System.Linq;
 

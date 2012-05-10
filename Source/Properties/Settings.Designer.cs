@@ -37,17 +37,6 @@ namespace MySql.TrayApp.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Specialized.StringCollection ServicesMonitor {
-            get {
-                return ((global::System.Collections.Specialized.StringCollection)(this["ServicesMonitor"]));
-            }
-            set {
-                this["ServicesMonitor"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool AutoAddServicesToMonitor {
             get {
@@ -115,6 +104,18 @@ namespace MySql.TrayApp.Properties {
             }
             set {
                 this["AutoCheckForUpdates"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ServiceSettingsList {
+            get {
+                return ((string)(this["ServiceSettingsList"]));
+            }
+            set {
+                this["ServiceSettingsList"] = value;
             }
         }
     }

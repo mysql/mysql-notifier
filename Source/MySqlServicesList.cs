@@ -53,6 +53,7 @@ namespace MySql.TrayApp
     }
 
     public List<MySQLService> Services { get; private set; }
+    private List<MySqlServiceOptions> mySqlServicesOptionsList { get; set; }
 
     public void LoadFromSettings()
     {
@@ -62,11 +63,14 @@ namespace MySql.TrayApp
         return;
       }
 
-      if (Settings.Default.ServicesMonitor == null) return;
+      if (Properties.Settings.Default.ServiceSettingsList == null) return;
+
+      //load saved settings for monitored services
+      mySqlServicesOptionsList = MySqlServiceOptionsList.LoadServices();
 
       loading = true;
-      foreach (string serviceName in Settings.Default.ServicesMonitor)
-        AddService(serviceName);
+      foreach (MySqlServiceOptions service in mySqlServicesOptionsList)
+        AddService(service.Name, service.NotifyOnStateChange);
       loading = false;
     }
 
@@ -77,27 +81,31 @@ namespace MySql.TrayApp
 
       var services = Service.GetInstances(Settings.Default.AutoAddPattern);
       foreach (var item in services)
-        AddService(item.Properties["DisplayName"].Value.ToString());
+        AddService(item.Properties["DisplayName"].Value.ToString(), true);
     }
 
-    public void AddService(string serviceName)
+    public void AddService(string serviceName, bool notifyOnStateChange)
     {
-      AddService(serviceName, ServiceListChangeType.Add);
+      AddService(serviceName, notifyOnStateChange, ServiceListChangeType.Add);
     }
 
-    private void AddService(string serviceName, ServiceListChangeType changeType)
+    private void AddService(string serviceName, bool notifyOnStateChange, ServiceListChangeType changeType)
     {
       foreach (MySQLService service in Services)
         if (String.Compare(service.ServiceName, serviceName, true) == 0) return;
-
-      MySQLService newService = new MySQLService(serviceName);
+      
+      // for now all services will have same value as the global setting for the notifications
+      MySQLService newService = new MySQLService(serviceName, Settings.Default.NotifyOfStatusChange);
       newService.StatusChanged += new MySQLService.StatusChangedHandler(mySQLService_StatusChanged);
       Services.Add(newService);
+
       OnServiceListChanged(newService, changeType);
       if (!loading)
-      {
-        Settings.Default.ServicesMonitor.Add(serviceName);
-        Settings.Default.Save();
+      {        
+        if (mySqlServicesOptionsList == null) mySqlServicesOptionsList = new List<MySqlServiceOptions>();
+        mySqlServicesOptionsList.Add(new MySqlServiceOptions { Name = serviceName, NotifyOnStateChange = notifyOnStateChange });
+        MySqlServiceOptionsList.Save(mySqlServicesOptionsList);
+        Properties.Settings.Default.Save();
       }
     }
 
@@ -117,7 +125,9 @@ namespace MySql.TrayApp
       OnServiceListChanged(serviceToDelete, ServiceListChangeType.Remove);
       if (!loading)
       {
-        Settings.Default.ServicesMonitor.Remove(serviceName);
+        int index = mySqlServicesOptionsList.FindIndex(t => t.Name.Equals(serviceToDelete.ServiceName));
+        mySqlServicesOptionsList.RemoveAt(index);
+        MySqlServiceOptionsList.Save(mySqlServicesOptionsList);        
         Settings.Default.Save();
       }
     }
@@ -129,7 +139,7 @@ namespace MySql.TrayApp
       return false;
     }
 
-    public void SetServiceStatus(string serviceName, string path, string status)
+    public void SetServiceStatus(string serviceName, bool notifyOnStateChange, string path, string status)
     {
       foreach (MySQLService service in Services)
       {
@@ -143,7 +153,7 @@ namespace MySql.TrayApp
 
       Regex regex = new Regex(Settings.Default.AutoAddPattern, RegexOptions.IgnoreCase);
       if (regex.Match(path).Success)
-        AddService(serviceName, ServiceListChangeType.AutoAdd);
+        AddService(serviceName, notifyOnStateChange, ServiceListChangeType.AutoAdd);
     }
 
   
