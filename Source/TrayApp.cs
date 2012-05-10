@@ -203,7 +203,7 @@ namespace MySql.TrayApp
 
     private void mySQLServicesList_ServiceStatusChanged(object sender, ServiceStatus args)
     {
-      if (!Settings.Default.NotifyOfStatusChange && !args.NotifyOnStateChange) return;
+      if (!Settings.Default.NotifyOfStatusChange) return;
 
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceStatus;

@@ -130,7 +130,7 @@ namespace MySql.TrayApp
         ServiceControllerStatus copyPreviousStatus = Status;
         Status = newStatus;
         MenuGroup.Update();
-        OnStatusChanged(new ServiceStatus(ServiceName, notifyChangesEnabled, copyPreviousStatus, Status));
+        OnStatusChanged(new ServiceStatus(ServiceName, copyPreviousStatus, Status));
       }
     }
 

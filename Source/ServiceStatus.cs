@@ -36,8 +36,7 @@ namespace MySql.TrayApp
   /// </summary>
   public class ServiceStatus : EventArgs
   {
-    private string serviceName;
-    private bool notifyOnStateChange;
+    private string serviceName;    
     private ServiceControllerStatus currentStatus;
     private ServiceControllerStatus previousStatus;
 
@@ -46,12 +45,7 @@ namespace MySql.TrayApp
     {
       get { return this.serviceName; }
     }
-
-    public bool NotifyOnStateChange
-    {
-      get { return this.notifyOnStateChange; }
-    }
-
+  
     public ServiceControllerStatus CurrentStatus
     {
       get { return this.currentStatus; }
@@ -62,10 +56,9 @@ namespace MySql.TrayApp
       get { return this.previousStatus; }
     }
 
-    public ServiceStatus(string serviceName, bool notifyOnStateChange, ServiceControllerStatus previousStatus, ServiceControllerStatus currentStatus)
+    public ServiceStatus(string serviceName, ServiceControllerStatus previousStatus, ServiceControllerStatus currentStatus)
     {
-      this.serviceName = serviceName;
-      this.notifyOnStateChange = notifyOnStateChange;
+      this.serviceName = serviceName;      
       this.previousStatus = previousStatus;
       this.currentStatus = currentStatus;
     }
