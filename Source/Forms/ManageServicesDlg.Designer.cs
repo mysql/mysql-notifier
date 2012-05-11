@@ -36,17 +36,21 @@
       this.lstMonitoredServices = new System.Windows.Forms.ListView();
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+      this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.notifyOnStatusChange = new System.Windows.Forms.CheckBox();
+      this.groupBox1.SuspendLayout();
       this.SuspendLayout();
       // 
       // btnClose
       // 
       this.btnClose.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.btnClose.Location = new System.Drawing.Point(414, 216);
+      this.btnClose.Location = new System.Drawing.Point(414, 254);
       this.btnClose.Name = "btnClose";
       this.btnClose.Size = new System.Drawing.Size(75, 23);
       this.btnClose.TabIndex = 14;
       this.btnClose.Text = "Close";
       this.btnClose.UseVisualStyleBackColor = true;
+      this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
       // 
       // btnDelete
       // 
@@ -84,6 +88,7 @@
             this.columnHeader1,
             this.columnHeader3});
       this.lstMonitoredServices.FullRowSelect = true;
+      this.lstMonitoredServices.HideSelection = false;
       this.lstMonitoredServices.Location = new System.Drawing.Point(12, 43);
       this.lstMonitoredServices.MultiSelect = false;
       this.lstMonitoredServices.Name = "lstMonitoredServices";
@@ -103,11 +108,33 @@
       this.columnHeader3.Text = "Status";
       this.columnHeader3.Width = 74;
       // 
+      // groupBox1
+      // 
+      this.groupBox1.Controls.Add(this.notifyOnStatusChange);
+      this.groupBox1.Location = new System.Drawing.Point(12, 201);
+      this.groupBox1.Name = "groupBox1";
+      this.groupBox1.Size = new System.Drawing.Size(384, 76);
+      this.groupBox1.TabIndex = 15;
+      this.groupBox1.TabStop = false;
+      this.groupBox1.Text = "Service Options";
+      // 
+      // notifyOnStatusChange
+      // 
+      this.notifyOnStatusChange.AutoSize = true;
+      this.notifyOnStatusChange.Location = new System.Drawing.Point(24, 28);
+      this.notifyOnStatusChange.Name = "notifyOnStatusChange";
+      this.notifyOnStatusChange.Size = new System.Drawing.Size(174, 17);
+      this.notifyOnStatusChange.TabIndex = 0;
+      this.notifyOnStatusChange.Text = "Notify me when status changes";
+      this.notifyOnStatusChange.UseVisualStyleBackColor = true;
+      this.notifyOnStatusChange.CheckedChanged += new System.EventHandler(this.notifyOnStatusChange_CheckedChanged);
+      // 
       // ManageServicesDlg
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(502, 261);
+      this.ClientSize = new System.Drawing.Size(502, 294);
+      this.Controls.Add(this.groupBox1);
       this.Controls.Add(this.btnClose);
       this.Controls.Add(this.btnDelete);
       this.Controls.Add(this.btnAdd);
@@ -120,6 +147,8 @@
       this.Name = "ManageServicesDlg";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Manage Services";
+      this.groupBox1.ResumeLayout(false);
+      this.groupBox1.PerformLayout();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -134,5 +163,7 @@
     private System.Windows.Forms.ListView lstMonitoredServices;
     private System.Windows.Forms.ColumnHeader columnHeader1;
     private System.Windows.Forms.ColumnHeader columnHeader3;
+    private System.Windows.Forms.GroupBox groupBox1;
+    private System.Windows.Forms.CheckBox notifyOnStatusChange;
   }
 }

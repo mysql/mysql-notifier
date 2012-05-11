@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.ServiceProcess;
+using MySql.TrayApp.Properties;
 
 namespace MySql.TrayApp
 {
@@ -14,6 +15,7 @@ namespace MySql.TrayApp
   {
     private MySQLServicesList serviceList;
     public static string addServiceName;
+    private MySQLService selectedService;
 
     public ManageServicesDlg(MySQLServicesList serviceList)
     {
@@ -27,11 +29,13 @@ namespace MySql.TrayApp
       lstMonitoredServices.Items.Clear();
       foreach (MySQLService service in serviceList.Services)
       {
-        ListViewItem itemList = new ListViewItem(service.ServiceName, 0);
+        ListViewItem itemList = new ListViewItem(service.DisplayName, 0);
+        itemList.Tag = service;
         itemList.SubItems.Add(service.Status.ToString());
-        itemList.Checked = service.Status == ServiceControllerStatus.Running;
         lstMonitoredServices.Items.Add(itemList);
       }
+      if (lstMonitoredServices.Items.Count > 0)
+        lstMonitoredServices.Items[0].Selected = true;
     }
 
     private void btnAdd_Click(object sender, EventArgs e)
@@ -44,7 +48,7 @@ namespace MySql.TrayApp
         if (serviceList.Contains(service))
           MessageBox.Show("Selected Service is already in the Monitor List", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         else
-          serviceList.AddService(service, Properties.Settings.Default.NotifyOfStatusChange);
+          serviceList.AddService(service);
       }
 
       RefreshList();
@@ -57,13 +61,29 @@ namespace MySql.TrayApp
     /// <param name="e"></param>
     private void btnDelete_Click(object sender, EventArgs e)
     {
-      serviceList.RemoveService(lstMonitoredServices.SelectedItems[0].SubItems[0].Text);
+      if (selectedService == null) return;
+
+      serviceList.RemoveService(selectedService.ServiceName);
       RefreshList();
     }
 
     private void lstMonitoredServices_SelectedIndexChanged(object sender, EventArgs e)
     {
       btnDelete.Enabled = lstMonitoredServices.SelectedItems.Count > 0;
+
+      selectedService = lstMonitoredServices.SelectedItems.Count > 0 ? lstMonitoredServices.SelectedItems[0].Tag as MySQLService : null;
+      notifyOnStatusChange.Checked = selectedService != null && selectedService.NotifyOnStatusChange;
+    }
+
+    private void notifyOnStatusChange_CheckedChanged(object sender, EventArgs e)
+    {
+      if (selectedService == null) return;
+      selectedService.NotifyOnStatusChange = notifyOnStatusChange.Checked;
+    }
+
+    private void btnClose_Click(object sender, EventArgs e)
+    {
+      Settings.Default.Save();
     }
   }
 }

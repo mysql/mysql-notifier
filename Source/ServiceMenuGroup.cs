@@ -53,7 +53,7 @@ namespace MySql.TrayApp
     {
       boundService = mySQLBoundService;
 
-      statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.ServiceName, boundService.Status));
+      statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.DisplayName, boundService.Status));
       configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
       configureMenu.Click += new EventHandler(configureInstanceItem_Click);
 
@@ -190,7 +190,7 @@ namespace MySql.TrayApp
     /// <param name="boundServiceStatus">Service Status</param>
     public void Update()
     {      
-      statusMenu.Text = String.Format("{0} - {1}", boundService.ServiceName, boundService.Status);
+      statusMenu.Text = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
       Image image = null;
       switch (boundService.Status)
       {

@@ -77,7 +77,7 @@ namespace MySql.TrayApp
             Settings.Default.CheckForUpdatesFrequency, false);
         }
       }
-     
+
       // loads all the services from our settings file and sets up their menus
       mySQLServicesList.LoadFromSettings();
       AddStaticMenuItems();
@@ -205,6 +205,9 @@ namespace MySql.TrayApp
     {
       if (!Settings.Default.NotifyOfStatusChange) return;
 
+      MySQLService service = mySQLServicesList.GetServiceByName(args.ServiceName);
+      if (!service.NotifyOnStatusChange) return;
+
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceStatus;
       notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceStatus,
@@ -236,7 +239,25 @@ namespace MySql.TrayApp
 
     private void checkUpdatesItem_Click(object sender, EventArgs e)
     {                       
-      if (!MySqlInstaller.IsInstalled) return;
+      notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+      notifyIcon.BalloonTipTitle = "Check for Updates";
+      notifyIcon.BalloonTipText = "Starting the check for updates ...";
+      notifyIcon.ShowBalloonTip(1500);
+
+      MySqlInstaller.CheckForUpdatesDone += new EventHandler(MySqlInstaller_CheckForUpdatesDone);
+      MySqlInstaller.BeginCheckForUpdates();
+    }
+
+    void MySqlInstaller_CheckForUpdatesDone(object sender, EventArgs e)
+    {
+      if (!MySqlInstaller.HasUpdates)
+      {
+        DialogResult result = MessageBox.Show(Resources.HasUpdatesLaunchInstaller, Resources.CheckUpdates, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+        if (result == DialogResult.Yes)
+          MySqlInstaller.LaunchInstaller();
+      }
+      else
+        MessageBox.Show(Resources.NoUpdatesFound, Resources.CheckUpdates, MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private void aboutMenu_Click(object sender, EventArgs e)
@@ -292,12 +313,12 @@ namespace MySql.TrayApp
       if (c.InvokeRequired)
         c.Invoke((MethodInvoker)delegate
         {
-          mySQLServicesList.SetServiceStatus(serviceName, Settings.Default.NotifyOfStatusChange, path, state);
+          mySQLServicesList.SetServiceStatus(serviceName, path, state);
           SetNotifyIconToolTip();
         });
       else
       {
-        mySQLServicesList.SetServiceStatus(serviceName, Settings.Default.NotifyOfStatusChange, path, state);
+        mySQLServicesList.SetServiceStatus(serviceName, path, state);
         SetNotifyIconToolTip();
       }
     }

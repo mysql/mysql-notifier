@@ -23,7 +23,7 @@
     <Setting Name="AutoCheckForUpdates" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="ServiceSettingsList" Type="System.String" Scope="User">
+    <Setting Name="ServiceList" Type="System.Collections.Generic.List&lt;MySQLService&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

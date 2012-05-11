@@ -25,50 +25,47 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using MySQL.Utility;
 using System.Linq;
+using MySql.TrayApp.Properties;
 
 namespace MySql.TrayApp
 {
   static class Program
   {
-
-    private static int foundUpdates { get; set; }
-
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
     [STAThread]
     static void Main(params string[] args)
     {
-      if (args.Length > 0)
+      if (args.Length > 0 && args[0] == "--c")
       {
-        if (args[0] == "--c") 
-        {                  
-          foundUpdates = MySqlInstaller.CheckForUpdates();
-          if (foundUpdates > 0)
-          {
-            if (MessageBox.Show(string.Format("MySQL Tray Application found {0} Update(s). Press OK to Open MySQL Installer", foundUpdates), "MySQL Tray Application", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
-            {
-              MySqlInstaller.LaunchInstaller();
-            }
-          }                       
-        }
+        CheckForUpdates();
+        return;
       }
-      else
+
+      if (!SingleInstance.Start()) { return; }
+      Application.EnableVisualStyles();
+      Application.SetCompatibleTextRenderingDefault(false);
+      try
       {
-        if (!SingleInstance.Start()) { return; }
-        Application.EnableVisualStyles();
-        Application.SetCompatibleTextRenderingDefault(false);
-        try
-        {
-          var applicationContext = new TrayApplicationContext();
-          Application.Run(applicationContext);
-        }
-        catch (Exception ex)
-        {
-          MessageBox.Show(ex.Message, "Program Terminated Unexpectedly", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-        SingleInstance.Stop();
+        var applicationContext = new TrayApplicationContext();
+        Application.Run(applicationContext);
       }
-    }    
+      catch (Exception ex)
+      {
+        MessageBox.Show(ex.Message, "Program Terminated Unexpectedly", MessageBoxButtons.OK, MessageBoxIcon.Error);
+      }
+      SingleInstance.Stop();
+    }
+
+    private static void CheckForUpdates()
+    {
+      if (!MySqlInstaller.CheckForUpdates()) return;
+
+      // we have updates available so we ask the user if they want to launch the installer
+      DialogResult result = MessageBox.Show(Resources.HasUpdatesLaunchInstaller, Resources.CheckUpdates, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+      if (result == DialogResult.Yes)
+        MySqlInstaller.LaunchInstaller();
+    }
   }
 }

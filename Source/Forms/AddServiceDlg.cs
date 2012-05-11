@@ -73,6 +73,7 @@ namespace MySql.TrayApp
         {
           ListViewItem newItem = new ListViewItem();
           newItem.Text = item.Properties["DisplayName"].Value.ToString();
+          newItem.Tag = item.Properties["Name"].Value.ToString();
           newItem.SubItems.Add(item.Properties["State"].Value.ToString());
 
           lstServices.Items.Add(newItem);
@@ -90,7 +91,7 @@ namespace MySql.TrayApp
       ServicesToAdd = new List<string>();
       foreach (ListViewItem lvi in lstServices.SelectedItems)
       {
-        ServicesToAdd.Add(lvi.Text);
+        ServicesToAdd.Add(lvi.Tag as string);
       }
     }
 

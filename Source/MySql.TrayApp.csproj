@@ -51,10 +51,6 @@
     <Reference Include="Accessibility">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="MySQL.Utility, Version=1.0.0.0, Culture=neutral, PublicKeyToken=da94e9146a1b152a, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Lib\MySQL.Utility.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
@@ -133,6 +129,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -163,6 +160,12 @@
     <None Include="Resources\MySQLTrayAppIcon24x24.png" />
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\MySQL.Utility\MySQL.Utility.csproj">
+      <Project>{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}</Project>
+      <Name>MySQL.Utility</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

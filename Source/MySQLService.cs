@@ -34,37 +34,57 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
 using System.Net;
+using System.Xml.Serialization;
+using System.Configuration;
 
 namespace MySql.TrayApp
 {
   [Serializable]
-  internal class MySqlServiceSettings
-  {
-    public string Name { get; set; }
-    public bool NotifyOnStateChange { get; set; }
-  }
-
   public class MySQLService 
   {
     private ServiceController winService;
+    private string serviceName;
 
-    public bool IsRealMySQLService { get; private set; }
-    public ServiceControllerStatus Status { get; private set; }
-    public string Name { get; private set; }
-    public bool notifyChangesEnabled { get; set; }
-
-    public string ServiceName
+    public MySQLService()
     {
-      get { return winService.DisplayName; }
     }
-
-    public ServiceMenuGroup MenuGroup { get; private set; }
 
     public MySQLService(string serviceName, bool notificationOnChange)
     {
+      ServiceName = serviceName;
+      NotifyOnStatusChange = notificationOnChange;
+    }
+
+    [XmlAttribute(AttributeName = "ServiceName")]
+    public string ServiceName
+    { 
+      get { return serviceName; }
+      set { SetService(value); }
+    }
+
+    [XmlAttribute(AttributeName = "NotifyOnStatusChange")]
+    public bool NotifyOnStatusChange { get; set; }
+
+    [XmlIgnore]
+    public bool IsRealMySQLService { get; private set; }
+
+    [XmlIgnore]
+    public ServiceControllerStatus Status { get; set; }
+
+    [XmlIgnore]
+    public string DisplayName { get; private set; }
+
+    [XmlIgnore]
+    public ServiceMenuGroup MenuGroup { get; private set; }
+
+    [XmlIgnore]
+    public List<MySqlWorkbenchConnection> WorkbenchConnections { get; private set; }
+
+    private void SetService(string serviceName)
+    {
       winService = new ServiceController(serviceName);
-      Name = winService.ServiceName;
-      notifyChangesEnabled = notificationOnChange;
+      DisplayName = winService.DisplayName;
+      this.serviceName = winService.ServiceName;
       try
       {
         Status = winService.Status;
@@ -78,8 +98,6 @@ namespace MySql.TrayApp
       }
     }
 
-
-    public List<MySqlWorkbenchConnection> WorkbenchConnections { get; private set; }
 
     private void SeeIfRealMySQLService(string cmd)
     {
@@ -212,7 +230,7 @@ namespace MySql.TrayApp
       proc.StartInfo.Verb = "runas";
       proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
       proc.StartInfo.FileName = "sc";
-      proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, Name);
+      proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, ServiceName);
       proc.StartInfo.UseShellExecute = true;
       proc.Start();
       winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running : ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
@@ -254,7 +272,6 @@ namespace MySql.TrayApp
 
       return parameters;
     }
-
   }
 
   public struct MySQLStartupParameters

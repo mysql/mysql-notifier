@@ -33,6 +33,7 @@ using System.Text.RegularExpressions;
 using MySQL.Utility;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml.Serialization;
 
 
 namespace MySql.TrayApp
@@ -49,47 +50,45 @@ namespace MySql.TrayApp
   {
     private bool loading;
 
-    public MySQLServicesList()
+    public List<MySQLService> Services
     {
-      Services = new List<MySQLService>();
+      get { return Settings.Default.ServiceList; }
+      set { Settings.Default.ServiceList = value; }
     }
-
-    public List<MySQLService> Services { get; private set; }    
 
     public void LoadFromSettings()
     {
-      if (Settings.Default.FirstRun)
-      {
-        LoadFirstRun();
-        return;
-      }
-
-      if (Properties.Settings.Default.ServiceSettingsList == null) return;
-      
       loading = true;
-      //load saved settings for monitored services
-      LoadServicesFromSettings();
+
+      if (Services == null)
+        Services = new List<MySQLService>();
+      if (Settings.Default.FirstRun)
+        AutoAddServices();
+      else
+        // we have to manually call our service list changed event handler since that isn't done
+        // with how we are using settings
+        foreach (MySQLService service in Services)
+          OnServiceListChanged(service, ServiceListChangeType.Add);
 
       loading = false;
-      
     }
 
-    private void LoadFirstRun()
+    private void AutoAddServices()
     {
-      Settings.Default.FirstRun = false;
-      Settings.Default.Save();
-
       var services = Service.GetInstances(Settings.Default.AutoAddPattern);
       foreach (var item in services)
-        AddService(item.Properties["DisplayName"].Value.ToString(), true);
+        AddService(item.Properties["DisplayName"].Value.ToString());
+
+      Settings.Default.FirstRun = false;
+      Settings.Default.Save();
     }
 
-    public void AddService(string serviceName, bool notifyOnStateChange)
+    public void AddService(string serviceName)
     {
-      AddService(serviceName, notifyOnStateChange, ServiceListChangeType.Add);
+      AddService(serviceName, ServiceListChangeType.Add);
     }
 
-    private void AddService(string serviceName, bool notifyOnStateChange, ServiceListChangeType changeType)
+    private void AddService(string serviceName, ServiceListChangeType changeType)
     {
       foreach (MySQLService service in Services)
         if (String.Compare(service.ServiceName, serviceName, true) == 0) return;
@@ -101,10 +100,7 @@ namespace MySql.TrayApp
 
       OnServiceListChanged(newService, changeType);
       if (!loading)
-      {                
-        SaveServicesOnSettings();        
         Properties.Settings.Default.Save();
-      }
     }
 
     public void RemoveService(string serviceName)
@@ -122,20 +118,22 @@ namespace MySql.TrayApp
       Services.Remove(serviceToDelete);
       OnServiceListChanged(serviceToDelete, ServiceListChangeType.Remove);
       if (!loading)
-      {
-        SaveServicesOnSettings();
         Settings.Default.Save();
-      }
     }
 
     public bool Contains(string name)
     {
-      foreach (MySQLService service in Services)
-        if (String.Compare(service.ServiceName, name, true) == 0) return true;
-      return false;
+      return GetServiceByName(name) != null;
     }
 
-    public void SetServiceStatus(string serviceName, bool notifyOnStateChange, string path, string status)
+    public MySQLService GetServiceByName(string name)
+    {
+      foreach (MySQLService service in Services)
+        if (String.Compare(service.ServiceName, name, true) == 0) return service;
+      return null;
+    }
+
+    public void SetServiceStatus(string serviceName, string path, string status)
     {
       foreach (MySQLService service in Services)
       {
@@ -149,7 +147,7 @@ namespace MySql.TrayApp
 
       Regex regex = new Regex(Settings.Default.AutoAddPattern, RegexOptions.IgnoreCase);
       if (regex.Match(path).Success)
-        AddService(serviceName, notifyOnStateChange, ServiceListChangeType.AutoAdd);
+        AddService(serviceName, ServiceListChangeType.AutoAdd);
     }
 
   
@@ -179,51 +177,6 @@ namespace MySql.TrayApp
     {
         OnServiceStatusChanged(args);
     }
-
-
-    public void SaveServicesOnSettings()
-    {
-      List<MySqlServiceSettings> serviceSettingsList = new List<MySqlServiceSettings>();
-
-      foreach (var item in Services)
-      {
-        var serviceSettings = new MySqlServiceSettings { Name = item.Name, NotifyOnStateChange = item.notifyChangesEnabled };
-        serviceSettingsList.Add(serviceSettings);
-      }
-
-      using (MemoryStream ms = new MemoryStream())
-      {
-        using (StreamReader sr = new StreamReader(ms))
-        {
-          BinaryFormatter serviceBinaryFormatter = new BinaryFormatter();
-          serviceBinaryFormatter.Serialize(ms, serviceSettingsList);
-          ms.Position = 0;
-          byte[] buffer = new byte[(int)ms.Length];
-          ms.Read(buffer, 0, buffer.Length);
-          Properties.Settings.Default.ServiceSettingsList = Convert.ToBase64String(buffer);
-        }
-      }
-    }
-
-    public void LoadServicesFromSettings()
-    {
-     
-      if (String.IsNullOrEmpty(Properties.Settings.Default.ServiceSettingsList)) return;
-
-      List<MySqlServiceSettings> serviceSettingsList = new List<MySqlServiceSettings>();
-
-      using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(Properties.Settings.Default.ServiceSettingsList)))
-      {
-        BinaryFormatter serviceBinaryFormatter = new BinaryFormatter();
-        serviceSettingsList = (List<MySqlServiceSettings>)serviceBinaryFormatter.Deserialize(ms);
-      }
-      
-      foreach (var item in serviceSettingsList)
-      {        
-        AddService(item.Name, item.NotifyOnStateChange);       
-      }      
-    }
-
   }
 
 }
