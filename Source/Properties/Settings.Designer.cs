@@ -117,5 +117,29 @@ namespace MySql.TrayApp.Properties {
                 this["ServiceList"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ServiceSettingsList {
+            get {
+                return ((string)(this["ServiceSettingsList"]));
+            }
+            set {
+                this["ServiceSettingsList"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int UpdateCheck {
+            get {
+                return ((int)(this["UpdateCheck"]));
+            }
+            set {
+                this["UpdateCheck"] = value;
+            }
+        }
     }
 }

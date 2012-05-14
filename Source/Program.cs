@@ -37,9 +37,9 @@ namespace MySql.TrayApp
     [STAThread]
     static void Main(params string[] args)
     {
-      if (args.Length > 0 && args[0] == "--c")
+      if (args.Length > 0 && (args[0] == "--c" || args[0] == "--x"))
       {
-        CheckForUpdates();
+        CheckForUpdates(args[0]);
         return;
       }
 
@@ -58,14 +58,20 @@ namespace MySql.TrayApp
       SingleInstance.Stop();
     }
 
-    private static void CheckForUpdates()
+    private static void CheckForUpdates(string arg)
     {
-      if (!MySqlInstaller.CheckForUpdates()) return;
+      Settings.Default.UpdateCheck = (int)SoftwareUpdateStaus.Checking;
+      Settings.Default.Save();
 
-      // we have updates available so we ask the user if they want to launch the installer
-      DialogResult result = MessageBox.Show(Resources.HasUpdatesLaunchInstaller, Resources.CheckUpdates, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-      if (result == DialogResult.Yes)
-        MySqlInstaller.LaunchInstaller();
+      bool hasUpdates = true;
+
+      if (arg == "--c")
+        hasUpdates = MySqlInstaller.CheckForUpdates(10);
+      else if (arg == "--x")               // --x is only for testing right now
+        System.Threading.Thread.Sleep(5000);
+
+      Settings.Default.UpdateCheck = hasUpdates ? (int)SoftwareUpdateStaus.HasUpdates : 0;
+      Settings.Default.Save();
     }
   }
 }

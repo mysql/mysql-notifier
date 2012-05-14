@@ -270,6 +270,12 @@
     <value>..\Resources\oficial_icon.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="HasUpdatesLaunchInstaller" xml:space="preserve">
-    <value>There are updates to your installed MySQL software. Would you like to launch the MySQL Installer to apply them?</value>
+    <value>There are updates to your installed MySQL software.   Please launch the MySQL Installer to apply them.</value>
+  </data>
+  <data name="SoftwareUpdate" xml:space="preserve">
+    <value>Software Update</value>
+  </data>
+  <data name="CheckingForUpdates" xml:space="preserve">
+    <value>We are checking for updates to your installed MySQLsoftware.</value>
   </data>
 </root>

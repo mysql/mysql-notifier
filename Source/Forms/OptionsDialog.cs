@@ -50,12 +50,12 @@ namespace MySql.TrayApp
         {
           if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Tray")))
           {
-            Utility.createScheduledTask("MySQLTrayAppTask", @"""" + Utility.GetInstallLocation("MySQL Tray") + @"MySql.TrayApp.exe --c""",
+            Utility.CreateScheduledTask("MySQLTrayAppTask", @"""" + Utility.GetInstallLocation("MySQL Tray") + @"MySql.TrayApp.exe --c""",
               Settings.Default.CheckForUpdatesFrequency, deleteIfPrevious);
           }
         }
         if (deleteTask)
-          Utility.deleteScheduledTask("MySQLTrayAppTask");
+          Utility.DeleteScheduledTask("MySQLTrayAppTask");
       }
       
     }

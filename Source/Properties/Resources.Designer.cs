@@ -149,6 +149,15 @@ namespace MySql.TrayApp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to We are checking for updates to your installed MySQLsoftware..
+        /// </summary>
+        internal static string CheckingForUpdates {
+            get {
+                return ResourceManager.GetString("CheckingForUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Check for Updates....
         /// </summary>
         internal static string CheckUpdates {
@@ -203,7 +212,7 @@ namespace MySql.TrayApp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are updates to your installed MySQL software. Would you like to launch the MySQL Installer to apply them?.
+        ///   Looks up a localized string similar to There are updates to your installed MySQL software.   Please launch the MySQL Installer to apply them..
         /// </summary>
         internal static string HasUpdatesLaunchInstaller {
             get {
@@ -344,6 +353,15 @@ namespace MySql.TrayApp.Properties {
             get {
                 object obj = ResourceManager.GetObject("running_icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Software Update.
+        /// </summary>
+        internal static string SoftwareUpdate {
+            get {
+                return ResourceManager.GetString("SoftwareUpdate", resourceCulture);
             }
         }
         

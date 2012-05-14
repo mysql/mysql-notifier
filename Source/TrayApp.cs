@@ -33,6 +33,7 @@ using System.Management;
 using MySql.TrayApp.Properties;
 using MySQL.Utility;
 using System.IO;
+using System.Configuration;
 
 
 
@@ -73,7 +74,7 @@ namespace MySql.TrayApp
       {
         if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Tray")))
         {
-          Utility.createScheduledTask("MySQLTrayAppTask", @"""" + Utility.GetInstallLocation("MySQL Tray") + @"MySql.TrayApp.exe --c""",
+          Utility.CreateScheduledTask("MySQLTrayAppTask", @"""" + Utility.GetInstallLocation("MySQL Tray") + @"MySql.TrayApp.exe --c""",
             Settings.Default.CheckForUpdatesFrequency, false);
         }
       }
@@ -82,7 +83,9 @@ namespace MySql.TrayApp
       mySQLServicesList.LoadFromSettings();
       AddStaticMenuItems();
       SetNotifyIconToolTip();
-      
+
+      StartWatchingSettingsFile();
+
       // listener for events
       var managementScope = new ManagementScope(@"root\cimv2");
       managementScope.Connect();
@@ -93,6 +96,47 @@ namespace MySql.TrayApp
       watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);
       watcher.Start();    
         
+    }
+
+    /// <summary>
+    /// Generic routine to help with showing tooltips
+    /// </summary>
+    void ShowTooltip(bool error, string title, string text, int delay)
+    {
+      notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+      notifyIcon.BalloonTipTitle = title;
+      notifyIcon.BalloonTipText = text; 
+      notifyIcon.ShowBalloonTip(delay);
+    }
+
+    private void StartWatchingSettingsFile()
+    {
+      Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
+      FileSystemWatcher watcher = new FileSystemWatcher();
+      watcher.Path = Path.GetDirectoryName(config.FilePath);
+      watcher.Filter = Path.GetFileName(config.FilePath);
+      watcher.NotifyFilter = NotifyFilters.LastWrite;
+      watcher.Changed += new FileSystemEventHandler(settingsFile_Changed);
+      watcher.EnableRaisingEvents = true;
+    }
+
+    void settingsFile_Changed(object sender, FileSystemEventArgs e)
+    {
+      Settings.Default.Reload();
+
+      // if we have already notified our user then noting more to do
+      if((Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0) return;
+
+      // let them know we are checking for updates
+      if ((Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.Checking) != 0)
+        ShowTooltip(false, Resources.SoftwareUpdate, Resources.CheckingForUpdates, 1500);
+
+      else if ((Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0)
+        ShowTooltip(false, Resources.SoftwareUpdate, Resources.HasUpdatesLaunchInstaller, 1500);
+
+      // set that we have notified our user
+      Settings.Default.UpdateCheck |= (int)SoftwareUpdateStaus.Notified;
+      Settings.Default.Save();
     }
 
     void notifyIcon_MouseClick(object sender, MouseEventArgs e)
@@ -238,26 +282,13 @@ namespace MySql.TrayApp
     }
 
     private void checkUpdatesItem_Click(object sender, EventArgs e)
-    {                       
-      notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-      notifyIcon.BalloonTipTitle = "Check for Updates";
-      notifyIcon.BalloonTipText = "Starting the check for updates ...";
-      notifyIcon.ShowBalloonTip(1500);
-
-      MySqlInstaller.CheckForUpdatesDone += new EventHandler(MySqlInstaller_CheckForUpdatesDone);
-      MySqlInstaller.BeginCheckForUpdates();
-    }
-
-    void MySqlInstaller_CheckForUpdatesDone(object sender, EventArgs e)
     {
-      if (!MySqlInstaller.HasUpdates)
-      {
-        DialogResult result = MessageBox.Show(Resources.HasUpdatesLaunchInstaller, Resources.CheckUpdates, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-        if (result == DialogResult.Yes)
-          MySqlInstaller.LaunchInstaller();
-      }
-      else
-        MessageBox.Show(Resources.NoUpdatesFound, Resources.CheckUpdates, MessageBoxButtons.OK, MessageBoxIcon.Information);
+      ProcessStartInfo psi = new ProcessStartInfo();
+      psi.FileName = AppDomain.CurrentDomain.SetupInformation.ApplicationName;
+      psi.WorkingDirectory = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+      psi.Arguments = "--c";
+      psi.CreateNoWindow = true;
+      Process.Start(psi);
     }
 
     private void aboutMenu_Click(object sender, EventArgs e)
@@ -322,5 +353,12 @@ namespace MySql.TrayApp
         SetNotifyIconToolTip();
       }
     }
+  }
+
+  public enum SoftwareUpdateStaus : int
+  {
+    Checking = 1,
+    HasUpdates = 2,
+    Notified = 4
   }
 }
