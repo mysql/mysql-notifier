@@ -10,6 +10,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySql.Notifier", "Source\My
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Commercial|Any CPU = Commercial|Any CPU
+		Commercial|Mixed Platforms = Commercial|Mixed Platforms
+		Commercial|x86 = Commercial|x86
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|x86 = Debug|x86
@@ -18,6 +21,11 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Commercial|Any CPU.ActiveCfg = Commercial|x86
+		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Commercial|Mixed Platforms.ActiveCfg = Commercial|x86
+		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Commercial|Mixed Platforms.Build.0 = Commercial|x86
+		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Commercial|x86.ActiveCfg = Commercial|x86
+		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Commercial|x86.Build.0 = Commercial|x86
 		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Debug|Mixed Platforms.Build.0 = Debug|x86
@@ -28,6 +36,12 @@ Global
 		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Release|Mixed Platforms.Build.0 = Release|x86
 		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Release|x86.ActiveCfg = Release|x86
 		{EC7DAD39-2206-484C-9966-AB256269A6D4}.Release|x86.Build.0 = Release|x86
+		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Commercial|Any CPU.ActiveCfg = Commercial|Any CPU
+		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Commercial|Any CPU.Build.0 = Commercial|Any CPU
+		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Commercial|Mixed Platforms.ActiveCfg = Commercial|Any CPU
+		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Commercial|Mixed Platforms.Build.0 = Commercial|Any CPU
+		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Commercial|x86.ActiveCfg = Commercial|x86
+		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Commercial|x86.Build.0 = Commercial|x86
 		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
