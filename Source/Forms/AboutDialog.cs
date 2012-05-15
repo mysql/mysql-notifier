@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
   public partial class AboutDialog : Form
   {

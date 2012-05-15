@@ -28,27 +28,27 @@ using System.Reflection;
 using System.Drawing;
 using System.Security.Principal;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
-  class TrayApplicationContext : ApplicationContext
+  class NotifierApplicationContext : ApplicationContext
   {
     
-    private readonly TrayApp trayApp;
+    private readonly Notifier notifierApp;
     
     /// <summary>
     /// This class should be created and passed into Application.Run( ... )
     /// </summary>
-    public TrayApplicationContext()
+    public NotifierApplicationContext()
     {
       WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
       bool hasAdminPrivileges = principal.IsInRole(WindowsBuiltInRole.Administrator);
 
-      this.trayApp = new TrayApp();      
-      this.trayApp.Exit += trayApp_Exit;
+      this.notifierApp = new Notifier();
+      this.notifierApp.Exit += NotifierApp_Exit;
     }
     
 
-    private void trayApp_Exit(object sender, EventArgs e)
+    private void NotifierApp_Exit(object sender, EventArgs e)
     {
       this.ExitThread();
     }

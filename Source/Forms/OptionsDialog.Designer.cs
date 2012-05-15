@@ -1,4 +1,4 @@
-﻿namespace MySql.TrayApp
+﻿namespace MySql.Notifier
 {
   partial class OptionsDialog
   {

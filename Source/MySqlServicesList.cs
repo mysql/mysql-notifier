@@ -28,7 +28,7 @@ using System.Windows.Forms;
 using System.Linq;
 using System.Globalization;
 using System.Management;
-using MySql.TrayApp.Properties;
+using MySql.Notifier.Properties;
 using System.Text.RegularExpressions;
 using MySQL.Utility;
 using System.IO;
@@ -36,7 +36,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
 
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
 
   public enum ServiceListChangeType

@@ -23,7 +23,7 @@
 using System;
 using System.Reflection;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
   /// <summary>
   /// Gets information about the application.

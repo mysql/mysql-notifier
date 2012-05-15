@@ -28,11 +28,11 @@ using System.Windows.Forms;
 using System.ServiceProcess;
 using System.Diagnostics;
 using System.IO;
-using MySql.TrayApp.Properties;
+using MySql.Notifier.Properties;
 using System.Drawing;
 using MySQL.Utility;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
 
   /// <summary>

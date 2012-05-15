@@ -8,8 +8,8 @@
     <ProjectGuid>{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MySql.TrayApp</RootNamespace>
-    <AssemblyName>MySql.TrayApp</AssemblyName>
+    <RootNamespace>MySql.Notifier</RootNamespace>
+    <AssemblyName>MySql.Notifier</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -104,8 +104,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SingleInstance.cs" />
-    <Compile Include="TrayApp.cs" />
-    <Compile Include="TrayApplicationContext.cs" />
+    <Compile Include="MySQL.Notifier.cs" />
+    <Compile Include="ApplicationContext.cs" />
     <Compile Include="WinAPI.cs" />
     <EmbeddedResource Include="Forms\AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
@@ -155,6 +155,7 @@
     <None Include="Resources\signal-red.gif" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\newGroupIcon.ico" />
     <None Include="Resources\oficial_icon.ico" />
     <None Include="Resources\about.png" />
     <Content Include="Lib\MySQL.Utility.dll" />
@@ -162,13 +163,7 @@
     <Content Include="Resources\iconDB.jpg" />
     <None Include="Resources\stop.png" />
     <None Include="Resources\play.png" />
-    <None Include="Resources\MySQLTrayApp_starting.png" />
-    <None Include="Resources\MySQLTrayApp_stopped.png" />
-    <None Include="Resources\MySQLTrayApp_default.png" />
-    <None Include="Resources\MySQLTrayApp_running.png" />
     <Content Include="Resources\logo-mysql.png" />
-    <None Include="Resources\MySQLTrayAppIcon16x16.png" />
-    <None Include="Resources\MySQLTrayAppIcon24x24.png" />
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
   </ItemGroup>

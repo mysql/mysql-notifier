@@ -1,4 +1,4 @@
-﻿namespace MySql.TrayApp
+﻿namespace MySql.Notifier
 {
   partial class AboutDialog
   {
@@ -35,9 +35,9 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.BackgroundImage = global::MySql.TrayApp.Properties.Resources.AboutBackGroundDialog;
-      this.ClientSize = new System.Drawing.Size(559, 305);
-      this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(88)))), ((int)(((byte)(131)))), ((int)(((byte)(158)))));
+      this.BackgroundImage = global::MySql.Notifier.Properties.Resources.AboutBackGroundDialog;
+      this.ClientSize = new System.Drawing.Size(557, 320);
+      this.ForeColor = System.Drawing.SystemColors.Control;
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;

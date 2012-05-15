@@ -23,7 +23,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
 
   /// <summary>

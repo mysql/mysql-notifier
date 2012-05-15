@@ -23,7 +23,7 @@
 using System;
 using System.Threading;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
 
     /// <summary>

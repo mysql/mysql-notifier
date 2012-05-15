@@ -37,7 +37,7 @@ using System.Net;
 using System.Xml.Serialization;
 using System.Configuration;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
   [Serializable]
   public class MySQLService 

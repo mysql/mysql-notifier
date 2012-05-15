@@ -6,11 +6,11 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using MySql.TrayApp.Properties;
+using MySql.Notifier.Properties;
 using MySQL.Utility;
 
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
   public partial class OptionsDialog : Form
   {
@@ -48,14 +48,14 @@ namespace MySql.TrayApp
 
         if (Settings.Default.AutoCheckForUpdates)
         {
-          if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Tray")))
+          if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Notifier")))
           {
-            Utility.CreateScheduledTask("MySQLTrayAppTask", @"""" + Utility.GetInstallLocation("MySQL Tray") + @"MySql.TrayApp.exe --c""",
+            Utility.CreateScheduledTask("MySQLNotifierTask", @"""" + Utility.GetInstallLocation("MySQL Notifier") + @"MySql.Notifier.exe --c""",
               Settings.Default.CheckForUpdatesFrequency, deleteIfPrevious);
           }
         }
         if (deleteTask)
-          Utility.DeleteScheduledTask("MySQLTrayAppTask");
+          Utility.DeleteScheduledTask("MySQLNotifierTask");
       }
       
     }

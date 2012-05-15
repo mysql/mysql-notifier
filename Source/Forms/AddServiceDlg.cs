@@ -6,11 +6,11 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using MySql.TrayApp.Properties;
+using MySql.Notifier.Properties;
 using System.Collections;
 using MySQL.Utility;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
   public partial class AddServiceDlg : Form
   {

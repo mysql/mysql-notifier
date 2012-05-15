@@ -25,9 +25,9 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using MySQL.Utility;
 using System.Linq;
-using MySql.TrayApp.Properties;
+using MySql.Notifier.Properties;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
   static class Program
   {
@@ -48,7 +48,7 @@ namespace MySql.TrayApp
       Application.SetCompatibleTextRenderingDefault(false);
       try
       {
-        var applicationContext = new TrayApplicationContext();
+        var applicationContext = new NotifierApplicationContext();
         Application.Run(applicationContext);
       }
       catch (Exception ex)

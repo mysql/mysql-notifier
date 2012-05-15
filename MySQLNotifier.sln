@@ -6,7 +6,7 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Installer", "Installer\Inst
 		{64030920-03D5-4DFD-BE1C-2A50EBC3A49F} = {64030920-03D5-4DFD-BE1C-2A50EBC3A49F}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySql.TrayApp", "Source\MySql.TrayApp.csproj", "{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MySql.Notifier", "Source\MySql.Notifier.csproj", "{64030920-03D5-4DFD-BE1C-2A50EBC3A49F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

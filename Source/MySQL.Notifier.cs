@@ -30,16 +30,16 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.Linq;
 using System.Management;
-using MySql.TrayApp.Properties;
+using MySql.Notifier.Properties;
 using MySQL.Utility;
 using System.IO;
 using System.Configuration;
 
 
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
-  class TrayApp
+  class Notifier
   {
     private System.ComponentModel.IContainer components;
     private NotifyIcon notifyIcon;
@@ -47,9 +47,9 @@ namespace MySql.TrayApp
     
     private ManagementEventWatcher watcher;    
 
-    public TrayApp()
+    public Notifier()
     {
-      Bitmap iconBitmap = Properties.Resources.TrayIcon;
+      Bitmap iconBitmap = Properties.Resources.NotifierIcon;
      
       components = new System.ComponentModel.Container();
       notifyIcon = new NotifyIcon(components)
@@ -72,9 +72,9 @@ namespace MySql.TrayApp
       // when first run
       if (Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0)
       {
-        if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Tray")))
+        if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Notifier")))
         {
-          Utility.CreateScheduledTask("MySQLTrayAppTask", @"""" + Utility.GetInstallLocation("MySQL Tray") + @"MySql.TrayApp.exe --c""",
+          Utility.CreateScheduledTask("MySQLNotifierTask", @"""" + Utility.GetInstallLocation("MySQL Notifier") + @"MySql.Notifier.exe --c""",
             Settings.Default.CheckForUpdatesFrequency, false);
         }
       }
@@ -181,7 +181,7 @@ namespace MySql.TrayApp
       ToolStripMenuItem aboutMenu = new ToolStripMenuItem("About...");
       aboutMenu.Click += new EventHandler(aboutMenu_Click);
 
-      ToolStripMenuItem exitMenu = new ToolStripMenuItem("Close MySQL Tray App");
+      ToolStripMenuItem exitMenu = new ToolStripMenuItem("Close MySQL Notifier");
       exitMenu.Click += new EventHandler(exitItem_Click);
 
       actionsMenu.DropDownItems.Add(new ToolStripSeparator());
@@ -227,7 +227,7 @@ namespace MySql.TrayApp
     }
 
     /// <summary>
-    /// Notifies that the TrayApp wants to quit
+    /// Notifies that the Notifier wants to quit
     /// </summary>
     public event EventHandler Exit;
 

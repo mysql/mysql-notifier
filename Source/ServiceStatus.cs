@@ -29,7 +29,7 @@ using System.Linq;
 using System.Globalization;
 using System.Management;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
   /// <summary>
   /// Event Arguments used with the StatusChanged event containing information about the Service's status change.

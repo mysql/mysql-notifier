@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.ServiceProcess;
-using MySql.TrayApp.Properties;
+using MySql.Notifier.Properties;
 
-namespace MySql.TrayApp
+namespace MySql.Notifier
 {
   public partial class ManageServicesDlg : Form
   {
