@@ -51,6 +51,10 @@
     <Reference Include="Accessibility">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="MySQL.Utility, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Lib\MySQL.Utility.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -126,6 +130,11 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
+    <None Include="Lib\WexInstaller.Core.il.~1~" />
+    <None Include="Lib\WexInstaller.Core.Properties.Resources.resources.~1~" />
+    <None Include="Lib\WexInstaller.Core.res.~1~" />
+    <None Include="Lib\WexInstaller.Core.RootPasswordPromptDlg.resources.~1~" />
+    <None Include="Lib\WexInstaller.InstallerPanel.resources.~1~" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -148,6 +157,7 @@
   <ItemGroup>
     <None Include="Resources\oficial_icon.ico" />
     <None Include="Resources\about.png" />
+    <Content Include="Lib\MySQL.Utility.dll" />
     <Content Include="Resources\app_default.ico" />
     <Content Include="Resources\iconDB.jpg" />
     <None Include="Resources\stop.png" />
@@ -161,12 +171,6 @@
     <None Include="Resources\MySQLTrayAppIcon24x24.png" />
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\MySQL.Utility\MySQL.Utility.csproj">
-      <Project>{B8A3BD3B-3CBD-48D5-84F5-076365655E0B}</Project>
-      <Name>MySQL.Utility</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

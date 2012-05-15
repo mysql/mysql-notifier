@@ -171,7 +171,7 @@ namespace MySql.TrayApp
 
       ToolStripMenuItem checkForUpdates = new ToolStripMenuItem("Check for updates");
       checkForUpdates.Click += new EventHandler(checkUpdatesItem_Click);
-      checkForUpdates.Enabled = installerInstalled;
+      checkForUpdates.Enabled = MySqlInstaller.CanCheckForUpdates();
 
       ToolStripMenuItem actionsMenu = new ToolStripMenuItem("Actions", null, manageServices, launchInstaller, checkForUpdates);
 

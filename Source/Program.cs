@@ -66,7 +66,7 @@ namespace MySql.TrayApp
       bool hasUpdates = true;
 
       if (arg == "--c")
-        hasUpdates = MySqlInstaller.CheckForUpdates(10);
+        hasUpdates = MySqlInstaller.HasUpdates(10 * 1000);
       else if (arg == "--x")               // --x is only for testing right now
         System.Threading.Thread.Sleep(5000);
 
