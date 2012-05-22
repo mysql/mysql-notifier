@@ -37,6 +37,7 @@
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.chkUpdateTrayIcon = new System.Windows.Forms.CheckBox();
       this.notifyOnStatusChange = new System.Windows.Forms.CheckBox();
       this.groupBox1.SuspendLayout();
       this.SuspendLayout();
@@ -110,6 +111,7 @@
       // 
       // groupBox1
       // 
+      this.groupBox1.Controls.Add(this.chkUpdateTrayIcon);
       this.groupBox1.Controls.Add(this.notifyOnStatusChange);
       this.groupBox1.Location = new System.Drawing.Point(12, 201);
       this.groupBox1.Name = "groupBox1";
@@ -118,10 +120,21 @@
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "Service Options";
       // 
+      // chkUpdateTrayIcon
+      // 
+      this.chkUpdateTrayIcon.AutoSize = true;
+      this.chkUpdateTrayIcon.Location = new System.Drawing.Point(26, 42);
+      this.chkUpdateTrayIcon.Name = "chkUpdateTrayIcon";
+      this.chkUpdateTrayIcon.Size = new System.Drawing.Size(293, 17);
+      this.chkUpdateTrayIcon.TabIndex = 1;
+      this.chkUpdateTrayIcon.Text = "Update MySQL Notifier tray icon based on service status";
+      this.chkUpdateTrayIcon.UseVisualStyleBackColor = true;
+      this.chkUpdateTrayIcon.CheckedChanged += new System.EventHandler(this.chkUpdateTrayIcon_CheckedChanged);
+      // 
       // notifyOnStatusChange
       // 
       this.notifyOnStatusChange.AutoSize = true;
-      this.notifyOnStatusChange.Location = new System.Drawing.Point(24, 28);
+      this.notifyOnStatusChange.Location = new System.Drawing.Point(26, 19);
       this.notifyOnStatusChange.Name = "notifyOnStatusChange";
       this.notifyOnStatusChange.Size = new System.Drawing.Size(174, 17);
       this.notifyOnStatusChange.TabIndex = 0;
@@ -165,5 +178,6 @@
     private System.Windows.Forms.ColumnHeader columnHeader3;
     private System.Windows.Forms.GroupBox groupBox1;
     private System.Windows.Forms.CheckBox notifyOnStatusChange;
+    private System.Windows.Forms.CheckBox chkUpdateTrayIcon;
   }
 }

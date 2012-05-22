@@ -148,6 +148,13 @@ namespace MySql.Notifier.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap CheckForUpdatesIcon {
+            get {
+                object obj = ResourceManager.GetObject("CheckForUpdatesIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to We are checking for updates to your installed MySQLsoftware..
         /// </summary>
@@ -254,6 +261,13 @@ namespace MySql.Notifier.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap ManageServicesIcon {
+            get {
+                object obj = ResourceManager.GetObject("ManageServicesIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to There was a problem retrieving Windows Services.
         /// </summary>
@@ -266,6 +280,55 @@ namespace MySql.Notifier.Properties {
         internal static System.Drawing.Bitmap NotifierIcon {
             get {
                 object obj = ResourceManager.GetObject("NotifierIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierIconAlert {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconAlert", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierIconRunning {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconRunning", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierIconRunningAlert {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconRunningAlert", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierIconStarting {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconStarting", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierIconStartingAlert {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconStartingAlert", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierIconStopped {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconStopped", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierIconStoppedAlert {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconStoppedAlert", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -347,19 +410,19 @@ namespace MySql.Notifier.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap restart {
+            get {
+                object obj = ResourceManager.GetObject("restart", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Running.
         /// </summary>
         internal static string Running {
             get {
                 return ResourceManager.GetString("Running", resourceCulture);
-            }
-        }
-        
-        internal static System.Drawing.Bitmap running_icon {
-            get {
-                object obj = ResourceManager.GetObject("running_icon", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -381,9 +444,9 @@ namespace MySql.Notifier.Properties {
             }
         }
         
-        internal static System.Drawing.Bitmap starting_icon {
+        internal static System.Drawing.Bitmap StartInstallerIcon {
             get {
-                object obj = ResourceManager.GetObject("starting_icon", resourceCulture);
+                object obj = ResourceManager.GetObject("StartInstallerIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -410,13 +473,6 @@ namespace MySql.Notifier.Properties {
         internal static string Stopped {
             get {
                 return ResourceManager.GetString("Stopped", resourceCulture);
-            }
-        }
-        
-        internal static System.Drawing.Bitmap stopped_icon {
-            get {
-                object obj = ResourceManager.GetObject("stopped_icon", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

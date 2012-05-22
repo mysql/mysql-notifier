@@ -49,10 +49,11 @@ namespace MySql.Notifier
     {
     }
 
-    public MySQLService(string serviceName, bool notificationOnChange)
+    public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon)
     {
       ServiceName = serviceName;
       NotifyOnStatusChange = notificationOnChange;
+      UpdateTrayIconOnStatusChange = updatesTrayIcon;
     }
 
     [XmlAttribute(AttributeName = "ServiceName")]
@@ -61,6 +62,9 @@ namespace MySql.Notifier
       get { return serviceName; }
       set { SetService(value); }
     }
+
+    [XmlAttribute(AttributeName = "UpdateTrayIconOnStatusChange")]
+    public bool UpdateTrayIconOnStatusChange { get; set; }
 
     [XmlAttribute(AttributeName = "NotifyOnStatusChange")]
     public bool NotifyOnStatusChange { get; set; }
@@ -214,28 +218,44 @@ namespace MySql.Notifier
       BackgroundWorker worker = sender as BackgroundWorker;
       int action = (int)e.Argument;
 
-      if (action == 1)
-      {
-        StartOrStopService("start");
-      }
-      else if (action == 0)
-      {
-        StartOrStopService("stop");
+      switch (action)
+      { 
+        case 0:
+          ProcessStatusService("stop");
+          break;
+        case 1:
+          ProcessStatusService("start");
+          break;
+        case 2:
+          ProcessStatusService("restart");
+          break;                
       }
     }
 
-    private void StartOrStopService(string action)
+    private void ProcessStatusService(string action)
     {
       Process proc = new Process();
       proc.StartInfo.Verb = "runas";
       proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-      proc.StartInfo.FileName = "sc";
-      proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, ServiceName);
-      proc.StartInfo.UseShellExecute = true;
-      proc.Start();
-      winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running : ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
-    }
 
+      if (action == "restart")
+      {
+        proc.StartInfo.FileName = "cmd.exe";
+        proc.StartInfo.Arguments = "/C net stop " + @"" + serviceName + @"" + " && net start " + serviceName + @"";
+        proc.StartInfo.UseShellExecute = true;
+        proc.Start();
+        winService.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));      
+      }
+      else
+      {      
+        proc.StartInfo.FileName = "sc";
+        proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, ServiceName);
+        proc.StartInfo.UseShellExecute = true;
+        proc.Start();
+        winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running : ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
+      }
+    }
+    
     private MySQLStartupParameters GetStartupParameters()
     {
       MySQLStartupParameters parameters = new MySQLStartupParameters();

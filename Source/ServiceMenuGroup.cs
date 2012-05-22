@@ -71,7 +71,7 @@ namespace MySql.Notifier
       stopMenu = new ToolStripMenuItem("Stop", Resources.stop);
       stopMenu.Click += new EventHandler(stop_Click);
 
-      restartMenu = new ToolStripMenuItem("Restart");
+      restartMenu = new ToolStripMenuItem("Restart", Resources.restart);
       restartMenu.Click += new EventHandler(restart_Click);
 
 
@@ -199,19 +199,20 @@ namespace MySql.Notifier
         case ServiceControllerStatus.PausePending:
         case ServiceControllerStatus.StartPending:
         case ServiceControllerStatus.StopPending:
-          image = Resources.starting_icon;
+          image = Resources.NotifierIconStarting;
           break;
         case ServiceControllerStatus.Stopped:
-          image = Resources.stopped_icon;
+          image = Resources.NotifierIconStopped;
           break;
         case ServiceControllerStatus.Running:
-          image = Resources.running_icon;
+          image = Resources.NotifierIconRunning;
           break;
       }
       statusMenu.Image = image;
 
       startMenu.Enabled = boundService.Status == ServiceControllerStatus.Stopped;
       stopMenu.Enabled = boundService.Status != ServiceControllerStatus.Stopped;
+      restartMenu.Enabled = stopMenu.Enabled;
 
       editorMenu.Enabled = MySqlWorkbench.IsInstalled;
       configureMenu.Enabled = MySqlWorkbench.IsInstalled;

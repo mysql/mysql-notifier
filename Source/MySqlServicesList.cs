@@ -94,7 +94,7 @@ namespace MySql.Notifier
         if (String.Compare(service.ServiceName, serviceName, true) == 0) return;
       
       // for now all services will have same value as the global setting for the notifications
-      MySQLService newService = new MySQLService(serviceName, Settings.Default.NotifyOfStatusChange);
+      MySQLService newService = new MySQLService(serviceName, Settings.Default.NotifyOfStatusChange, updatesTrayIcon: true);
       newService.StatusChanged += new MySQLService.StatusChangedHandler(mySQLService_StatusChanged);
       Services.Add(newService);
 

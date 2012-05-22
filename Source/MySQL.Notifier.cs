@@ -45,19 +45,23 @@ namespace MySql.Notifier
     private NotifyIcon notifyIcon;
     private MySQLServicesList mySQLServicesList { get; set; }
     
-    private ManagementEventWatcher watcher;    
+    private ManagementEventWatcher watcher;
+
+    private ToolStripMenuItem installAvailablelUpdates;
+    private ToolStripMenuItem ignoreAvailableUpdate;
+    private ToolStripSeparator separator;
 
     public Notifier()
-    {
-      Bitmap iconBitmap = Properties.Resources.NotifierIcon;
+    {      
      
       components = new System.ComponentModel.Container();
       notifyIcon = new NotifyIcon(components)
                     {
                       ContextMenuStrip = new ContextMenuStrip(),
-                      Icon = Icon.FromHandle(iconBitmap.GetHicon()),
+                      Icon = Icon.FromHandle(GetIconForNotifier().GetHicon()),
                       Visible = true
                     };
+
       notifyIcon.MouseClick += notifyIcon_MouseClick;
       notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
@@ -83,6 +87,21 @@ namespace MySql.Notifier
       mySQLServicesList.LoadFromSettings();
       AddStaticMenuItems();
       SetNotifyIconToolTip();
+      
+      if (Settings.Default.UpdateCheck == (int)SoftwareUpdateStaus.HasUpdates)
+      {        
+        separator =  new ToolStripSeparator();
+
+        installAvailablelUpdates = new ToolStripMenuItem("Install available updates...");
+        installAvailablelUpdates.Click += new EventHandler(InstallAvailablelUpdates_Click);
+
+        ignoreAvailableUpdate = new ToolStripMenuItem("Ignore this update");
+        ignoreAvailableUpdate.Click += new EventHandler(IgnoreAvailableUpdateItem_Click);
+
+        notifyIcon.ContextMenuStrip.Items.Add(separator);
+        notifyIcon.ContextMenuStrip.Items.Add(installAvailablelUpdates);
+        notifyIcon.ContextMenuStrip.Items.Add(ignoreAvailableUpdate);
+      }
 
       StartWatchingSettingsFile();
 
@@ -146,7 +165,7 @@ namespace MySql.Notifier
             MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
             mi.Invoke(notifyIcon, null);
         }
-    }
+    }    
 
     void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
     {
@@ -159,19 +178,21 @@ namespace MySql.Notifier
     /// </summary>
     private void AddStaticMenuItems()
     {
-      var shieldBitmap = SystemIcons.Shield.ToBitmap();
-      shieldBitmap.SetResolution(16, 16);
+
       ToolStripMenuItem manageServices = new ToolStripMenuItem("Manage Services...");    
       manageServices.Click += new EventHandler(manageServicesDialogItem_Click);
+      manageServices.Image = Resources.ManageServicesIcon;
 
       ToolStripMenuItem launchInstaller = new ToolStripMenuItem("Launch Installer");
       bool installerInstalled = MySqlInstaller.IsInstalled;
       launchInstaller.Click += new EventHandler(launchInstallerItem_Click);
+      launchInstaller.Image = Resources.StartInstallerIcon;
       launchInstaller.Enabled = installerInstalled;
 
       ToolStripMenuItem checkForUpdates = new ToolStripMenuItem("Check for updates");
       checkForUpdates.Click += new EventHandler(checkUpdatesItem_Click);
-      checkForUpdates.Enabled = MySqlInstaller.CanCheckForUpdates();
+      checkForUpdates.Enabled = !String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) && MySqlInstaller.GetInstallerVersion().Contains("1.1");
+      checkForUpdates.Image = Resources.CheckForUpdatesIcon;
 
       ToolStripMenuItem actionsMenu = new ToolStripMenuItem("Actions", null, manageServices, launchInstaller, checkForUpdates);
 
@@ -249,8 +270,11 @@ namespace MySql.Notifier
     {
       if (!Settings.Default.NotifyOfStatusChange) return;
 
-      MySQLService service = mySQLServicesList.GetServiceByName(args.ServiceName);
+      MySQLService service = mySQLServicesList.GetServiceByName(args.ServiceName);      
+
       if (!service.NotifyOnStatusChange) return;
+
+      if (service.UpdateTrayIconOnStatusChange) notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
 
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceStatus;
@@ -265,7 +289,9 @@ namespace MySql.Notifier
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
     {
       ManageServicesDlg dlg = new ManageServicesDlg(mySQLServicesList);
-      dlg.ShowDialog();
+      dlg.ShowDialog();    
+      //update icon 
+      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
     }
 
 
@@ -283,12 +309,15 @@ namespace MySql.Notifier
 
     private void checkUpdatesItem_Click(object sender, EventArgs e)
     {
-      ProcessStartInfo psi = new ProcessStartInfo();
-      psi.FileName = AppDomain.CurrentDomain.SetupInformation.ApplicationName;
-      psi.WorkingDirectory = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
-      psi.Arguments = "--c";
-      psi.CreateNoWindow = true;
-      Process.Start(psi);
+      if (!String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()))
+      {
+        string path = @MySqlInstaller.GetInstallerPath();
+        Process proc = new Process();
+        ProcessStartInfo startInfo = new ProcessStartInfo();
+        startInfo.FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path);
+        startInfo.Arguments = "-checkforupdates";
+        Process.Start(startInfo);
+      }      
     }
 
     private void aboutMenu_Click(object sender, EventArgs e)
@@ -302,6 +331,28 @@ namespace MySql.Notifier
     {
       OptionsDialog dlg = new OptionsDialog();
       dlg.ShowDialog();      
+    }
+
+
+    private void InstallAvailablelUpdates_Click(object sender, EventArgs e)
+    {
+      //TODO  InstallAvailablelUpdates_Click
+    
+    }
+
+    private void IgnoreAvailableUpdateItem_Click(object sender, EventArgs e)
+    {
+      if (MessageBox.Show("This action will completely ignore the available software updates. Would you like to continue?", "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+      {
+        Properties.Settings.Default.UpdateCheck = 0;
+        Properties.Settings.Default.Save();        
+        
+        // update UI
+        notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+        notifyIcon.ContextMenuStrip.Items.Remove(separator);
+        notifyIcon.ContextMenuStrip.Items.Remove(installAvailablelUpdates);
+        notifyIcon.ContextMenuStrip.Items.Remove(ignoreAvailableUpdate);
+      }       
     }
 
     /// <summary>
@@ -346,14 +397,58 @@ namespace MySql.Notifier
         {
           mySQLServicesList.SetServiceStatus(serviceName, path, state);
           SetNotifyIconToolTip();
+          if (mySQLServicesList.GetServiceByName(serviceName) != null)
+          {
+            if (mySQLServicesList.GetServiceByName(serviceName).UpdateTrayIconOnStatusChange)
+             notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());            
+          }
         });
+
       else
       {
         mySQLServicesList.SetServiceStatus(serviceName, path, state);
         SetNotifyIconToolTip();
+        if (mySQLServicesList.GetServiceByName(serviceName) != null)
+        {
+          if (mySQLServicesList.GetServiceByName(serviceName).UpdateTrayIconOnStatusChange)
+            notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+        }
       }
     }
-  }
+
+
+    private Bitmap GetIconForNotifier()
+    {
+      
+      if (Settings.Default.ServiceList == null)
+        return Settings.Default.UpdateCheck == (int)SoftwareUpdateStaus.HasUpdates ? 
+               Properties.Resources.NotifierIconAlert :
+               Properties.Resources.NotifierIcon;
+     
+      var updateTrayIconServices = Settings.Default.ServiceList.Where(t => t.UpdateTrayIconOnStatusChange);
+
+      if (updateTrayIconServices != null)
+      {
+        if (updateTrayIconServices.Where(t => t.Status == ServiceControllerStatus.Stopped).Count() > 0)
+          return Settings.Default.UpdateCheck == (int)SoftwareUpdateStaus.HasUpdates ?
+                  Properties.Resources.NotifierIconStoppedAlert :
+                  Properties.Resources.NotifierIconStopped;
+
+        if (updateTrayIconServices.Where(t => t.Status == ServiceControllerStatus.StartPending).Count() > 0)
+          return Settings.Default.UpdateCheck == (int)SoftwareUpdateStaus.HasUpdates ?
+                  Properties.Resources.NotifierIconStartingAlert :
+                  Properties.Resources.NotifierIconStarting;
+
+
+        if (updateTrayIconServices.Where(t => t.Status == ServiceControllerStatus.Running).Count() > 0)
+          return Settings.Default.UpdateCheck == (int)SoftwareUpdateStaus.HasUpdates ?
+                  Properties.Resources.NotifierIconRunningAlert:
+                  Properties.Resources.NotifierIconRunning;      
+      }
+
+      return Properties.Resources.NotifierIcon;      
+    }
+  }  
 
   public enum SoftwareUpdateStaus : int
   {

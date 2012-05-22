@@ -73,12 +73,21 @@ namespace MySql.Notifier
 
       selectedService = lstMonitoredServices.SelectedItems.Count > 0 ? lstMonitoredServices.SelectedItems[0].Tag as MySQLService : null;
       notifyOnStatusChange.Checked = selectedService != null && selectedService.NotifyOnStatusChange;
+      chkUpdateTrayIcon.Checked = selectedService != null && selectedService.UpdateTrayIconOnStatusChange;
+            
     }
 
     private void notifyOnStatusChange_CheckedChanged(object sender, EventArgs e)
     {
       if (selectedService == null) return;
-      selectedService.NotifyOnStatusChange = notifyOnStatusChange.Checked;
+      selectedService.NotifyOnStatusChange = notifyOnStatusChange.Checked;      
+    }
+
+
+    private void chkUpdateTrayIcon_CheckedChanged(object sender, EventArgs e)
+    {
+      if (selectedService == null) return;      
+      selectedService.UpdateTrayIconOnStatusChange = chkUpdateTrayIcon.Checked;      
     }
 
     private void btnClose_Click(object sender, EventArgs e)
