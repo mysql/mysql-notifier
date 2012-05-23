@@ -235,6 +235,7 @@
     <None Include="Resources\MySQLTrayApp_manageServices.png" />
     <None Include="Resources\MySQLTrayApp_restart.png" />
     <None Include="Resources\MySQLTrayApp_startInstaller.png" />
+    <None Include="Resources\MySQLTrayApp_alert.png" />
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
   </ItemGroup>

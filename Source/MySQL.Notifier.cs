@@ -92,7 +92,7 @@ namespace MySql.Notifier
       {        
         separator =  new ToolStripSeparator();
 
-        installAvailablelUpdates = new ToolStripMenuItem("Install available updates...");
+        installAvailablelUpdates = new ToolStripMenuItem("Install available updates...", Resources.InstallAvailableUpdatesIcon);
         installAvailablelUpdates.Click += new EventHandler(InstallAvailablelUpdates_Click);
 
         ignoreAvailableUpdate = new ToolStripMenuItem("Ignore this update");

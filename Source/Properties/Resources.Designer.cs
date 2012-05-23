@@ -236,6 +236,13 @@ namespace MySql.Notifier.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap InstallAvailableUpdatesIcon {
+            get {
+                object obj = ResourceManager.GetObject("InstallAvailableUpdatesIcon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Launch MySQL Installer....
         /// </summary>
