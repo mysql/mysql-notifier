@@ -276,33 +276,33 @@
     <value>We are checking for updates to your installed MySQLsoftware.</value>
   </data>
   <data name="CheckForUpdatesIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MySQLTrayApp_checkForUpdates.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="NotifierIconAlert" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MySQLTrayApp_default_alert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="ManageServicesIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MySQLTrayApp_manageServices.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="restart" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MySQLTrayApp_restart.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="NotifierIconRunningAlert" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MySQLTrayApp_running_alert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="NotifierIconStartingAlert" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MySQLTrayApp_starting_altert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="StartInstallerIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MySQLTrayApp_startInstaller.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="NotifierIconStoppedAlert" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MySQLTrayApp_stopped_altert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\CheckForUpdatesIcon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="InstallAvailableUpdatesIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MySQLTrayApp_alert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\InstallAvailableUpdatesIcon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="oficial_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\mysql-notifier.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ManageServicesIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ManageServicesIcon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MySqlNotifierIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NotifierIcon.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NotifierIconAlert" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NotifierIconAlert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NotifierIconRunningAlert" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NotifierIconRunningAlert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NotifierIconStartingAlert" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NotifierIconStartingAlert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NotifierIconStoppedAlert" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NotifierIconStoppedAlert.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="restart" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\restart.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="StartInstallerIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\StartInstallerIcon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

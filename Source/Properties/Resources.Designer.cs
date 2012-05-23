@@ -275,6 +275,13 @@ namespace MySql.Notifier.Properties {
             }
         }
         
+        internal static System.Drawing.Icon MySqlNotifierIcon {
+            get {
+                object obj = ResourceManager.GetObject("MySqlNotifierIcon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to There was a problem retrieving Windows Services.
         /// </summary>
@@ -346,13 +353,6 @@ namespace MySql.Notifier.Properties {
         internal static string NoUpdatesFound {
             get {
                 return ResourceManager.GetString("NoUpdatesFound", resourceCulture);
-            }
-        }
-        
-        internal static System.Drawing.Icon oficial_icon {
-            get {
-                object obj = ResourceManager.GetObject("oficial_icon", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
             }
         }
         

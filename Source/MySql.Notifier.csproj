@@ -35,7 +35,8 @@
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
-    <ApplicationIcon>Resources\oficial_icon.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -219,24 +220,22 @@
     <None Include="Resources\signal-red.gif" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\oficial_icon.ico" />
     <None Include="Resources\about.png" />
     <Content Include="Lib\MySQL.Utility.dll" />
-    <Content Include="Resources\app_default.ico" />
     <Content Include="Resources\iconDB.jpg" />
     <None Include="Resources\stop.png" />
     <None Include="Resources\play.png" />
     <Content Include="Resources\logo-mysql.png" />
-    <None Include="Resources\MySQLTrayApp_stopped_altert.png" />
-    <None Include="Resources\MySQLTrayApp_starting_altert.png" />
-    <None Include="Resources\MySQLTrayApp_running_alert.png" />
-    <None Include="Resources\MySQLTrayApp_default_alert.png" />
-    <None Include="Resources\MySQLTrayApp_checkForUpdates.png" />
-    <None Include="Resources\MySQLTrayApp_manageServices.png" />
-    <None Include="Resources\MySQLTrayApp_restart.png" />
-    <None Include="Resources\MySQLTrayApp_startInstaller.png" />
-    <None Include="Resources\MySQLTrayApp_alert.png" />
-    <None Include="Resources\mysql-notifier.ico" />
+    <None Include="Resources\NotifierIconStoppedAlert.png" />
+    <None Include="Resources\NotifierIconStartingAlert.png" />
+    <None Include="Resources\NotifierIconRunningAlert.png" />
+    <None Include="Resources\NotifierIconAlert.png" />
+    <None Include="Resources\CheckForUpdatesIcon.png" />
+    <None Include="Resources\ManageServicesIcon.png" />
+    <None Include="Resources\restart.png" />
+    <None Include="Resources\StartInstallerIcon.png" />
+    <None Include="Resources\InstallAvailableUpdatesIcon.png" />
+    <None Include="Resources\NotifierIcon.ico" />
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
   </ItemGroup>
