@@ -179,6 +179,9 @@ namespace MySql.Notifier
     private void AddStaticMenuItems()
     {
 
+      ToolStripMenuItem launchWorkbenchUtilities = null;
+      ToolStripMenuItem actionsMenu = null;
+
       ToolStripMenuItem manageServices = new ToolStripMenuItem("Manage Services...");    
       manageServices.Click += new EventHandler(manageServicesDialogItem_Click);
       manageServices.Image = Resources.ManageServicesIcon;
@@ -189,12 +192,23 @@ namespace MySql.Notifier
       launchInstaller.Image = Resources.StartInstallerIcon;
       launchInstaller.Enabled = installerInstalled;
 
+      if (MySqlWorkbench.IsMySQLUtilitiesInstalled())
+      {
+        launchWorkbenchUtilities = new ToolStripMenuItem("MySQL Utilities Shell");
+        launchWorkbenchUtilities.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
+        launchWorkbenchUtilities.Image = Resources.LaunchUtilities;
+      }
+
       ToolStripMenuItem checkForUpdates = new ToolStripMenuItem("Check for updates");
       checkForUpdates.Click += new EventHandler(checkUpdatesItem_Click);
       checkForUpdates.Enabled = !String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) && MySqlInstaller.GetInstallerVersion().Contains("1.1");
       checkForUpdates.Image = Resources.CheckForUpdatesIcon;
+      
+      actionsMenu = new ToolStripMenuItem("Actions", null, manageServices, launchInstaller, checkForUpdates);
+      
+      if (launchWorkbenchUtilities != null)
+        actionsMenu.DropDownItems.Add(launchWorkbenchUtilities);
 
-      ToolStripMenuItem actionsMenu = new ToolStripMenuItem("Actions", null, manageServices, launchInstaller, checkForUpdates);
 
       ToolStripMenuItem optionsMenu = new ToolStripMenuItem("Options...");
       optionsMenu.Click += new EventHandler(optionsItem_Click);
@@ -354,6 +368,12 @@ namespace MySql.Notifier
         notifyIcon.ContextMenuStrip.Items.Remove(ignoreAvailableUpdate);
       }       
     }
+
+    private void LaunchWorkbenchUtilities_Click(object sender, EventArgs e)
+    {
+      MySqlWorkbench.LaunchUtilitiesShell();    
+    }
+
 
     /// <summary>
     /// When the exit menu item is clicked, make a call to terminate the ApplicationContext.

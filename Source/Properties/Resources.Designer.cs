@@ -252,6 +252,13 @@ namespace MySql.Notifier.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap LaunchUtilities {
+            get {
+                object obj = ResourceManager.GetObject("LaunchUtilities", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap logo_mysql {
             get {
                 object obj = ResourceManager.GetObject("logo_mysql", resourceCulture);

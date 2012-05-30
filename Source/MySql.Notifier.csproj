@@ -225,6 +225,7 @@
     <Content Include="Resources\iconDB.jpg" />
     <None Include="Resources\stop.png" />
     <None Include="Resources\play.png" />
+    <Content Include="Resources\LaunchUtilities.png" />
     <Content Include="Resources\logo-mysql.png" />
     <None Include="Resources\NotifierIconStoppedAlert.png" />
     <None Include="Resources\NotifierIconStartingAlert.png" />
