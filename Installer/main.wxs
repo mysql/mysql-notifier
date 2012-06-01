@@ -28,7 +28,7 @@
         <Directory Id='CompanyDir' Name='MySQL'>
           <Directory Id="INSTALLDIR" Name="$(var.ProductName)">
             <Component Id='MainExecutable' Guid='1e9fb57a-62e3-45cf-a896-686e33407606'>             
-              <File Id='MySqlNotifierEXE' Name='MySQL.Notifier.exe' Source='..\Source\bin\Release\MySql.Notifier.exe' Vital='yes' />
+              <File Id='MySqlNotifierEXE' Name='MySQLNotifier.exe' Source='..\Source\bin\Release\MySqlNotifier.exe' Vital='yes' />
               <File Id='MySQLUtilityDll' Name='MySQL.Utility.dll' Source='..\Source\Lib\MySQL.Utility.dll' Vital='yes' />             
               <RemoveFolder Id="INSTALLDIR" On="uninstall" />              
             </Component>            
@@ -61,7 +61,7 @@
         <CreateFolder Directory="ShortCutDir" />
         <RemoveFolder Id="RemovePMCompanyDir" Directory="PMCompanyDir" On="uninstall" />        
         <RemoveFolder Id="RemoveShortCutDir"  Directory="ShortCutDir" On="uninstall"/>
-        <Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"   Description="MySQL Notifier"  Target="[INSTALLDIR]MySql.Notifier.exe"  WorkingDirectory="INSTALLDIR"/>       
+        <Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"   Description="MySQL Notifier"  Target="[INSTALLDIR]MySqlNotifier.exe"  WorkingDirectory="INSTALLDIR"/>       
         <RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
         <RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="location" Type="string" Value="[INSTALLDIR]"/>
       </Component>
