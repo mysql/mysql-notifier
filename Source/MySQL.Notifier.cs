@@ -217,14 +217,13 @@ namespace MySql.Notifier
     }
 
     private void UpdateStaticMenuItems()
-    {
-      launchInstallerMenuItem.Enabled = MySqlInstaller.IsInstalled;
-      launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySQLUtilitiesInstalled();
-
+    {      
       bool hasUpdates = (Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0;
-      hasUpdatesSeparator.Visible = hasUpdates;
-      installAvailablelUpdatesMenuItem.Visible = hasUpdates;
-      ignoreAvailableUpdateMenuItem.Visible = hasUpdates;
+      if (hasUpdatesSeparator != null) hasUpdatesSeparator.Visible = hasUpdates;
+      if (installAvailablelUpdatesMenuItem != null)  installAvailablelUpdatesMenuItem.Visible = hasUpdates;
+      if (ignoreAvailableUpdateMenuItem != null) ignoreAvailableUpdateMenuItem.Visible = hasUpdates;
+      if (launchInstallerMenuItem != null) launchInstallerMenuItem.Enabled = MySqlInstaller.IsInstalled;
+      if (launchWorkbenchUtilitiesMenuItem != null) launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySQLUtilitiesInstalled();
     }
 
     private void ServiceListChanged(MySQLService service, ServiceListChangeType changeType)
@@ -305,6 +304,7 @@ namespace MySql.Notifier
       ManageServicesDlg dlg = new ManageServicesDlg(mySQLServicesList);
       dlg.ShowDialog();    
       //update icon 
+      Properties.Settings.Default.Reload();
       notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
     }
 

@@ -2,87 +2,87 @@
 <?define ProductName="MySQL Notifier 1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
-  <Product Name="$(var.ProductName)" Id ="9e9fb57a-62e3-45cf-a896-686e33407606" Manufacturer="Oracle" Language="1033" Version="1.0" 
-           UpgradeCode="9e9fb57a-62e3-45cf-a896-686e33407606">
+	<Product Name="$(var.ProductName)" Id ="9e9fb57a-62e3-45cf-a896-686e33407606" Manufacturer="Oracle" Language="1033" Version="1.0" 
+					 UpgradeCode="9e9fb57a-62e3-45cf-a896-686e33407606">
 		<Package Id="*" InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated"/>
 
-    <Property Id="ARPURLINFOABOUT" Value="http://www.mysql.com" />
-    <Property Id="ARPURLUPDATEINFO" Value="http://dev.mysql.com"/>    
+		<Property Id="ARPURLINFOABOUT" Value="http://www.mysql.com" />
+		<Property Id="ARPURLUPDATEINFO" Value="http://dev.mysql.com"/>    
 
-    <Media Id="1" Cabinet="MySqlNotifier.cab" EmbedCab="yes"  CompressionLevel="high"/>
+		<Media Id="1" Cabinet="MySqlNotifier.cab" EmbedCab="yes"  CompressionLevel="high"/>
 
-    <Condition Message="You must have Administrative rights on this machine to install [ProductName].">
-      <![CDATA[ Privileged  ]]>
-    </Condition>
+		<Condition Message="You must have Administrative rights on this machine to install [ProductName].">
+			<![CDATA[ Privileged  ]]>
+		</Condition>
 
-    <!-- First make sure that .NET is installed -->
-    <PropertyRef Id="NETFRAMEWORK40CLIENT"/>
-    <PropertyRef Id="NETFRAMEWORK40FULL"/>
-    <Condition Message="This application requires .NET Framework 4.0. Please install the .NET Framework then run this installer again.  For more information, please see http://go.microsoft.com/fwlink/?LinkId=181012">
-      <![CDATA[Installed OR NETFRAMEWORK40FULL OR NETFRAMEWORK40CLIENT]]>
-    </Condition>
+		<!-- First make sure that .NET is installed -->
+		<PropertyRef Id="NETFRAMEWORK40CLIENT"/>
+		<PropertyRef Id="NETFRAMEWORK40FULL"/>
+		<Condition Message="This application requires .NET Framework 4.0. Please install the .NET Framework then run this installer again.  For more information, please see http://go.microsoft.com/fwlink/?LinkId=181012">
+			<![CDATA[Installed OR NETFRAMEWORK40FULL OR NETFRAMEWORK40CLIENT]]>
+		</Condition>
 
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      
-      <Directory Id="ProgramFilesFolder" Name='PFiles'>
-        <Directory Id='CompanyDir' Name='MySQL'>
-          <Directory Id="INSTALLDIR" Name="$(var.ProductName)">
-            <Component Id='MainExecutable' Guid='1e9fb57a-62e3-45cf-a896-686e33407606'>             
-              <File Id='MySqlNotifierEXE' Name='MySQLNotifier.exe' Source='..\Source\bin\Release\MySqlNotifier.exe' Vital='yes' />
-              <File Id='MySQLUtilityDll' Name='MySQL.Utility.dll' Source='..\Source\Lib\MySQL.Utility.dll' Vital='yes' />             
-              <RemoveFolder Id="INSTALLDIR" On="uninstall" />              
-            </Component>            
-          </Directory>
-        </Directory>
-      </Directory>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			
+			<Directory Id="ProgramFilesFolder" Name='PFiles'>
+				<Directory Id='CompanyDir' Name='MySQL'>
+					<Directory Id="INSTALLDIR" Name="$(var.ProductName)">
+						<Component Id='MainExecutable' Guid='1e9fb57a-62e3-45cf-a896-686e33407606'>             
+							<File Id='MySqlNotifierEXE' Name='MySQLNotifier.exe' Source='..\Source\bin\Release\MySqlNotifier.exe' Vital='yes' />
+							<File Id='MySQLUtilityDll' Name='MySQL.Utility.dll' Source='..\Source\Lib\MySQL.Utility.dll' Vital='yes' />             
+							<RemoveFolder Id="INSTALLDIR" On="uninstall" />              
+						</Component>            
+					</Directory>
+				</Directory>
+			</Directory>
 
-      <Directory Id="ProgramMenuFolder" Name="PMFolder">
-        <Directory Id='PMCompanyDir' Name='MySQL'>
-          <Directory Id="ShortCutDir" Name="$(var.ProductName)"/>
-        </Directory>
-      </Directory>
+			<Directory Id="ProgramMenuFolder" Name="PMFolder">
+				<Directory Id='PMCompanyDir' Name='MySQL'>
+					<Directory Id="ShortCutDir" Name="$(var.ProductName)"/>
+				</Directory>
+			</Directory>
 
-      <!--<Directory Id="DesktopFolder"  Name="Desktop">
-        <Component Id="DesktopShortcut" Guid="1e9fb57a-62e3-45cf-a896-686e33407608">
-          <RegistryKey Root="HKCU" Key="MySQL AB\MySQLNotifierApp" Action="createAndRemoveOnUninstall">
-            <RegistryValue Name="MySQLNotifierShortCut" Value="1" Type="integer" KeyPath="yes"/>
-          </RegistryKey>
-          <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="MySQL Notifier" ShortName="MySQLNotifier" Icon="Icon.exe" Target="[INSTALLDIR]MySQL.Notifier.exe" Show="normal" WorkingDirectory="INSTALLDIR">
-            <Icon Id="Icon.exe" SourceFile="..\Source\bin\Release\MySQL.Notifier.exe" />
-          </Shortcut>
-        </Component>
-      </Directory>-->
-    
-    </Directory>
+			<!--<Directory Id="DesktopFolder"  Name="Desktop">
+				<Component Id="DesktopShortcut" Guid="1e9fb57a-62e3-45cf-a896-686e33407608">
+					<RegistryKey Root="HKCU" Key="MySQL AB\MySQLNotifierApp" Action="createAndRemoveOnUninstall">
+						<RegistryValue Name="MySQLNotifierShortCut" Value="1" Type="integer" KeyPath="yes"/>
+					</RegistryKey>
+					<Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="MySQL Notifier" ShortName="MySQLNotifier" Icon="Icon.exe" Target="[INSTALLDIR]MySQL.Notifier.exe" Show="normal" WorkingDirectory="INSTALLDIR">
+						<Icon Id="Icon.exe" SourceFile="..\Source\bin\Release\MySQL.Notifier.exe" />
+					</Shortcut>
+				</Component>
+			</Directory>-->
+		
+		</Directory>
 
-    <DirectoryRef Id="ShortCutDir">
-      <Component Id="ProgramMenuShortcutsComponent" Guid="1e9fb57a-62e3-45cf-a896-686e33407610">
-        <CreateFolder Directory="PMCompanyDir" />
-        <CreateFolder Directory="ShortCutDir" />
-        <RemoveFolder Id="RemovePMCompanyDir" Directory="PMCompanyDir" On="uninstall" />        
-        <RemoveFolder Id="RemoveShortCutDir"  Directory="ShortCutDir" On="uninstall"/>
-        <Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"   Description="MySQL Notifier"  Target="[INSTALLDIR]MySqlNotifier.exe"  WorkingDirectory="INSTALLDIR"/>       
-        <RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
-        <RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="location" Type="string" Value="[INSTALLDIR]"/>
-      </Component>
-    </DirectoryRef>
+		<DirectoryRef Id="ShortCutDir">
+			<Component Id="ProgramMenuShortcutsComponent" Guid="1e9fb57a-62e3-45cf-a896-686e33407610">
+				<CreateFolder Directory="PMCompanyDir" />
+				<CreateFolder Directory="ShortCutDir" />
+				<RemoveFolder Id="RemovePMCompanyDir" Directory="PMCompanyDir" On="uninstall" />        
+				<RemoveFolder Id="RemoveShortCutDir"  Directory="ShortCutDir" On="uninstall"/>
+				<Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"   Description="MySQL Notifier"  Target="[INSTALLDIR]MySqlNotifier.exe"  WorkingDirectory="INSTALLDIR"/>       
+				<RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+				<RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="location" Type="string" Value="[INSTALLDIR]"/>
+			</Component>
+		</DirectoryRef>
 
-    <Feature Id="Complete" Level="1">		
+		<Feature Id="Complete" Level="1">		
 			<ComponentRef Id="MainExecutable" />
-      <!--<ComponentRef Id="DesktopShortcut" />-->
-      <ComponentRef Id="ProgramMenuShortcutsComponent"/>
-    </Feature>
+			<!--<ComponentRef Id="DesktopShortcut" />-->
+			<ComponentRef Id="ProgramMenuShortcutsComponent"/>
+		</Feature>
 
-  
+	
 
-    <Property Id="LAUNCHAPPONEXIT" Value="1"/>    
-    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
-    <UIRef Id="WixUI_InstallDirNoLicense" />
-    <WixVariable Id="WixUIBannerBmp" Value="Bitmaps/BannrBmp.bmp"/>
-    <WixVariable Id="WixUIDialogBmp" Value="Bitmaps/DlgBmp.bmp"/>
-    <!--<Icon Id="Notifier.ico" SourceFile="app_default.ico" />-->
+		<Property Id="LAUNCHAPPONEXIT" Value="1"/>    
+		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
+		<UIRef Id="WixUI_InstallDirNoLicense" />
+		<WixVariable Id="WixUIBannerBmp" Value="Bitmaps/BannrBmp.bmp"/>
+		<WixVariable Id="WixUIDialogBmp" Value="Bitmaps/DlgBmp.bmp"/>
+		<Icon Id="Notifier.ico" SourceFile="app_default.ico" />
 
-    <CustomAction Id="LaunchApplication" FileKey="MySqlNotifierEXE" ExeCommand="" Execute="immediate" Impersonate="yes" Return="asyncNoWait" />
-    
-  </Product>
+		<CustomAction Id="LaunchApplication" FileKey="MySqlNotifierEXE" ExeCommand="" Execute="immediate" Impersonate="yes" Return="asyncNoWait" />
+		
+	</Product>
 </Wix>

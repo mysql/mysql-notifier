@@ -36,6 +36,12 @@ namespace MySql.Notifier
       }
       if (lstMonitoredServices.Items.Count > 0)
         lstMonitoredServices.Items[0].Selected = true;
+      else
+      {
+        btnDelete.Enabled = false;
+        chkUpdateTrayIcon.Enabled = false;
+        notifyOnStatusChange.Enabled = false;
+      }
     }
 
     private void btnAdd_Click(object sender, EventArgs e)
@@ -70,6 +76,9 @@ namespace MySql.Notifier
     private void lstMonitoredServices_SelectedIndexChanged(object sender, EventArgs e)
     {
       btnDelete.Enabled = lstMonitoredServices.SelectedItems.Count > 0;
+      notifyOnStatusChange.Enabled = btnDelete.Enabled;
+      chkUpdateTrayIcon.Enabled = btnDelete.Enabled;
+
 
       selectedService = lstMonitoredServices.SelectedItems.Count > 0 ? lstMonitoredServices.SelectedItems[0].Tag as MySQLService : null;
       notifyOnStatusChange.Checked = selectedService != null && selectedService.NotifyOnStatusChange;

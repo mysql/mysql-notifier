@@ -123,6 +123,7 @@
       // chkUpdateTrayIcon
       // 
       this.chkUpdateTrayIcon.AutoSize = true;
+      this.chkUpdateTrayIcon.Enabled = false;
       this.chkUpdateTrayIcon.Location = new System.Drawing.Point(26, 42);
       this.chkUpdateTrayIcon.Name = "chkUpdateTrayIcon";
       this.chkUpdateTrayIcon.Size = new System.Drawing.Size(293, 17);
@@ -134,6 +135,7 @@
       // notifyOnStatusChange
       // 
       this.notifyOnStatusChange.AutoSize = true;
+      this.notifyOnStatusChange.Enabled = false;
       this.notifyOnStatusChange.Location = new System.Drawing.Point(26, 19);
       this.notifyOnStatusChange.Name = "notifyOnStatusChange";
       this.notifyOnStatusChange.Size = new System.Drawing.Size(174, 17);
