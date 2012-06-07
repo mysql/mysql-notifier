@@ -12,7 +12,7 @@ using MySQL.Utility;
 
 namespace MySql.Notifier
 {
-  public partial class OptionsDialog : Form
+  public partial class OptionsDialog : FormBase
   {
     
     internal OptionsDialog()

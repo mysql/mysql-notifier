@@ -120,6 +120,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Lib\MySQL.Utility.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -137,6 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Forms\BaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\AboutDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -177,6 +181,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\AddServiceDlg.resx">
       <DependentUpon>AddServiceDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\BaseForm.resx">
+      <DependentUpon>BaseForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ManageServicesDlg.resx">
       <DependentUpon>ManageServicesDlg.cs</DependentUpon>
@@ -220,6 +227,7 @@
     <None Include="Resources\signal-red.gif" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\NotifierSplashWindow.png" />
     <None Include="Resources\about.png" />
     <Content Include="Lib\MySQL.Utility.dll" />
     <Content Include="Resources\iconDB.jpg" />

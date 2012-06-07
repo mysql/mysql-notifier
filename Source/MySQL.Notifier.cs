@@ -54,8 +54,11 @@ namespace MySql.Notifier
     private ToolStripSeparator hasUpdatesSeparator;
 
     public Notifier()
-    {      
-     
+    {           
+      //load splash screen
+       var splashScreen = new AboutDialog();
+       splashScreen.Show();
+      
       components = new System.ComponentModel.Container();
       notifyIcon = new NotifyIcon(components)
                     {
@@ -66,6 +69,7 @@ namespace MySql.Notifier
 
       notifyIcon.MouseClick += notifyIcon_MouseClick;
       notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
+      
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleTextServiceStatus;
 
@@ -87,7 +91,13 @@ namespace MySql.Notifier
 
       // loads all the services from our settings file and sets up their menus
       mySQLServicesList.LoadFromSettings();
-      AddStaticMenuItems();
+
+      if (mySQLServicesList.Services.Count == 0 || mySQLServicesList.Services.Count > 1) // otherwise menus will be hanlde when adding or removing services ||
+      {
+        AddStaticMenuItems();
+        UpdateStaticMenuItems();
+      }
+     
       SetNotifyIconToolTip();
       
       StartWatchingSettingsFile();
@@ -100,7 +110,9 @@ namespace MySql.Notifier
       WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
       watcher = new ManagementEventWatcher(managementScope, query);
       watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);
-      watcher.Start();    
+      watcher.Start();
+
+      splashScreen.Close();
         
     }
 
@@ -166,7 +178,9 @@ namespace MySql.Notifier
     /// Adds the static menu items such as Options, Exit, About..
     /// </summary>
     private void AddStaticMenuItems()
-    {
+    {      
+      ContextMenuStrip menu = new ContextMenuStrip();      
+
       ToolStripMenuItem manageServices = new ToolStripMenuItem("Manage Services...");    
       manageServices.Click += new EventHandler(manageServicesDialogItem_Click);
       manageServices.Image = Resources.ManageServicesIcon;
@@ -175,17 +189,15 @@ namespace MySql.Notifier
       launchInstallerMenuItem.Click += new EventHandler(launchInstallerItem_Click);
       launchInstallerMenuItem.Image = Resources.StartInstallerIcon;
 
-      launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem("MySQL Utilities Shell");
-      launchWorkbenchUtilitiesMenuItem.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
-      launchWorkbenchUtilitiesMenuItem.Image = Resources.LaunchUtilities;
-
       ToolStripMenuItem checkForUpdates = new ToolStripMenuItem("Check for updates");
       checkForUpdates.Click += new EventHandler(checkUpdatesItem_Click);
       checkForUpdates.Enabled = !String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) && MySqlInstaller.GetInstallerVersion().Contains("1.1");
       checkForUpdates.Image = Resources.CheckForUpdatesIcon;
-      
-      ToolStripMenuItem actionsMenu = new ToolStripMenuItem("Actions", null, manageServices, launchInstallerMenuItem, checkForUpdates, launchWorkbenchUtilitiesMenuItem);
-      
+
+      launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem("MySQL Utilities Shell");
+      launchWorkbenchUtilitiesMenuItem.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
+      launchWorkbenchUtilitiesMenuItem.Image = Resources.LaunchUtilities;
+
       ToolStripMenuItem optionsMenu = new ToolStripMenuItem("Options...");
       optionsMenu.Click += new EventHandler(optionsItem_Click);
 
@@ -195,12 +207,25 @@ namespace MySql.Notifier
       ToolStripMenuItem exitMenu = new ToolStripMenuItem("Close MySQL Notifier");
       exitMenu.Click += new EventHandler(exitItem_Click);
 
-      actionsMenu.DropDownItems.Add(new ToolStripSeparator());
-      actionsMenu.DropDownItems.Add(optionsMenu);
-      actionsMenu.DropDownItems.Add(aboutMenu);
-      actionsMenu.DropDownItems.Add(exitMenu);
-
-      notifyIcon.ContextMenuStrip.Items.Add(actionsMenu);
+      menu.Items.Add(manageServices);
+      menu.Items.Add(launchInstallerMenuItem);
+      menu.Items.Add(checkForUpdates);
+      menu.Items.Add(launchWorkbenchUtilitiesMenuItem);
+      menu.Items.Add(new ToolStripSeparator());
+      menu.Items.Add(optionsMenu);
+      menu.Items.Add(aboutMenu);
+      menu.Items.Add(exitMenu);
+     
+      if (mySQLServicesList.Services.Count > 0)
+      {
+        ToolStripMenuItem actionsMenu = new ToolStripMenuItem("Actions", null);
+        actionsMenu.DropDown = menu;
+        notifyIcon.ContextMenuStrip.Items.Add(actionsMenu);
+      }
+      else
+      {
+        notifyIcon.ContextMenuStrip = menu;
+      }
 
       // now we add the menu items we will show when we have updates available
       hasUpdatesSeparator = new ToolStripSeparator();
@@ -228,22 +253,29 @@ namespace MySql.Notifier
 
     private void ServiceListChanged(MySQLService service, ServiceListChangeType changeType)
     {
-      if (changeType == ServiceListChangeType.Remove)
-      {
-        service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);
-        return;
+           
+       if ((mySQLServicesList.Services.Count == 0 && changeType == ServiceListChangeType.Remove) ||
+          (mySQLServicesList.Services.Count == 1 &&  changeType != ServiceListChangeType.Remove))
+      {      
+          ReBuildMenu();             
       }
 
-      // the rest of this is for additions
-      service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
-      service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
-      if (changeType == ServiceListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
+      if (changeType == ServiceListChangeType.Remove)
       {
-        notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-        notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
-        notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.ServiceName);
-        notifyIcon.ShowBalloonTip(1500);
+         service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);                 
       }
+      else
+      {                
+          service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
+          service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
+          if (changeType == ServiceListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
+          {
+            notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
+            notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.ServiceName);
+            notifyIcon.ShowBalloonTip(1500);
+          }
+       }       
     }
 
     void service_StatusChangeError(object sender, Exception ex)
@@ -254,7 +286,7 @@ namespace MySql.Notifier
       notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextFailedStatusChange, service.ServiceName, ex.Message);
       notifyIcon.ShowBalloonTip(1500);
     }
-
+   
     void mySQLServicesList_ServiceListChanged(object sender, MySQLService service, ServiceListChangeType changeType)
     {
       ServiceListChanged(service, changeType);
@@ -304,7 +336,6 @@ namespace MySql.Notifier
       ManageServicesDlg dlg = new ManageServicesDlg(mySQLServicesList);
       dlg.ShowDialog();    
       //update icon 
-      Properties.Settings.Default.Reload();
       notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
     }
 
@@ -430,6 +461,13 @@ namespace MySql.Notifier
       }
     }
 
+    private void ReBuildMenu()
+    {
+      notifyIcon.ContextMenuStrip = new ContextMenuStrip();
+      AddStaticMenuItems();
+      UpdateStaticMenuItems();
+    }
+
 
     private Bitmap GetIconForNotifier()
     {
@@ -454,7 +492,7 @@ namespace MySql.Notifier
 
       return hasUpdates ? Properties.Resources.NotifierIconAlert : Properties.Resources.NotifierIcon;
     }
-  }  
+  }    
 
   public enum SoftwareUpdateStaus : int
   {

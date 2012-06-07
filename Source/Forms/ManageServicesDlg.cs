@@ -11,7 +11,7 @@ using MySql.Notifier.Properties;
 
 namespace MySql.Notifier
 {
-  public partial class ManageServicesDlg : Form
+  public partial class ManageServicesDlg : FormBase
   {
     private MySQLServicesList serviceList;
     public static string addServiceName;
@@ -44,7 +44,7 @@ namespace MySql.Notifier
       }
     }
 
-    private void btnAdd_Click(object sender, EventArgs e)
+    private void btnAdd_Click(object sender, EventArgs e)  
     {
       AddServiceDlg dlg = new AddServiceDlg();
       if (dlg.ShowDialog() == DialogResult.Cancel) return;

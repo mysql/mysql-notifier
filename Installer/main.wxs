@@ -22,8 +22,7 @@
 			<![CDATA[Installed OR NETFRAMEWORK40FULL OR NETFRAMEWORK40CLIENT]]>
 		</Condition>
 
-		<Directory Id="TARGETDIR" Name="SourceDir">
-			
+		<Directory Id="TARGETDIR" Name="SourceDir">			
 			<Directory Id="ProgramFilesFolder" Name='PFiles'>
 				<Directory Id='CompanyDir' Name='MySQL'>
 					<Directory Id="INSTALLDIR" Name="$(var.ProductName)">

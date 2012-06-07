@@ -12,7 +12,7 @@ using MySQL.Utility;
 
 namespace MySql.Notifier
 {
-  public partial class AddServiceDlg : Form
+  public partial class AddServiceDlg : FormBase
   {
 
     private class ListViewItemComparer : IComparer
@@ -47,7 +47,8 @@ namespace MySql.Notifier
     }
 
     private int sortColumn = -1;
-    private string lastFilter = String.Empty;    
+    private string lastFilter = String.Empty;
+    private string lastTextFilter = String.Empty;
 
     public AddServiceDlg()
     {      
@@ -64,11 +65,17 @@ namespace MySql.Notifier
       try
       {
         string currentFilter = filter.Checked ? Settings.Default.AutoAddPattern.Trim() : null;
-        if (currentFilter == lastFilter) return;
+        if (currentFilter == lastFilter && txtFilter.Text == lastTextFilter) return;
 
         lastFilter = currentFilter;
+        lastTextFilter = txtFilter.Text;
+
         lstServices.Items.Clear();
         var services = Service.GetInstances(lastFilter);
+        if (!String.IsNullOrEmpty(lastTextFilter))
+        { 
+          services = services.Where(t => t.Properties["DisplayName"].Value.ToString().Contains(txtFilter.Text)).ToList();        
+        }
         foreach (var item in services)
         {
           ListViewItem newItem = new ListViewItem();
@@ -93,11 +100,6 @@ namespace MySql.Notifier
       {
         ServicesToAdd.Add(lvi.Tag as string);
       }
-    }
-
-    private void textBox1_TextChanged(object sender, EventArgs e)
-    {
-      RefreshList();
     }
 
     private void filter_CheckedChanged(object sender, EventArgs e)
@@ -130,5 +132,10 @@ namespace MySql.Notifier
 
     }
 
+    private void txtFilter_TextChanged(object sender, EventArgs e)
+    {
+      RefreshList();
+    }
+  
   }
 }

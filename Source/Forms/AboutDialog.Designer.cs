@@ -35,8 +35,8 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.BackgroundImage = global::MySql.Notifier.Properties.Resources.AboutBackGroundDialog;
-      this.ClientSize = new System.Drawing.Size(557, 320);
+      this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
+      this.ClientSize = new System.Drawing.Size(557, 271);
       this.ForeColor = System.Drawing.SystemColors.Control;
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));

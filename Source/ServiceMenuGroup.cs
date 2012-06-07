@@ -174,12 +174,15 @@ namespace MySql.Notifier
 
     public void RemoveFromContextMenu(ContextMenuStrip menu)
     {
-
       if (boundService.IsRealMySQLService)
       {
-        menu.Items.RemoveAt(menu.Items.IndexOf(statusMenu));
-        menu.Items.Remove(configureMenu);
-        menu.Items.Remove(editorMenu);
+        int index = menu.Items.IndexOf(statusMenu);
+        if (index >= 0) 
+        {
+          menu.Items.RemoveAt(index);
+          menu.Items.Remove(configureMenu);
+          menu.Items.Remove(editorMenu);
+        }
       }
       else
       {
