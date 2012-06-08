@@ -10,43 +10,25 @@ namespace MySql.Notifier
 {
   public class FormBase : Form
   {
-    private Utility.OSVersion OsVersion
+    private Font smallFont;
+    private Font mediumFont;
+    private Font largeFont;
+
+    public FormBase()
     {
-      get {
-        return Utility.GetOsVersion();
-      }
+      Utility.OSVersion v = Utility.GetOsVersion();
+      string fontName = v != Utility.OSVersion.WindowsXp ? "Segoe UI" : "Tahoma";
+      smallFont = new Font(fontName, 12, FontStyle.Regular, GraphicsUnit.Pixel, ((byte)(0)));
+      mediumFont = new Font(fontName, 14, FontStyle.Regular, GraphicsUnit.Pixel, ((byte)(0)));
+      largeFont = new Font(fontName, 16, FontStyle.Regular, GraphicsUnit.Pixel, ((byte)(0)));
     }
 
-    private Font smallFont
-    {
-      get
-      {
-        return new Font(OsVersion != Utility.OSVersion.WindowsXp ? "Segoe UI" : "Tahoma", 12, FontStyle.Regular, GraphicsUnit.Pixel, ((byte)(0)));       
-      }      
-    }
-    
-    private Font mediumFont
-    {
-      get
-      {
-        return new Font(OsVersion != Utility.OSVersion.WindowsXp ? "Segoe UI" : "Tahoma", 14, FontStyle.Regular, GraphicsUnit.Pixel, ((byte)(0)));       
-      }     
-    }
-
-    private Font largeFont
-    {
-      get
-      {
-        return new Font(OsVersion != Utility.OSVersion.WindowsXp ? "Segoe UI" : "Tahoma", 16, FontStyle.Regular, GraphicsUnit.Pixel, ((byte)(0)));       
-      }      
-    }
 
     protected override void OnLoad(EventArgs e)
     {
       base.OnLoad(e);
-      this.Font = smallFont;
-      var controls = this.Controls;
-      SettingControls(controls);
+      Font = smallFont;
+      SettingControls(Controls);
     }
   
     protected virtual void SettingControls(Control.ControlCollection controls)
@@ -54,28 +36,24 @@ namespace MySql.Notifier
       if (controls == null || controls.Count == 0) return;
            
       foreach (Control c in controls)
-      {                
+      {
         c.Font = smallFont;
-        if (c is Label)
+        if (c is CheckBox)
+          c.BackColor = Color.Transparent;
+        else if (c is Label)
         {
-          Label lbl = ((Label)c);
-          lbl.BackColor = Color.Transparent;
-          var name = lbl.Name.ToLower();
+          c.BackColor = Color.Transparent;
+          string name = c.Name.ToLower();
           if (name.Contains("hipertitle"))
           {
-            lbl.Font = largeFont;
-            lbl.ForeColor = Color.FromArgb(39, 73, 161);
+            c.Font = largeFont;
+            c.ForeColor = Color.FromArgb(39, 73, 161);
           }
-          if (name.Contains("lblsubtitle"))              
-            lbl.Font = mediumFont;              
-        }
-        if (c is CheckBox)
-        {
-          CheckBox chk = (CheckBox)c;
-          chk.BackColor = Color.Transparent;
+          else if (name.Contains("lblsubtitle"))
+            c.Font = mediumFont;
         }
         SettingControls(c.Controls);
-      }    
-    } 
+      }
+    }
   }
 }
