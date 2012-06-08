@@ -118,7 +118,7 @@ namespace MySql.Notifier
 
       foreach (MySqlWorkbenchConnection c in MySqlWorkbench.Connections)
       {
-        if (c.Host != parameters.HostIPv4) continue;
+        if (c.Host != parameters.HostIPv4 && c.Host != parameters.HostName) continue; // including hostName in case the connection is attach to the host name
         if (c.IsNamedPipe && (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0)) continue;
         if (c.IsSocket && c.Port != parameters.Port) continue;
         WorkbenchConnections.Add(c);
@@ -262,7 +262,7 @@ namespace MySql.Notifier
       parameters.PipeName = "mysql";
 
       // get our host information
-      parameters.HostName = winService.MachineName;
+      parameters.HostName = winService.MachineName == "." ? "localhost" : winService.MachineName;
       parameters.HostIPv4 = Utility.GetIPv4ForHostName(parameters.HostName);
 
       RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format(@"SYSTEM\CurrentControlSet\Services\{0}", winService.ServiceName));
