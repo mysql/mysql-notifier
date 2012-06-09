@@ -53,6 +53,8 @@ namespace MySql.Notifier
     private ToolStripMenuItem ignoreAvailableUpdateMenuItem;
     private ToolStripSeparator hasUpdatesSeparator;
 
+    private int previousTotalServicesNumber;
+
     public Notifier()
     {           
       //load splash screen
@@ -92,7 +94,9 @@ namespace MySql.Notifier
       // loads all the services from our settings file and sets up their menus
       mySQLServicesList.LoadFromSettings();
 
-      if (mySQLServicesList.Services.Count == 0 || mySQLServicesList.Services.Count > 1) // otherwise menus will be hanlde when adding or removing services ||
+      previousTotalServicesNumber = mySQLServicesList.Services.Count;
+
+      if (mySQLServicesList.Services.Count == 0) // otherwise menus will be hanlde when adding or removing services 
       {
         AddStaticMenuItems();
         UpdateStaticMenuItems();
@@ -255,9 +259,10 @@ namespace MySql.Notifier
     {
            
        if ((mySQLServicesList.Services.Count == 0 && changeType == ServiceListChangeType.Remove) ||
-          (mySQLServicesList.Services.Count == 1 &&  changeType != ServiceListChangeType.Remove))
+          (previousTotalServicesNumber == 0 &&  changeType != ServiceListChangeType.Remove))
       {      
-          ReBuildMenu();             
+          ReBuildMenu();
+          previousTotalServicesNumber = mySQLServicesList.Services.Count;
       }
 
       if (changeType == ServiceListChangeType.Remove)

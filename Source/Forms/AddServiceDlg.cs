@@ -74,7 +74,7 @@ namespace MySql.Notifier
         var services = Service.GetInstances(lastFilter);
         if (!String.IsNullOrEmpty(lastTextFilter))
         { 
-          services = services.Where(t => t.Properties["DisplayName"].Value.ToString().Contains(txtFilter.Text)).ToList();        
+          services = services.Where(t => t.Properties["DisplayName"].Value.ToString().ToLower().Contains(txtFilter.Text.ToLower())).ToList();        
         }
         foreach (var item in services)
         {

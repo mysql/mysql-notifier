@@ -57,9 +57,9 @@
       this.panel2.Controls.Add(this.btnCancel);
       this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
       this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.panel2.Location = new System.Drawing.Point(0, 614);
+      this.panel2.Location = new System.Drawing.Point(0, 459);
       this.panel2.Name = "panel2";
-      this.panel2.Size = new System.Drawing.Size(486, 62);
+      this.panel2.Size = new System.Drawing.Size(488, 59);
       this.panel2.TabIndex = 46;
       // 
       // btnOK
@@ -67,7 +67,7 @@
       this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
       this.btnOK.Enabled = false;
-      this.btnOK.Location = new System.Drawing.Point(318, 18);
+      this.btnOK.Location = new System.Drawing.Point(320, 14);
       this.btnOK.Name = "btnOK";
       this.btnOK.Size = new System.Drawing.Size(75, 23);
       this.btnOK.TabIndex = 13;
@@ -79,7 +79,7 @@
       // 
       this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.btnCancel.Location = new System.Drawing.Point(399, 18);
+      this.btnCancel.Location = new System.Drawing.Point(401, 14);
       this.btnCancel.Name = "btnCancel";
       this.btnCancel.Size = new System.Drawing.Size(75, 23);
       this.btnCancel.TabIndex = 12;
@@ -105,12 +105,12 @@
       this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panel1.Location = new System.Drawing.Point(0, 0);
       this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(486, 676);
+      this.panel1.Size = new System.Drawing.Size(488, 518);
       this.panel1.TabIndex = 47;
       // 
       // txtFilter
       // 
-      this.txtFilter.Location = new System.Drawing.Point(62, 236);
+      this.txtFilter.Location = new System.Drawing.Point(62, 225);
       this.txtFilter.Name = "txtFilter";
       this.txtFilter.Size = new System.Drawing.Size(130, 22);
       this.txtFilter.TabIndex = 57;
@@ -119,7 +119,7 @@
       // lblText6
       // 
       this.lblText6.AutoSize = true;
-      this.lblText6.Location = new System.Drawing.Point(20, 241);
+      this.lblText6.Location = new System.Drawing.Point(20, 230);
       this.lblText6.Name = "lblText6";
       this.lblText6.Size = new System.Drawing.Size(36, 13);
       this.lblText6.TabIndex = 56;
@@ -128,7 +128,7 @@
       // lblText5
       // 
       this.lblText5.AutoSize = true;
-      this.lblText5.Location = new System.Drawing.Point(20, 214);
+      this.lblText5.Location = new System.Drawing.Point(20, 203);
       this.lblText5.Name = "lblText5";
       this.lblText5.Size = new System.Drawing.Size(94, 13);
       this.lblText5.TabIndex = 55;
@@ -137,7 +137,7 @@
       // lblText4
       // 
       this.lblText4.AutoSize = true;
-      this.lblText4.Location = new System.Drawing.Point(20, 195);
+      this.lblText4.Location = new System.Drawing.Point(20, 184);
       this.lblText4.Name = "lblText4";
       this.lblText4.Size = new System.Drawing.Size(392, 13);
       this.lblText4.TabIndex = 54;
@@ -173,7 +173,7 @@
       // filter
       // 
       this.filter.AutoSize = true;
-      this.filter.Location = new System.Drawing.Point(213, 241);
+      this.filter.Location = new System.Drawing.Point(213, 230);
       this.filter.Name = "filter";
       this.filter.Size = new System.Drawing.Size(264, 17);
       this.filter.TabIndex = 50;
@@ -190,9 +190,9 @@
             this.columnHeader1,
             this.columnHeader3});
       this.lstServices.FullRowSelect = true;
-      this.lstServices.Location = new System.Drawing.Point(23, 273);
+      this.lstServices.Location = new System.Drawing.Point(23, 262);
       this.lstServices.Name = "lstServices";
-      this.lstServices.Size = new System.Drawing.Size(445, 311);
+      this.lstServices.Size = new System.Drawing.Size(447, 180);
       this.lstServices.TabIndex = 49;
       this.lstServices.UseCompatibleStateImageBehavior = false;
       this.lstServices.View = System.Windows.Forms.View.Details;
@@ -211,7 +211,7 @@
       // lblSubTitle2
       // 
       this.lblSubTitle2.AutoSize = true;
-      this.lblSubTitle2.Location = new System.Drawing.Point(20, 173);
+      this.lblSubTitle2.Location = new System.Drawing.Point(20, 162);
       this.lblSubTitle2.Name = "lblSubTitle2";
       this.lblSubTitle2.Size = new System.Drawing.Size(145, 13);
       this.lblSubTitle2.TabIndex = 48;
@@ -220,7 +220,7 @@
       // lblText3
       // 
       this.lblText3.AutoSize = true;
-      this.lblText3.Location = new System.Drawing.Point(20, 109);
+      this.lblText3.Location = new System.Drawing.Point(20, 118);
       this.lblText3.Name = "lblText3";
       this.lblText3.Size = new System.Drawing.Size(61, 13);
       this.lblText3.TabIndex = 47;
@@ -232,7 +232,7 @@
       this.server.FormattingEnabled = true;
       this.server.Items.AddRange(new object[] {
             "Local"});
-      this.server.Location = new System.Drawing.Point(95, 106);
+      this.server.Location = new System.Drawing.Point(95, 115);
       this.server.Name = "server";
       this.server.Size = new System.Drawing.Size(259, 21);
       this.server.TabIndex = 46;
@@ -243,7 +243,7 @@
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackColor = System.Drawing.SystemColors.Menu;
       this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-      this.ClientSize = new System.Drawing.Size(486, 676);
+      this.ClientSize = new System.Drawing.Size(488, 518);
       this.Controls.Add(this.panel2);
       this.Controls.Add(this.panel1);
       this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

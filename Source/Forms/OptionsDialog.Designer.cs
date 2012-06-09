@@ -79,6 +79,7 @@
       this.btnOK.TabIndex = 4;
       this.btnOK.Text = "Apply";
       this.btnOK.UseVisualStyleBackColor = true;
+      this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
       // 
       // panel1
       // 
@@ -146,6 +147,7 @@
       this.chkEnabledAutoAddServices.TabIndex = 57;
       this.chkEnabledAutoAddServices.Text = "Automatically add new services that match this pattern\r\n";
       this.chkEnabledAutoAddServices.UseVisualStyleBackColor = true;
+      this.chkEnabledAutoAddServices.CheckedChanged += new System.EventHandler(this.chkEnabledAutoAddServices_CheckedChanged);
       // 
       // lblWeeks
       // 
@@ -172,6 +174,7 @@
       this.chkAutoCheckUpdates.TabIndex = 54;
       this.chkAutoCheckUpdates.Text = "Automatically Check For Updates Every";
       this.chkAutoCheckUpdates.UseVisualStyleBackColor = true;
+      this.chkAutoCheckUpdates.CheckedChanged += new System.EventHandler(this.chkAutoCheckUpdates_CheckedChanged);
       // 
       // chkRunAtStartup
       // 

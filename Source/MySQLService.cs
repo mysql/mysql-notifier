@@ -110,15 +110,24 @@ namespace MySql.Notifier
 
     private void FindMatchingWBConnections()
     {
+      
       // first we discover what parameters we were started with
       MySQLStartupParameters parameters = GetStartupParameters();
       WorkbenchConnections = new List<MySqlWorkbenchConnection>();
 
       if (!IsRealMySQLService) return;
-
+      
       foreach (MySqlWorkbenchConnection c in MySqlWorkbench.Connections)
       {
-        if (c.Host != parameters.HostIPv4 && c.Host != parameters.HostName) continue; // including hostName in case the connection is attach to the host name
+        if (!Utility.IsValidIpAddress(c.Host)) //matching connections by Ip
+        {
+          if (Utility.GetIPv4ForHostName(c.Host) != parameters.HostIPv4) continue; 
+        }
+        else
+        {
+          if (c.Host != parameters.HostIPv4) continue; 
+        }
+        
         if (c.IsNamedPipe && (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0)) continue;
         if (c.IsSocket && c.Port != parameters.Port) continue;
         WorkbenchConnections.Add(c);
@@ -201,8 +210,8 @@ namespace MySql.Notifier
 
     void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      if (e.Error != null)
-        OnStatusChangeError(e.Error);
+      if (e.Error != null)    
+        OnStatusChangeError(e.Error);      
       else
       {
         // else no error
@@ -247,7 +256,7 @@ namespace MySql.Notifier
         winService.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));      
       }
       else
-      {      
+      {       
         proc.StartInfo.FileName = "sc";
         proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, ServiceName);
         proc.StartInfo.UseShellExecute = true;
