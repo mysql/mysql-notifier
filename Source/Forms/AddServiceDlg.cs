@@ -48,14 +48,14 @@ namespace MySql.Notifier
 
     private int sortColumn = -1;
     private string lastFilter = String.Empty;
-    private string lastTextFilter = String.Empty;
+    private string lastTextFilter = String.Empty;    
 
     public AddServiceDlg()
     {      
       InitializeComponent();
       server.SelectedIndex = 0;
       RefreshList();
-      lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);
+      lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);      
     }
 
     public List<string> ServicesToAdd { get; private set; }
@@ -67,6 +67,7 @@ namespace MySql.Notifier
         string currentFilter = filter.Checked ? Settings.Default.AutoAddPattern.Trim() : null;
         if (currentFilter == lastFilter && txtFilter.Text == lastTextFilter) return;
 
+        lstServices.BeginUpdate();
         lastFilter = currentFilter;
         lastTextFilter = txtFilter.Text;
 
@@ -74,7 +75,7 @@ namespace MySql.Notifier
         var services = Service.GetInstances(lastFilter);
         if (!String.IsNullOrEmpty(lastTextFilter))
         { 
-          services = services.Where(t => t.Properties["DisplayName"].Value.ToString().ToLower().Contains(txtFilter.Text.ToLower())).ToList();        
+          services = services.Where(t => t.Properties["DisplayName"].Value.ToString().Contains(txtFilter.Text)).ToList();        
         }
         foreach (var item in services)
         {
@@ -85,6 +86,7 @@ namespace MySql.Notifier
 
           lstServices.Items.Add(newItem);
         }
+        lstServices.EndUpdate();
       }
       catch (Exception ex)
       {
@@ -134,8 +136,16 @@ namespace MySql.Notifier
 
     private void txtFilter_TextChanged(object sender, EventArgs e)
     {
-      RefreshList();
+      if (!timerForFiltering.Enabled)
+      {
+        timerForFiltering.Enabled = true;
+      }
     }
-  
+
+    private void timerForFiltering_Tick(object sender, EventArgs e)
+    {
+      RefreshList();
+      timerForFiltering.Enabled = false;      
+    }
   }
 }

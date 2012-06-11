@@ -267,7 +267,7 @@ namespace MySql.Notifier
 
       if (changeType == ServiceListChangeType.Remove)
       {
-         service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);                 
+        service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);                 
       }
       else
       {                
@@ -469,6 +469,7 @@ namespace MySql.Notifier
     private void ReBuildMenu()
     {
       notifyIcon.ContextMenuStrip = new ContextMenuStrip();
+      notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
       AddStaticMenuItems();
       UpdateStaticMenuItems();
     }

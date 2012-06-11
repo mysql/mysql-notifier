@@ -55,15 +55,15 @@
       this.panel2.Controls.Add(this.btnOK);
       this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
       this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.panel2.Location = new System.Drawing.Point(0, 392);
+      this.panel2.Location = new System.Drawing.Point(0, 409);
       this.panel2.Name = "panel2";
-      this.panel2.Size = new System.Drawing.Size(422, 63);
+      this.panel2.Size = new System.Drawing.Size(422, 46);
       this.panel2.TabIndex = 5;
       // 
       // btnCancel
       // 
       this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.btnCancel.Location = new System.Drawing.Point(325, 20);
+      this.btnCancel.Location = new System.Drawing.Point(325, 10);
       this.btnCancel.Name = "btnCancel";
       this.btnCancel.Size = new System.Drawing.Size(87, 27);
       this.btnCancel.TabIndex = 5;
@@ -73,7 +73,7 @@
       // btnOK
       // 
       this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.btnOK.Location = new System.Drawing.Point(231, 20);
+      this.btnOK.Location = new System.Drawing.Point(231, 10);
       this.btnOK.Name = "btnOK";
       this.btnOK.Size = new System.Drawing.Size(87, 27);
       this.btnOK.TabIndex = 4;

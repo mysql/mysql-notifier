@@ -36,7 +36,8 @@
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
-      this.ClientSize = new System.Drawing.Size(557, 271);
+      this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+      this.ClientSize = new System.Drawing.Size(560, 272);
       this.ForeColor = System.Drawing.SystemColors.Control;
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));

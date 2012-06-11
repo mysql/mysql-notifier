@@ -28,6 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
+      this.components = new System.ComponentModel.Container();
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddServiceDlg));
       this.panel2 = new System.Windows.Forms.Panel();
       this.btnOK = new System.Windows.Forms.Button();
@@ -47,6 +48,7 @@
       this.lblSubTitle2 = new System.Windows.Forms.Label();
       this.lblText3 = new System.Windows.Forms.Label();
       this.server = new System.Windows.Forms.ComboBox();
+      this.timerForFiltering = new System.Windows.Forms.Timer(this.components);
       this.panel2.SuspendLayout();
       this.panel1.SuspendLayout();
       this.SuspendLayout();
@@ -57,9 +59,9 @@
       this.panel2.Controls.Add(this.btnCancel);
       this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
       this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.panel2.Location = new System.Drawing.Point(0, 459);
+      this.panel2.Location = new System.Drawing.Point(0, 468);
       this.panel2.Name = "panel2";
-      this.panel2.Size = new System.Drawing.Size(488, 59);
+      this.panel2.Size = new System.Drawing.Size(488, 50);
       this.panel2.TabIndex = 46;
       // 
       // btnOK
@@ -67,7 +69,7 @@
       this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
       this.btnOK.Enabled = false;
-      this.btnOK.Location = new System.Drawing.Point(320, 14);
+      this.btnOK.Location = new System.Drawing.Point(320, 15);
       this.btnOK.Name = "btnOK";
       this.btnOK.Size = new System.Drawing.Size(75, 23);
       this.btnOK.TabIndex = 13;
@@ -79,7 +81,7 @@
       // 
       this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.btnCancel.Location = new System.Drawing.Point(401, 14);
+      this.btnCancel.Location = new System.Drawing.Point(401, 15);
       this.btnCancel.Name = "btnCancel";
       this.btnCancel.Size = new System.Drawing.Size(75, 23);
       this.btnCancel.TabIndex = 12;
@@ -237,6 +239,11 @@
       this.server.Size = new System.Drawing.Size(259, 21);
       this.server.TabIndex = 46;
       // 
+      // timerForFiltering
+      // 
+      this.timerForFiltering.Interval = 600;
+      this.timerForFiltering.Tick += new System.EventHandler(this.timerForFiltering_Tick);
+      // 
       // AddServiceDlg
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -282,5 +289,6 @@
     private System.Windows.Forms.Label lblSubTitle2;
     private System.Windows.Forms.Label lblText3;
     private System.Windows.Forms.ComboBox server;
+    private System.Windows.Forms.Timer timerForFiltering;
   }
 }

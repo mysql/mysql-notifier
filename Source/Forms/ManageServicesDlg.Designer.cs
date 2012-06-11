@@ -54,15 +54,15 @@
       this.panel2.Controls.Add(this.btnClose);
       this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
       this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.panel2.Location = new System.Drawing.Point(0, 417);
+      this.panel2.Location = new System.Drawing.Point(0, 432);
       this.panel2.Name = "panel2";
-      this.panel2.Size = new System.Drawing.Size(596, 63);
+      this.panel2.Size = new System.Drawing.Size(596, 48);
       this.panel2.TabIndex = 47;
       // 
       // btnClose
       // 
       this.btnClose.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.btnClose.Location = new System.Drawing.Point(502, 15);
+      this.btnClose.Location = new System.Drawing.Point(502, 9);
       this.btnClose.Name = "btnClose";
       this.btnClose.Size = new System.Drawing.Size(87, 27);
       this.btnClose.TabIndex = 15;
@@ -132,7 +132,7 @@
       this.chkUpdateTrayIcon.Enabled = false;
       this.chkUpdateTrayIcon.Location = new System.Drawing.Point(30, 48);
       this.chkUpdateTrayIcon.Name = "chkUpdateTrayIcon";
-      this.chkUpdateTrayIcon.Size = new System.Drawing.Size(321, 19);
+      this.chkUpdateTrayIcon.Size = new System.Drawing.Size(293, 17);
       this.chkUpdateTrayIcon.TabIndex = 1;
       this.chkUpdateTrayIcon.Text = "Update MySQL Notifier tray icon based on service status";
       this.chkUpdateTrayIcon.UseVisualStyleBackColor = true;
@@ -144,7 +144,7 @@
       this.notifyOnStatusChange.Enabled = false;
       this.notifyOnStatusChange.Location = new System.Drawing.Point(30, 22);
       this.notifyOnStatusChange.Name = "notifyOnStatusChange";
-      this.notifyOnStatusChange.Size = new System.Drawing.Size(192, 19);
+      this.notifyOnStatusChange.Size = new System.Drawing.Size(174, 17);
       this.notifyOnStatusChange.TabIndex = 0;
       this.notifyOnStatusChange.Text = "Notify me when status changes";
       this.notifyOnStatusChange.UseVisualStyleBackColor = true;

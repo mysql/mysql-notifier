@@ -48,7 +48,7 @@ namespace MySql.Notifier
     private ToolStripMenuItem editorMenu;
     private ToolStripSeparator separator;
     private MySQLService boundService;
-    
+
     public ServiceMenuGroup(MySQLService mySQLBoundService)
     {
       boundService = mySQLBoundService;
@@ -59,7 +59,7 @@ namespace MySql.Notifier
 
       CreateEditorMenus();
 
-      separator = new ToolStripSeparator(); 
+      separator = new ToolStripSeparator();
 
       Font menuItemFont = new Font(statusMenu.Font, FontStyle.Bold);
       Font subMenuItemFont = new Font(statusMenu.Font, FontStyle.Regular);
@@ -173,15 +173,44 @@ namespace MySql.Notifier
     }
 
     public void RemoveFromContextMenu(ContextMenuStrip menu)
-    {      
-      menu.Items.Remove(statusMenu);
+    {
+      string[] menuItems = new string[4];
+      int index = -1;
+
       if (boundService.IsRealMySQLService)
       {
-        menu.Items.Remove(configureMenu);
-        menu.Items.Remove(editorMenu);          
+        menuItems[0] = "Editor Menu";
+        menuItems[1] = "Configure Menu";
+        menuItems[2] = "Separator";
+        menuItems[3] = statusMenu.Text; // the last item we delete is the service name item which is the reference for the others
       }
-      menu.Items.Remove(separator);
-      menu.Refresh();
+      else
+      {
+        menuItems[0] = "Separator";
+        menuItems[1] = statusMenu.Text;
+      }
+
+      foreach (var item in menuItems)
+      {
+        if (String.IsNullOrEmpty(item)) continue;
+        
+        for (int i = 0; i < menu.Items.Count; i++)
+         {
+            if (menu.Items[i].Text.Equals(statusMenu.Text))
+            {
+              index = i;
+              break;
+            }
+        }
+        if (index >= 0 && index <= menu.Items.Count)
+        {
+          if (!item.Equals(statusMenu.Text))
+            index++;
+
+          menu.Items.RemoveAt(index);
+          menu.Refresh();
+        }
+      }  
     }
 
     /// <summary>
@@ -190,7 +219,7 @@ namespace MySql.Notifier
     /// <param name="boundServiceName">Service Name</param>
     /// <param name="boundServiceStatus">Service Status</param>
     public void Update()
-    {      
+    {
       statusMenu.Text = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
       Image image = null;
       switch (boundService.Status)
@@ -301,8 +330,5 @@ namespace MySql.Notifier
     {
       return ToolStripMenuItemWithHandler(displayText, null, eventHandler);
     }
-
-  
-
   }
 }
