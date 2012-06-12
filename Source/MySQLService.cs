@@ -116,21 +116,26 @@ namespace MySql.Notifier
       WorkbenchConnections = new List<MySqlWorkbenchConnection>();
 
       if (!IsRealMySQLService) return;
-      
-      foreach (MySqlWorkbenchConnection c in MySqlWorkbench.Connections)
+
+      var filteredConnections = MySqlWorkbench.Connections.Where(t => !String.IsNullOrEmpty(t.Name));
+
+      if (filteredConnections != null)
       {
-        if (!Utility.IsValidIpAddress(c.Host)) //matching connections by Ip
+        foreach (MySqlWorkbenchConnection c in filteredConnections)
         {
-          if (Utility.GetIPv4ForHostName(c.Host) != parameters.HostIPv4) continue; 
+          if (!Utility.IsValidIpAddress(c.Host)) //matching connections by Ip
+          {
+            if (Utility.GetIPv4ForHostName(c.Host) != parameters.HostIPv4) continue;
+          }
+          else
+          {
+            if (c.Host != parameters.HostIPv4) continue;
+          }
+
+          if (c.IsNamedPipe && (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0)) continue;
+          if (c.IsSocket && c.Port != parameters.Port) continue;
+          WorkbenchConnections.Add(c);
         }
-        else
-        {
-          if (c.Host != parameters.HostIPv4) continue; 
-        }
-        
-        if (c.IsNamedPipe && (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0)) continue;
-        if (c.IsSocket && c.Port != parameters.Port) continue;
-        WorkbenchConnections.Add(c);
       }
     }
 
