@@ -76,7 +76,6 @@
 		<Property Id="LAUNCHAPPONEXIT" Value="1"/>    
 		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
 		<Property Id="ARPPRODUCTICON" Value="Notifier.ico" />
-		<Property Id="ARPURLUPDATEINFO" Value="http://www.mysql.com/downloads" />
 		<UIRef Id="WixUI_InstallDirNoLicense" />
 		<WixVariable Id="WixUIBannerBmp" Value="Bitmaps/BannrBmp.bmp"/>
 		<WixVariable Id="WixUIDialogBmp" Value="Bitmaps/DlgBmp.bmp"/>
