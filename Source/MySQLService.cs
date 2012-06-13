@@ -131,9 +131,19 @@ namespace MySql.Notifier
           {
             if (c.Host != parameters.HostIPv4) continue;
           }
-
-          if (c.IsNamedPipe && (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0)) continue;
-          if (c.IsSocket && c.Port != parameters.Port) continue;
+          switch (c.DriverType)
+          {
+            case MySqlWorkbenchConnectionType.NamedPipes:
+              if (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0) continue;
+              break;
+            case MySqlWorkbenchConnectionType.Ssh:
+              continue;             
+            case MySqlWorkbenchConnectionType.Tcp:
+              if (c.Port != parameters.Port) continue;
+              break;
+            case MySqlWorkbenchConnectionType.Unknown:
+              continue;                         
+          }         
           WorkbenchConnections.Add(c);
         }
       }
