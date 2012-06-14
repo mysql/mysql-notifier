@@ -82,8 +82,17 @@ namespace MySql.Notifier
       mySQLServicesList.ServiceStatusChanged += mySQLServicesList_ServiceStatusChanged;
       mySQLServicesList.ServiceListChanged += new MySQLServicesList.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
 
-      // create scheduled task to check for updates 
-      // when first run
+
+      // Create watcher to synchronize menus
+      if (MySqlWorkbench.IsInstalled)
+      {
+        string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
+        StartWatcherForFile(file, connectionsFile_Changed);
+
+        file = String.Format(@"{0}\MySQL\Workbench\server_instances.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
+        StartWatcherForFile(file, serversFile_Changed);
+      }
+
       if (Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0)
       {
         if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Notifier")))
@@ -91,37 +100,30 @@ namespace MySql.Notifier
           Utility.CreateScheduledTask("MySQLNotifierTask", @"""" + Utility.GetInstallLocation("MySQL Notifier") + @"MySql.Notifier.exe --c""",
             Settings.Default.CheckForUpdatesFrequency, false);
         }
+               
       }
-
-      // loads all the services from our settings file and sets up their menus
+      
       mySQLServicesList.LoadFromSettings();
-
+      
       previousTotalServicesNumber = mySQLServicesList.Services.Count;
 
-      if (mySQLServicesList.Services.Count == 0) // otherwise menus will be hanlde when adding or removing services 
+      if (mySQLServicesList.Services.Count == 0) 
       {
         AddStaticMenuItems();
         UpdateStaticMenuItems();
       }
+      else
+      {
+        notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+      }
      
       SetNotifyIconToolTip();
 
-      //start watcher for settings file
+      
       Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
       StartWatcherForFile(config.FilePath, settingsFile_Changed);
 
-      //start watcher for connections and server instances file
-      // so we can synchronize our status menu 
-      if (MySqlWorkbench.IsInstalled)
-      { 
-        string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
-        StartWatcherForFile(file, connectionsFile_Changed);
-
-        file = String.Format(@"{0}\MySQL\Workbench\server_instances.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
-        StartWatcherForFile(file, serversFile_Changed);      
-      }
-
-      // listener for events
+      
       var managementScope = new ManagementScope(@"root\cimv2");
       managementScope.Connect();
 
@@ -333,7 +335,7 @@ namespace MySql.Notifier
             notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
             notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
             notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.ServiceName);
-            notifyIcon.ShowBalloonTip(1500);
+            notifyIcon.ShowBalloonTip(1500);            
           }
        }       
     }
