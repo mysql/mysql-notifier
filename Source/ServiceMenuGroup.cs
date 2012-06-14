@@ -267,7 +267,7 @@ namespace MySql.Notifier
         menu.Items.RemoveAt(index + 2);
         menu.Refresh();
       }
-
+      editorMenu.Enabled = MySqlWorkbench.IsInstalled;
       menu.Items.Insert(index + 2, editorMenu);          
     }
 
@@ -280,7 +280,7 @@ namespace MySql.Notifier
         CreateEditorMenus();
 
         if (menu.InvokeRequired)
-        {
+        {          
           menuRefreshDelegate md = new menuRefreshDelegate(UpdateItems);
           menu.Invoke(md, menu);
         }      

@@ -108,12 +108,15 @@ namespace MySql.Notifier
       Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
       StartWatcherForFile(config.FilePath, settingsFile_Changed);
 
-      //start watcher for connections file
-      // so we can synchronize our menu with the connections file
+      //start watcher for connections and server instances file
+      // so we can synchronize our status menu 
       if (MySqlWorkbench.IsInstalled)
       { 
         string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
-        StartWatcherForFile(file, connectionsFile_Changed);      
+        StartWatcherForFile(file, connectionsFile_Changed);
+
+        file = String.Format(@"{0}\MySQL\Workbench\server_instances.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
+        StartWatcherForFile(file, serversFile_Changed);      
       }
 
       // listener for events
@@ -194,6 +197,21 @@ namespace MySql.Notifier
       {
         item.MenuGroup.RefreshMenu(notifyIcon.ContextMenuStrip);
       }     
+    }
+
+
+    /// <summary>
+    /// Method to handle the change events in the 
+    /// server instances file of workbench
+    /// no changes in UI
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void serversFile_Changed(object sender, FileSystemEventArgs e)
+    {
+      MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
+      MySqlWorkbench.Connections = new MySqlWorkbenchConnectionCollection();
+      MySqlWorkbench.LoadData();
     }
 
 
