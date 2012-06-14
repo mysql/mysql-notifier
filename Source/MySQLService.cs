@@ -108,21 +108,35 @@ namespace MySql.Notifier
       IsRealMySQLService = cmd.EndsWith("mysqld.exe") || cmd.EndsWith("mysqld-nt.exe") || cmd.EndsWith("mysqld") || cmd.EndsWith("mysqld-nt");
     }
 
-    private void FindMatchingWBConnections()
+    internal void FindMatchingWBConnections()
     {
-      
+            
       // first we discover what parameters we were started with
       MySQLStartupParameters parameters = GetStartupParameters();
       WorkbenchConnections = new List<MySqlWorkbenchConnection>();
 
       if (!IsRealMySQLService) return;
-
+        
       var filteredConnections = MySqlWorkbench.Connections.Where(t => !String.IsNullOrEmpty(t.Name));
 
       if (filteredConnections != null)
       {
         foreach (MySqlWorkbenchConnection c in filteredConnections)
         {
+          switch (c.DriverType)
+          {
+            case MySqlWorkbenchConnectionType.NamedPipes:
+              if (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0) continue;
+              break;
+            case MySqlWorkbenchConnectionType.Ssh:
+              continue;
+            case MySqlWorkbenchConnectionType.Tcp:
+              if (c.Port != parameters.Port) continue;
+              break;
+            case MySqlWorkbenchConnectionType.Unknown:
+              continue;
+          }         
+          
           if (!Utility.IsValidIpAddress(c.Host)) //matching connections by Ip
           {
             if (Utility.GetIPv4ForHostName(c.Host) != parameters.HostIPv4) continue;
@@ -131,19 +145,7 @@ namespace MySql.Notifier
           {
             if (c.Host != parameters.HostIPv4) continue;
           }
-          switch (c.DriverType)
-          {
-            case MySqlWorkbenchConnectionType.NamedPipes:
-              if (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0) continue;
-              break;
-            case MySqlWorkbenchConnectionType.Ssh:
-              continue;             
-            case MySqlWorkbenchConnectionType.Tcp:
-              if (c.Port != parameters.Port) continue;
-              break;
-            case MySqlWorkbenchConnectionType.Unknown:
-              continue;                         
-          }         
+         
           WorkbenchConnections.Add(c);
         }
       }

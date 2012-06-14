@@ -48,6 +48,8 @@ namespace MySql.Notifier
     private ToolStripMenuItem editorMenu;
     private ToolStripSeparator separator;
     private MySQLService boundService;
+    private delegate void menuRefreshDelegate(ContextMenuStrip menu);
+
 
     public ServiceMenuGroup(MySQLService mySQLBoundService)
     {
@@ -161,7 +163,7 @@ namespace MySql.Notifier
     }
 
     public void AddToContextMenu(ContextMenuStrip menu)
-    {
+    {  
       int index = 0;
       menu.Items.Insert(index++, statusMenu);
       if (boundService.IsRealMySQLService)
@@ -172,6 +174,7 @@ namespace MySql.Notifier
       menu.Items.Insert(index++, separator);
     }
 
+    
     public void RemoveFromContextMenu(ContextMenuStrip menu)
     {
       string[] menuItems = new string[4];
@@ -179,8 +182,8 @@ namespace MySql.Notifier
 
       if (boundService.IsRealMySQLService)
       {
-        menuItems[0] = "Editor Menu";
-        menuItems[1] = "Configure Menu";
+        menuItems[0] = "Configure Menu";
+        menuItems[1] = "Editor Menu";
         menuItems[2] = "Separator";
         menuItems[3] = statusMenu.Text; // the last item we delete is the service name item which is the reference for the others
       }
@@ -205,8 +208,7 @@ namespace MySql.Notifier
         if (index >= 0 && index <= menu.Items.Count)
         {
           if (!item.Equals(statusMenu.Text))
-            index++;
-
+            index++;          
           menu.Items.RemoveAt(index);
           menu.Refresh();
         }
@@ -248,6 +250,46 @@ namespace MySql.Notifier
       configureMenu.Enabled = MySqlWorkbench.IsInstalled;
     }
 
+    private void UpdateItems(ContextMenuStrip menu)
+    {
+      int index = -1;
+      for (int i = 0; i < menu.Items.Count; i++)
+      {
+        if (menu.Items[i].Text.Equals(statusMenu.Text))
+        {
+          index = i;
+          break;
+        }
+      }
+
+      if (index >= 0 && index <= menu.Items.Count)
+      {
+        menu.Items.RemoveAt(index + 2);
+        menu.Refresh();
+      }
+
+      menu.Items.Insert(index + 2, editorMenu);          
+    }
+
+
+    public void RefreshMenu(ContextMenuStrip menu)
+    {
+      if (boundService.IsRealMySQLService)
+      {       
+        boundService.FindMatchingWBConnections();
+        CreateEditorMenus();
+
+        if (menu.InvokeRequired)
+        {
+          menuRefreshDelegate md = new menuRefreshDelegate(UpdateItems);
+          menu.Invoke(md, menu);
+        }      
+        else
+        {
+          UpdateItems(menu);
+        }        
+      }
+    }
 
     /// <summary>
     /// Adds a new item to the Notify Icon's context menu.

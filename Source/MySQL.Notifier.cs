@@ -103,8 +103,18 @@ namespace MySql.Notifier
       }
      
       SetNotifyIconToolTip();
-      
-      StartWatchingSettingsFile();
+
+      //start watcher for settings file
+      Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
+      StartWatcherForFile(config.FilePath, settingsFile_Changed);
+
+      //start watcher for connections file
+      // so we can synchronize our menu with the connections file
+      if (MySqlWorkbench.IsInstalled)
+      { 
+        string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
+        StartWatcherForFile(file, connectionsFile_Changed);      
+      }
 
       // listener for events
       var managementScope = new ManagementScope(@"root\cimv2");
@@ -131,16 +141,22 @@ namespace MySql.Notifier
       notifyIcon.ShowBalloonTip(delay);
     }
 
-    private void StartWatchingSettingsFile()
-    {
-      Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
+    /// <summary>
+    /// Creates a FileSystemWatcher for the specified file
+    /// </summary>
+    /// <param name="filePath">File to add the file system watcher</param>
+    /// <param name="method">Action method</param>
+    
+    private void StartWatcherForFile(string filePath, FileSystemEventHandler method)
+    {      
       FileSystemWatcher watcher = new FileSystemWatcher();
-      watcher.Path = Path.GetDirectoryName(config.FilePath);
-      watcher.Filter = Path.GetFileName(config.FilePath);
-      watcher.NotifyFilter = NotifyFilters.LastWrite;
-      watcher.Changed += new FileSystemEventHandler(settingsFile_Changed);
+      watcher.Path = Path.GetDirectoryName(filePath);
+      watcher.Filter = Path.GetFileName(filePath);
+      watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Attributes;
+      watcher.Changed += new FileSystemEventHandler(method);
       watcher.EnableRaisingEvents = true;
     }
+
 
     void settingsFile_Changed(object sender, FileSystemEventArgs e)
     {
@@ -161,6 +177,25 @@ namespace MySql.Notifier
       Settings.Default.Save();
       notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
     }
+
+    /// <summary>
+    /// Method to handle the change events in the 
+    /// connections file of workbench
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void connectionsFile_Changed(object sender, FileSystemEventArgs e)
+    {
+      MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
+      MySqlWorkbench.Connections = new MySqlWorkbenchConnectionCollection();
+      MySqlWorkbench.LoadData();
+
+      foreach (var item in mySQLServicesList.Services)
+      {
+        item.MenuGroup.RefreshMenu(notifyIcon.ContextMenuStrip);
+      }     
+    }
+
 
     void notifyIcon_MouseClick(object sender, MouseEventArgs e)
     {
