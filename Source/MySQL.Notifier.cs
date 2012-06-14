@@ -55,6 +55,8 @@ namespace MySql.Notifier
 
     private int previousTotalServicesNumber;
 
+    private delegate void serviceWindowsEvent(string servicename, string path, string state);    
+
     public Notifier()
     {           
       //load splash screen
@@ -496,27 +498,36 @@ namespace MySql.Notifier
 
       Control c = notifyIcon.ContextMenuStrip;
       if (c.InvokeRequired)
-        c.Invoke((MethodInvoker)delegate
-        {
-          mySQLServicesList.SetServiceStatus(serviceName, path, state);
-          SetNotifyIconToolTip();
-          if (mySQLServicesList.GetServiceByName(serviceName) != null)
-          {
-            if (mySQLServicesList.GetServiceByName(serviceName).UpdateTrayIconOnStatusChange)
-             notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());            
-          }
-        });
-
-      else
       {
+        serviceWindowsEvent se = new serviceWindowsEvent(GetWindowsEvent);
+        se.Invoke(serviceName, path, state);
+      }     
+      else      
+        GetWindowsEvent(serviceName, path, state);
+
+    }
+
+    private void GetWindowsEvent(string serviceName, string path, string state)
+    {
+      var service = mySQLServicesList.GetServiceByName(serviceName);
+      if (service != null)
+      {
+        ServiceControllerStatus copyPreviousStatus = service.Status;
+
         mySQLServicesList.SetServiceStatus(serviceName, path, state);
+        ServiceControllerStatus newStatus = service.Status;
+
         SetNotifyIconToolTip();
-        if (mySQLServicesList.GetServiceByName(serviceName) != null)
+      
+        if (service.UpdateTrayIconOnStatusChange)
+          notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+
+        if (service.NotifyOnStatusChange && !copyPreviousStatus.Equals(newStatus))
         {
-          if (mySQLServicesList.GetServiceByName(serviceName).UpdateTrayIconOnStatusChange)
-            notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+          var serviceStatusInfo = new ServiceStatus(service.ServiceName, copyPreviousStatus, newStatus);
+          mySQLServicesList_ServiceStatusChanged(this, serviceStatusInfo);
         }
-      }
+      }    
     }
 
     private void ReBuildMenu()

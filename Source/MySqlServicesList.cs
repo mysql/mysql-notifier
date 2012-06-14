@@ -68,7 +68,10 @@ namespace MySql.Notifier
         // we have to manually call our service list changed event handler since that isn't done
         // with how we are using settings
         foreach (MySQLService service in Services)
+        {
+          service.StatusChanged += new MySQLService.StatusChangedHandler(mySQLService_StatusChanged);
           OnServiceListChanged(service, ServiceListChangeType.Add);
+        }
 
       loading = false;
     }
