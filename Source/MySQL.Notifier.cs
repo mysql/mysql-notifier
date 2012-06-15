@@ -313,8 +313,7 @@ namespace MySql.Notifier
     }
 
     private void ServiceListChanged(MySQLService service, ServiceListChangeType changeType)
-    {
-           
+    {           
        if ((mySQLServicesList.Services.Count == 0 && changeType == ServiceListChangeType.Remove) ||
           (previousTotalServicesNumber == 0 &&  changeType != ServiceListChangeType.Remove))
       {      
@@ -511,15 +510,15 @@ namespace MySql.Notifier
 
     private void GetWindowsEvent(string serviceName, string path, string state)
     {
+
+      mySQLServicesList.SetServiceStatus(serviceName, path, state);
+      SetNotifyIconToolTip();
+
       var service = mySQLServicesList.GetServiceByName(serviceName);
       if (service != null)
-      {
+      {     
         ServiceControllerStatus copyPreviousStatus = service.Status;
-
-        mySQLServicesList.SetServiceStatus(serviceName, path, state);
         ServiceControllerStatus newStatus = service.Status;
-
-        SetNotifyIconToolTip();
       
         if (service.UpdateTrayIconOnStatusChange)
           notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
