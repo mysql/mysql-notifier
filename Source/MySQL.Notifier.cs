@@ -95,9 +95,10 @@ namespace MySql.Notifier
 
       if (Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0)
       {
-        if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Notifier")))
+        var location = Utility.GetInstallLocation("MySQL Notifier");
+        if (!String.IsNullOrEmpty(location))
         {
-          Utility.CreateScheduledTask("MySQLNotifierTask", @"""" + Utility.GetInstallLocation("MySQL Notifier") + @"MySql.Notifier.exe --c""",
+          Utility.CreateScheduledTask("MySQLNotifierTask", @"""" + location + @"MySql.Notifier.exe --c""",
             Settings.Default.CheckForUpdatesFrequency, false);
         }
                
@@ -420,7 +421,7 @@ namespace MySql.Notifier
         Process proc = new Process();
         ProcessStartInfo startInfo = new ProcessStartInfo();
         startInfo.FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path);
-        startInfo.Arguments = "-checkforupdates";
+        startInfo.Arguments = "checkforupdates";
         Process.Start(startInfo);
       }      
     }
