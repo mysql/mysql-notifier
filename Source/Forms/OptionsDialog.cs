@@ -34,6 +34,8 @@ namespace MySql.Notifier
       var deleteTask = !chkAutoCheckUpdates.Checked && Settings.Default.AutoCheckForUpdates ? true : false;
       var deleteIfPrevious = chkAutoCheckUpdates.Checked && !Settings.Default.AutoCheckForUpdates ? false : true;
 
+      if (Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(this.numCheckUpdatesWeeks.Value)) updateTask = true;
+
       Settings.Default.NotifyOfAutoServiceAddition = notifyOfAutoAdd.Checked;
       Settings.Default.NotifyOfStatusChange = notifyOfStatusChange.Checked;
       Settings.Default.AutoCheckForUpdates = chkAutoCheckUpdates.Checked;
@@ -43,6 +45,7 @@ namespace MySql.Notifier
       Settings.Default.Save();
       Utility.SetRunAtStartUp(Application.ProductName, chkRunAtStartup.Checked);
 
+
       if (updateTask)
       {
 
@@ -50,8 +53,7 @@ namespace MySql.Notifier
         {
           if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Notifier")))
           {
-            Utility.CreateScheduledTask("MySQLNotifierTask", @"""" + Utility.GetInstallLocation("MySQL Notifier") + @"MySql.Notifier.exe --c""",
-              Settings.Default.CheckForUpdatesFrequency, deleteIfPrevious);
+            Utility.CreateScheduledTask("MySQLNotifierTask", Utility.GetInstallLocation("MySQL Notifier") + "MySql.Notifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, deleteIfPrevious);
           }
         }
         if (deleteTask)

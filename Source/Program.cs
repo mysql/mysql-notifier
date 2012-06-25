@@ -60,18 +60,12 @@ namespace MySql.Notifier
 
     private static void CheckForUpdates(string arg)
     {
-      Settings.Default.UpdateCheck = (int)SoftwareUpdateStaus.Checking;
-      Settings.Default.Save();
-
-      bool hasUpdates = true;
-
       if (arg == "--c")
-        hasUpdates = MySqlInstaller.HasUpdates(10 * 1000);
-      else if (arg == "--x")               // --x is only for testing right now
-        System.Threading.Thread.Sleep(5000);
-
-      Settings.Default.UpdateCheck = hasUpdates ? (int)SoftwareUpdateStaus.HasUpdates : 0;
-      Settings.Default.Save();
+      {
+        Settings.Default.UpdateCheck = (int)SoftwareUpdateStaus.Checking;
+        Settings.Default.Save();
+      }
+      return;
     }
   }
 }

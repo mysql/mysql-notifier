@@ -45,7 +45,7 @@
       this.MinimizeBox = false;
       this.Name = "AboutDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-      this.Text = "About";
+      this.Text = "MySQL Notifier";
       this.Load += new System.EventHandler(this.AboutDialog_Load);
       this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.AboutDialog_MouseClick);
       this.ResumeLayout(false);
