@@ -54,8 +54,7 @@ namespace MySql.Notifier
     private ToolStripSeparator hasUpdatesSeparator;
 
     private int previousTotalServicesNumber;
-
-    private int internalCounter { get; set; }
+    
 
     private delegate void serviceWindowsEvent(string servicename, string path, string state);    
 
@@ -133,9 +132,7 @@ namespace MySql.Notifier
       WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
       watcher = new ManagementEventWatcher(managementScope, query);
       watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);
-      watcher.Start();
-
-      internalCounter = 0;
+      watcher.Start();      
 
       splashScreen.Close();
         
@@ -171,45 +168,52 @@ namespace MySql.Notifier
 
     void settingsFile_Changed(object sender, FileSystemEventArgs e)
     {
-      try
+
+      int settingsUpdateCheck = -1;
+
+
+      for (int i = 0; i < 3; i++)
       {
-        Settings.Default.Reload();
+         try
+         {
+            Settings.Default.Reload();
+            settingsUpdateCheck = Settings.Default.UpdateCheck;
+         }
+         catch
+         {
+            System.Threading.Thread.Sleep(1000);
+            if (i == 2)
+            {
+              MessageBox.Show("Configuration settings update failed. Please restart the application.", "MySQL Notifier", MessageBoxButtons.OK, MessageBoxIcon.Error);
+              return;
+            }
+         }
+        }
+
+
         // if we have already notified our user then noting more to do
-        if ((Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0) return;
+      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0) return;
      
         bool hasUpdates = true;
 
         // let them know we are checking for updates
-        if ((Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.Checking) != 0)
+        if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Checking) != 0)
         {
           ShowTooltip(false, Resources.SoftwareUpdate, Resources.CheckingForUpdates, 1500);
           hasUpdates = MySqlInstaller.HasUpdates(10 * 1000);        
           Settings.Default.UpdateCheck = hasUpdates ? (int)SoftwareUpdateStaus.HasUpdates : 0;
+          settingsUpdateCheck = Settings.Default.UpdateCheck;
           Settings.Default.Save();        
         }
 
-        if ((Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0)
+        if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0)
           ShowTooltip(false, Resources.SoftwareUpdate, Resources.HasUpdatesLaunchInstaller, 1500);
        
-         Settings.Default.Reload();
          // set that we have notified our user
          Settings.Default.UpdateCheck |= (int)SoftwareUpdateStaus.Notified;
          Settings.Default.Save();          
        
-         notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
-      }
-      catch
-      {
-        System.Threading.Thread.Sleep(1000);
-        internalCounter++;
-        if (internalCounter <= 3)
-          settingsFile_Changed(sender, e);
-        else
-        {
-          MessageBox.Show("Configuration settings update failed. Please restart the application.", "MySQL Notifier", MessageBoxButtons.OK, MessageBoxIcon.Error);
-          return;
-        }
-      }
+         notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());            
     }
 
     /// <summary>
