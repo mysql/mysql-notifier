@@ -50,16 +50,26 @@ namespace MySql.Notifier
     private MySQLService boundService;
     private delegate void menuRefreshDelegate(ContextMenuStrip menu);
 
+    private bool supportedWorkbenchVersion {
+      get
+      {
+        return new Version(MySqlWorkbench.ProductVersion) >= new Version(Settings.Default.SupportedWorkbenchVersion); 
+      }
+    } 
+
 
     public ServiceMenuGroup(MySQLService mySQLBoundService)
     {
       boundService = mySQLBoundService;
 
       statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.DisplayName, boundService.Status));
-      configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
-      configureMenu.Click += new EventHandler(configureInstanceItem_Click);
 
-      CreateEditorMenus();
+      if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
+      {
+        configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
+        configureMenu.Click += new EventHandler(configureInstanceItem_Click);
+        CreateEditorMenus();
+      }
 
       separator = new ToolStripSeparator();
 
@@ -87,8 +97,7 @@ namespace MySql.Notifier
     private void CreateEditorMenus()
     {
       editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
-      editorMenu.Enabled = false;
-      if (!MySqlWorkbench.IsInstalled) return;
+      editorMenu.Enabled = false;     
 
       // if there are 0 or 1 connections then the single menu will suffice
       if (boundService.WorkbenchConnections.Count <= 1)
@@ -168,8 +177,8 @@ namespace MySql.Notifier
       menu.Items.Insert(index++, statusMenu);
       if (boundService.IsRealMySQLService)
       {
-        menu.Items.Insert(index++, configureMenu);
-        menu.Items.Insert(index++, editorMenu);
+        if (configureMenu != null) menu.Items.Insert(index++, configureMenu);
+        if (editorMenu != null) menu.Items.Insert(index++, editorMenu);
       }
       menu.Items.Insert(index++, separator);
     }
@@ -245,9 +254,12 @@ namespace MySql.Notifier
       startMenu.Enabled = boundService.Status == ServiceControllerStatus.Stopped;
       stopMenu.Enabled = boundService.Status != ServiceControllerStatus.Stopped;
       restartMenu.Enabled = stopMenu.Enabled;
+      if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
+      {
+        editorMenu.Enabled = true;
+        configureMenu.Enabled = true;
+      }
 
-      editorMenu.Enabled = MySqlWorkbench.IsInstalled;
-      configureMenu.Enabled = MySqlWorkbench.IsInstalled;
     }
 
     private void UpdateItems(ContextMenuStrip menu)

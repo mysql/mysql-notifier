@@ -54,7 +54,14 @@ namespace MySql.Notifier
     private ToolStripSeparator hasUpdatesSeparator;
 
     private int previousTotalServicesNumber;
-    
+
+    private bool supportedWorkbenchVersion
+    {
+      get
+      {
+        return new Version(MySqlWorkbench.ProductVersion) >= new Version(Settings.Default.SupportedWorkbenchVersion);
+      }
+    }
 
     private delegate void serviceWindowsEvent(string servicename, string path, string state);    
 
@@ -84,8 +91,8 @@ namespace MySql.Notifier
       mySQLServicesList.ServiceListChanged += new MySQLServicesList.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
 
 
-      // Create watcher to synchronize menus
-      if (MySqlWorkbench.IsInstalled)
+      // Create watcher for WB files
+      if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
       {
         string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
         StartWatcherForFile(file, connectionsFile_Changed);
@@ -120,19 +127,22 @@ namespace MySql.Notifier
      
       SetNotifyIconToolTip();
 
-
       Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
       StartWatcherForFile(config.FilePath, settingsFile_Changed);
-
-      
+     
       var managementScope = new ManagementScope(@"root\cimv2");
-      managementScope.Connect();
+      managementScope.Connect();     
 
-      // WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\" AND ( TargetInstance.Name LIKE \"%MYSQL%\" OR TargetInstance.PathName LIKE \"%MYSQL%\" ) ");
-      WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
-      watcher = new ManagementEventWatcher(managementScope, query);
-      watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);
-      watcher.Start();      
+      try
+      {        
+        WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
+        watcher = new ManagementEventWatcher(managementScope, query);
+        watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);        
+        watcher.Start();
+      }
+      catch (ManagementException)
+      {        
+      }
 
       splashScreen.Close();
         
@@ -286,9 +296,12 @@ namespace MySql.Notifier
       checkForUpdates.Enabled = !String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) && MySqlInstaller.GetInstallerVersion().Contains("1.1");
       checkForUpdates.Image = Resources.CheckForUpdatesIcon;
 
-      launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem("MySQL Utilities Shell");
-      launchWorkbenchUtilitiesMenuItem.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
-      launchWorkbenchUtilitiesMenuItem.Image = Resources.LaunchUtilities;
+      if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
+      {
+        launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem("MySQL Utilities Shell");
+        launchWorkbenchUtilitiesMenuItem.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
+        launchWorkbenchUtilitiesMenuItem.Image = Resources.LaunchUtilities;
+      }
 
       ToolStripMenuItem optionsMenu = new ToolStripMenuItem("Options...");
       optionsMenu.Click += new EventHandler(optionsItem_Click);
@@ -302,7 +315,10 @@ namespace MySql.Notifier
       menu.Items.Add(manageServices);
       menu.Items.Add(launchInstallerMenuItem);
       menu.Items.Add(checkForUpdates);
-      menu.Items.Add(launchWorkbenchUtilitiesMenuItem);
+      
+      if (launchWorkbenchUtilitiesMenuItem != null) 
+        menu.Items.Add(launchWorkbenchUtilitiesMenuItem);
+
       menu.Items.Add(new ToolStripSeparator());
       menu.Items.Add(optionsMenu);
       menu.Items.Add(aboutMenu);

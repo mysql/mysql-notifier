@@ -141,5 +141,17 @@ namespace MySql.Notifier.Properties {
                 this["UpdateCheck"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5.2.40.0")]
+        public string SupportedWorkbenchVersion {
+            get {
+                return ((string)(this["SupportedWorkbenchVersion"]));
+            }
+            set {
+                this["SupportedWorkbenchVersion"] = value;
+            }
+        }
     }
 }

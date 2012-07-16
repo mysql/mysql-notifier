@@ -53,7 +53,7 @@ namespace MySql.Notifier
         {
           if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Notifier")))
           {
-            Utility.CreateScheduledTask("MySQLNotifierTask", Utility.GetInstallLocation("MySQL Notifier") + "MySql.Notifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, deleteIfPrevious);
+            Utility.CreateScheduledTask("MySQLNotifierTask", Utility.GetInstallLocation("MySQL Notifier") + "MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, deleteIfPrevious);
           }
         }
         if (deleteTask)
