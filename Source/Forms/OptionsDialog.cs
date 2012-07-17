@@ -26,10 +26,12 @@ namespace MySql.Notifier
       numCheckUpdatesWeeks.Value = Settings.Default.CheckForUpdatesFrequency;
       chkEnabledAutoAddServices.Checked = Settings.Default.AutoAddServicesToMonitor;
       autoAddRegex.Text = Settings.Default.AutoAddPattern;
+      chkUseColorfulIcons.Checked = Settings.Default.UseColorfulStatusIcons;
     }
 
     private void btnOK_Click(object sender, EventArgs e)
     {
+            
       var updateTask = chkAutoCheckUpdates.Checked != Settings.Default.AutoCheckForUpdates ? true : false;
       var deleteTask = !chkAutoCheckUpdates.Checked && Settings.Default.AutoCheckForUpdates ? true : false;
       var deleteIfPrevious = chkAutoCheckUpdates.Checked && !Settings.Default.AutoCheckForUpdates ? false : true;
@@ -42,6 +44,7 @@ namespace MySql.Notifier
       Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(this.numCheckUpdatesWeeks.Value);
       Settings.Default.AutoAddServicesToMonitor = chkEnabledAutoAddServices.Checked;
       Settings.Default.AutoAddPattern = autoAddRegex.Text.Trim();
+      Settings.Default.UseColorfulStatusIcons = chkUseColorfulIcons.Checked;
       Settings.Default.Save();
       Utility.SetRunAtStartUp(Application.ProductName, chkRunAtStartup.Checked);
 

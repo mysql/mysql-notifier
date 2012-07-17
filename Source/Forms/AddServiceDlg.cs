@@ -91,8 +91,10 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        MessageBox.Show(ex.Message, ex.Source, MessageBoxButtons.OK, MessageBoxIcon.Error);
-        throw;
+        using (var errorDialog = new MessageDialog(ex.Message, ex.StackTrace, true))
+        {
+          errorDialog.ShowDialog(this);        
+        }
       }
     }
 

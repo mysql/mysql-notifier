@@ -165,6 +165,12 @@
     <Compile Include="Forms\OptionsDialog.Designer.cs">
       <DependentUpon>OptionsDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\MessageDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MessageDialog.Designer.cs">
+      <DependentUpon>MessageDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Options.cs" />
     <Compile Include="ServiceStatus.cs" />
     <Compile Include="MySqlServicesList.cs" />
@@ -187,6 +193,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ManageServicesDlg.resx">
       <DependentUpon>ManageServicesDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MessageDialog.resx">
+      <DependentUpon>MessageDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\OptionsDialog.resx">
       <DependentUpon>OptionsDialog.cs</DependentUpon>
@@ -245,6 +254,14 @@
     <None Include="Resources\StartInstallerIcon.png" />
     <None Include="Resources\InstallAvailableUpdatesIcon.png" />
     <None Include="Resources\NotifierIcon.ico" />
+    <None Include="Resources\MySQLNotifierIconApplicationLogo.png" />
+    <None Include="Resources\MySQLNotifierApplicationLogo.png" />
+    <None Include="Resources\MySQLNotifier_ErrorImage.png" />
+    <None Include="Resources\MySQLNotifier_WarningImage.png" />
+    <None Include="Resources\MySQLNotifier_Starting_Alert_Strong.png" />
+    <None Include="Resources\MySQLNotifier_Starting_Strong.png" />
+    <None Include="Resources\MySQLNotifier_Stopped_Alert_Strong.png" />
+    <None Include="Resources\MySQLNotifier_Stopped_Strong.png" />
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
   </ItemGroup>

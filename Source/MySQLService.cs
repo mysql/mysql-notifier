@@ -36,6 +36,7 @@ using Microsoft.Win32;
 using System.Net;
 using System.Xml.Serialization;
 using System.Configuration;
+using MySql.Notifier.Properties;
 
 namespace MySql.Notifier
 {
@@ -97,8 +98,11 @@ namespace MySql.Notifier
       }
       catch (InvalidOperationException ioEx)
       {
-        MessageBox.Show(ioEx.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        winService = null;
+        using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ioEx.Message, true))
+        {
+          errorDialog.ShowDialog();          
+        }
+        winService = null;        
       }
     }
 
@@ -117,7 +121,7 @@ namespace MySql.Notifier
 
       if (!IsRealMySQLService) return;
         
-      var filteredConnections = MySqlWorkbench.Connections.Where(t => !String.IsNullOrEmpty(t.Name));
+      var filteredConnections = MySqlWorkbench.Connections.Where(t => !String.IsNullOrEmpty(t.Name) && t.Port == parameters.Port);
 
       if (filteredConnections != null)
       {

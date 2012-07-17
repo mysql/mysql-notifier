@@ -153,5 +153,17 @@ namespace MySql.Notifier.Properties {
                 this["SupportedWorkbenchVersion"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool UseColorfulStatusIcons {
+            get {
+                return ((bool)(this["UseColorfulStatusIcons"]));
+            }
+            set {
+                this["UseColorfulStatusIcons"] = value;
+            }
+        }
     }
 }

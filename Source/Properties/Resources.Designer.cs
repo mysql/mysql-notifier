@@ -85,6 +85,13 @@ namespace MySql.Notifier.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap ApplicationLogo {
+            get {
+                object obj = ResourceManager.GetObject("ApplicationLogo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to MySQL Notifier.
         /// </summary>
@@ -236,6 +243,15 @@ namespace MySql.Notifier.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to High Severity Error.
+        /// </summary>
+        internal static string HighSeverityError {
+            get {
+                return ResourceManager.GetString("HighSeverityError", resourceCulture);
+            }
+        }
+        
         internal static System.Drawing.Bitmap InstallAvailableUpdatesIcon {
             get {
                 object obj = ResourceManager.GetObject("InstallAvailableUpdatesIcon", resourceCulture);
@@ -307,6 +323,13 @@ namespace MySql.Notifier.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap NotifierErrorImage {
+            get {
+                object obj = ResourceManager.GetObject("NotifierErrorImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap NotifierIcon {
             get {
                 object obj = ResourceManager.GetObject("NotifierIcon", resourceCulture);
@@ -349,6 +372,20 @@ namespace MySql.Notifier.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap NotifierIconStartingAlertStrong {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconStartingAlertStrong", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierIconStartingStrong {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconStartingStrong", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap NotifierIconStopped {
             get {
                 object obj = ResourceManager.GetObject("NotifierIconStopped", resourceCulture);
@@ -359,6 +396,27 @@ namespace MySql.Notifier.Properties {
         internal static System.Drawing.Bitmap NotifierIconStoppedAlert {
             get {
                 object obj = ResourceManager.GetObject("NotifierIconStoppedAlert", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierIconStoppedAlertStrong {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconStoppedAlertStrong", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierIconStoppedStrong {
+            get {
+                object obj = ResourceManager.GetObject("NotifierIconStoppedStrong", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap NotifierWarningImage {
+            get {
+                object obj = ResourceManager.GetObject("NotifierWarningImage", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

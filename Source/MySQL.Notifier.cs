@@ -68,11 +68,13 @@ namespace MySql.Notifier
     public Notifier()
     {
 
-      traceNotifier = new MySQLSourceTrace("Notifier", Environment.CurrentDirectory + @"\MySQLNotifierLog.txt", "", SourceLevels.Warning);      
-      //load splash screen
-       var splashScreen = new AboutDialog();
-       splashScreen.Show();
+      traceNotifier = new MySQLSourceTrace("Notifier", Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + @"\Oracle\MySQLNotifierLog.txt", "", SourceLevels.Warning);      
       
+      //load splash screen
+      var splashScreen = new AboutDialog();      
+      splashScreen.Show();
+      Application.DoEvents();       
+   
       components = new System.ComponentModel.Container();
       notifyIcon = new NotifyIcon(components)
                     {
@@ -109,8 +111,7 @@ namespace MySql.Notifier
         if (!String.IsNullOrEmpty(location))
         {
           Utility.CreateScheduledTask("MySQLNotifierTask", location + @"MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, false);
-        }
-               
+        }               
       }
       
       mySQLServicesList.LoadFromSettings();
@@ -142,9 +143,9 @@ namespace MySql.Notifier
         watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);        
         watcher.Start();
       }
-      catch (ManagementException)
+      catch (ManagementException ex)
       {
-        traceNotifier.WriteWarning("Critical Error when adding listener for events. This will cause the application won't listen for external changes in the services.", 1);
+        traceNotifier.WriteWarning("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, 1);
       }
 
       splashScreen.Close();
@@ -406,6 +407,7 @@ namespace MySql.Notifier
       notifyIcon.BalloonTipTitle = Resources.BalloonTitleFailedStatusChange;
       notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextFailedStatusChange, service.ServiceName, ex.Message);
       notifyIcon.ShowBalloonTip(1500);
+      traceNotifier.WriteError("Critical Error when trying to update the service status - " + (ex.Message + " " + ex.InnerException), 1);
     }
    
     void mySQLServicesList_ServiceListChanged(object sender, MySQLService service, ServiceListChangeType changeType)
@@ -476,8 +478,11 @@ namespace MySql.Notifier
     {
       if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
       {
-        MessageBox.Show(Resources.Installer11RequiredForCheckForUpdates, Resources.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-        return;
+        using (var errorDialog = new MessageDialog(Resources.Installer11RequiredForCheckForUpdates,"", false))
+        {
+          errorDialog.ShowDialog();          
+          return;
+        }
       }
 
       string path = @MySqlInstaller.GetInstallerPath();
@@ -540,10 +545,11 @@ namespace MySql.Notifier
     public void SetNotifyIconToolTip()
     {
       int MAX_TOOLTIP_LENGHT = 63; // framework constraint for notify icons
+      var version =  Assembly.GetExecutingAssembly().GetName().Version.ToString().Split('.'); 
 
       string toolTipText = string.Format("{0} ({1})\n{2}.",
                                          Properties.Resources.AppName,
-                                         Assembly.GetExecutingAssembly().GetName().Version.ToString(),
+                                         String.Format("{0}.{1}.{2}", version[0], version[1], version[2]),
                                          String.Format(Properties.Resources.ToolTipText, mySQLServicesList.Services.Count));
       notifyIcon.Text = (toolTipText.Length >= MAX_TOOLTIP_LENGHT ? toolTipText.Substring(0, MAX_TOOLTIP_LENGHT - 3) + "..." : toolTipText);
     }
@@ -606,6 +612,7 @@ namespace MySql.Notifier
     private Bitmap GetIconForNotifier()
     {
       bool hasUpdates = (Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0;
+      bool useColorfulIcon = Settings.Default.UseColorfulStatusIcons;
 
       if (Settings.Default.ServiceList != null)
       {
@@ -614,10 +621,16 @@ namespace MySql.Notifier
         if (updateTrayIconServices != null)
         {
           if (updateTrayIconServices.Where(t => t.Status == ServiceControllerStatus.Stopped).Count() > 0)
-            return hasUpdates ? Properties.Resources.NotifierIconStoppedAlert : Properties.Resources.NotifierIconStopped;
+            if (!useColorfulIcon)
+              return hasUpdates ? Properties.Resources.NotifierIconStoppedAlert : Properties.Resources.NotifierIconStopped;
+            else
+              return hasUpdates ? Properties.Resources.NotifierIconStoppedAlertStrong : Properties.Resources.NotifierIconStoppedStrong;
 
           if (updateTrayIconServices.Where(t => t.Status == ServiceControllerStatus.StartPending).Count() > 0)
-            return hasUpdates ? Properties.Resources.NotifierIconStartingAlert : Properties.Resources.NotifierIconStarting;
+            if (!useColorfulIcon)
+                return hasUpdates ? Properties.Resources.NotifierIconStartingAlert : Properties.Resources.NotifierIconStarting;
+            else
+                return hasUpdates ? Properties.Resources.NotifierIconStartingAlertStrong : Properties.Resources.NotifierIconStartingStrong;
 
           if (updateTrayIconServices.Where(t => t.Status == ServiceControllerStatus.Running).Count() > 0)
             return hasUpdates ? Properties.Resources.NotifierIconRunningAlert : Properties.Resources.NotifierIconRunning;

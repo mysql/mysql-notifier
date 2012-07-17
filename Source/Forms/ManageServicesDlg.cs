@@ -52,7 +52,12 @@ namespace MySql.Notifier
       foreach (string service in dlg.ServicesToAdd)
       {
         if (serviceList.Contains(service))
-          MessageBox.Show("Selected Service is already in the Monitor List", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        {
+          using (var errorDialog = new MessageDialog("Warning", "Selected Service is already in the Monitor List", false))
+          {
+            errorDialog.ShowDialog(this);
+          }                    
+        }
         else
           serviceList.AddService(service);
       }

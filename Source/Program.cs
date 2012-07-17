@@ -27,25 +27,31 @@ using MySQL.Utility;
 using System.Linq;
 using MySql.Notifier.Properties;
 using System.Threading;
+using System.Diagnostics;
 
 namespace MySql.Notifier
 {
   static class Program
   {
 
-    static void MySQLNotifierHandler(Exception e)
+    static void MySQLNotifierHandler(Exception e, bool critical)
     {
-      MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+      using (var errorDialog = new MessageDialog(Resources.HighSeverityError, e.Message, critical))
+      {        
+        errorDialog.ShowDialog();
+        var traceNotifier = new MySQLSourceTrace("Notifier", Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + @"\Oracle\MySQLNotifierLog.txt", "", SourceLevels.Warning);
+        traceNotifier.WriteError("Unhandled Exception - "  + (e.Message + " " + e.InnerException), 1);        
+      }            
     }
 
     static void MySQLNotifierThreadExceptionEventHandler(object sender, ThreadExceptionEventArgs args)
     {
-      MySQLNotifierHandler(args.Exception);     
+      MySQLNotifierHandler(args.Exception, true);     
     }
 
     static void MySQLNotifierAppExceptionHandler(object sender, UnhandledExceptionEventArgs args)
     {
-      MySQLNotifierHandler((Exception)args.ExceptionObject);      
+      MySQLNotifierHandler((Exception)args.ExceptionObject, true);      
     }
 
 
@@ -81,7 +87,12 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        MessageBox.Show(ex.Message, "Program Terminated Unexpectedly", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ex.Message, true))
+        {
+          errorDialog.ShowDialog();
+          var traceNotifier = new MySQLSourceTrace("Notifier", Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + @"\Oracle\MySQLNotifierLog.txt", "", SourceLevels.Warning);
+          traceNotifier.WriteError("Application Error - " + (ex.Message + " " + ex.InnerException), 1);  
+        }                
       }
       SingleInstance.Stop();
     }

@@ -44,6 +44,7 @@
       this.chkRunAtStartup = new System.Windows.Forms.CheckBox();
       this.lblSubTitle1 = new System.Windows.Forms.Label();
       this.lblHiperTitle = new System.Windows.Forms.Label();
+      this.chkUseColorfulIcons = new System.Windows.Forms.CheckBox();
       this.panel2.SuspendLayout();
       this.panel1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numCheckUpdatesWeeks)).BeginInit();
@@ -55,7 +56,7 @@
       this.panel2.Controls.Add(this.btnOK);
       this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
       this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.panel2.Location = new System.Drawing.Point(0, 409);
+      this.panel2.Location = new System.Drawing.Point(0, 406);
       this.panel2.Name = "panel2";
       this.panel2.Size = new System.Drawing.Size(422, 46);
       this.panel2.TabIndex = 5;
@@ -85,6 +86,7 @@
       // 
       this.panel1.AutoSize = true;
       this.panel1.BackColor = System.Drawing.Color.White;
+      this.panel1.Controls.Add(this.chkUseColorfulIcons);
       this.panel1.Controls.Add(this.lblSubTitle2);
       this.panel1.Controls.Add(this.notifyOfStatusChange);
       this.panel1.Controls.Add(this.notifyOfAutoAdd);
@@ -99,13 +101,13 @@
       this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panel1.Location = new System.Drawing.Point(0, 0);
       this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(422, 455);
+      this.panel1.Size = new System.Drawing.Size(422, 452);
       this.panel1.TabIndex = 6;
       // 
       // lblSubTitle2
       // 
       this.lblSubTitle2.AutoSize = true;
-      this.lblSubTitle2.Location = new System.Drawing.Point(17, 268);
+      this.lblSubTitle2.Location = new System.Drawing.Point(17, 288);
       this.lblSubTitle2.Name = "lblSubTitle2";
       this.lblSubTitle2.Size = new System.Drawing.Size(120, 15);
       this.lblSubTitle2.TabIndex = 61;
@@ -114,7 +116,7 @@
       // notifyOfStatusChange
       // 
       this.notifyOfStatusChange.AutoSize = true;
-      this.notifyOfStatusChange.Location = new System.Drawing.Point(21, 344);
+      this.notifyOfStatusChange.Location = new System.Drawing.Point(21, 359);
       this.notifyOfStatusChange.Name = "notifyOfStatusChange";
       this.notifyOfStatusChange.Size = new System.Drawing.Size(243, 19);
       this.notifyOfStatusChange.TabIndex = 60;
@@ -124,7 +126,7 @@
       // notifyOfAutoAdd
       // 
       this.notifyOfAutoAdd.AutoSize = true;
-      this.notifyOfAutoAdd.Location = new System.Drawing.Point(21, 310);
+      this.notifyOfAutoAdd.Location = new System.Drawing.Point(21, 325);
       this.notifyOfAutoAdd.Name = "notifyOfAutoAdd";
       this.notifyOfAutoAdd.Size = new System.Drawing.Size(284, 19);
       this.notifyOfAutoAdd.TabIndex = 59;
@@ -133,7 +135,7 @@
       // 
       // autoAddRegex
       // 
-      this.autoAddRegex.Location = new System.Drawing.Point(49, 205);
+      this.autoAddRegex.Location = new System.Drawing.Point(49, 238);
       this.autoAddRegex.Name = "autoAddRegex";
       this.autoAddRegex.Size = new System.Drawing.Size(300, 23);
       this.autoAddRegex.TabIndex = 58;
@@ -141,7 +143,7 @@
       // chkEnabledAutoAddServices
       // 
       this.chkEnabledAutoAddServices.AutoSize = true;
-      this.chkEnabledAutoAddServices.Location = new System.Drawing.Point(21, 179);
+      this.chkEnabledAutoAddServices.Location = new System.Drawing.Point(21, 212);
       this.chkEnabledAutoAddServices.Name = "chkEnabledAutoAddServices";
       this.chkEnabledAutoAddServices.Size = new System.Drawing.Size(316, 19);
       this.chkEnabledAutoAddServices.TabIndex = 57;
@@ -152,7 +154,7 @@
       // lblWeeks
       // 
       this.lblWeeks.AutoSize = true;
-      this.lblWeeks.Location = new System.Drawing.Point(328, 141);
+      this.lblWeeks.Location = new System.Drawing.Point(328, 174);
       this.lblWeeks.Name = "lblWeeks";
       this.lblWeeks.Size = new System.Drawing.Size(41, 15);
       this.lblWeeks.TabIndex = 56;
@@ -160,7 +162,7 @@
       // 
       // numCheckUpdatesWeeks
       // 
-      this.numCheckUpdatesWeeks.Location = new System.Drawing.Point(268, 138);
+      this.numCheckUpdatesWeeks.Location = new System.Drawing.Point(268, 171);
       this.numCheckUpdatesWeeks.Name = "numCheckUpdatesWeeks";
       this.numCheckUpdatesWeeks.Size = new System.Drawing.Size(52, 23);
       this.numCheckUpdatesWeeks.TabIndex = 55;
@@ -168,7 +170,7 @@
       // chkAutoCheckUpdates
       // 
       this.chkAutoCheckUpdates.AutoSize = true;
-      this.chkAutoCheckUpdates.Location = new System.Drawing.Point(21, 140);
+      this.chkAutoCheckUpdates.Location = new System.Drawing.Point(21, 173);
       this.chkAutoCheckUpdates.Name = "chkAutoCheckUpdates";
       this.chkAutoCheckUpdates.Size = new System.Drawing.Size(233, 19);
       this.chkAutoCheckUpdates.TabIndex = 54;
@@ -179,7 +181,7 @@
       // chkRunAtStartup
       // 
       this.chkRunAtStartup.AutoSize = true;
-      this.chkRunAtStartup.Location = new System.Drawing.Point(21, 104);
+      this.chkRunAtStartup.Location = new System.Drawing.Point(21, 137);
       this.chkRunAtStartup.Name = "chkRunAtStartup";
       this.chkRunAtStartup.Size = new System.Drawing.Size(153, 19);
       this.chkRunAtStartup.TabIndex = 53;
@@ -205,11 +207,21 @@
       this.lblHiperTitle.TabIndex = 21;
       this.lblHiperTitle.Text = "MySQL Notifier Options";
       // 
+      // chkUseColorfulIcons
+      // 
+      this.chkUseColorfulIcons.AutoSize = true;
+      this.chkUseColorfulIcons.Location = new System.Drawing.Point(21, 102);
+      this.chkUseColorfulIcons.Name = "chkUseColorfulIcons";
+      this.chkUseColorfulIcons.Size = new System.Drawing.Size(154, 19);
+      this.chkUseColorfulIcons.TabIndex = 62;
+      this.chkUseColorfulIcons.Text = "Use colorful status icons";
+      this.chkUseColorfulIcons.UseVisualStyleBackColor = true;
+      // 
       // OptionsDialog
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(422, 455);
+      this.ClientSize = new System.Drawing.Size(422, 452);
       this.Controls.Add(this.panel2);
       this.Controls.Add(this.panel1);
       this.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
@@ -246,5 +258,6 @@
     private System.Windows.Forms.CheckBox chkAutoCheckUpdates;
     private System.Windows.Forms.CheckBox chkRunAtStartup;
     private System.Windows.Forms.Label lblSubTitle1;
+    private System.Windows.Forms.CheckBox chkUseColorfulIcons;
   }
 }

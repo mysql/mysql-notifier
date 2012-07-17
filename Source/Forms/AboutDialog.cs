@@ -6,16 +6,24 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Reflection;
 
 namespace MySql.Notifier
 {
-  public partial class AboutDialog : Form
+  public partial class AboutDialog : FormBase
   {
-    public AboutDialog()
+    private string[] version
     {
-      InitializeComponent();
+      get {
+        return Assembly.GetExecutingAssembly().GetName().Version.ToString().Split('.');      
+      }    
     }
 
+    public AboutDialog()
+    {      
+      InitializeComponent();
+      lblVersionSubTitle.Text = String.Format("{0}.{1}.{2}", version[0], version[1], version[2]);    
+    }
   
     private void AboutDialog_Load(object sender, EventArgs e)
     {
