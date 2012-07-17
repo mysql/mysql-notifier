@@ -26,11 +26,29 @@ using System.Windows.Forms;
 using MySQL.Utility;
 using System.Linq;
 using MySql.Notifier.Properties;
+using System.Threading;
 
 namespace MySql.Notifier
 {
   static class Program
   {
+
+    static void MySQLNotifierHandler(Exception e)
+    {
+      MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+
+    static void MySQLNotifierThreadExceptionEventHandler(object sender, ThreadExceptionEventArgs args)
+    {
+      MySQLNotifierHandler(args.Exception);     
+    }
+
+    static void MySQLNotifierAppExceptionHandler(object sender, UnhandledExceptionEventArgs args)
+    {
+      MySQLNotifierHandler((Exception)args.ExceptionObject);      
+    }
+
+
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
@@ -46,6 +64,16 @@ namespace MySql.Notifier
       if (!SingleInstance.Start()) { return; }
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
+
+      Application.ThreadException += new ThreadExceptionEventHandler(MySQLNotifierThreadExceptionEventHandler);
+
+      // For Windows Forms errors to go through our handler.
+      Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+
+      // For non-UI thread exceptions
+      AppDomain.CurrentDomain.UnhandledException +=
+          new UnhandledExceptionEventHandler(MySQLNotifierAppExceptionHandler);
+
       try
       {
         var applicationContext = new NotifierApplicationContext();

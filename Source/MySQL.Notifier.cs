@@ -35,8 +35,6 @@ using MySQL.Utility;
 using System.IO;
 using System.Configuration;
 
-
-
 namespace MySql.Notifier
 {
   class Notifier
@@ -53,6 +51,8 @@ namespace MySql.Notifier
     private ToolStripMenuItem ignoreAvailableUpdateMenuItem;
     private ToolStripSeparator hasUpdatesSeparator;
 
+    private MySQLSourceTrace traceNotifier;
+
     private int previousTotalServicesNumber;
 
     private bool supportedWorkbenchVersion
@@ -63,10 +63,12 @@ namespace MySql.Notifier
       }
     }
 
-    private delegate void serviceWindowsEvent(string servicename, string path, string state);    
+    private delegate void serviceWindowsEvent(string servicename, string path, string state);
 
     public Notifier()
-    {           
+    {
+
+      traceNotifier = new MySQLSourceTrace("Notifier", Environment.CurrentDirectory + @"\MySQLNotifierLog.txt", "", SourceLevels.Warning);      
       //load splash screen
        var splashScreen = new AboutDialog();
        splashScreen.Show();
@@ -141,7 +143,8 @@ namespace MySql.Notifier
         watcher.Start();
       }
       catch (ManagementException)
-      {        
+      {
+        traceNotifier.WriteWarning("Critical Error when adding listener for events. This will cause the application won't listen for external changes in the services.", 1);
       }
 
       splashScreen.Close();
