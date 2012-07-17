@@ -308,4 +308,7 @@
   <data name="AboutBackGroundDialog" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\NotifierSplashWindow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Installer11RequiredForCheckForUpdates" xml:space="preserve">
+    <value>MySQL Installer For Windows 1.1 or later must be installed to enable check for updates.</value>
+  </data>
 </root>

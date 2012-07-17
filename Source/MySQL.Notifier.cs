@@ -296,7 +296,6 @@ namespace MySql.Notifier
 
       ToolStripMenuItem checkForUpdates = new ToolStripMenuItem("Check for updates");
       checkForUpdates.Click += new EventHandler(checkUpdatesItem_Click);
-      checkForUpdates.Enabled = !String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) && MySqlInstaller.GetInstallerVersion().Contains("1.1");
       checkForUpdates.Image = Resources.CheckForUpdatesIcon;
 
       if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
@@ -464,15 +463,18 @@ namespace MySql.Notifier
 
     private void checkUpdatesItem_Click(object sender, EventArgs e)
     {
-      if (!String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()))
+      if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
       {
-        string path = @MySqlInstaller.GetInstallerPath();
-        Process proc = new Process();
-        ProcessStartInfo startInfo = new ProcessStartInfo();
-        startInfo.FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path);
-        startInfo.Arguments = "checkforupdates";
-        Process.Start(startInfo);
-      }      
+        MessageBox.Show(Resources.Installer11RequiredForCheckForUpdates, Resources.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        return;
+      }
+
+      string path = @MySqlInstaller.GetInstallerPath();
+      Process proc = new Process();
+      ProcessStartInfo startInfo = new ProcessStartInfo();
+      startInfo.FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path);
+      startInfo.Arguments = "checkforupdates";
+      Process.Start(startInfo);
     }
 
     private void aboutMenu_Click(object sender, EventArgs e)
