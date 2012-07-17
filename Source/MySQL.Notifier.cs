@@ -189,13 +189,15 @@ namespace MySql.Notifier
           return true;
         }
         catch (IOException ex)
-        {
-          //TODO:  log exception as non fatal
+        {          
+          traceNotifier.WriteWarning(Resources.SettingsFileFailedToLoad + " - " + (ex.Message + " " + ex.InnerException), 1);
           System.Threading.Thread.Sleep(1000);
         }
       }
-
-      MessageBox.Show(Resources.SettingsFileFailedToLoad, Resources.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+      using (var errorDialog = new MessageDialog(Resources.SettingsFileFailedToLoad, "", true))
+      {
+        errorDialog.ShowDialog();        
+      }      
       return false;
     }
 
