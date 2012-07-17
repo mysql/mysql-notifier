@@ -178,55 +178,66 @@ namespace MySql.Notifier
       watcher.EnableRaisingEvents = true;
     }
 
+    private bool LoadSettingsFile()
+    {
+      for (int i = 0; i < 3; i++)
+      {
+        try
+        {
+          Settings.Default.Reload();
+          return true;
+        }
+        catch (IOException ex)
+        {
+          //TODO:  log exception as non fatal
+          System.Threading.Thread.Sleep(1000);
+        }
+      }
+
+      MessageBox.Show(Resources.SettingsFileFailedToLoad, Resources.AppName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+      return false;
+    }
+
 
     void settingsFile_Changed(object sender, FileSystemEventArgs e)
     {
 
       int settingsUpdateCheck = -1;
 
+      if (!LoadSettingsFile()) return;
+      settingsUpdateCheck = Settings.Default.UpdateCheck;
 
-      for (int i = 0; i < 3; i++)
-      {
-         try
-         {
-            Settings.Default.Reload();
-            settingsUpdateCheck = Settings.Default.UpdateCheck;
-         }
-         catch
-         {
-            System.Threading.Thread.Sleep(1000);
-            if (i == 2)
-            {
-              MessageBox.Show("Configuration settings update failed. Please restart the application.", "MySQL Notifier", MessageBoxButtons.OK, MessageBoxIcon.Error);
-              return;
-            }
-         }
-        }
-
-
-        // if we have already notified our user then noting more to do
+      // if we have already notified our user then noting more to do
       if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0) return;
      
-        bool hasUpdates = true;
+      // if we are supposed to check forupdates but the installer is too old then 
+      // notify the user and exit
+      if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
+      {
+        ShowTooltip(false, Resources.SoftwareUpdate, Resources.ScheduledCheckRequiresInstaller11, 1500);
+        settingsUpdateCheck = 0;
+      }
 
-        // let them know we are checking for updates
-        if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Checking) != 0)
-        {
-          ShowTooltip(false, Resources.SoftwareUpdate, Resources.CheckingForUpdates, 1500);
-          hasUpdates = MySqlInstaller.HasUpdates(10 * 1000);        
-          Settings.Default.UpdateCheck = hasUpdates ? (int)SoftwareUpdateStaus.HasUpdates : 0;
-          settingsUpdateCheck = Settings.Default.UpdateCheck;
-          Settings.Default.Save();        
-        }
+      bool hasUpdates = true;
 
-        if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0)
-          ShowTooltip(false, Resources.SoftwareUpdate, Resources.HasUpdatesLaunchInstaller, 1500);
+      // let them know we are checking for updates
+      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Checking) != 0)
+      {
+        ShowTooltip(false, Resources.SoftwareUpdate, Resources.CheckingForUpdates, 1500);
+        hasUpdates = MySqlInstaller.HasUpdates(10 * 1000);        
+        Settings.Default.UpdateCheck = hasUpdates ? (int)SoftwareUpdateStaus.HasUpdates : 0;
+        settingsUpdateCheck = Settings.Default.UpdateCheck;
+        Settings.Default.Save();        
+      }
+
+      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0)
+        ShowTooltip(false, Resources.SoftwareUpdate, Resources.HasUpdatesLaunchInstaller, 1500);
        
-         // set that we have notified our user
-         Settings.Default.UpdateCheck |= (int)SoftwareUpdateStaus.Notified;
-         Settings.Default.Save();          
+      // set that we have notified our user
+      Settings.Default.UpdateCheck |= (int)SoftwareUpdateStaus.Notified;
+      Settings.Default.Save();          
        
-         notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());            
+      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());            
     }
 
     /// <summary>

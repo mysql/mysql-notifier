@@ -311,4 +311,10 @@
   <data name="Installer11RequiredForCheckForUpdates" xml:space="preserve">
     <value>MySQL Installer For Windows 1.1 or later must be installed to enable check for updates.</value>
   </data>
+  <data name="SettingsFileFailedToLoad" xml:space="preserve">
+    <value>Loading application settings failed.  The application will continue to run but may not behave as you would expect.</value>
+  </data>
+  <data name="ScheduledCheckRequiresInstaller11" xml:space="preserve">
+    <value>The scheduled update check requires that MySQL Installer for Windows 1.1 or later be installed.</value>
+  </data>
 </root>

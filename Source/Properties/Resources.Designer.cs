@@ -450,6 +450,24 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The scheduled update check requires that MySQL Installer for Windows 1.1 or later be installed..
+        /// </summary>
+        internal static string ScheduledCheckRequiresInstaller11 {
+            get {
+                return ResourceManager.GetString("ScheduledCheckRequiresInstaller11", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading application settings failed.  The application will continue to run but may not behave as you would expect..
+        /// </summary>
+        internal static string SettingsFileFailedToLoad {
+            get {
+                return ResourceManager.GetString("SettingsFileFailedToLoad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Software Update.
         /// </summary>
         internal static string SoftwareUpdate {
