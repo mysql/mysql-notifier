@@ -165,6 +165,7 @@
     <Compile Include="Forms\OptionsDialog.Designer.cs">
       <DependentUpon>OptionsDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="NotifierSettings.cs" />
     <Compile Include="Forms\MessageDialog.cs">
       <SubType>Form</SubType>
     </Compile>
