@@ -107,7 +107,7 @@ namespace MySql.Notifier
         var location = Utility.GetInstallLocation("MySQL Notifier");
         if (!String.IsNullOrEmpty(location))
         {
-          Utility.CreateScheduledTask("MySQLNotifierTask", location + @"MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, false);
+          Utility.CreateScheduledTask("MySQLNotifierTask", location + @"MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, false, Utility.GetOsVersion() == Utility.OSVersion.WindowsXp);                   
         }               
       }
       
