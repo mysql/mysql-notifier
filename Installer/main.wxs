@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?define ProductName="MySQL Notifier 1.0.2"?>
+<?define ProductName="MySQL Notifier $(var.Version)"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
-  <Product Name="$(var.ProductName)" Id ="9e9fb57a-62e3-45cf-a896-686e33407607" Manufacturer="Oracle" Language="1033" Version="1.0.2"
+  <Product Name="$(var.ProductName)" Id ="*" Manufacturer="Oracle" Language="1033" Version="$(var.Version)" 
            UpgradeCode="9e9fb57a-62e3-45cf-a896-686e33407606">
     <Package Id="*" InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated"/>
 
@@ -30,8 +30,14 @@
             <Component Id='MainExecutable' Guid='1e9fb57a-62e3-45cf-a896-686e33407606'>
               <File Id='MySqlNotifierEXE' Name='MySQLNotifier.exe' Source='..\Source\bin\Release\MySqlNotifier.exe' Vital='yes' />
               <File Id='MySQLUtilityDll' Name='MySQL.Utility.dll' Source='..\Source\Lib\MySQL.Utility.dll' Vital='yes' />
-              <RemoveFolder Id="INSTALLDIR" On="uninstall" />
-            </Component>
+              <?if $(var.IsGPL) = 1?>
+              <File Id='ReadMe' Name='README' Source='README'/>
+              <File Id="COPYING" Name="COPYING" Source="COPYING" DiskId="1" />
+              <?else?>
+              <File Id="README2" Name="README" Source="README-Commercial" DiskId="1"/>
+              <?endif?>
+              <RemoveFolder Id="INSTALLDIR" On="uninstall" />              
+            </Component>            
           </Directory>
         </Directory>
       </Directory>

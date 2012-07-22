@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("MySQL Notifier")]
 [assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyConfiguration("beta")]
 [assembly: AssemblyCompany("Oracle")]
 [assembly: AssemblyProduct("mysqlnotifier")]
 [assembly: AssemblyCopyright("Copyright © Oracle 2012")]
@@ -53,5 +53,5 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyDelaySign(false)]
 [assembly: AssemblyKeyName("ConnectorNet")]
-[assembly: AssemblyVersion("1.0.2")]
-[assembly: AssemblyFileVersion("1.0.2")]
+[assembly: AssemblyVersion("1.0.3")]
+[assembly: AssemblyFileVersion("1.0.3")]
