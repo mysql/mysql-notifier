@@ -132,9 +132,8 @@ namespace MySql.Notifier
         using (var errorDialog = new MessageDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench, false))
         {
           errorDialog.ShowDialog();
-        }
-        var traceNotifier = new MySQLSourceTrace("Notifier", Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + @"\Oracle\MySQLNotifierLog.txt", "", SourceLevels.Warning);
-        traceNotifier.WriteError("Application Error - " + ex.Message + " " + ex.InnerException, 1);
+        }        
+        MySQLNotifierTrace.GetSourceTrace().WriteError("Application Error - " + ex.Message + " " + ex.InnerException, 1);
       }
     }
 
@@ -152,8 +151,7 @@ namespace MySql.Notifier
         {
           errorDialog.ShowDialog();
         }
-        var traceNotifier = new MySQLSourceTrace("Notifier", Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + @"\Oracle\MySQLNotifierLog.txt", "", SourceLevels.Warning);
-        traceNotifier.WriteError("Application Error - " + ex.Message + " " + ex.InnerException, 1);
+        MySQLNotifierTrace.GetSourceTrace().WriteError("Application Error - " + ex.Message + " " + ex.InnerException, 1);
       }
 
     }

@@ -48,8 +48,6 @@ namespace MySql.Notifier
     private ToolStripMenuItem ignoreAvailableUpdateMenuItem;
     private ToolStripSeparator hasUpdatesSeparator;
 
-    private MySQLSourceTrace traceNotifier;
-
     private int previousTotalServicesNumber;
 
     private bool supportedWorkbenchVersion
@@ -64,9 +62,7 @@ namespace MySql.Notifier
 
     public Notifier()
     {
-
-      traceNotifier = new MySQLSourceTrace("Notifier", Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + @"\Oracle\MySQLNotifierLog.txt", "", SourceLevels.Warning);      
-      
+            
       //load splash screen
       var splashScreen = new AboutDialog();      
       splashScreen.Show();
@@ -127,8 +123,7 @@ namespace MySql.Notifier
      
       SetNotifyIconToolTip();
 
-      Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal);
-      StartWatcherForFile(config.FilePath, settingsFile_Changed);
+      StartWatcherForFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier\settings.config", settingsFile_Changed);
      
       var managementScope = new ManagementScope(@"root\cimv2");
       managementScope.Connect();     
@@ -142,7 +137,7 @@ namespace MySql.Notifier
       }
       catch (ManagementException ex)
       {
-        traceNotifier.WriteWarning("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, 1);
+        MySQLNotifierTrace.GetSourceTrace().WriteWarning("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, 1);
       }
 
       splashScreen.Close();
@@ -186,12 +181,12 @@ namespace MySql.Notifier
           return true;
         }
         catch (IOException ex)
-        {          
-          traceNotifier.WriteWarning(Resources.SettingsFileFailedToLoad + " - " + (ex.Message + " " + ex.InnerException), 1);
+        {
+          MySQLNotifierTrace.GetSourceTrace().WriteWarning(Resources.SettingsFileFailedToLoad + " - " + (ex.Message + " " + ex.InnerException), 1);
           System.Threading.Thread.Sleep(1000);
         }
       }
-      using (var errorDialog = new MessageDialog(Resources.SettingsFileFailedToLoad, "", true))
+      using (var errorDialog = new MessageDialog(Resources.HighSeverityError, Resources.SettingsFileFailedToLoad, true))
       {
         errorDialog.ShowDialog();        
       }      
@@ -406,7 +401,7 @@ namespace MySql.Notifier
       notifyIcon.BalloonTipTitle = Resources.BalloonTitleFailedStatusChange;
       notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextFailedStatusChange, service.ServiceName, ex.Message);
       notifyIcon.ShowBalloonTip(1500);
-      traceNotifier.WriteError("Critical Error when trying to update the service status - " + (ex.Message + " " + ex.InnerException), 1);
+      MySQLNotifierTrace.GetSourceTrace().WriteError("Critical Error when trying to update the service status - " + (ex.Message + " " + ex.InnerException), 1);
     }
    
     void mySQLServicesList_ServiceListChanged(object sender, MySQLService service, ServiceListChangeType changeType)

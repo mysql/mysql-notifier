@@ -74,12 +74,11 @@ namespace MySql.Notifier
       // 
       // lblOperationDetails
       // 
-      this.lblOperationDetails.AutoSize = true;
-      this.lblOperationDetails.Location = new System.Drawing.Point(111, 66);
+      this.lblOperationDetails.Location = new System.Drawing.Point(111, 60);
       this.lblOperationDetails.Name = "lblOperationDetails";
-      this.lblOperationDetails.Size = new System.Drawing.Size(108, 15);
+      this.lblOperationDetails.Size = new System.Drawing.Size(388, 55);
       this.lblOperationDetails.TabIndex = 27;
-      this.lblOperationDetails.Text = "lblOperationDetails";
+      this.lblOperationDetails.Text = "lblOperationDetails\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n";
       // 
       // picLogo
       // 
@@ -135,7 +134,7 @@ namespace MySql.Notifier
       this.MinimizeBox = false;
       this.Name = "MessageDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-      this.Text = "MySQL Notifer";
+      this.Text = "MySQL Notifier";
       this.panel1.ResumeLayout(false);
       this.panel1.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();

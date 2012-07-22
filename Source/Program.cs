@@ -30,14 +30,12 @@ namespace MySql.Notifier
 {
   static class Program
   {
-
     static void MySQLNotifierHandler(Exception e, bool critical)
     {
       using (var errorDialog = new MessageDialog(Resources.HighSeverityError, e.Message, critical))
       {        
         errorDialog.ShowDialog();
-        var traceNotifier = new MySQLSourceTrace("Notifier", Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + @"\Oracle\MySQLNotifierLog.txt", "", SourceLevels.Warning);
-        traceNotifier.WriteError("Unhandled Exception - "  + (e.Message + " " + e.InnerException), 1);        
+        MySQLNotifierTrace.GetSourceTrace().WriteError("Unhandled Exception - "  + (e.Message + " " + e.InnerException), 1);        
       }            
     }
 
@@ -86,9 +84,8 @@ namespace MySql.Notifier
       {
         using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ex.Message, true))
         {
-          errorDialog.ShowDialog();
-          var traceNotifier = new MySQLSourceTrace("Notifier", Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData) + @"\Oracle\MySQLNotifierLog.txt", "", SourceLevels.Warning);
-          traceNotifier.WriteError("Application Error - " + (ex.Message + " " + ex.InnerException), 1);  
+          errorDialog.ShowDialog();          
+          MySQLNotifierTrace.GetSourceTrace().WriteError("Application Error - " + (ex.Message + " " + ex.InnerException), 1);  
         }                
       }
       SingleInstance.Stop();
@@ -104,4 +101,16 @@ namespace MySql.Notifier
       return;
     }
   }
+
+
+  public static class MySQLNotifierTrace
+  {
+    public static MySQLSourceTrace GetSourceTrace()
+    {
+      var logPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier";
+      return new MySQLSourceTrace("MySqlNotifier", logPath + @"\MySQLNotifier.log", "", SourceLevels.Warning);
+    }
+  }
+
+
 }

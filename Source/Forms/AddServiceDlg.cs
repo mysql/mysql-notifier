@@ -110,9 +110,10 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        using (var errorDialog = new MessageDialog(ex.Message, ex.StackTrace, true))
+        using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ex.Message, true))
         {
-          errorDialog.ShowDialog(this);        
+          errorDialog.ShowDialog(this);
+          MySQLNotifierTrace.GetSourceTrace().WriteError(ex.Message, 1);
         }
       }
     }

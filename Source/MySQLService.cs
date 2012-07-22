@@ -99,6 +99,7 @@ namespace MySql.Notifier
         {
           errorDialog.ShowDialog();          
         }
+        MySQLNotifierTrace.GetSourceTrace().WriteError(ioEx.Message, 1);
         winService = null;        
       }
     }
