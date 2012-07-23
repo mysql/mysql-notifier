@@ -73,7 +73,7 @@
       </Component>
     </DirectoryRef>
 
-    <Feature Id="Complete" Level="1">
+    <Feature Id="Complete" Level="1" Title="MySQL Notifier">
       <ComponentRef Id="MainExecutable" />
       <!--<ComponentRef Id="DesktopShortcut" />-->
       <ComponentRef Id="ProgramMenuShortcutsComponent"/>

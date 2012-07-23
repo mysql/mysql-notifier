@@ -91,11 +91,14 @@ namespace MySql.Notifier
       // Create watcher for WB files
       if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
       {
+
         string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
-        StartWatcherForFile(file, connectionsFile_Changed);
+        if (File.Exists(file))
+          StartWatcherForFile(file, connectionsFile_Changed);
 
         file = String.Format(@"{0}\MySQL\Workbench\server_instances.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
-        StartWatcherForFile(file, serversFile_Changed);
+        if (File.Exists(file))
+          StartWatcherForFile(file, serversFile_Changed);
       }
 
       if (Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0)
@@ -122,7 +125,7 @@ namespace MySql.Notifier
       }
      
       SetNotifyIconToolTip();
-
+  
       StartWatcherForFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier\settings.config", settingsFile_Changed);
      
       var managementScope = new ManagementScope(@"root\cimv2");
