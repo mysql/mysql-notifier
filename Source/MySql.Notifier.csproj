@@ -217,6 +217,7 @@
     <None Include="Lib\WexInstaller.Core.res.~1~" />
     <None Include="Lib\WexInstaller.Core.RootPasswordPromptDlg.resources.~1~" />
     <None Include="Lib\WexInstaller.InstallerPanel.resources.~1~" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

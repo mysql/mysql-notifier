@@ -63,7 +63,7 @@
     <CreateProperty Value="Version=$(Version);$(DefineConstants)">
       <Output TaskParameter="Value" PropertyName="DefineConstants" />
     </CreateProperty>
-    <CreateProperty Value="mysql-notifier-$(Version).msi">
+    <CreateProperty Value="mysql-notifier-$(Version)">
       <Output TaskParameter="Value" PropertyName="TargetName" />
     </CreateProperty>
     <CreateProperty Value="$(TargetName)$(TargetExt)">
@@ -73,9 +73,6 @@
       <Output TaskParameter="Value" PropertyName="TargetPath" />
     </CreateProperty>
   </Target>
-  <!--	<Target Name="AfterBuild">
-	</Target>
-	-->
   <PropertyGroup>
     <BuildDependsOn>SetVariables;$(BuildDependsOn)</BuildDependsOn>
   </PropertyGroup>
