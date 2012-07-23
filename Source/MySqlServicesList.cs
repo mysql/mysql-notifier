@@ -77,7 +77,7 @@ namespace MySql.Notifier
     {
       var services = Service.GetInstances(Settings.Default.AutoAddPattern);
       foreach (var item in services)
-        AddService(item.Properties["DisplayName"].Value.ToString());
+        AddService(item.Properties["Name"].Value.ToString());
 
       Settings.Default.FirstRun = false;
       Settings.Default.Save();
@@ -133,14 +133,24 @@ namespace MySql.Notifier
       return null;
     }
 
-    public void SetServiceStatus(string serviceName, string path, string status)
+    public MySQLService GetServiceByDisplayName(string displayName)
     {
       foreach (MySQLService service in Services)
-      {
-        if (String.Compare(service.ServiceName, serviceName, true) != 0) continue;
-        service.SetStatus(status);
-        return;
-      }
+        if (String.Compare(service.DisplayName, displayName, true) == 0) return service;
+      return null;
+    }
+
+  
+    public void SetServiceStatus(string serviceName, string path, string status)
+    {
+      //TODO: Check if this foreach is not necessary anymore
+      //foreach (MySQLService service in Services)
+      //{
+      //  if (String.Compare(service.ServiceName, serviceName, true) != 0) continue;
+      //  service.SetStatus(status);
+      //  service.MenuGroup.Update();
+      //  return;
+      //}
       // if we get here the service doesn't exist in the list
       // if we are not supposed to auto add then just exit
       if (!Settings.Default.AutoAddServicesToMonitor) return;

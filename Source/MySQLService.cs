@@ -82,13 +82,18 @@ namespace MySql.Notifier
     [XmlIgnore]
     public List<MySqlWorkbenchConnection> WorkbenchConnections { get; private set; }
 
+    [XmlIgnore]
+    public bool workCompleted { get; private set; }
+
+
     private void SetService(string serviceName)
     {
       winService = new ServiceController(serviceName);
-      DisplayName = winService.DisplayName;
-      this.serviceName = winService.ServiceName;
+   
       try
       {
+        DisplayName = winService.DisplayName;
+        this.serviceName = winService.ServiceName;
         Status = winService.Status;
         FindMatchingWBConnections();
         MenuGroup = new ServiceMenuGroup(this);
@@ -176,6 +181,12 @@ namespace MySql.Notifier
         this.StatusChanged(this, args);
     }
 
+    public void UpdateMenu(string statusString)
+    {              
+        SetStatus(statusString);
+        MenuGroup.Update();  
+    }
+
     public void SetStatus(string statusString)
     {
       ServiceControllerStatus newStatus;
@@ -185,8 +196,7 @@ namespace MySql.Notifier
         if (newStatus == Status) return;
         ServiceControllerStatus copyPreviousStatus = Status;
         Status = newStatus;
-        MenuGroup.Update();
-        OnStatusChanged(new ServiceStatus(ServiceName, copyPreviousStatus, Status));
+        OnStatusChanged(new ServiceStatus(DisplayName, copyPreviousStatus, Status));
       }
     }
 
@@ -235,7 +245,7 @@ namespace MySql.Notifier
       {
         // else no error
         winService.Refresh();
-        SetStatus(winService.Status.ToString());
+        workCompleted = true;       
       }
     }
    
@@ -245,6 +255,7 @@ namespace MySql.Notifier
       TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
       BackgroundWorker worker = sender as BackgroundWorker;
       int action = (int)e.Argument;
+      workCompleted = false;
 
       switch (action)
       { 

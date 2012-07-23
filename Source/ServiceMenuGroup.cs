@@ -164,28 +164,46 @@ namespace MySql.Notifier
     void restart_Click(object sender, EventArgs e)
     {
       boundService.Restart();
+      if (boundService.workCompleted)     
+        boundService.UpdateMenu(boundService.Status.ToString());
+      
     }
 
     void stop_Click(object sender, EventArgs e)
     {
       boundService.Stop();
+      if (boundService.workCompleted)      
+        boundService.UpdateMenu(boundService.Status.ToString());
+      
     }
 
     void start_Click(object sender, EventArgs e)
     {
       boundService.Start();
+      if (boundService.workCompleted)
+      {
+        boundService.UpdateMenu(boundService.Status.ToString());        
+      }
     }
 
     public void AddToContextMenu(ContextMenuStrip menu)
-    {  
-      int index = 0;
-      menu.Items.Insert(index++, statusMenu);
-      if (boundService.IsRealMySQLService)
+    {       
+      if (menu.InvokeRequired)
       {
-        if (configureMenu != null) menu.Items.Insert(index++, configureMenu);
-        if (editorMenu != null) menu.Items.Insert(index++, editorMenu);
+        menu.Invoke(new MethodInvoker(() => { AddToContextMenu(menu); }));
       }
-      menu.Items.Insert(index++, separator);
+      else
+      {      
+        int index = 0;
+        menu.Items.Insert(index++, statusMenu);
+        if (boundService.IsRealMySQLService)
+        {
+          if (configureMenu != null) menu.Items.Insert(index++, configureMenu);
+          if (editorMenu != null) menu.Items.Insert(index++, editorMenu);
+        }
+        menu.Items.Insert(index++, separator);
+      }
+
     }
 
     
@@ -259,12 +277,11 @@ namespace MySql.Notifier
       startMenu.Enabled = boundService.Status == ServiceControllerStatus.Stopped;
       stopMenu.Enabled = boundService.Status != ServiceControllerStatus.Stopped;
       restartMenu.Enabled = stopMenu.Enabled;
-      if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
+      if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion && boundService.IsRealMySQLService)
       {
         editorMenu.Enabled = true;
         configureMenu.Enabled = true;
-      }
-
+      }      
     }
 
     private void UpdateItems(ContextMenuStrip menu)

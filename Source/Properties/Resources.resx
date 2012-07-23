@@ -309,7 +309,7 @@
     <value>..\Resources\NotifierSplashWindow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Installer11RequiredForCheckForUpdates" xml:space="preserve">
-    <value>MySQL Installer For Windows 1.1 or later must be installed to enable check for updates.</value>
+    <value>MySQL Installer For Windows 1.1 or later must be installed{0}to enable check for updates.</value>
   </data>
   <data name="SettingsFileFailedToLoad" xml:space="preserve">
     <value>Loading application settings failed.  The application will continue to run but may not behave as you would expect.</value>
@@ -340,5 +340,8 @@
   </data>
   <data name="NotifierIconStoppedStrong" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\MySQLNotifier_Stopped_Strong.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MissingMySQLInstaller" xml:space="preserve">
+    <value>Missing MySQL Installer</value>
   </data>
 </root>

@@ -197,13 +197,13 @@ namespace MySql.Notifier
     void settingsFile_Changed(object sender, FileSystemEventArgs e)
     {
 
-      int settingsUpdateCheck = -1;
+      int settingsUpdateCheck = 0;
 
       if (!LoadSettingsFile()) return;
       settingsUpdateCheck = Settings.Default.UpdateCheck;
 
       // if we have already notified our user then noting more to do
-      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0) return;
+      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0 || settingsUpdateCheck == 0) return;
      
       // if we are supposed to check forupdates but the installer is too old then 
       // notify the user and exit
@@ -388,7 +388,7 @@ namespace MySql.Notifier
           {
             notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
             notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
-            notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.ServiceName);
+            notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.DisplayName);
             notifyIcon.ShowBalloonTip(1500);            
           }
        }       
@@ -399,7 +399,7 @@ namespace MySql.Notifier
       MySQLService service = (MySQLService)sender;
       notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
       notifyIcon.BalloonTipTitle = Resources.BalloonTitleFailedStatusChange;
-      notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextFailedStatusChange, service.ServiceName, ex.Message);
+      notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, ex.Message);
       notifyIcon.ShowBalloonTip(1500);
       MySQLNotifierTrace.GetSourceTrace().WriteError("Critical Error when trying to update the service status - " + (ex.Message + " " + ex.InnerException), 1);
     }
@@ -430,9 +430,10 @@ namespace MySql.Notifier
 
     private void mySQLServicesList_ServiceStatusChanged(object sender, ServiceStatus args)
     {
-      if (!Settings.Default.NotifyOfStatusChange) return;
+      
+      if (!Settings.Default.NotifyOfStatusChange) return;     
 
-      MySQLService service = mySQLServicesList.GetServiceByName(args.ServiceName);      
+      MySQLService service = mySQLServicesList.GetServiceByDisplayName(args.ServiceDisplayName);      
 
       if (!service.NotifyOnStatusChange) return;
 
@@ -441,7 +442,7 @@ namespace MySql.Notifier
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceStatus;
       notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceStatus,
-                                                      args.ServiceName,
+                                                      args.ServiceDisplayName,
                                                       args.PreviousStatus.ToString(),
                                                       args.CurrentStatus.ToString());
       notifyIcon.ShowBalloonTip(1500);
@@ -472,9 +473,9 @@ namespace MySql.Notifier
     {
       if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
       {
-        using (var errorDialog = new MessageDialog(Resources.Installer11RequiredForCheckForUpdates,"", false))
+        using (var errorDialog = new MessageDialog(Resources.MissingMySQLInstaller, String.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine), false))
         {
-          errorDialog.ShowDialog();          
+          errorDialog.ShowDialog();
           return;
         }
       }
@@ -496,8 +497,14 @@ namespace MySql.Notifier
 
     private void optionsItem_Click(object sender, EventArgs e)
     {
+      var usecolorfulIcons = Properties.Settings.Default.UseColorfulStatusIcons;
       OptionsDialog dlg = new OptionsDialog();
-      dlg.ShowDialog();      
+      dlg.ShowDialog();
+
+      // if there was a change in the setting for the icons then refresh Icon
+      if (usecolorfulIcons != Properties.Settings.Default.UseColorfulStatusIcons)
+        notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+     
     }
 
 
@@ -555,7 +562,7 @@ namespace MySql.Notifier
       if (o == null) return;
 
       string state = o["State"].ToString().Trim();
-      string serviceName = o["DisplayName"].ToString().Trim();
+      string serviceName = o["Name"].ToString().Trim();
       string path = o["PathName"].ToString();
 
       if (state.Contains("Pending")) return;
@@ -573,25 +580,38 @@ namespace MySql.Notifier
 
     private void GetWindowsEvent(string serviceName, string path, string state)
     {
+      Control c = notifyIcon.ContextMenuStrip;
 
-      mySQLServicesList.SetServiceStatus(serviceName, path, state);
-      SetNotifyIconToolTip();
+      if (c.InvokeRequired)
+      {
+        c.Invoke(new MethodInvoker(() => { GetWindowsEvent(serviceName, path, state); }));
+      }
+      else
+      {
+        var service = mySQLServicesList.GetServiceByName(serviceName);        
+        ServiceControllerStatus copyPreviousStatus = ServiceControllerStatus.Stopped;
+        if (service != null) 
+          copyPreviousStatus = service.Status;
 
-      var service = mySQLServicesList.GetServiceByName(serviceName);
-      if (service != null)
-      {     
-        ServiceControllerStatus copyPreviousStatus = service.Status;
-        ServiceControllerStatus newStatus = service.Status;
-      
-        if (service.UpdateTrayIconOnStatusChange)
-          notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
-
-        if (service.NotifyOnStatusChange && !copyPreviousStatus.Equals(newStatus))
+        if (service == null)
         {
-          var serviceStatusInfo = new ServiceStatus(service.ServiceName, copyPreviousStatus, newStatus);
-          mySQLServicesList_ServiceStatusChanged(this, serviceStatusInfo);
+          mySQLServicesList.SetServiceStatus(serviceName, path, state);
+          return;
         }
-      }    
+
+        service.UpdateMenu(state);         
+
+        if (service.UpdateTrayIconOnStatusChange)
+            notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+
+        SetNotifyIconToolTip();
+
+        if (service.NotifyOnStatusChange && !copyPreviousStatus.Equals(service.Status))
+        {
+            var serviceStatusInfo = new ServiceStatus(service.DisplayName, copyPreviousStatus, service.Status);
+            mySQLServicesList_ServiceStatusChanged(this, serviceStatusInfo);
+        }        
+      }
     }
 
     private void ReBuildMenu()

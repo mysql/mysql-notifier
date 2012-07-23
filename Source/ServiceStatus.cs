@@ -33,14 +33,14 @@ namespace MySql.Notifier
   /// </summary>
   public class ServiceStatus : EventArgs
   {
-    private string serviceName;    
+    private string serviceDisplayName;    
     private ServiceControllerStatus currentStatus;
     private ServiceControllerStatus previousStatus;
 
 
-    public string ServiceName
+    public string ServiceDisplayName
     {
-      get { return this.serviceName; }
+      get { return this.serviceDisplayName; }
     }
   
     public ServiceControllerStatus CurrentStatus
@@ -53,9 +53,9 @@ namespace MySql.Notifier
       get { return this.previousStatus; }
     }
 
-    public ServiceStatus(string serviceName, ServiceControllerStatus previousStatus, ServiceControllerStatus currentStatus)
+    public ServiceStatus(string serviceDisplayName, ServiceControllerStatus previousStatus, ServiceControllerStatus currentStatus)
     {
-      this.serviceName = serviceName;      
+      this.serviceDisplayName = serviceDisplayName;      
       this.previousStatus = previousStatus;
       this.currentStatus = currentStatus;
     }
