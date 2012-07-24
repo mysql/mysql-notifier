@@ -130,23 +130,87 @@ namespace MySql.Notifier
   
       StartWatcherForFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier\settings.config", settingsFile_Changed);
      
+      WatchForServiceChanges();
+      WatchForServiceDeletion();
+
+      splashScreen.Close();
+        
+    }
+
+    private void WatchForServiceChanges()
+    {
       var managementScope = new ManagementScope(@"root\cimv2");
-      managementScope.Connect();     
+      managementScope.Connect();
 
       try
-      {        
+      {
         WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
         watcher = new ManagementEventWatcher(managementScope, query);
-        watcher.EventArrived += new EventArrivedEventHandler(watcher_EventArrived);        
+        watcher.EventArrived += new EventArrivedEventHandler(ServiceChangedHandler);
         watcher.Start();
       }
       catch (ManagementException ex)
       {
         MySQLNotifierTrace.GetSourceTrace().WriteWarning("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, 1);
       }
+    }
 
-      splashScreen.Close();
-        
+    public void ServiceChangedHandler(object sender, EventArrivedEventArgs args)
+    {
+      var e = args.NewEvent;
+      ManagementBaseObject o = ((ManagementBaseObject)e["TargetInstance"]);
+      if (o == null) return;
+
+      string state = o["State"].ToString().Trim();
+      string serviceName = o["Name"].ToString().Trim();
+      string path = o["PathName"].ToString();
+      string mode = o["StartMode"].ToString();
+
+      if (state.Contains("Pending")) return;
+
+      if (mode == "Disabled")
+      {
+        mySQLServicesList.RemoveService(serviceName);
+        return;
+      }
+
+      Control c = notifyIcon.ContextMenuStrip;
+      if (c.InvokeRequired)
+      {
+        serviceWindowsEvent se = new serviceWindowsEvent(GetWindowsEvent);
+        se.Invoke(serviceName, path, state);
+      }
+      else
+        GetWindowsEvent(serviceName, path, state);
+    }
+
+    private void WatchForServiceDeletion()
+    {
+      var managementScope = new ManagementScope(@"root\cimv2");
+      managementScope.Connect();
+      try
+      {
+        WqlEventQuery query = new WqlEventQuery("__InstanceDeletionEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
+        watcher = new ManagementEventWatcher(managementScope, query);
+        watcher.EventArrived += new EventArrivedEventHandler(ServiceDeletedHandler);
+        watcher.Start();
+      }
+      catch (ManagementException ex)
+      {
+        MySQLNotifierTrace.GetSourceTrace().WriteWarning("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, 1);
+      }
+    }
+
+    void ServiceDeletedHandler(object sender, EventArrivedEventArgs args)
+    {
+      var e = args.NewEvent;
+      ManagementBaseObject o = ((ManagementBaseObject)e["TargetInstance"]);
+      if (o == null) return;
+
+
+      string serviceName = o["Name"].ToString().Trim();
+
+      mySQLServicesList.RemoveService(serviceName);
     }
 
     /// <summary>
@@ -559,29 +623,6 @@ namespace MySql.Notifier
                                          String.Format("{0}.{1}.{2}", version[0], version[1], version[2]),
                                          String.Format(Properties.Resources.ToolTipText, mySQLServicesList.Services.Count));
       notifyIcon.Text = (toolTipText.Length >= MAX_TOOLTIP_LENGHT ? toolTipText.Substring(0, MAX_TOOLTIP_LENGHT - 3) + "..." : toolTipText);
-    }
-
-    public void watcher_EventArrived(object sender, EventArrivedEventArgs args)
-    {
-      var e = args.NewEvent;
-      ManagementBaseObject o = ((ManagementBaseObject)e["TargetInstance"]);
-      if (o == null) return;
-
-      string state = o["State"].ToString().Trim();
-      string serviceName = o["Name"].ToString().Trim();
-      string path = o["PathName"].ToString();
-
-      if (state.Contains("Pending")) return;
-
-      Control c = notifyIcon.ContextMenuStrip;
-      if (c.InvokeRequired)
-      {
-        serviceWindowsEvent se = new serviceWindowsEvent(GetWindowsEvent);
-        se.Invoke(serviceName, path, state);
-      }     
-      else      
-        GetWindowsEvent(serviceName, path, state);
-
     }
 
     private void GetWindowsEvent(string serviceName, string path, string state)
