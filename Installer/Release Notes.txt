@@ -3,12 +3,16 @@ MySQL Notifier 1.0 Release Notes
 
 Welcome to the release notes for MySQL Notifier 1.0
 
-Features
---------------------
-[list major features here]
-
+MySQL Notifier provides the following features:
+* Runs in the notification area
+* Monitors any service
+* Allows easy access to start/stop/restart services
+* Notifies you of running state changes on the services
+* Provides easy access to edit and configure options for MySQL services
+* Integrates with MySQL Workbench
+* Integrate seamless with MySQL Installer to inform you of updates to your products
 
 Known Issues
 --------------------
-[list known issues here]
+* Selecting Edit from a MySQL service that has a Workbench connection currently does not take you to the Workbench Edit window.
 
