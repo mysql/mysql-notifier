@@ -67,7 +67,7 @@ namespace MySql.Notifier
       var splashScreen = new AboutDialog();      
       splashScreen.Show();
       Application.DoEvents();       
-   
+
       components = new System.ComponentModel.Container();
       notifyIcon = new NotifyIcon(components)
                     {
@@ -109,7 +109,9 @@ namespace MySql.Notifier
           Utility.CreateScheduledTask("MySQLNotifierTask", location + @"MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, false, Utility.GetOsVersion() == Utility.OSVersion.WindowsXp);                   
         }               
       }
-      
+
+      UpdateListToRemoveDeletedServices();
+
       mySQLServicesList.LoadFromSettings();
       
       previousTotalServicesNumber = mySQLServicesList.Services.Count;
@@ -283,8 +285,9 @@ namespace MySql.Notifier
 
     void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
     {
-      foreach (MySQLService service in mySQLServicesList.Services)
-        service.MenuGroup.Update();
+      UpdateListToRemoveDeletedServices();
+      foreach (MySQLService service in mySQLServicesList.Services)        
+          service.MenuGroup.Update();
       UpdateStaticMenuItems();
     }
 
@@ -402,7 +405,7 @@ namespace MySql.Notifier
       MySQLService service = (MySQLService)sender;
       notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
       notifyIcon.BalloonTipTitle = Resources.BalloonTitleFailedStatusChange;
-      notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, ex.Message);
+      notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, Environment.NewLine + ex.Message + Environment.NewLine + Resources.AskRestartApplication);
       notifyIcon.ShowBalloonTip(1500);
       MySQLNotifierTrace.GetSourceTrace().WriteError("Critical Error when trying to update the service status - " + (ex.Message + " " + ex.InnerException), 1);
     }
@@ -593,27 +596,25 @@ namespace MySql.Notifier
       {
         var service = mySQLServicesList.GetServiceByName(serviceName);        
         ServiceControllerStatus copyPreviousStatus = ServiceControllerStatus.Stopped;
-        if (service != null) 
+        if (service != null)
+        {
           copyPreviousStatus = service.Status;
+          service.UpdateMenu(state);
 
-        if (service == null)
-        {
-          mySQLServicesList.SetServiceStatus(serviceName, path, state);
-          return;
-        }
+          SetNotifyIconToolTip();
 
-        service.UpdateMenu(state);         
-
-        if (service.UpdateTrayIconOnStatusChange)
-            notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
-
-        SetNotifyIconToolTip();
-
-        if (service.NotifyOnStatusChange && !copyPreviousStatus.Equals(service.Status))
-        {
+          if (service.NotifyOnStatusChange && !copyPreviousStatus.Equals(service.Status))
+          {
             var serviceStatusInfo = new ServiceStatus(service.DisplayName, copyPreviousStatus, service.Status);
             mySQLServicesList_ServiceStatusChanged(this, serviceStatusInfo);
-        }        
+          }
+        }
+
+        mySQLServicesList.SetServiceStatus(serviceName, path, state);
+
+        if (service == null || service.UpdateTrayIconOnStatusChange)
+            notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+        
       }
     }
 
@@ -625,6 +626,16 @@ namespace MySql.Notifier
       UpdateStaticMenuItems();
     }
 
+    private void UpdateListToRemoveDeletedServices()
+    {
+      if (mySQLServicesList.Services == null) return;
+
+      if (mySQLServicesList.Services.Count(t => t.foundInSystem) < mySQLServicesList.Services.Count)
+      {
+        mySQLServicesList.Services = mySQLServicesList.Services.Where(t => t.foundInSystem).ToList();
+        Settings.Default.Save();
+      }    
+    }
 
     private Bitmap GetIconForNotifier()
     {

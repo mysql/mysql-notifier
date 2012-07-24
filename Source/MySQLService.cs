@@ -85,11 +85,16 @@ namespace MySql.Notifier
     [XmlIgnore]
     public bool workCompleted { get; private set; }
 
+    [XmlIgnore]
+    public bool foundInSystem { get; private set; }
 
     private void SetService(string serviceName)
     {
-      winService = new ServiceController(serviceName);
-   
+      
+      foundInSystem = Service.ExistsServiceInstance(serviceName);      
+      if (!foundInSystem) return;
+
+      winService = new ServiceController(serviceName);   
       try
       {
         DisplayName = winService.DisplayName;
@@ -252,8 +257,16 @@ namespace MySql.Notifier
 
     void worker_DoWork(object sender, DoWorkEventArgs e)
     {
-      TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
+
       BackgroundWorker worker = sender as BackgroundWorker;
+      
+      if (!Service.ExistsServiceInstance(serviceName))
+      {
+        throw new Exception(String.Format(Resources.ServiceNotFound, serviceName));        
+      }
+      
+      TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
+      
       int action = (int)e.Argument;
       workCompleted = false;
 

@@ -344,4 +344,10 @@
   <data name="MissingMySQLInstaller" xml:space="preserve">
     <value>Missing MySQL Installer</value>
   </data>
+  <data name="ServiceNotFound" xml:space="preserve">
+    <value>The service {0} was not found in the Windows Services</value>
+  </data>
+  <data name="AskRestartApplication" xml:space="preserve">
+    <value>If problem persists please restart MySQL Notifier</value>
+  </data>
 </root>

@@ -62,13 +62,22 @@ namespace MySql.Notifier
       if (Settings.Default.FirstRun)
         AutoAddServices();
       else
+      {       
         // we have to manually call our service list changed event handler since that isn't done
         // with how we are using settings
-        foreach (MySQLService service in Services)
+        var copyofServices = Services;
+        foreach (MySQLService service in copyofServices)
         {
-          service.StatusChanged += new MySQLService.StatusChangedHandler(mySQLService_StatusChanged);
-          OnServiceListChanged(service, ServiceListChangeType.Add);
+          if (service.ServiceName != null && Service.ExistsServiceInstance(service.ServiceName))
+          {
+            service.StatusChanged += new MySQLService.StatusChangedHandler(mySQLService_StatusChanged);
+            OnServiceListChanged(service, ServiceListChangeType.Add);
+          }
+          else          
+            Services.Remove(service);          
         }
+        Settings.Default.Save();
+      }
 
       loading = false;
     }

@@ -102,6 +102,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to If problem persists please restart MySQL Notifier.
+        /// </summary>
+        internal static string AskRestartApplication {
+            get {
+                return ResourceManager.GetString("AskRestartApplication", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The service {0} failed the most recent status change request with the message {1}..
         /// </summary>
         internal static string BalloonTextFailedStatusChange {
@@ -522,6 +531,15 @@ namespace MySql.Notifier.Properties {
         internal static string ScheduledCheckRequiresInstaller11 {
             get {
                 return ResourceManager.GetString("ScheduledCheckRequiresInstaller11", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The service {0} was not found in the Windows Services.
+        /// </summary>
+        internal static string ServiceNotFound {
+            get {
+                return ResourceManager.GetString("ServiceNotFound", resourceCulture);
             }
         }
         
