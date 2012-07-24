@@ -630,9 +630,9 @@ namespace MySql.Notifier
     {
       if (mySQLServicesList.Services == null) return;
 
-      if (mySQLServicesList.Services.Count(t => t.foundInSystem) < mySQLServicesList.Services.Count)
+      if (mySQLServicesList.Services.Count(t => t.FoundInSystem) < mySQLServicesList.Services.Count)
       {
-        mySQLServicesList.Services = mySQLServicesList.Services.Where(t => t.foundInSystem).ToList();
+        mySQLServicesList.Services = mySQLServicesList.Services.Where(t => t.FoundInSystem).ToList();
         Settings.Default.Save();
       }    
     }

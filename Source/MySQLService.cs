@@ -83,16 +83,16 @@ namespace MySql.Notifier
     public List<MySqlWorkbenchConnection> WorkbenchConnections { get; private set; }
 
     [XmlIgnore]
-    public bool workCompleted { get; private set; }
+    public bool WorkCompleted { get; private set; }
 
     [XmlIgnore]
-    public bool foundInSystem { get; private set; }
+    public bool FoundInSystem { get; private set; }
 
     private void SetService(string serviceName)
     {
       
-      foundInSystem = Service.ExistsServiceInstance(serviceName);      
-      if (!foundInSystem) return;
+      FoundInSystem = Service.ExistsServiceInstance(serviceName);      
+      if (!FoundInSystem) return;
 
       winService = new ServiceController(serviceName);   
       try
@@ -250,7 +250,7 @@ namespace MySql.Notifier
       {
         // else no error
         winService.Refresh();
-        workCompleted = true;       
+        WorkCompleted = true;       
       }
     }
    
@@ -268,7 +268,7 @@ namespace MySql.Notifier
       TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
       
       int action = (int)e.Argument;
-      workCompleted = false;
+      WorkCompleted = false;
 
       switch (action)
       { 

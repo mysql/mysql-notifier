@@ -164,7 +164,7 @@ namespace MySql.Notifier
     void restart_Click(object sender, EventArgs e)
     {
       boundService.Restart();
-      if (boundService.workCompleted)     
+      if (boundService.WorkCompleted)     
         boundService.UpdateMenu(boundService.Status.ToString());
       
     }
@@ -172,7 +172,7 @@ namespace MySql.Notifier
     void stop_Click(object sender, EventArgs e)
     {
       boundService.Stop();
-      if (boundService.workCompleted)      
+      if (boundService.WorkCompleted)      
         boundService.UpdateMenu(boundService.Status.ToString());
       
     }
@@ -180,7 +180,7 @@ namespace MySql.Notifier
     void start_Click(object sender, EventArgs e)
     {
       boundService.Start();
-      if (boundService.workCompleted)
+      if (boundService.WorkCompleted)
       {
         boundService.UpdateMenu(boundService.Status.ToString());        
       }
