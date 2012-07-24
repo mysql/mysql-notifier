@@ -350,4 +350,7 @@
   <data name="AskRestartApplication" xml:space="preserve">
     <value>If problem persists please restart MySQL Notifier</value>
   </data>
+  <data name="ServiceRemoved" xml:space="preserve">
+    <value>The service {0} has been removed from the monitoring list.  </value>
+  </data>
 </root>

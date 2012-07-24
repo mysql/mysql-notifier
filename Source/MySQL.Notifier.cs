@@ -206,11 +206,28 @@ namespace MySql.Notifier
       var e = args.NewEvent;
       ManagementBaseObject o = ((ManagementBaseObject)e["TargetInstance"]);
       if (o == null) return;
-
-
       string serviceName = o["Name"].ToString().Trim();
+       Control c = notifyIcon.ContextMenuStrip;
+       if (c.InvokeRequired)
+         c.Invoke(new MethodInvoker(() =>
+         {
+           RemoveServiceAndNotify(serviceName);
+         }));
+       else       
+         RemoveServiceAndNotify(serviceName);       
+    }
 
+
+    /// <summary>
+    /// Remove Service and Notify the user
+    /// </summary>
+    private void RemoveServiceAndNotify(string serviceName) 
+    {
       mySQLServicesList.RemoveService(serviceName);
+      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+      if (!Settings.Default.NotifyOfStatusChange) return;
+      SetNotifyIconToolTip();
+      ShowTooltip(false, Resources.BalloonTitleTextServiceList, String.Format(Resources.ServiceRemoved, serviceName), 1500);                     
     }
 
     /// <summary>
@@ -448,7 +465,7 @@ namespace MySql.Notifier
 
       if (changeType == ServiceListChangeType.Remove)
       {
-        service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);                 
+        service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);               
       }
       else
       {                

@@ -544,6 +544,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The service {0} has been removed from the monitoring list.  .
+        /// </summary>
+        internal static string ServiceRemoved {
+            get {
+                return ResourceManager.GetString("ServiceRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Loading application settings failed.  The application will continue to run but may not behave as you would expect..
         /// </summary>
         internal static string SettingsFileFailedToLoad {
