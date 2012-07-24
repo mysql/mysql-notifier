@@ -62,12 +62,6 @@ namespace MySql.Notifier
 
     public Notifier()
     {
-            
-      //load splash screen
-      var splashScreen = new AboutDialog();      
-      splashScreen.Show();
-      Application.DoEvents();       
-
       components = new System.ComponentModel.Container();
       notifyIcon = new NotifyIcon(components)
                     {
@@ -132,9 +126,6 @@ namespace MySql.Notifier
      
       WatchForServiceChanges();
       WatchForServiceDeletion();
-
-      splashScreen.Close();
-        
     }
 
     private void WatchForServiceChanges()
