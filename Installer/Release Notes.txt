@@ -14,5 +14,7 @@ MySQL Notifier provides the following features:
 
 Known Issues
 --------------------
-* Selecting Edit from a MySQL service that has a Workbench connection currently does not take you to the Workbench Edit window.
-
+* All Windows - Selecting SQL Editor from a MySQL service that doesn't have a Workbench connection opens Workbench in the home screen.
+  Workaround: Create a local connection in Workbench with the MySQL service used in the Notifier so the SQL Editor could use this connection.
+* Windows XP - The Scheduled Task created by the Notifier to Check for Updates does not have valid credentials and cannot be run.
+  Workaround: Update the "MySQLNotifierTask" in Windows XP with some valid credentials.
