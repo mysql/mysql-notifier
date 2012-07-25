@@ -62,6 +62,7 @@ namespace MySql.Notifier
 
     public Notifier()
     {
+
       components = new System.ComponentModel.Container();
       notifyIcon = new NotifyIcon(components)
                     {
@@ -126,6 +127,7 @@ namespace MySql.Notifier
      
       WatchForServiceChanges();
       WatchForServiceDeletion();
+
     }
 
     private void WatchForServiceChanges()
@@ -248,14 +250,14 @@ namespace MySql.Notifier
       watcher.EnableRaisingEvents = true;
     }
 
-    private bool LoadSettingsFile()
+    private int LoadUpdateCheck()
     {
       for (int i = 0; i < 3; i++)
       {
         try
         {
           Settings.Default.Reload();
-          return true;
+          return Settings.Default.UpdateCheck;
         }
         catch (IOException ex)
         {
@@ -267,20 +269,17 @@ namespace MySql.Notifier
       {
         errorDialog.ShowDialog();        
       }      
-      return false;
+      return -1;
     }
 
 
     void settingsFile_Changed(object sender, FileSystemEventArgs e)
     {
 
-      int settingsUpdateCheck = 0;
-
-      if (!LoadSettingsFile()) return;
-      settingsUpdateCheck = Settings.Default.UpdateCheck;
+      int settingsUpdateCheck = LoadUpdateCheck();      
 
       // if we have already notified our user then noting more to do
-      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0 || settingsUpdateCheck == 0) return;
+      if (settingsUpdateCheck == 0 || (settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0) return;
      
       // if we are supposed to check forupdates but the installer is too old then 
       // notify the user and exit
@@ -357,7 +356,6 @@ namespace MySql.Notifier
 
     void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
     {
-      UpdateListToRemoveDeletedServices();
       foreach (MySQLService service in mySQLServicesList.Services)        
           service.MenuGroup.Update();
       UpdateStaticMenuItems();
@@ -481,7 +479,16 @@ namespace MySql.Notifier
       notifyIcon.ShowBalloonTip(1500);
       MySQLNotifierTrace.GetSourceTrace().WriteError("Critical Error when trying to update the service status - " + (ex.Message + " " + ex.InnerException), 1);
     }
-   
+
+
+    void service_StatusChanged(object sender, ServiceStatus args)
+    {
+      MySQLService service = (MySQLService)sender;
+      service.MenuGroup.Update();
+      notifyIcon.ContextMenuStrip.Refresh();
+    }
+
+
     void mySQLServicesList_ServiceListChanged(object sender, MySQLService service, ServiceListChangeType changeType)
     {
       ServiceListChanged(service, changeType);
@@ -544,7 +551,7 @@ namespace MySql.Notifier
       Process proc = new Process();
       ProcessStartInfo startInfo = new ProcessStartInfo();
       startInfo.FileName = String.Format(@"{0}\MySQLInstaller.exe", path);
-      Process.Start(startInfo);            
+      Process.Start(startInfo);     
     }
 
     private void checkUpdatesItem_Click(object sender, EventArgs e)
@@ -589,6 +596,9 @@ namespace MySql.Notifier
     private void InstallAvailablelUpdates_Click(object sender, EventArgs e)
     {
       launchInstallerItem_Click(null, EventArgs.Empty);
+      Properties.Settings.Default.UpdateCheck = 0;
+      Properties.Settings.Default.Save();
+      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());    
     }
 
     private void IgnoreAvailableUpdateItem_Click(object sender, EventArgs e)
@@ -598,7 +608,8 @@ namespace MySql.Notifier
       if (result == DialogResult.Yes)
       {
         Properties.Settings.Default.UpdateCheck = 0;
-        Properties.Settings.Default.Save();        
+        Properties.Settings.Default.Save();
+        notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());            
       }
     }
 
@@ -647,6 +658,8 @@ namespace MySql.Notifier
         ServiceControllerStatus copyPreviousStatus = ServiceControllerStatus.Stopped;
         if (service != null)
         {
+          service.StatusChanged -= new MySQLService.StatusChangedHandler(service_StatusChanged);
+          service.StatusChanged += new MySQLService.StatusChangedHandler(service_StatusChanged);
           copyPreviousStatus = service.Status;
           service.UpdateMenu(state);
 
@@ -657,6 +670,7 @@ namespace MySql.Notifier
             var serviceStatusInfo = new ServiceStatus(service.DisplayName, copyPreviousStatus, service.Status);
             mySQLServicesList_ServiceStatusChanged(this, serviceStatusInfo);
           }
+          service.MenuGroup.RefreshRoot(notifyIcon.ContextMenuStrip, copyPreviousStatus);       
         }
 
         mySQLServicesList.SetServiceStatus(serviceName, path, state);

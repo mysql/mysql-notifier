@@ -138,14 +138,20 @@ namespace MySql.Notifier
     public MySQLService GetServiceByName(string name)
     {
       foreach (MySQLService service in Services)
-        if (String.Compare(service.ServiceName, name, true) == 0) return service;
+        if (String.Compare(service.ServiceName, name, true) == 0)
+        {          
+          return service;
+        }
       return null;
     }
 
     public MySQLService GetServiceByDisplayName(string displayName)
     {
       foreach (MySQLService service in Services)
-        if (String.Compare(service.DisplayName, displayName, true) == 0) return service;
+        if (String.Compare(service.DisplayName, displayName, true) == 0)
+        {          
+          return service;
+        }
       return null;
     }
 

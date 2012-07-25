@@ -212,7 +212,7 @@ namespace MySql.Notifier
       string[] menuItems = new string[4];
       int index = -1;
 
-      if (boundService.IsRealMySQLService)
+      if (boundService.IsRealMySQLService && MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
       {
         menuItems[0] = "Configure Menu";
         menuItems[1] = "Editor Menu";
@@ -253,7 +253,7 @@ namespace MySql.Notifier
     /// <param name="boundServiceName">Service Name</param>
     /// <param name="boundServiceStatus">Service Status</param>
     public void Update()
-    {
+    {      
       statusMenu.Text = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
       Image image = null;
       switch (boundService.Status)
@@ -279,9 +279,10 @@ namespace MySql.Notifier
       restartMenu.Enabled = stopMenu.Enabled;
       if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion && boundService.IsRealMySQLService)
       {
-        editorMenu.Enabled = true;
-        configureMenu.Enabled = true;
-      }      
+        if (editorMenu != null) editorMenu.Enabled = true;
+        if (configureMenu !=  null) configureMenu.Enabled = true;
+      }
+           
     }
 
     private void UpdateItems(ContextMenuStrip menu)
@@ -323,6 +324,47 @@ namespace MySql.Notifier
           UpdateItems(menu);
         }        
       }
+    }
+
+
+    public void RefreshRoot(ContextMenuStrip menu, ServiceControllerStatus previousStatus)
+    {
+          
+      var newStatusText = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
+      var previousStatusText = String.Format("{0} - {1}", boundService.DisplayName, previousStatus);
+
+      for (int i = 0; i < menu.Items.Count; i++)
+      {
+        if (menu.Items[i].Text.Equals(previousStatusText))
+        {
+          menu.Items[i].Text = newStatusText;
+         
+          Image image = null;
+          switch (boundService.Status)
+          {
+            case ServiceControllerStatus.ContinuePending:
+            case ServiceControllerStatus.Paused:
+            case ServiceControllerStatus.PausePending:
+            case ServiceControllerStatus.StartPending:
+            case ServiceControllerStatus.StopPending:
+              image = Resources.NotifierIconStarting;
+              break;
+            case ServiceControllerStatus.Stopped:
+              image = Resources.NotifierIconStopped;
+              break;
+            case ServiceControllerStatus.Running:
+              image = Resources.NotifierIconRunning;
+              break;
+          }
+          menu.Items[i].Image = image;
+          ToolStripMenuItem menuItem = (ToolStripMenuItem)menu.Items[i];
+          menuItem.DropDownItems[0].Enabled = boundService.Status == ServiceControllerStatus.Stopped;
+          menuItem.DropDownItems[1].Enabled = boundService.Status != ServiceControllerStatus.Stopped;
+          menuItem.DropDownItems[2].Enabled = menuItem.DropDownItems[1].Enabled;
+          break;
+        }
+      }
+     
     }
 
     /// <summary>
