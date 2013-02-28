@@ -72,7 +72,7 @@ namespace MySql.Notifier
       this.installerVersion.Name = "installerVersion";
       this.installerVersion.Size = new System.Drawing.Size(119, 17);
       this.installerVersion.TabIndex = 3;
-      this.installerVersion.Text = "MySQL Installer 1.1";
+      this.installerVersion.Text = "MySQL Installer 1.2";
       this.installerVersion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
       // AboutDialog
