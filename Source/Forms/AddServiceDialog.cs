@@ -1,16 +1,16 @@
-﻿// 
+﻿//
 // Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -18,22 +18,17 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
-using System.Collections;
 using MySQL.Utility;
 
 namespace MySql.Notifier
 {
-  public partial class AddServiceDlg : FormBase
+  public partial class AddServiceDialog : BaseForm
   {
-
     private class ListViewItemComparer : IComparer
     {
       private int col;
@@ -61,20 +56,19 @@ namespace MySql.Notifier
           returnVal *= -1;
 
         return returnVal;
-
       }
     }
 
     private int sortColumn = -1;
     private string lastFilter = String.Empty;
-    private string lastTextFilter = String.Empty;    
+    private string lastTextFilter = String.Empty;
 
-    public AddServiceDlg()
-    {      
+    public AddServiceDialog()
+    {
       InitializeComponent();
       server.SelectedIndex = 0;
       RefreshList();
-      lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);      
+      lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);
     }
 
     public List<string> ServicesToAdd { get; private set; }
@@ -94,8 +88,8 @@ namespace MySql.Notifier
         var services = Service.GetInstances(lastFilter);
 
         if (!String.IsNullOrEmpty(lastTextFilter))
-        { 
-          services = services.Where(t => t.Properties["DisplayName"].Value.ToString().ToLower().Contains(lastTextFilter.ToLower())).ToList();        
+        {
+          services = services.Where(t => t.Properties["DisplayName"].Value.ToString().ToLower().Contains(lastTextFilter.ToLower())).ToList();
         }
         foreach (var item in services)
         {
@@ -154,7 +148,6 @@ namespace MySql.Notifier
 
       lstServices.Sort();
       lstServices.ListViewItemSorter = new ListViewItemComparer(e.Column, lstServices.Sorting);
-
     }
 
     private void txtFilter_TextChanged(object sender, EventArgs e)
@@ -168,7 +161,7 @@ namespace MySql.Notifier
     private void timerForFiltering_Tick(object sender, EventArgs e)
     {
       RefreshList();
-      timerForFiltering.Enabled = false;      
+      timerForFiltering.Enabled = false;
     }
   }
 }

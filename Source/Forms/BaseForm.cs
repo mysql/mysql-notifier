@@ -1,16 +1,16 @@
-﻿// 
+﻿//
 // Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -18,22 +18,19 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 using System.Drawing;
+using System.Windows.Forms;
 using MySQL.Utility;
 
 namespace MySql.Notifier
 {
-  public class FormBase : Form
+  public class BaseForm : Form
   {
     private Font smallFont;
     private Font mediumFont;
     private Font largeFont;
 
-    public FormBase()
+    public BaseForm()
     {
       Utility.OSVersion v = Utility.GetOsVersion();
       string fontName = v != Utility.OSVersion.WindowsXp ? "Segoe UI" : "Tahoma";
@@ -42,18 +39,17 @@ namespace MySql.Notifier
       largeFont = new Font(fontName, 16, FontStyle.Regular, GraphicsUnit.Pixel, ((byte)(0)));
     }
 
-
     protected override void OnLoad(EventArgs e)
     {
       base.OnLoad(e);
       Font = smallFont;
       SettingControls(Controls);
     }
-  
+
     protected virtual void SettingControls(Control.ControlCollection controls)
     {
       if (controls == null || controls.Count == 0) return;
-           
+
       foreach (Control c in controls)
       {
         c.Font = smallFont;

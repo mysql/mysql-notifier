@@ -19,7 +19,7 @@
 
 namespace MySql.Notifier
 {
-  partial class ManageServicesDlg
+  partial class ManageServicesDialog
   {
     /// <summary>
     /// Required designer variable.
@@ -47,7 +47,7 @@ namespace MySql.Notifier
     /// </summary>
     private void InitializeComponent()
     {
-      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageServicesDlg));
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageServicesDialog));
       this.panel2 = new System.Windows.Forms.Panel();
       this.btnClose = new System.Windows.Forms.Button();
       this.panel1 = new System.Windows.Forms.Panel();

@@ -212,11 +212,6 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
-    <None Include="Lib\WexInstaller.Core.il.~1~" />
-    <None Include="Lib\WexInstaller.Core.Properties.Resources.resources.~1~" />
-    <None Include="Lib\WexInstaller.Core.res.~1~" />
-    <None Include="Lib\WexInstaller.Core.RootPasswordPromptDlg.resources.~1~" />
-    <None Include="Lib\WexInstaller.InstallerPanel.resources.~1~" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -239,6 +234,7 @@
   <ItemGroup>
     <None Include="Resources\NotifierSplashWindow.png" />
     <None Include="Resources\about.png" />
+    <Content Include="Lib\MySql.Data.dll" />
     <Content Include="Lib\MySQL.Utility.dll" />
     <Content Include="Resources\iconDB.jpg" />
     <None Include="Resources\stop.png" />
@@ -255,7 +251,6 @@
     <None Include="Resources\StartInstallerIcon.png" />
     <None Include="Resources\InstallAvailableUpdatesIcon.png" />
     <None Include="Resources\NotifierIcon.ico" />
-    <None Include="Resources\MySQLNotifierIconApplicationLogo.png" />
     <None Include="Resources\MySQLNotifierApplicationLogo.png" />
     <None Include="Resources\MySQLNotifier_ErrorImage.png" />
     <None Include="Resources\MySQLNotifier_WarningImage.png" />
