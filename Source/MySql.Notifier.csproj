@@ -146,17 +146,17 @@
     <Compile Include="Forms\AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\AddServiceDlg.cs">
+    <Compile Include="Forms\AddServiceDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\AddServiceDlg.Designer.cs">
-      <DependentUpon>AddServiceDlg.cs</DependentUpon>
+    <Compile Include="Forms\AddServiceDialog.Designer.cs">
+      <DependentUpon>AddServiceDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ManageServicesDlg.cs">
+    <Compile Include="Forms\ManageServicesDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\ManageServicesDlg.Designer.cs">
-      <DependentUpon>ManageServicesDlg.cs</DependentUpon>
+    <Compile Include="Forms\ManageServicesDialog.Designer.cs">
+      <DependentUpon>ManageServicesDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\OptionsDialog.cs">
       <SubType>Form</SubType>
@@ -185,14 +185,14 @@
     <EmbeddedResource Include="Forms\AboutDialog.resx">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\AddServiceDlg.resx">
-      <DependentUpon>AddServiceDlg.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\AddServiceDialog.resx">
+      <DependentUpon>AddServiceDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\BaseForm.resx">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ManageServicesDlg.resx">
-      <DependentUpon>ManageServicesDlg.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\ManageServicesDialog.resx">
+      <DependentUpon>ManageServicesDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MessageDialog.resx">
       <DependentUpon>MessageDialog.cs</DependentUpon>

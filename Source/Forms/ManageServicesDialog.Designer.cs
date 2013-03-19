@@ -138,7 +138,7 @@ namespace MySql.Notifier
       // 
       this.groupBox1.Controls.Add(this.chkUpdateTrayIcon);
       this.groupBox1.Controls.Add(this.notifyOnStatusChange);
-      this.groupBox1.Location = new System.Drawing.Point(33, 304);
+      this.groupBox1.Location = new System.Drawing.Point(32, 313);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(448, 88);
       this.groupBox1.TabIndex = 23;
@@ -151,7 +151,7 @@ namespace MySql.Notifier
       this.chkUpdateTrayIcon.Enabled = false;
       this.chkUpdateTrayIcon.Location = new System.Drawing.Point(30, 48);
       this.chkUpdateTrayIcon.Name = "chkUpdateTrayIcon";
-      this.chkUpdateTrayIcon.Size = new System.Drawing.Size(293, 17);
+      this.chkUpdateTrayIcon.Size = new System.Drawing.Size(321, 19);
       this.chkUpdateTrayIcon.TabIndex = 1;
       this.chkUpdateTrayIcon.Text = "Update MySQL Notifier tray icon based on service status";
       this.chkUpdateTrayIcon.UseVisualStyleBackColor = true;
@@ -163,7 +163,7 @@ namespace MySql.Notifier
       this.notifyOnStatusChange.Enabled = false;
       this.notifyOnStatusChange.Location = new System.Drawing.Point(30, 22);
       this.notifyOnStatusChange.Name = "notifyOnStatusChange";
-      this.notifyOnStatusChange.Size = new System.Drawing.Size(174, 17);
+      this.notifyOnStatusChange.Size = new System.Drawing.Size(192, 19);
       this.notifyOnStatusChange.TabIndex = 0;
       this.notifyOnStatusChange.Text = "Notify me when status changes";
       this.notifyOnStatusChange.UseVisualStyleBackColor = true;
