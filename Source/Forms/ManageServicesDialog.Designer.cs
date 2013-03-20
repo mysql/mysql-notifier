@@ -226,7 +226,7 @@ namespace MySql.Notifier
       this.columnHeader3.Text = "Status";
       this.columnHeader3.Width = 127;
       // 
-      // ManageServicesDlg
+      // ManageServicesDialog
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -239,7 +239,7 @@ namespace MySql.Notifier
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
-      this.Name = "ManageServicesDlg";
+      this.Name = "ManageServicesDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Manage Services";
       this.panel2.ResumeLayout(false);

@@ -58,10 +58,10 @@ namespace MySql.Notifier
 
     private void btnAdd_Click(object sender, EventArgs e)
     {
-      AddServiceDialog dlg = new AddServiceDialog();
-      if (dlg.ShowDialog() == DialogResult.Cancel) return;
+      AddServiceDialog Dialog = new AddServiceDialog();
+      if (Dialog.ShowDialog() == DialogResult.Cancel) return;
 
-      foreach (string service in dlg.ServicesToAdd)
+      foreach (string service in Dialog.ServicesToAdd)
       {
         if (serviceList.Contains(service))
         {

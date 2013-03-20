@@ -1,16 +1,16 @@
-﻿// 
+﻿//
 // Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -18,43 +18,40 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
-using MySQL.Utility;
-using System.Linq;
-using MySql.Notifier.Properties;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
+using System.Windows.Forms;
+using MySql.Notifier.Properties;
+using MySQL.Utility;
 
 namespace MySql.Notifier
 {
-  static class Program
+  internal static class Program
   {
-    static void MySQLNotifierHandler(Exception e, bool critical)
+    private static void MySQLNotifierHandler(Exception e, bool critical)
     {
       using (var errorDialog = new MessageDialog(Resources.HighSeverityError, e.Message, critical))
-      {        
+      {
         errorDialog.ShowDialog();
-        MySQLNotifierTrace.GetSourceTrace().WriteError("Unhandled Exception - "  + (e.Message + " " + e.InnerException), 1);        
-      }            
+        MySQLNotifierTrace.GetSourceTrace().WriteError("Unhandled Exception - " + (e.Message + " " + e.InnerException), 1);
+      }
     }
 
-    static void MySQLNotifierThreadExceptionEventHandler(object sender, ThreadExceptionEventArgs args)
+    private static void MySQLNotifierThreadExceptionEventHandler(object sender, ThreadExceptionEventArgs args)
     {
-      MySQLNotifierHandler(args.Exception, true);     
+      MySQLNotifierHandler(args.Exception, true);
     }
 
-    static void MySQLNotifierAppExceptionHandler(object sender, UnhandledExceptionEventArgs args)
+    private static void MySQLNotifierAppExceptionHandler(object sender, UnhandledExceptionEventArgs args)
     {
-      MySQLNotifierHandler((Exception)args.ExceptionObject, true);      
+      MySQLNotifierHandler((Exception)args.ExceptionObject, true);
     }
-
 
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
     [STAThread]
-    static void Main(params string[] args)
+    private static void Main(params string[] args)
     {
       if (args.Length > 0 && (args[0] == "--c" || args[0] == "--x"))
       {
@@ -84,9 +81,9 @@ namespace MySql.Notifier
       {
         using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ex.Message, true))
         {
-          errorDialog.ShowDialog();          
-          MySQLNotifierTrace.GetSourceTrace().WriteError("Application Error - " + (ex.Message + " " + ex.InnerException), 1);  
-        }                
+          errorDialog.ShowDialog();
+          MySQLNotifierTrace.GetSourceTrace().WriteError("Application Error - " + (ex.Message + " " + ex.InnerException), 1);
+        }
       }
       SingleInstance.Stop();
     }
@@ -102,7 +99,6 @@ namespace MySql.Notifier
     }
   }
 
-
   public static class MySQLNotifierTrace
   {
     public static MySQLSourceTrace GetSourceTrace()
@@ -111,6 +107,4 @@ namespace MySql.Notifier
       return new MySQLSourceTrace("MySqlNotifier", logPath + @"\MySQLNotifier.log", "", SourceLevels.Warning);
     }
   }
-
-
 }

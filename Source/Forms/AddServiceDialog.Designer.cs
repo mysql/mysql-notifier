@@ -241,7 +241,7 @@ namespace MySql.Notifier
       this.timerForFiltering.Interval = 600;
       this.timerForFiltering.Tick += new System.EventHandler(this.timerForFiltering_Tick);
       // 
-      // AddServiceDlg
+      // AddServiceDialog
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -255,7 +255,7 @@ namespace MySql.Notifier
       this.MaximizeBox = false;
       this.MinimizeBox = false;
       this.MinimumSize = new System.Drawing.Size(449, 454);
-      this.Name = "AddServiceDlg";
+      this.Name = "AddServiceDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Add Service";
       this.panel2.ResumeLayout(false);
