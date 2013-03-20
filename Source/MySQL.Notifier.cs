@@ -522,8 +522,8 @@ namespace MySql.Notifier
 
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
     {
-      ManageServicesDialog Dialog = new ManageServicesDialog(mySQLServicesList);
-      Dialog.ShowDialog();
+      ManageServicesDialog dialog = new ManageServicesDialog(mySQLServicesList);
+      dialog.ShowDialog();
 
       //update icon
       notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
@@ -561,15 +561,15 @@ namespace MySql.Notifier
 
     private void aboutMenu_Click(object sender, EventArgs e)
     {
-      AboutDialog Dialog = new AboutDialog();
-      Dialog.ShowDialog();
+      AboutDialog dialog = new AboutDialog();
+      dialog.ShowDialog();
     }
 
     private void optionsItem_Click(object sender, EventArgs e)
     {
       var usecolorfulIcons = Properties.Settings.Default.UseColorfulStatusIcons;
-      OptionsDialog Dialog = new OptionsDialog();
-      Dialog.ShowDialog();
+      OptionsDialog dialog = new OptionsDialog();
+      dialog.ShowDialog();
 
       // if there was a change in the setting for the icons then refresh Icon
       if (usecolorfulIcons != Properties.Settings.Default.UseColorfulStatusIcons)
