@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
+using MySQL.Notifier;
 using MySQL.Utility;
 
 namespace MySql.Notifier
@@ -62,6 +63,9 @@ namespace MySql.Notifier
     private int sortColumn = -1;
     private string lastFilter = String.Empty;
     private string lastTextFilter = String.Empty;
+    private ServiceType serviceType = ServiceType.Local;
+
+    public AccountLogin Login { get; set; }
 
     public AddServiceDialog()
     {
@@ -71,7 +75,8 @@ namespace MySql.Notifier
       lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);
     }
 
-    public List<string> ServicesToAdd { get; private set; }
+    //public List<string> ServicesToAdd { get; private set; }
+    public List<MySQLService> ServicesToAdd { get; set; }
 
     private void RefreshList()
     {
@@ -114,10 +119,11 @@ namespace MySql.Notifier
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-      ServicesToAdd = new List<string>();
+      //TODO: VALIDATE THIS WORKS
+      ServicesToAdd = new List<MySQLService>();//new List<string>();
       foreach (ListViewItem lvi in lstServices.SelectedItems)
       {
-        ServicesToAdd.Add(lvi.Tag as string);
+        ServicesToAdd.Add(new MySQLService(lvi.Tag as string, true, true, Login));
       }
     }
 
@@ -163,5 +169,42 @@ namespace MySql.Notifier
       RefreshList();
       timerForFiltering.Enabled = false;
     }
+
+    private void server_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      serviceType = (ServiceType)server.SelectedIndex;
+      LoginGathererForm rgf = new LoginGathererForm();
+
+      switch (serviceType)
+      {
+        case ServiceType.Local:
+
+          // Reload list?
+          return;
+
+        case ServiceType.RemoteWindows:
+          rgf = new NewWindowsConnectionDialog();
+          break;
+
+        case ServiceType.RemoteNonWindows:
+          rgf = new NewNonWindowsConnectionDialog();
+          break;
+
+        default:
+          break;
+      }
+
+      if (rgf.ShowDialog() == DialogResult.Cancel) return;
+
+      //TODO: Query rgf DialogResponse and act accordingly (see if list refresh is required, etc).
+      Login = rgf.Login;
+    }
+  }
+
+  public enum ServiceType
+  {
+    Local,
+    RemoteWindows,
+    RemoteNonWindows,
   }
 }

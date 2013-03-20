@@ -26,18 +26,31 @@ namespace MySql.Notifier
 {
   public partial class OptionsDialog : BaseForm
   {
+    ServiceType serviceType = ServiceType.Local;
+
     internal OptionsDialog()
     {
       InitializeComponent();
 
+       if(serviceType == ServiceType.RemoteNonWindows)
+      {
+        notifyOfAutoAdd.Checked = false;
+        notifyOfStatusChange.Checked = false;
+      }
+      else
+      {
       notifyOfAutoAdd.Checked = Settings.Default.NotifyOfAutoServiceAddition;
       notifyOfStatusChange.Checked = Settings.Default.NotifyOfStatusChange;
+      }
       chkRunAtStartup.Checked = Utility.GetRunAtStartUp(Application.ProductName);
       chkAutoCheckUpdates.Checked = Settings.Default.AutoCheckForUpdates;
       numCheckUpdatesWeeks.Value = Settings.Default.CheckForUpdatesFrequency;
       chkEnabledAutoAddServices.Checked = Settings.Default.AutoAddServicesToMonitor;
       autoAddRegex.Text = Settings.Default.AutoAddPattern;
       chkUseColorfulIcons.Checked = Settings.Default.UseColorfulStatusIcons;
+     
+
+      //// Disable checks to monitor when service is hosted at non-windows remote machine. 
     }
 
     private void btnOK_Click(object sender, EventArgs e)

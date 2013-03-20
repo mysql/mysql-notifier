@@ -636,10 +636,12 @@ namespace MySql.Notifier
       }
       else
       {
+        // TODO: FIX THE WAY WMI Notifies for all services... :/
         var service = mySQLServicesList.GetServiceByName(serviceName);
         ServiceControllerStatus copyPreviousStatus = ServiceControllerStatus.Stopped;
         if (service != null)
         {
+          // TODO: FIX THE WAY WMI Notifies for all services... :/
           service.StatusChanged -= new MySQLService.StatusChangedHandler(service_StatusChanged);
           service.StatusChanged += new MySQLService.StatusChangedHandler(service_StatusChanged);
           copyPreviousStatus = service.Status;

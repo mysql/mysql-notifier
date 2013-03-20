@@ -1,16 +1,16 @@
-﻿// 
+﻿//
 // Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
@@ -19,44 +19,77 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections;
-using System.ServiceProcess;
-using System.Windows.Forms;
-using System.Linq;
-using System.Globalization;
-using System.Management;
 using System.ComponentModel;
-using MySQL.Utility;
 using System.Diagnostics;
-using System.IO;
-using Microsoft.Win32;
-using System.Net;
+using System.Linq;
+using System.ServiceProcess;
 using System.Xml.Serialization;
-using System.Configuration;
+using Microsoft.Win32;
 using MySql.Notifier.Properties;
+using MySQL.Utility;
 
 namespace MySql.Notifier
 {
   [Serializable]
-  public class MySQLService 
+  public class MySQLService
   {
     private ServiceController winService;
     private string serviceName;
+    private string hostName;
+    private string userName;
+    private ServiceType? serviceType;
 
+    /// <summary>
+    /// Default constructor. DO NOT REMOVE.
+    /// </summary>
     public MySQLService()
     {
     }
 
-    public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon)
+    public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, AccountLogin login = null)
     {
+      if (login == null)
+      {
+        login = new AccountLogin();
+      }
+
+      ServiceType = login.ServiceType;
+      Host = login.Host;
+      Port = login.Port.ToString();
+      User = login.User;
+      Password = login.Password;
       ServiceName = serviceName;
       NotifyOnStatusChange = notificationOnChange;
       UpdateTrayIconOnStatusChange = updatesTrayIcon;
     }
 
+    [XmlAttribute(AttributeName = "ServiceType")]
+    public ServiceType ServiceType
+    {
+      get { return serviceType ?? ServiceType.Local; }
+      set { serviceType = value; }
+    }
+
+    [XmlAttribute(AttributeName = "Host")]
+    public string Host
+    {
+      get { return hostName ?? "localhost"; }
+      set { hostName = value; }
+    }
+
+    [XmlAttribute(AttributeName = "Port")]
+    public string Port { get; set; }
+
+    [XmlAttribute(AttributeName = "User")]
+    public string User
+    {
+      get { return String.IsNullOrEmpty(userName) ? Environment.UserName : userName; }
+      set { userName = value; }
+    }
+
     [XmlAttribute(AttributeName = "ServiceName")]
     public string ServiceName
-    { 
+    {
       get { return serviceName; }
       set { SetService(value); }
     }
@@ -66,6 +99,9 @@ namespace MySql.Notifier
 
     [XmlAttribute(AttributeName = "NotifyOnStatusChange")]
     public bool NotifyOnStatusChange { get; set; }
+
+    [XmlAttribute(AttributeName = "Password")]
+    public string Password { get; set; }
 
     [XmlIgnore]
     public bool IsRealMySQLService { get; private set; }
@@ -90,11 +126,10 @@ namespace MySql.Notifier
 
     private void SetService(string serviceName)
     {
-      
-      FoundInSystem = Service.ExistsServiceInstance(serviceName);      
+      FoundInSystem = Service.ExistsServiceInstance(serviceName);
       if (!FoundInSystem) return;
 
-      winService = new ServiceController(serviceName);   
+      winService = new ServiceController(serviceName);
       try
       {
         DisplayName = winService.DisplayName;
@@ -107,13 +142,12 @@ namespace MySql.Notifier
       {
         using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ioEx.Message, true))
         {
-          errorDialog.ShowDialog();          
+          errorDialog.ShowDialog();
         }
         MySQLNotifierTrace.GetSourceTrace().WriteError(ioEx.Message, 1);
-        winService = null;        
+        winService = null;
       }
     }
-
 
     private void SeeIfRealMySQLService(string cmd)
     {
@@ -122,13 +156,12 @@ namespace MySql.Notifier
 
     internal void FindMatchingWBConnections()
     {
-            
       // first we discover what parameters we were started with
       MySQLStartupParameters parameters = GetStartupParameters();
       WorkbenchConnections = new List<MySqlWorkbenchConnection>();
 
       if (!IsRealMySQLService) return;
-        
+
       var filteredConnections = MySqlWorkbench.Connections.Where(t => !String.IsNullOrEmpty(t.Name) && t.Port == parameters.Port);
 
       if (filteredConnections != null)
@@ -140,15 +173,17 @@ namespace MySql.Notifier
             case MySqlWorkbenchConnectionType.NamedPipes:
               if (!parameters.NamedPipesEnabled || String.Compare(c.Socket, parameters.PipeName, true) != 0) continue;
               break;
+
             case MySqlWorkbenchConnectionType.Ssh:
               continue;
             case MySqlWorkbenchConnectionType.Tcp:
               if (c.Port != parameters.Port) continue;
               break;
+
             case MySqlWorkbenchConnectionType.Unknown:
               continue;
-          }         
-          
+          }
+
           if (!Utility.IsValidIpAddress(c.Host)) //matching connections by Ip
           {
             if (Utility.GetIPv4ForHostName(c.Host) != parameters.HostIPv4) continue;
@@ -157,7 +192,7 @@ namespace MySql.Notifier
           {
             if (c.Host != parameters.HostIPv4) continue;
           }
-         
+
           WorkbenchConnections.Add(c);
         }
       }
@@ -167,6 +202,7 @@ namespace MySql.Notifier
     /// This event system handles the case where the service failed to move to a proposed status
     /// </summary>
     public delegate void StatusChangeErrorHandler(object sender, Exception ex);
+
     public event StatusChangeErrorHandler StatusChangeError;
 
     private void OnStatusChangeError(Exception ex)
@@ -179,7 +215,9 @@ namespace MySql.Notifier
     /// This event system handles the case where the service successfully moved to a new status
     /// </summary>
     public delegate void StatusChangedHandler(object sender, ServiceStatus args);
+
     public event StatusChangedHandler StatusChanged;
+
     protected virtual void OnStatusChanged(ServiceStatus args)
     {
       if (this.StatusChanged != null)
@@ -187,9 +225,9 @@ namespace MySql.Notifier
     }
 
     public void UpdateMenu(string statusString)
-    {              
-        SetStatus(statusString);
-        MenuGroup.Update();  
+    {
+      SetStatus(statusString);
+      MenuGroup.Update();
     }
 
     public void SetStatus(string statusString)
@@ -242,45 +280,45 @@ namespace MySql.Notifier
       worker.RunWorkerAsync(action);
     }
 
-    void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+    private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      if (e.Error != null)    
-        OnStatusChangeError(e.Error);      
+      if (e.Error != null)
+        OnStatusChangeError(e.Error);
       else
       {
         // else no error
         winService.Refresh();
-        WorkCompleted = true;       
+        WorkCompleted = true;
       }
     }
-   
 
-    void worker_DoWork(object sender, DoWorkEventArgs e)
+    private void worker_DoWork(object sender, DoWorkEventArgs e)
     {
-
       BackgroundWorker worker = sender as BackgroundWorker;
-      
+
       if (!Service.ExistsServiceInstance(serviceName))
       {
-        throw new Exception(String.Format(Resources.ServiceNotFound, serviceName));        
+        throw new Exception(String.Format(Resources.ServiceNotFound, serviceName));
       }
-      
+
       TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
-      
+
       int action = (int)e.Argument;
       WorkCompleted = false;
 
       switch (action)
-      { 
+      {
         case 0:
           ProcessStatusService("stop");
           break;
+
         case 1:
           ProcessStatusService("start");
           break;
+
         case 2:
           ProcessStatusService("restart");
-          break;                
+          break;
       }
     }
 
@@ -296,10 +334,10 @@ namespace MySql.Notifier
         proc.StartInfo.Arguments = "/C net stop " + @"" + serviceName + @"" + " && net start " + serviceName + @"";
         proc.StartInfo.UseShellExecute = true;
         proc.Start();
-        winService.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));      
+        winService.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));
       }
       else
-      {       
+      {
         proc.StartInfo.FileName = "sc";
         proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, ServiceName);
         proc.StartInfo.UseShellExecute = true;
@@ -307,7 +345,7 @@ namespace MySql.Notifier
         winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running : ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
       }
     }
-    
+
     private MySQLStartupParameters GetStartupParameters()
     {
       MySQLStartupParameters parameters = new MySQLStartupParameters();
@@ -356,5 +394,3 @@ namespace MySql.Notifier
     public bool NamedPipesEnabled;
   }
 }
-
-

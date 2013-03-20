@@ -230,11 +230,14 @@ namespace MySql.Notifier
       this.server.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.server.FormattingEnabled = true;
       this.server.Items.AddRange(new object[] {
-            "Local"});
+            "Local",
+            "Remote - Windows",
+            "Remote - Non Windows"});
       this.server.Location = new System.Drawing.Point(152, 78);
       this.server.Name = "server";
       this.server.Size = new System.Drawing.Size(259, 21);
       this.server.TabIndex = 46;
+      this.server.SelectedIndexChanged += new System.EventHandler(this.server_SelectedIndexChanged);
       // 
       // timerForFiltering
       // 

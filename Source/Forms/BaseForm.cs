@@ -71,4 +71,9 @@ namespace MySql.Notifier
       }
     }
   }
+
+  public class LoginGathererForm : BaseForm
+  {
+    public AccountLogin Login { get; set; }
+  }
 }
