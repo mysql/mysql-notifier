@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -20,16 +20,17 @@
 using System;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
+using System.Drawing;
 
 namespace MySql.Notifier
 {
-  public partial class ManageServicesDialog : BaseForm
+  public partial class ManageItemsDialog : BaseForm
   {
     private MySQLServicesList serviceList;
     public static string addServiceName;
     private MySQLService selectedService;
 
-    public ManageServicesDialog(MySQLServicesList serviceList)
+    public ManageItemsDialog(MySQLServicesList serviceList)
     {
       this.serviceList = serviceList;
       InitializeComponent();
@@ -43,6 +44,7 @@ namespace MySql.Notifier
       {
         ListViewItem itemList = new ListViewItem(service.DisplayName, 0);
         itemList.Tag = service;
+        itemList.SubItems.Add(service.ServiceType.ToString());
         itemList.SubItems.Add(service.Status.ToString());
         lstMonitoredServices.Items.Add(itemList);
       }
@@ -58,30 +60,22 @@ namespace MySql.Notifier
 
     private void btnAdd_Click(object sender, EventArgs e)
     {
-      AddServiceDialog dlg = new AddServiceDialog();
-      if (dlg.ShowDialog() == DialogResult.Cancel) return;
-
-      foreach (MySQLService service in dlg.ServicesToAdd)
+      Point screenPoint = btnAdd.PointToScreen(new Point(btnAdd.Left, btnAdd.Bottom));
+      if (screenPoint.Y + AddButtonContextMenuStrip.Size.Height > Screen.PrimaryScreen.WorkingArea.Height)
       {
-        if (serviceList.Contains(service))
-        {
-          using (var errorDialog = new MessageDialog("Warning", "Selected Service is already in the Monitor List", false))
-          {
-            errorDialog.ShowDialog(this);
-          }
-        }
-        else
-          serviceList.AddService(service);
+        AddButtonContextMenuStrip.Show(btnAdd, new Point(0, -AddButtonContextMenuStrip.Size.Height));
       }
-
-      RefreshList();
+      else
+      {
+        AddButtonContextMenuStrip.Show(btnAdd, new Point(0, btnAdd.Height));
+      }     
     }
 
     /// <summary>
-    /// Deletes selected service from monitor
+    /// Deletes selected item from monitored items list
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
+    /// <param name="sender">Sender Object</param>
+    /// <param name="e">Event Arguments</param>
     private void btnDelete_Click(object sender, EventArgs e)
     {
       if (selectedService == null) return;
@@ -116,6 +110,35 @@ namespace MySql.Notifier
     private void btnClose_Click(object sender, EventArgs e)
     {
       Settings.Default.Save();
+    }
+
+    private void serviceToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      AddServiceDialog dlg = new AddServiceDialog();
+      if (dlg.ShowDialog() == DialogResult.Cancel) return;
+
+      foreach (MySQLService service in dlg.ServicesToAdd)
+      {
+        if (serviceList.Contains(service))
+        {
+          using (var errorDialog = new MessageDialog("Warning", "Selected Service is already in the Monitor List", false))
+          {
+            errorDialog.ShowDialog(this);
+          }
+        }
+        else
+        {
+          serviceList.AddService(service);
+        }
+      }
+
+      RefreshList();
+    }
+
+    private void mySQLInstanceToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      // TODO: Javier Treviño's Screen for Workbech connections goes here.
+      throw new NotImplementedException();
     }
   }
 }

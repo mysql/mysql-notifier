@@ -19,7 +19,7 @@
 
 namespace MySql.Notifier
 {
-  partial class ManageServicesDialog
+  partial class ManageItemsDialog
   {
     /// <summary>
     /// Required designer variable.
@@ -47,11 +47,11 @@ namespace MySql.Notifier
     /// </summary>
     private void InitializeComponent()
     {
-      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageServicesDialog));
+      this.components = new System.ComponentModel.Container();
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageItemsDialog));
       this.panel2 = new System.Windows.Forms.Panel();
       this.btnClose = new System.Windows.Forms.Button();
       this.panel1 = new System.Windows.Forms.Panel();
-      this.label3 = new System.Windows.Forms.Label();
       this.label2 = new System.Windows.Forms.Label();
       this.lblSubTitle1 = new System.Windows.Forms.Label();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -62,10 +62,15 @@ namespace MySql.Notifier
       this.lblHiperTitle = new System.Windows.Forms.Label();
       this.lstMonitoredServices = new System.Windows.Forms.ListView();
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+      this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+      this.AddButtonContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+      this.serviceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.mySQLInstanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.panel2.SuspendLayout();
       this.panel1.SuspendLayout();
       this.groupBox1.SuspendLayout();
+      this.AddButtonContextMenuStrip.SuspendLayout();
       this.SuspendLayout();
       // 
       // panel2
@@ -81,7 +86,7 @@ namespace MySql.Notifier
       // btnClose
       // 
       this.btnClose.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.btnClose.Location = new System.Drawing.Point(502, 9);
+      this.btnClose.Location = new System.Drawing.Point(497, 9);
       this.btnClose.Name = "btnClose";
       this.btnClose.Size = new System.Drawing.Size(87, 27);
       this.btnClose.TabIndex = 15;
@@ -93,7 +98,6 @@ namespace MySql.Notifier
       // 
       this.panel1.AutoSize = true;
       this.panel1.BackColor = System.Drawing.Color.White;
-      this.panel1.Controls.Add(this.label3);
       this.panel1.Controls.Add(this.label2);
       this.panel1.Controls.Add(this.lblSubTitle1);
       this.panel1.Controls.Add(this.groupBox1);
@@ -107,32 +111,23 @@ namespace MySql.Notifier
       this.panel1.Size = new System.Drawing.Size(596, 480);
       this.panel1.TabIndex = 48;
       // 
-      // label3
-      // 
-      this.label3.AutoSize = true;
-      this.label3.Location = new System.Drawing.Point(33, 88);
-      this.label3.Name = "label3";
-      this.label3.Size = new System.Drawing.Size(162, 15);
-      this.label3.TabIndex = 26;
-      this.label3.Text = "other local Windows services.";
-      // 
       // label2
       // 
-      this.label2.AutoSize = true;
-      this.label2.Location = new System.Drawing.Point(33, 73);
+      this.label2.Location = new System.Drawing.Point(32, 73);
       this.label2.Name = "label2";
-      this.label2.Size = new System.Drawing.Size(394, 15);
+      this.label2.Size = new System.Drawing.Size(448, 37);
       this.label2.TabIndex = 25;
-      this.label2.Text = "Local MySQL instances will be automatically added. Press Add to monitor";
+      this.label2.Text = "Local MySQL services will be automatically added. Press Add to monitor other Wind" +
+    "ows services or MySQL instances.";
       // 
       // lblSubTitle1
       // 
       this.lblSubTitle1.AutoSize = true;
-      this.lblSubTitle1.Location = new System.Drawing.Point(33, 48);
+      this.lblSubTitle1.Location = new System.Drawing.Point(32, 45);
       this.lblSubTitle1.Name = "lblSubTitle1";
-      this.lblSubTitle1.Size = new System.Drawing.Size(101, 15);
+      this.lblSubTitle1.Size = new System.Drawing.Size(217, 15);
       this.lblSubTitle1.TabIndex = 24;
-      this.lblSubTitle1.Text = "Windows Services";
+      this.lblSubTitle1.Text = "Windows Services and MySQL Instances";
       // 
       // groupBox1
       // 
@@ -172,7 +167,7 @@ namespace MySql.Notifier
       // btnDelete
       // 
       this.btnDelete.Enabled = false;
-      this.btnDelete.Location = new System.Drawing.Point(502, 159);
+      this.btnDelete.Location = new System.Drawing.Point(497, 155);
       this.btnDelete.Name = "btnDelete";
       this.btnDelete.Size = new System.Drawing.Size(87, 27);
       this.btnDelete.TabIndex = 22;
@@ -182,11 +177,11 @@ namespace MySql.Notifier
       // 
       // btnAdd
       // 
-      this.btnAdd.Location = new System.Drawing.Point(502, 125);
+      this.btnAdd.Location = new System.Drawing.Point(497, 122);
       this.btnAdd.Name = "btnAdd";
       this.btnAdd.Size = new System.Drawing.Size(87, 27);
       this.btnAdd.TabIndex = 21;
-      this.btnAdd.Text = "Add";
+      this.btnAdd.Text = "Add...";
       this.btnAdd.UseVisualStyleBackColor = true;
       this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
       // 
@@ -194,16 +189,17 @@ namespace MySql.Notifier
       // 
       this.lblHiperTitle.AutoSize = true;
       this.lblHiperTitle.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.lblHiperTitle.Location = new System.Drawing.Point(12, 19);
+      this.lblHiperTitle.Location = new System.Drawing.Point(12, 18);
       this.lblHiperTitle.Name = "lblHiperTitle";
-      this.lblHiperTitle.Size = new System.Drawing.Size(154, 15);
+      this.lblHiperTitle.Size = new System.Drawing.Size(141, 15);
       this.lblHiperTitle.TabIndex = 20;
-      this.lblHiperTitle.Text = "Manage Monitored Services";
+      this.lblHiperTitle.Text = "Manage Monitored Items";
       // 
       // lstMonitoredServices
       // 
       this.lstMonitoredServices.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
+            this.columnHeader2,
             this.columnHeader3});
       this.lstMonitoredServices.FullRowSelect = true;
       this.lstMonitoredServices.HideSelection = false;
@@ -218,15 +214,41 @@ namespace MySql.Notifier
       // 
       // columnHeader1
       // 
-      this.columnHeader1.Text = "Service Name";
+      this.columnHeader1.Text = "Name";
       this.columnHeader1.Width = 301;
+      // 
+      // columnHeader2
+      // 
+      this.columnHeader2.Text = "Type";
       // 
       // columnHeader3
       // 
       this.columnHeader3.Text = "Status";
       this.columnHeader3.Width = 127;
       // 
-      // ManageServicesDialog
+      // AddButtonContextMenuStrip
+      // 
+      this.AddButtonContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.serviceToolStripMenuItem,
+            this.mySQLInstanceToolStripMenuItem});
+      this.AddButtonContextMenuStrip.Name = "contextMenuStrip1";
+      this.AddButtonContextMenuStrip.Size = new System.Drawing.Size(164, 48);
+      // 
+      // serviceToolStripMenuItem
+      // 
+      this.serviceToolStripMenuItem.Name = "serviceToolStripMenuItem";
+      this.serviceToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+      this.serviceToolStripMenuItem.Text = "Windows Service";
+      this.serviceToolStripMenuItem.Click += new System.EventHandler(this.serviceToolStripMenuItem_Click);
+      // 
+      // mySQLInstanceToolStripMenuItem
+      // 
+      this.mySQLInstanceToolStripMenuItem.Name = "mySQLInstanceToolStripMenuItem";
+      this.mySQLInstanceToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+      this.mySQLInstanceToolStripMenuItem.Text = "MySQL Instance";
+      this.mySQLInstanceToolStripMenuItem.Click += new System.EventHandler(this.mySQLInstanceToolStripMenuItem_Click);
+      // 
+      // ManageItemsDialog
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -239,14 +261,15 @@ namespace MySql.Notifier
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
-      this.Name = "ManageServicesDialog";
+      this.Name = "ManageItemsDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-      this.Text = "Manage Services";
+      this.Text = "Manage Items";
       this.panel2.ResumeLayout(false);
       this.panel1.ResumeLayout(false);
       this.panel1.PerformLayout();
       this.groupBox1.ResumeLayout(false);
       this.groupBox1.PerformLayout();
+      this.AddButtonContextMenuStrip.ResumeLayout(false);
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -257,17 +280,20 @@ namespace MySql.Notifier
     private System.Windows.Forms.Panel panel2;
     private System.Windows.Forms.Button btnClose;
     private System.Windows.Forms.Panel panel1;
-    private System.Windows.Forms.Label label3;
-    private System.Windows.Forms.Label label2;
-    private System.Windows.Forms.Label lblSubTitle1;
     private System.Windows.Forms.GroupBox groupBox1;
     private System.Windows.Forms.CheckBox chkUpdateTrayIcon;
     private System.Windows.Forms.CheckBox notifyOnStatusChange;
     private System.Windows.Forms.Button btnDelete;
     private System.Windows.Forms.Button btnAdd;
-    private System.Windows.Forms.Label lblHiperTitle;
     private System.Windows.Forms.ListView lstMonitoredServices;
     private System.Windows.Forms.ColumnHeader columnHeader1;
     private System.Windows.Forms.ColumnHeader columnHeader3;
+    private System.Windows.Forms.ContextMenuStrip AddButtonContextMenuStrip;
+    private System.Windows.Forms.ToolStripMenuItem serviceToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem mySQLInstanceToolStripMenuItem;
+    private System.Windows.Forms.Label label2;
+    private System.Windows.Forms.Label lblSubTitle1;
+    private System.Windows.Forms.Label lblHiperTitle;
+    private System.Windows.Forms.ColumnHeader columnHeader2;
   }
 }

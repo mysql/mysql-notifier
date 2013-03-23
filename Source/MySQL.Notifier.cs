@@ -522,7 +522,7 @@ namespace MySql.Notifier
 
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
     {
-      ManageServicesDialog dialog = new ManageServicesDialog(mySQLServicesList);
+      ManageItemsDialog dialog = new ManageItemsDialog(mySQLServicesList);
       dialog.ShowDialog();
 
       //update icon

@@ -183,14 +183,7 @@ namespace MySQL.Notifier
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-      if (SavePasswordCheck.Checked)
-      {
-        Login = new AccountLogin(Hostname.Text, Username.Text, Password.Text);
-      }
-      else
-      {
-        Login = new AccountLogin(Hostname.Text, Username.Text, String.Empty);
-      }
+      Login = new AccountLogin(Hostname.Text, Username.Text, Password.Text);      
     }
 
     private void txtPassword_TextChanged(object sender, EventArgs e)

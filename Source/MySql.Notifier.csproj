@@ -156,11 +156,11 @@
     <Compile Include="Forms\AddServiceDialog.Designer.cs">
       <DependentUpon>AddServiceDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ManageServicesDialog.cs">
+    <Compile Include="Forms\ManageItemsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\ManageServicesDialog.Designer.cs">
-      <DependentUpon>ManageServicesDialog.cs</DependentUpon>
+    <Compile Include="Forms\ManageItemsDialog.Designer.cs">
+      <DependentUpon>ManageItemsDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\NewNonWindowsConnectionDialog.cs">
       <SubType>Form</SubType>
@@ -209,8 +209,8 @@
     <EmbeddedResource Include="Forms\BaseForm.resx">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ManageServicesDialog.resx">
-      <DependentUpon>ManageServicesDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\ManageItemsDialog.resx">
+      <DependentUpon>ManageItemsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MessageDialog.resx">
       <DependentUpon>MessageDialog.cs</DependentUpon>
