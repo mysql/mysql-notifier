@@ -85,6 +85,18 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Gets or sets the file path of the password vault file to be used.
+    /// </summary>
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public static string PasswordVaultFilePath
+    {
+      get
+      {
+        return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
+      }
+    }
+
+    /// <summary>
     /// Gets the Workbench connection selected to be monitored.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -101,6 +113,7 @@ namespace MySql.Notifier
     {
       using (var instanceConnectionDialog = new MySQLWorkbenchConnectionDialog(null))
       {
+        instanceConnectionDialog.FallbackPasswordVaultFile = PasswordVaultFilePath;
         instanceConnectionDialog.ExternalProgramName = AssemblyInfo.AssemblyTitle;
         instanceConnectionDialog.Icon = Properties.Resources.MySqlNotifierIcon;
         instanceConnectionDialog.ShowIcon = true;
