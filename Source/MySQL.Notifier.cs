@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -29,6 +29,7 @@ using System.ServiceProcess;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
 using MySQL.Utility;
+using MySQL.Utility.Forms;
 
 namespace MySql.Notifier
 {
@@ -123,6 +124,21 @@ namespace MySql.Notifier
 
       WatchForServiceChanges();
       WatchForServiceDeletion();
+
+      CustomizeInfoDialog();
+    }
+
+    /// <summary>
+    /// Customizes the looks of the <see cref="MySQL.Utility.Forms.InfoDialog"/> form for the MySQL Notifier.
+    /// </summary>
+    private void CustomizeInfoDialog()
+    {
+      InfoDialog.ApplicationName = AssemblyInfo.AssemblyTitle;
+      InfoDialog.SuccessLogo = Properties.Resources.ApplicationLogo;
+      InfoDialog.ErrorLogo = Properties.Resources.NotifierErrorImage;
+      InfoDialog.WarningLogo = Properties.Resources.NotifierWarningImage;
+      InfoDialog.InformationLogo = Properties.Resources.ApplicationLogo;
+      InfoDialog.ApplicationIcon = Properties.Resources.MySqlNotifierIcon;
     }
 
     private void WatchForServiceChanges()

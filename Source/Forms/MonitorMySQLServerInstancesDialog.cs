@@ -114,11 +114,8 @@ namespace MySql.Notifier
       using (var instanceConnectionDialog = new MySQLWorkbenchConnectionDialog(null))
       {
         instanceConnectionDialog.FallbackPasswordVaultFile = PasswordVaultFilePath;
-        instanceConnectionDialog.ExternalProgramName = AssemblyInfo.AssemblyTitle;
         instanceConnectionDialog.Icon = Properties.Resources.MySqlNotifierIcon;
         instanceConnectionDialog.ShowIcon = true;
-        instanceConnectionDialog.InfoDialogImageList.Images.Add(Properties.Resources.ApplicationLogo);
-        instanceConnectionDialog.InfoDialogImageList.Images.Add(Properties.Resources.NotifierErrorImage);
         DialogResult dr = instanceConnectionDialog.ShowIfWorkbenchNotRunning();
         if (dr == DialogResult.OK)
         {
