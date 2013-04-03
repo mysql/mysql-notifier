@@ -162,23 +162,23 @@
     <Compile Include="Forms\ManageItemsDialog.Designer.cs">
       <DependentUpon>ManageItemsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\NewNonWindowsConnectionDialog.cs">
+    <Compile Include="Forms\MonitorMySQLServerInstancesDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\NewNonWindowsConnectionDialog.designer.cs">
-      <DependentUpon>NewNonWindowsConnectionDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\NewWindowsConnectionDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\NewWindowsConnectionDialog.designer.cs">
-      <DependentUpon>NewWindowsConnectionDialog.cs</DependentUpon>
+    <Compile Include="Forms\MonitorMySQLServerInstancesDialog.Designer.cs">
+      <DependentUpon>MonitorMySQLServerInstancesDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\OptionsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\OptionsDialog.Designer.cs">
       <DependentUpon>OptionsDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\WindowsConnectionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\WindowsConnectionDialog.designer.cs">
+      <DependentUpon>WindowsConnectionDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="MySQLSecurity.cs" />
     <Compile Include="AccountLogin.cs" />
@@ -216,15 +216,15 @@
       <DependentUpon>MessageDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\NewNonWindowsConnectionDialog.resx">
-      <DependentUpon>NewNonWindowsConnectionDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\NewWindowsConnectionDialog.resx">
-      <DependentUpon>NewWindowsConnectionDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\MonitorMySQLServerInstancesDialog.resx">
+      <DependentUpon>MonitorMySQLServerInstancesDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\OptionsDialog.resx">
       <DependentUpon>OptionsDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\WindowsConnectionDialog.resx">
+      <DependentUpon>WindowsConnectionDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -137,8 +137,10 @@ namespace MySql.Notifier
 
     private void mySQLInstanceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-      // TODO: Javier Treviño's Screen for Workbech connections goes here.
-      throw new NotImplementedException();
+      using (var monitorInstancesDialog = new MonitorMySQLServerInstancesDialog())
+      {
+        monitorInstancesDialog.ShowDialog();
+      }
     }
   }
 }

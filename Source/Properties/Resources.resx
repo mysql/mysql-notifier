@@ -353,4 +353,10 @@
   <data name="ServiceRemoved" xml:space="preserve">
     <value>The service {0} has been removed from the monitoring list.  </value>
   </data>
+  <data name="NoText" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="YesText" xml:space="preserve">
+    <value>Yes</value>
+  </data>
 </root>

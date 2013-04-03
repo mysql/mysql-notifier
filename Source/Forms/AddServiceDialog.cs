@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -17,17 +17,16 @@
 // 02110-1301  USA
 //
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
-using MySql.Notifier.Properties;
-using MySQL.Notifier;
-using MySQL.Utility;
-
 namespace MySql.Notifier
 {
+  using System;
+  using System.Collections;
+  using System.Collections.Generic;
+  using System.Linq;
+  using System.Windows.Forms;
+  using MySql.Notifier.Properties;
+  using MySQL.Utility;
+
   public partial class AddServiceDialog : BaseForm
   {
     private class ListViewItemComparer : IComparer
@@ -173,31 +172,22 @@ namespace MySql.Notifier
     private void server_SelectedIndexChanged(object sender, EventArgs e)
     {
       serviceType = (ServiceType)server.SelectedIndex;
-      LoginGathererForm rgf = new LoginGathererForm();
+      DialogResult dr = DialogResult.None;
 
       switch (serviceType)
       {
         case ServiceType.Local:
-
-          // Reload list?
+          //// Reload list?
           return;
 
         case ServiceType.RemoteWindows:
-          rgf = new NewWindowsConnectionDialog();
-          break;
-
-        case ServiceType.RemoteNonWindows:
-          rgf = new NewNonWindowsConnectionDialog();
-          break;
-
-        default:
+          using (var windowsConnectionDialog = new WindowsConnectionDialog())
+          {
+            dr = windowsConnectionDialog.ShowDialog();
+            Login = windowsConnectionDialog.Login;
+          }
           break;
       }
-
-      if (rgf.ShowDialog() == DialogResult.Cancel) return;
-
-      //TODO: Query rgf DialogResponse and act accordingly (see if list refresh is required, etc).
-      Login = rgf.Login;
     }
   }
 
