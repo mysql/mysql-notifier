@@ -24,11 +24,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("MySQL Notifier")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("beta")]
-[assembly: AssemblyCompany("Oracle")]
-[assembly: AssemblyProduct("mysqlnotifier")]
-[assembly: AssemblyCopyright("Copyright © Oracle 2012")]
+[assembly: AssemblyDescription("MySQL Notifier is an application for Windows enables developers and DBAs to easily monitor, start and stop all their MySQL database instances. It provides a familiar Microsoft SQL Server look and feel and integrates with MySQL Workbench.")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCompany("Oracle Corporation")]
+[assembly: AssemblyProduct("MySQL Notifier")]
+[assembly: AssemblyCopyright("Copyright © 2012 - 2013, Oracle and/or its affiliates. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -50,7 +50,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyDelaySign(false)]
-[assembly: AssemblyKeyName("ConnectorNet")]
-[assembly: AssemblyVersion("1.0.3")]
-[assembly: AssemblyFileVersion("1.0.3")]
+[assembly: AssemblyVersion("1.1.0")]
+[assembly: AssemblyFileVersion("1.1.0")]
