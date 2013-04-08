@@ -44,7 +44,7 @@ namespace MySql.Notifier
       {
         ListViewItem itemList = new ListViewItem(service.DisplayName, 0);
         itemList.Tag = service;
-        itemList.SubItems.Add(service.ServiceType.ToString());
+        itemList.SubItems.Add(service.WinServiceType.ToString());
         itemList.SubItems.Add(service.Status.ToString());
         lstMonitoredServices.Items.Add(itemList);
       }
@@ -56,6 +56,7 @@ namespace MySql.Notifier
         chkUpdateTrayIcon.Enabled = false;
         notifyOnStatusChange.Enabled = false;
       }
+      Cursor.Current = Cursors.Arrow;
     }
 
     private void btnAdd_Click(object sender, EventArgs e)
@@ -68,7 +69,7 @@ namespace MySql.Notifier
       else
       {
         AddButtonContextMenuStrip.Show(btnAdd, new Point(0, btnAdd.Height));
-      }     
+      }
     }
 
     /// <summary>
@@ -114,10 +115,11 @@ namespace MySql.Notifier
 
     private void serviceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-      AddServiceDialog dlg = new AddServiceDialog();
-      if (dlg.ShowDialog() == DialogResult.Cancel) return;
+      Cursor.Current = Cursors.WaitCursor;
+      AddServiceDialog dialog = new AddServiceDialog();
+      if (dialog.ShowDialog() == DialogResult.Cancel) return;
 
-      foreach (MySQLService service in dlg.ServicesToAdd)
+      foreach (MySQLService service in dialog.ServicesToAdd)
       {
         if (serviceList.Contains(service))
         {

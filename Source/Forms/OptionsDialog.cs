@@ -32,16 +32,8 @@ namespace MySql.Notifier
     {
       InitializeComponent();
 
-       if(serviceType == ServiceType.RemoteNonWindows)
-      {
-        notifyOfAutoAdd.Checked = false;
-        notifyOfStatusChange.Checked = false;
-      }
-      else
-      {
       notifyOfAutoAdd.Checked = Settings.Default.NotifyOfAutoServiceAddition;
       notifyOfStatusChange.Checked = Settings.Default.NotifyOfStatusChange;
-      }
       chkRunAtStartup.Checked = Utility.GetRunAtStartUp(Application.ProductName);
       chkAutoCheckUpdates.Checked = Settings.Default.AutoCheckForUpdates;
       numCheckUpdatesWeeks.Value = Settings.Default.CheckForUpdatesFrequency;

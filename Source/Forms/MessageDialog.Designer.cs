@@ -93,11 +93,14 @@ namespace MySql.Notifier
       this.lblOperationSummary.AutoSize = true;
       this.lblOperationSummary.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.lblOperationSummary.ForeColor = System.Drawing.Color.Navy;
-      this.lblOperationSummary.Location = new System.Drawing.Point(110, 37);
+      this.lblOperationSummary.Location = new System.Drawing.Point(110, 15);
+      this.lblOperationSummary.MaximumSize = new System.Drawing.Size(389, 0);
+      this.lblOperationSummary.MinimumSize = new System.Drawing.Size(389, 40);
       this.lblOperationSummary.Name = "lblOperationSummary";
-      this.lblOperationSummary.Size = new System.Drawing.Size(107, 20);
+      this.lblOperationSummary.Size = new System.Drawing.Size(389, 40);
       this.lblOperationSummary.TabIndex = 25;
       this.lblOperationSummary.Text = "Error Summary";
+      this.lblOperationSummary.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
       // 
       // panel2
       // 

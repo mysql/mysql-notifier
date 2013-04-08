@@ -464,14 +464,29 @@ namespace MySql.Notifier
       }
       else
       {
-        service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
-        service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
-        if (changeType == ServiceListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
+        if (service.WinServiceType == ServiceType.Local)
         {
-          notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-          notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
-          notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.DisplayName);
-          notifyIcon.ShowBalloonTip(1500);
+          service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
+          service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
+          if (changeType == ServiceListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
+          {
+            notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
+            notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.DisplayName);
+            notifyIcon.ShowBalloonTip(1500);
+          }
+        }
+        else
+        {
+          service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
+          service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
+          if (changeType == ServiceListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
+          {
+            notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
+            notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.DisplayName);
+            notifyIcon.ShowBalloonTip(1500);
+          }
         }
       }
     }

@@ -26,6 +26,7 @@ namespace MySql.Notifier
   using System.Windows.Forms;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
+  using System.Management;
 
   public partial class AddServiceDialog : BaseForm
   {
@@ -79,22 +80,74 @@ namespace MySql.Notifier
 
     private void RefreshList()
     {
-      try
+      if (Login == null || serviceType == ServiceType.Local)
       {
+        try
+        {
+          string currentFilter = filter.Checked ? Settings.Default.AutoAddPattern.Trim() : null;
+          //TODO: Verify filtert persistance
+          //if (currentFilter == lastFilter && txtFilter.Text == lastTextFilter) return;
+
+          lstServices.BeginUpdate();
+          lastFilter = currentFilter;
+          lastTextFilter = txtFilter.Text;
+
+          lstServices.Items.Clear();
+          var services = Service.GetInstances(lastFilter);
+
+          if (!String.IsNullOrEmpty(lastTextFilter))
+          {
+            services = services.Where(t => t.Properties["DisplayName"].Value.ToString().ToLower().Contains(lastTextFilter.ToLower())).ToList();
+          }
+          foreach (var item in services)
+          {
+            ListViewItem newItem = new ListViewItem();
+            newItem.Text = item.Properties["DisplayName"].Value.ToString();
+            newItem.Tag = item.Properties["Name"].Value.ToString();
+            newItem.SubItems.Add(item.Properties["State"].Value.ToString());
+
+            lstServices.Items.Add(newItem);
+          }
+          lstServices.EndUpdate();
+        }
+        catch (Exception ex)
+        {
+          using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ex.Message, true))
+          {
+            errorDialog.ShowDialog(this);
+            MySQLNotifierTrace.GetSourceTrace().WriteError(ex.Message, 1);
+          }
+        }
+      }
+      else
+      {
+        //TODO: Verify filtert persistance
         string currentFilter = filter.Checked ? Settings.Default.AutoAddPattern.Trim() : null;
-        if (currentFilter == lastFilter && txtFilter.Text == lastTextFilter) return;
+        //if (currentFilter == lastFilter && txtFilter.Text == lastTextFilter) return;
 
         lstServices.BeginUpdate();
         lastFilter = currentFilter;
         lastTextFilter = txtFilter.Text;
 
         lstServices.Items.Clear();
-        var services = Service.GetInstances(lastFilter);
+        //var services = Service.GetInstances(lastFilter, Login.Host);
+        ManagementNamedValueCollection context = new ManagementNamedValueCollection();
+        ConnectionOptions co = new ConnectionOptions();
+        co.Username = Login.User;
+        co.Password = Login.DecryptedPassword();
+        co.Impersonation = ImpersonationLevel.Impersonate;
+        co.Authentication = AuthenticationLevel.Packet;
+        co.EnablePrivileges = true;
+        co.Context = context;
+        co.Timeout = TimeSpan.FromSeconds(30);
 
-        if (!String.IsNullOrEmpty(lastTextFilter))
-        {
-          services = services.Where(t => t.Properties["DisplayName"].Value.ToString().ToLower().Contains(lastTextFilter.ToLower())).ToList();
-        }
+        var managementScope = new ManagementScope(@"\\" + Login.Host + @"\root\cimv2", co);
+
+        managementScope.Connect();
+        WqlObjectQuery query = new WqlObjectQuery("Select * From Win32_Service");
+        ManagementObjectSearcher searcher = new ManagementObjectSearcher(managementScope, query);
+        var services = searcher.Get();
+
         foreach (var item in services)
         {
           ListViewItem newItem = new ListViewItem();
@@ -106,20 +159,13 @@ namespace MySql.Notifier
         }
         lstServices.EndUpdate();
       }
-      catch (Exception ex)
-      {
-        using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ex.Message, true))
-        {
-          errorDialog.ShowDialog(this);
-          MySQLNotifierTrace.GetSourceTrace().WriteError(ex.Message, 1);
-        }
-      }
     }
 
     private void btnOK_Click(object sender, EventArgs e)
     {
+      Cursor.Current = Cursors.WaitCursor;
       //TODO: VALIDATE THIS WORKS
-      ServicesToAdd = new List<MySQLService>();//new List<string>();
+      ServicesToAdd = new List<MySQLService>();
       foreach (ListViewItem lvi in lstServices.SelectedItems)
       {
         ServicesToAdd.Add(new MySQLService(lvi.Tag as string, true, true, Login));
@@ -176,25 +222,27 @@ namespace MySql.Notifier
 
       switch (serviceType)
       {
-        case ServiceType.Local:
-          //// Reload list?
-          return;
+        // TODO: Verify this case is required.
+        //case ServiceType.Local:
+        //  //// Reload list?
+        //  return;
 
-        case ServiceType.RemoteWindows:
-          using (var windowsConnectionDialog = new WindowsConnectionDialog())
+        case ServiceType.Remote:
+          using (var windowsConnectionDialog = new WindowsConnectionDialog(Login))
           {
             dr = windowsConnectionDialog.ShowDialog();
             Login = windowsConnectionDialog.Login;
           }
           break;
       }
+
+      RefreshList();
     }
   }
 
   public enum ServiceType
   {
     Local,
-    RemoteWindows,
-    RemoteNonWindows,
+    Remote
   }
 }

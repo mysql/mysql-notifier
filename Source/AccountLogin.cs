@@ -43,19 +43,12 @@ namespace MySql.Notifier
       set { password = String.IsNullOrEmpty(value) ? String.Empty : MySQLSecurity.EncryptPassword(value); }
     }
 
-    public string DecryptedPassword
-    {
-      get { return String.IsNullOrEmpty(password) ? String.Empty : MySQLSecurity.DecryptPassword(password); }
-    }
-
     /// <summary>
     /// Default constructor, used to add local machine services.
     /// </summary>
     public AccountLogin()
     {
       this.ServiceType = ServiceType.Local;
-      this.Host = "localhost";
-      this.User = Environment.UserName;
     }
 
     /// <summary>
@@ -66,7 +59,7 @@ namespace MySql.Notifier
     /// <param name="Password">Account's password</param>
     public AccountLogin(string HostName, string UserName, string Password)
     {
-      this.ServiceType = ServiceType.RemoteWindows;
+      this.ServiceType = ServiceType.Remote;
       this.Host = HostName;
       this.User = UserName;
       this.Password = Password;
@@ -81,11 +74,19 @@ namespace MySql.Notifier
     /// <param name="Password">Account's password</param>
     public AccountLogin(string HostIP, int Port, string UserName, string Password)
     {
-      this.ServiceType = ServiceType.RemoteNonWindows;
+      this.ServiceType = ServiceType.Remote;
       this.Host = HostIP;
       this.Port = Port;
       this.User = UserName;
       this.Password = Password;
+    }
+
+    /// <summary>
+    /// Returns the password in plain text
+    /// </summary>
+    public string DecryptedPassword ()
+    {
+      return String.IsNullOrEmpty(password) ? String.Empty : MySQLSecurity.DecryptPassword(password);
     }
   }
 }

@@ -70,6 +70,18 @@ namespace MySql.Notifier
         SettingControls(c.Controls);
       }
     }
+
+    private void InitializeComponent()
+    {
+      this.SuspendLayout();
+      // 
+      // BaseForm
+      // 
+      this.ClientSize = new System.Drawing.Size(284, 262);
+      this.Name = "BaseForm";
+      this.ResumeLayout(false);
+
+    }
   }
 
   public class LoginGathererForm : BaseForm

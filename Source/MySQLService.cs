@@ -35,9 +35,6 @@ namespace MySql.Notifier
   {
     private ServiceController winService;
     private string serviceName;
-    private string hostName;
-    private string userName;
-    private ServiceType? serviceType;
 
     /// <summary>
     /// Default constructor. DO NOT REMOVE.
@@ -52,40 +49,23 @@ namespace MySql.Notifier
       {
         login = new AccountLogin();
       }
-
-      ServiceType = login.ServiceType;
-      Host = login.Host;
-      Port = login.Port.ToString();
-      User = login.User;
-      Password = login.Password;
+      WinServiceType = login.ServiceType;
+      Host = login.Host ?? ".";
       ServiceName = serviceName;
+      User = login.User ?? string.Empty;
+      Password = login.Password;
       NotifyOnStatusChange = notificationOnChange;
       UpdateTrayIconOnStatusChange = updatesTrayIcon;
     }
 
     [XmlAttribute(AttributeName = "ServiceType")]
-    public ServiceType ServiceType
-    {
-      get { return serviceType ?? ServiceType.Local; }
-      set { serviceType = value; }
-    }
+    public ServiceType WinServiceType { get; set; }
 
     [XmlAttribute(AttributeName = "Host")]
-    public string Host
-    {
-      get { return hostName ?? "localhost"; }
-      set { hostName = value; }
-    }
-
-    [XmlAttribute(AttributeName = "Port")]
-    public string Port { get; set; }
+    public string Host { get; set; }
 
     [XmlAttribute(AttributeName = "User")]
-    public string User
-    {
-      get { return String.IsNullOrEmpty(userName) ? Environment.UserName : userName; }
-      set { userName = value; }
-    }
+    public string User { get; set; }
 
     [XmlAttribute(AttributeName = "ServiceName")]
     public string ServiceName
@@ -124,12 +104,21 @@ namespace MySql.Notifier
     [XmlIgnore]
     public bool FoundInSystem { get; private set; }
 
-    private void SetService(string serviceName)
+    private void SetService(string _serviceName)
     {
-      FoundInSystem = Service.ExistsServiceInstance(serviceName);
-      if (!FoundInSystem) return;
+      serviceName = _serviceName;
+      if (WinServiceType == ServiceType.Local)
+      {
+        FoundInSystem = Service.ExistsServiceInstance(serviceName);
+        if (!FoundInSystem) return;
+        winService = new ServiceController(serviceName);
+      }
+      else
+      {
+        FoundInSystem = false;
+        winService = new ServiceController(serviceName, Host);
+      }
 
-      winService = new ServiceController(serviceName);
       try
       {
         DisplayName = winService.DisplayName;
@@ -352,12 +341,15 @@ namespace MySql.Notifier
       parameters.PipeName = "mysql";
 
       // get our host information
-      parameters.HostName = winService.MachineName == "." ? "localhost" : winService.MachineName;
+      parameters.HostName = (String.IsNullOrEmpty(Host) || Host == "." || Host == "localhost" || WinServiceType == ServiceType.Local) ? "localhost" : winService.MachineName;
       parameters.HostIPv4 = Utility.GetIPv4ForHostName(parameters.HostName);
 
       RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format(@"SYSTEM\CurrentControlSet\Services\{0}", winService.ServiceName));
+      if (key == null) return parameters;
+
       string imagepath = (string)key.GetValue("ImagePath", null);
       key.Close();
+
       if (imagepath == null) return parameters;
 
       string[] args = Utility.SplitArgs(imagepath);
