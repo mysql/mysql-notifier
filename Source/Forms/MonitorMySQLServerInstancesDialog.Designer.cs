@@ -66,8 +66,11 @@ namespace MySql.Notifier
       this.AddConnectionButton = new System.Windows.Forms.Button();
       this.DialogOKButton = new System.Windows.Forms.Button();
       this.FilterTimer = new System.Windows.Forms.Timer(this.components);
+      this.ConnectionsContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+      this.RefreshConnectionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.ContentAreaPanel.SuspendLayout();
       this.CommandAreaPanel.SuspendLayout();
+      this.ConnectionsContextMenuStrip.SuspendLayout();
       this.SuspendLayout();
       // 
       // ContentAreaPanel
@@ -149,6 +152,7 @@ namespace MySql.Notifier
             this.HostnameColumnHeader,
             this.PortColumnHeader,
             this.MonitoredColumnHeader});
+      this.WorkbenchConnectionsListView.ContextMenuStrip = this.ConnectionsContextMenuStrip;
       this.WorkbenchConnectionsListView.FullRowSelect = true;
       this.WorkbenchConnectionsListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
       this.WorkbenchConnectionsListView.HideSelection = false;
@@ -244,6 +248,21 @@ namespace MySql.Notifier
       this.FilterTimer.Interval = 500;
       this.FilterTimer.Tick += new System.EventHandler(this.FilterTimer_Tick);
       // 
+      // ConnectionsContextMenuStrip
+      // 
+      this.ConnectionsContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.RefreshConnectionsToolStripMenuItem});
+      this.ConnectionsContextMenuStrip.Name = "ConnectionsContextMenuStrip";
+      this.ConnectionsContextMenuStrip.Size = new System.Drawing.Size(184, 48);
+      // 
+      // RefreshConnectionsToolStripMenuItem
+      // 
+      this.RefreshConnectionsToolStripMenuItem.Image = global::MySql.Notifier.Properties.Resources.refresh;
+      this.RefreshConnectionsToolStripMenuItem.Name = "RefreshConnectionsToolStripMenuItem";
+      this.RefreshConnectionsToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+      this.RefreshConnectionsToolStripMenuItem.Text = "Refresh Connections";
+      this.RefreshConnectionsToolStripMenuItem.Click += new System.EventHandler(this.RefreshConnectionsToolStripMenuItem_Click);
+      // 
       // MonitorMySQLServerInstancesDialog
       // 
       this.AcceptButton = this.DialogOKButton;
@@ -263,6 +282,7 @@ namespace MySql.Notifier
       this.ContentAreaPanel.ResumeLayout(false);
       this.ContentAreaPanel.PerformLayout();
       this.CommandAreaPanel.ResumeLayout(false);
+      this.ConnectionsContextMenuStrip.ResumeLayout(false);
       this.ResumeLayout(false);
 
     }
@@ -286,5 +306,7 @@ namespace MySql.Notifier
     private System.Windows.Forms.CheckBox ShowMonitoredInstancesCheckBox;
     private System.Windows.Forms.TextBox FilterTextBox;
     private System.Windows.Forms.Timer FilterTimer;
+    private System.Windows.Forms.ContextMenuStrip ConnectionsContextMenuStrip;
+    private System.Windows.Forms.ToolStripMenuItem RefreshConnectionsToolStripMenuItem;
   }
 }

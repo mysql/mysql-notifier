@@ -82,13 +82,14 @@ namespace MySql.Notifier
       mySQLServicesList.ServiceListChanged += new MySQLServicesList.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
 
       // Create watcher for WB files
+      string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
       if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
       {
-        string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
+        string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", applicationDataFolderPath);
         if (File.Exists(file))
           StartWatcherForFile(file, connectionsFile_Changed);
 
-        file = String.Format(@"{0}\MySQL\Workbench\server_instances.xml", Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData));
+        file = String.Format(@"{0}\MySQL\Workbench\server_instances.xml", applicationDataFolderPath);
         if (File.Exists(file))
           StartWatcherForFile(file, serversFile_Changed);
       }
@@ -120,12 +121,27 @@ namespace MySql.Notifier
 
       SetNotifyIconToolTip();
 
-      StartWatcherForFile(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier\settings.config", settingsFile_Changed);
+      StartWatcherForFile(applicationDataFolderPath + @"\Oracle\MySQL Notifier\settings.config", settingsFile_Changed);
 
       WatchForServiceChanges();
       WatchForServiceDeletion();
 
       CustomizeInfoDialog();
+      InitializeHelperSettings();
+
+      //// Migrate Notifier connections to the MySQL Workbench connections file if possible.
+      MySqlWorkbenchConnectionsHelper.MigrateConnectionsFromConsumerApplicationToWorkbench();
+    }
+
+    /// <summary>
+    /// Initializes settings for the <see cref="MySqlWorkbenchConnectionsHelper"/> and <see cref="MySqlWorkbenchPasswordVault"/> classes.
+    /// </summary>
+    private void InitializeHelperSettings()
+    {
+      string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+      MySqlWorkbenchConnectionsHelper.ApplicationName = AssemblyInfo.AssemblyTitle;
+      MySqlWorkbenchConnectionsHelper.ApplicationConnectionsFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\connections.xml";
+      MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\user_data.dat";
     }
 
     /// <summary>

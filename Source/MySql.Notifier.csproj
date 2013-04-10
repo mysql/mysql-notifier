@@ -189,7 +189,6 @@
     <Compile Include="Forms\MessageDialog.Designer.cs">
       <DependentUpon>MessageDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Options.cs" />
     <Compile Include="ServiceStatus.cs" />
     <Compile Include="MySqlServicesList.cs" />
     <Compile Include="ServiceMenuGroup.cs" />
@@ -257,6 +256,7 @@
     <None Include="Resources\signal-red.gif" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\refresh.png" />
     <None Include="Resources\NotifierSplashWindow.png" />
     <None Include="Resources\about.png" />
     <Content Include="Lib\MySql.Data.dll" />

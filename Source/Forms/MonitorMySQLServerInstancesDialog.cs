@@ -20,6 +20,7 @@
 namespace MySql.Notifier
 {
   using System;
+  using System.Collections.Generic;
   using System.ComponentModel;
   using System.Drawing;
   using System.Linq;
@@ -62,9 +63,22 @@ namespace MySql.Notifier
       _lastServicesNameFilter = FilterTextBox.Text;
       _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
       SelectedWorkbenchConnection = null;
+      MySQLWorkbenchConnectionsList = null;
     }
 
     #region Properties
+
+    /// <summary>
+    /// Gets or sets the file path of the password vault file to be used.
+    /// </summary>
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public static string PasswordVaultFilePath
+    {
+      get
+      {
+        return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
+      }
+    }
 
     /// <summary>
     /// Gets a list of <see cref="MySQLService"/> objects monitored by the Notifier.
@@ -85,16 +99,10 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Gets or sets the file path of the password vault file to be used.
+    /// Gets a list of <see cref="MySqlWorkbenchConnection"/> objects from which to select a Workbench connection.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public static string PasswordVaultFilePath
-    {
-      get
-      {
-        return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
-      }
-    }
+    public List<MySqlWorkbenchConnection> MySQLWorkbenchConnectionsList { get; private set; }
 
     /// <summary>
     /// Gets the Workbench connection selected to be monitored.
@@ -113,13 +121,12 @@ namespace MySql.Notifier
     {
       using (var instanceConnectionDialog = new MySQLWorkbenchConnectionDialog(null))
       {
-        instanceConnectionDialog.FallbackPasswordVaultFile = PasswordVaultFilePath;
         instanceConnectionDialog.Icon = Properties.Resources.MySqlNotifierIcon;
         instanceConnectionDialog.ShowIcon = true;
         DialogResult dr = instanceConnectionDialog.ShowIfWorkbenchNotRunning();
         if (dr == DialogResult.OK)
         {
-          RefreshMySQLInstancesList(false);
+          RefreshMySQLInstancesList(true);
         }
       }
     }
@@ -221,6 +228,16 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Event delegate method fired when the <see cref="RefreshConnectionsToolStripMenuItem"/> is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void RefreshConnectionsToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      RefreshMySQLInstancesList(true);
+    }
+
+    /// <summary>
     /// Reloads the list of MySQL Server instances from the ones contained in the MySQL Workbench connections file.
     /// </summary>
     /// <param name="forceRefresh">Flag indicating if the refresh must be done although filters haven't changed.</param>
@@ -239,6 +256,17 @@ namespace MySql.Notifier
         _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
       }
 
+      if (forceRefresh)
+      {
+        if (MySQLWorkbenchConnectionsList != null)
+        {
+          MySQLWorkbenchConnectionsList.Clear();
+        }
+
+        MySQLWorkbenchConnectionsList = MySqlWorkbenchConnectionsHelper.GetConnections(forceRefresh);
+        _mySQLServicesList = null;
+      }
+
       if (filterChanges || forceRefresh)
       {
         RefreshMySQLInstancesList(_lastServicesNameFilter, _lastShowMonitoredServices);
@@ -252,6 +280,11 @@ namespace MySql.Notifier
     /// <param name="showNonMonitoredConnections">Flag indicating if Workbench connections already being monitored are listed too.</param>
     private void RefreshMySQLInstancesList(string connectionNameFilter, bool showNonMonitoredConnections)
     {
+      if (MySQLWorkbenchConnectionsList == null)
+      {
+        return;
+      }
+
       if (!string.IsNullOrEmpty(connectionNameFilter))
       {
         connectionNameFilter = connectionNameFilter.ToLowerInvariant();
@@ -260,7 +293,7 @@ namespace MySql.Notifier
       WorkbenchConnectionsListView.Items.Clear();
       WorkbenchConnectionsListView.BeginUpdate();
 
-      foreach (var connection in MySqlWorkbench.Connections.OrderBy(conn => conn.Name))
+      foreach (var connection in MySQLWorkbenchConnectionsList.OrderBy(conn => conn.Name))
       {
         if (!string.IsNullOrEmpty(connectionNameFilter) && !connection.Name.ToLowerInvariant().Contains(connectionNameFilter))
         {

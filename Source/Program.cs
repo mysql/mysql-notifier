@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -56,6 +56,10 @@ namespace MySql.Notifier
       if (args.Length > 0 && (args[0] == "--c" || args[0] == "--x"))
       {
         CheckForUpdates(args[0]);
+
+        //// Migrate Notifier connections to the MySQL Workbench connections file if they have not been migrated and need migrating.
+        MySqlWorkbenchConnectionsHelper.MigrateConnectionsFromConsumerApplicationToWorkbench();
+
         return;
       }
 
