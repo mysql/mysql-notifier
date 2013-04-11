@@ -18,6 +18,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -40,7 +41,7 @@ namespace MySql.Notifier
 
     private MySQLServicesList mySQLServicesList { get; set; }
 
-    private ManagementEventWatcher watcher;
+    private List<ManagementEventWatcher> watchers = new List<ManagementEventWatcher>();
 
     private ToolStripMenuItem launchWorkbenchUtilitiesMenuItem;
     private ToolStripMenuItem launchInstallerMenuItem;
@@ -103,7 +104,8 @@ namespace MySql.Notifier
         }
       }
 
-      UpdateListToRemoveDeletedServices();
+      //TODO: Restore this ▼ function
+      //UpdateListToRemoveDeletedServices();
 
       mySQLServicesList.LoadFromSettings();
 
@@ -159,15 +161,18 @@ namespace MySql.Notifier
 
     private void WatchForServiceChanges()
     {
-      var managementScope = new ManagementScope(@"root\cimv2");
-      managementScope.Connect();
-
       try
       {
-        WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
-        watcher = new ManagementEventWatcher(managementScope, query);
-        watcher.EventArrived += new EventArrivedEventHandler(ServiceChangedHandler);
-        watcher.Start();
+        foreach (ManagementScope managementScope in RemoteMachinesList.GetManagementScopes())
+        {
+          managementScope.Connect();
+          WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
+          ManagementEventWatcher watcher = new ManagementEventWatcher(managementScope, query);
+          watcher.EventArrived += new EventArrivedEventHandler(ServiceChangedHandler);
+          watchers.Add(watcher);
+        }
+        foreach (ManagementEventWatcher w in watchers)
+          w.Start();
       }
       catch (ManagementException ex)
       {
@@ -206,14 +211,18 @@ namespace MySql.Notifier
 
     private void WatchForServiceDeletion()
     {
-      var managementScope = new ManagementScope(@"root\cimv2");
-      managementScope.Connect();
       try
       {
-        WqlEventQuery query = new WqlEventQuery("__InstanceDeletionEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
-        watcher = new ManagementEventWatcher(managementScope, query);
-        watcher.EventArrived += new EventArrivedEventHandler(ServiceDeletedHandler);
-        watcher.Start();
+        foreach (ManagementScope managementScope in RemoteMachinesList.GetManagementScopes())
+        {
+          managementScope.Connect();
+          WqlEventQuery query = new WqlEventQuery("__InstanceDeletionEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
+          ManagementEventWatcher watcher = new ManagementEventWatcher(managementScope, query);
+          watcher.EventArrived += new EventArrivedEventHandler(ServiceDeletedHandler);
+          watchers.Add(watcher);
+        }
+        foreach (ManagementEventWatcher w in watchers)
+          w.Start();
       }
       catch (ManagementException ex)
       {
@@ -379,7 +388,8 @@ namespace MySql.Notifier
     private void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
     {
       foreach (MySQLService service in mySQLServicesList.Services)
-        service.MenuGroup.Update();
+        if (service.WinServiceType == ServiceType.Local)
+          service.MenuGroup.Update();
       UpdateStaticMenuItems();
     }
 
@@ -480,29 +490,15 @@ namespace MySql.Notifier
       }
       else
       {
-        if (service.WinServiceType == ServiceType.Local)
-        {
+        if (service.MenuGroup != null)
           service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
-          service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
-          if (changeType == ServiceListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
-          {
-            notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-            notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
-            notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.DisplayName);
-            notifyIcon.ShowBalloonTip(1500);
-          }
-        }
-        else
+        service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
+        if (changeType == ServiceListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
         {
-          service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
-          service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
-          if (changeType == ServiceListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
-          {
-            notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-            notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
-            notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.DisplayName);
-            notifyIcon.ShowBalloonTip(1500);
-          }
+          notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+          notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
+          notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.DisplayName);
+          notifyIcon.ShowBalloonTip(1500);
         }
       }
     }
@@ -542,7 +538,8 @@ namespace MySql.Notifier
     {
       notifyIcon.Visible = false;
 
-      watcher.Stop();
+      foreach (ManagementEventWatcher watcher in watchers)
+        watcher.Stop();
 
       if (this.Exit != null)
         Exit(this, e);
@@ -719,13 +716,19 @@ namespace MySql.Notifier
       UpdateStaticMenuItems();
     }
 
+    //TODO: Restore this ▼ function
     private void UpdateListToRemoveDeletedServices()
     {
       if (mySQLServicesList.Services == null) return;
 
-      if (mySQLServicesList.Services.Count(t => t.FoundInSystem) < mySQLServicesList.Services.Count)
+      // TODO: Why this comment bellow ▼ deletes the remote services up.
+      // /*old call >>  */if (mySQLServicesList.Services.Count(t => t.FoundInSystem) < mySQLServicesList.Services.Count)
+      /*new call >> */
+      if (mySQLServicesList.Services.Count(t => (t.Problem == ServiceProblem.None)) < mySQLServicesList.Services.Count)
       {
-        mySQLServicesList.Services = mySQLServicesList.Services.Where(t => t.FoundInSystem).ToList();
+        // /* old call >> */mySQLServicesList.Services = mySQLServicesList.Services.Where(t => t.FoundInSystem).ToList();
+        /*new call >> */
+        Settings.Default.ServiceList = mySQLServicesList.Services.Where(t => (t.Problem == ServiceProblem.None)).ToList();
         Settings.Default.Save();
       }
     }

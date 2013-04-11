@@ -20,14 +20,9 @@
 namespace MySql.Notifier
 {
   using System;
-  using MySql.Data.MySqlClient;
-  using MySql.Notifier;
-  using System.Text.RegularExpressions;
   using System.Management;
   using System.Runtime.InteropServices;
-  using MySQL.Utility;
-  using System.Collections.Generic;
-  using System.ServiceProcess;
+  using System.Text.RegularExpressions;
   using System.Windows.Forms;
 
   public partial class WindowsConnectionDialog : LoginGathererForm
@@ -57,12 +52,12 @@ namespace MySql.Notifier
       {
         if (sender.Equals(this.TestConnectionButton))
         {
-          MessageDialog dialog = new MessageDialog("Connection Successful", "You're all set to monitor services in this remote machine.", false);
-          dialog.ShowDialog();          
+          MessageDialog dialog = new MessageDialog("Connection Successful", "You are able to monitor services in this remote machine.", false);
+          dialog.ShowDialog();
         }
         else
         {
-          DialogOKButton.DialogResult = this.DialogResult = DialogResult.OK;          
+          DialogOKButton.DialogResult = this.DialogResult = DialogResult.OK;
         }
       }
       Textbox_TextChanged(sender, e);
@@ -78,13 +73,12 @@ namespace MySql.Notifier
     {
       //// Validate all textboxes are filled properly and the Host name is either a valid IP address or a machine name
       return (!String.IsNullOrEmpty(HostTextbox.Text) && !String.IsNullOrEmpty(UserTextBox.Text) && !String.IsNullOrEmpty(PasswordTextbox.Text) &&
-        (Regex.IsMatch(HostTextbox.Text, @"^[\w\.\-_]{1,64}$") || Regex.IsMatch(HostTextbox.Text, @"^([01]?[\d][\d]?|2[0-4][\d]|25[0-5])(\.([01]?[\d][\d]?|2[0-4][\d]|25[0-5])){3}$")));
+        Regex.IsMatch(UserTextBox.Text, @"^[\w\.\-_]{1,64}$") && (Regex.IsMatch(HostTextbox.Text, @"^[\w\.\-_]{1,64}$") || Regex.IsMatch(HostTextbox.Text, @"^([01]?[\d][\d]?|2[0-4][\d]|25[0-5])(\.([01]?[\d][\d]?|2[0-4][\d]|25[0-5])){3}$")));
     }
 
     private bool ValidateConnectionAndPermissions()
     {
-     
-     MessageDialog dialog = null;
+      MessageDialog dialog = null;
       bool result = false;
       try
       {
@@ -131,14 +125,7 @@ namespace MySql.Notifier
         }
         else
         {
-        if(Regex.IsMatch(HostTextbox.Text, @"^([01]?[\d][\d]?|2[0-4][\d]|25[0-5])(\.([01]?[\d][\d]?|2[0-4][\d]|25[0-5])){3}$"))
-         {
-           Login = new AccountLogin(HostTextbox.Text, 80, UserTextBox.Text, PasswordTextbox.Text);
-         }
-         else
-         {
-           Login = new AccountLogin(HostTextbox.Text, UserTextBox.Text, PasswordTextbox.Text);
-         }
+          Login = new AccountLogin(HostTextbox.Text, UserTextBox.Text, PasswordTextbox.Text);
         }
       }
       return result;

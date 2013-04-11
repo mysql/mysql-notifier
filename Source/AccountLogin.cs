@@ -33,8 +33,6 @@ namespace MySql.Notifier
 
     public string Host { get; set; }
 
-    public int? Port { get; set; }
-
     public string User { get; set; }
 
     public string Password
@@ -66,27 +64,17 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// This constructor is designed for remote Non-Windows accounts.
-    /// </summary>
-    /// <param name="Host">Service's Host name or IP address</param>
-    /// <param name="Port">Remote MySQL server port</param>
-    /// <param name="UserName">User account from remote server</param>
-    /// <param name="Password">Account's password</param>
-    public AccountLogin(string HostIP, int Port, string UserName, string Password)
-    {
-      this.ServiceType = ServiceType.Remote;
-      this.Host = HostIP;
-      this.Port = Port;
-      this.User = UserName;
-      this.Password = Password;
-    }
-
-    /// <summary>
     /// Returns the password in plain text
     /// </summary>
-    public string DecryptedPassword ()
+    public string DecryptedPassword()
     {
       return String.IsNullOrEmpty(password) ? String.Empty : MySQLSecurity.DecryptPassword(password);
     }
+  }
+
+  public enum ServiceType
+  {
+    Local,
+    Remote
   }
 }

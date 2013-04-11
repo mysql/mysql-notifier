@@ -82,7 +82,7 @@ namespace MySql.Notifier
       return Convert.ToBase64String(encryptedPassword);
     }
 
-    //TODO See if Secure string should/could be used instead of plain string for the password.
+    //TODO: See if Secure string should/could be used instead of plain string for the password.
     private static IntPtr SecureStringToBSTR(SecureString ss)
     {
       IntPtr ptr = new IntPtr();

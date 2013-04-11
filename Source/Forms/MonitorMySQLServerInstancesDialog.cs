@@ -46,7 +46,7 @@ namespace MySql.Notifier
     private bool _lastShowMonitoredServices;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     private MySQLServicesList _mySQLServicesList;
 

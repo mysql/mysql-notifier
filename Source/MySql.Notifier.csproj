@@ -180,6 +180,8 @@
     <Compile Include="Forms\WindowsConnectionDialog.designer.cs">
       <DependentUpon>WindowsConnectionDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="RemoteMachine.cs" />
+    <Compile Include="RemoteMachinesList.cs" />
     <Compile Include="MySQLSecurity.cs" />
     <Compile Include="AccountLogin.cs" />
     <Compile Include="NotifierSettings.cs" />
@@ -190,7 +192,7 @@
       <DependentUpon>MessageDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="ServiceStatus.cs" />
-    <Compile Include="MySqlServicesList.cs" />
+    <Compile Include="MySQLServicesList.cs" />
     <Compile Include="ServiceMenuGroup.cs" />
     <Compile Include="MySQLService.cs" />
     <Compile Include="Program.cs" />
@@ -256,7 +258,6 @@
     <None Include="Resources\signal-red.gif" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\refresh.png" />
     <None Include="Resources\NotifierSplashWindow.png" />
     <None Include="Resources\about.png" />
     <Content Include="Lib\MySql.Data.dll" />

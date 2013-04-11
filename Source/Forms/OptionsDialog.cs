@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -26,7 +26,7 @@ namespace MySql.Notifier
 {
   public partial class OptionsDialog : BaseForm
   {
-    ServiceType serviceType = ServiceType.Local;
+    private ServiceType serviceType = ServiceType.Local;
 
     internal OptionsDialog()
     {
@@ -40,9 +40,8 @@ namespace MySql.Notifier
       chkEnabledAutoAddServices.Checked = Settings.Default.AutoAddServicesToMonitor;
       autoAddRegex.Text = Settings.Default.AutoAddPattern;
       chkUseColorfulIcons.Checked = Settings.Default.UseColorfulStatusIcons;
-     
 
-      //// Disable checks to monitor when service is hosted at non-windows remote machine. 
+      //// Disable checks to monitor when service is hosted at non-windows remote machine.
     }
 
     private void btnOK_Click(object sender, EventArgs e)

@@ -23,10 +23,10 @@ namespace MySql.Notifier
   using System.Collections;
   using System.Collections.Generic;
   using System.Linq;
+  using System.Management;
   using System.Windows.Forms;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
-  using System.Management;
 
   public partial class AddServiceDialog : BaseForm
   {
@@ -75,7 +75,6 @@ namespace MySql.Notifier
       lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);
     }
 
-    //public List<string> ServicesToAdd { get; private set; }
     public List<MySQLService> ServicesToAdd { get; set; }
 
     private void RefreshList()
@@ -85,7 +84,8 @@ namespace MySql.Notifier
         try
         {
           string currentFilter = filter.Checked ? Settings.Default.AutoAddPattern.Trim() : null;
-          //TODO: Verify filtert persistance
+
+          //TODO: Restore filter persistance here ▼
           //if (currentFilter == lastFilter && txtFilter.Text == lastTextFilter) return;
 
           lstServices.BeginUpdate();
@@ -121,8 +121,9 @@ namespace MySql.Notifier
       }
       else
       {
-        //TODO: Verify filtert persistance
         string currentFilter = filter.Checked ? Settings.Default.AutoAddPattern.Trim() : null;
+
+        //TODO: Restore filtert persistance ▼
         //if (currentFilter == lastFilter && txtFilter.Text == lastTextFilter) return;
 
         lstServices.BeginUpdate();
@@ -130,7 +131,6 @@ namespace MySql.Notifier
         lastTextFilter = txtFilter.Text;
 
         lstServices.Items.Clear();
-        //var services = Service.GetInstances(lastFilter, Login.Host);
         ManagementNamedValueCollection context = new ManagementNamedValueCollection();
         ConnectionOptions co = new ConnectionOptions();
         co.Username = Login.User;
@@ -164,7 +164,6 @@ namespace MySql.Notifier
     private void btnOK_Click(object sender, EventArgs e)
     {
       Cursor.Current = Cursors.WaitCursor;
-      //TODO: VALIDATE THIS WORKS
       ServicesToAdd = new List<MySQLService>();
       foreach (ListViewItem lvi in lstServices.SelectedItems)
       {
@@ -220,29 +219,16 @@ namespace MySql.Notifier
       serviceType = (ServiceType)server.SelectedIndex;
       DialogResult dr = DialogResult.None;
 
-      switch (serviceType)
+      if (serviceType == ServiceType.Remote)
       {
-        // TODO: Verify this case is required.
-        //case ServiceType.Local:
-        //  //// Reload list?
-        //  return;
-
-        case ServiceType.Remote:
-          using (var windowsConnectionDialog = new WindowsConnectionDialog(Login))
-          {
-            dr = windowsConnectionDialog.ShowDialog();
-            Login = windowsConnectionDialog.Login;
-          }
-          break;
+        using (var windowsConnectionDialog = new WindowsConnectionDialog(Login))
+        {
+          dr = windowsConnectionDialog.ShowDialog();
+          Login = windowsConnectionDialog.Login;
+        }
       }
 
       RefreshList();
     }
-  }
-
-  public enum ServiceType
-  {
-    Local,
-    Remote
   }
 }
