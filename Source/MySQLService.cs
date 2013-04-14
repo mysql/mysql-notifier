@@ -217,7 +217,7 @@ namespace MySql.Notifier
 
       if (!IsRealMySQLService) return;
 
-      var filteredConnections = MySqlWorkbench.Connections.Where(t => !String.IsNullOrEmpty(t.Name) && t.Port == parameters.Port);
+      var filteredConnections = MySqlWorkbench.WorkbenchConnections.Where(t => !String.IsNullOrEmpty(t.Name) && t.Port == parameters.Port);
 
       if (filteredConnections != null)
       {

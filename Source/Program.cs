@@ -58,7 +58,8 @@ namespace MySql.Notifier
         CheckForUpdates(args[0]);
 
         //// Migrate Notifier connections to the MySQL Workbench connections file if they have not been migrated and need migrating.
-        MySqlWorkbenchConnectionsHelper.MigrateConnectionsFromConsumerApplicationToWorkbench();
+        Notifier.InitializeMySQLWorkbenchStaticSettings();
+        MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
 
         return;
       }

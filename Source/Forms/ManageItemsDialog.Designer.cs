@@ -60,7 +60,7 @@ namespace MySql.Notifier
       this.btnDelete = new System.Windows.Forms.Button();
       this.btnAdd = new System.Windows.Forms.Button();
       this.lblHiperTitle = new System.Windows.Forms.Label();
-      this.lstMonitoredServices = new System.Windows.Forms.ListView();
+      this.MonitoredItemsListView = new System.Windows.Forms.ListView();
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -104,7 +104,7 @@ namespace MySql.Notifier
       this.panel1.Controls.Add(this.btnDelete);
       this.panel1.Controls.Add(this.btnAdd);
       this.panel1.Controls.Add(this.lblHiperTitle);
-      this.panel1.Controls.Add(this.lstMonitoredServices);
+      this.panel1.Controls.Add(this.MonitoredItemsListView);
       this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panel1.Location = new System.Drawing.Point(0, 0);
       this.panel1.Name = "panel1";
@@ -195,22 +195,23 @@ namespace MySql.Notifier
       this.lblHiperTitle.TabIndex = 20;
       this.lblHiperTitle.Text = "Manage Monitored Items";
       // 
-      // lstMonitoredServices
+      // MonitoredItemsListView
       // 
-      this.lstMonitoredServices.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+      this.MonitoredItemsListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader3});
-      this.lstMonitoredServices.FullRowSelect = true;
-      this.lstMonitoredServices.HideSelection = false;
-      this.lstMonitoredServices.Location = new System.Drawing.Point(33, 122);
-      this.lstMonitoredServices.MultiSelect = false;
-      this.lstMonitoredServices.Name = "lstMonitoredServices";
-      this.lstMonitoredServices.Size = new System.Drawing.Size(447, 175);
-      this.lstMonitoredServices.TabIndex = 19;
-      this.lstMonitoredServices.UseCompatibleStateImageBehavior = false;
-      this.lstMonitoredServices.View = System.Windows.Forms.View.Details;
-      this.lstMonitoredServices.SelectedIndexChanged += new System.EventHandler(this.lstMonitoredServices_SelectedIndexChanged);
+      this.MonitoredItemsListView.FullRowSelect = true;
+      this.MonitoredItemsListView.HideSelection = false;
+      this.MonitoredItemsListView.Location = new System.Drawing.Point(33, 122);
+      this.MonitoredItemsListView.MultiSelect = false;
+      this.MonitoredItemsListView.Name = "MonitoredItemsListView";
+      this.MonitoredItemsListView.Size = new System.Drawing.Size(447, 175);
+      this.MonitoredItemsListView.Sorting = System.Windows.Forms.SortOrder.Ascending;
+      this.MonitoredItemsListView.TabIndex = 19;
+      this.MonitoredItemsListView.UseCompatibleStateImageBehavior = false;
+      this.MonitoredItemsListView.View = System.Windows.Forms.View.Details;
+      this.MonitoredItemsListView.SelectedIndexChanged += new System.EventHandler(this.MonitoredItemsListView_SelectedIndexChanged);
       // 
       // columnHeader1
       // 
@@ -285,7 +286,7 @@ namespace MySql.Notifier
     private System.Windows.Forms.CheckBox notifyOnStatusChange;
     private System.Windows.Forms.Button btnDelete;
     private System.Windows.Forms.Button btnAdd;
-    private System.Windows.Forms.ListView lstMonitoredServices;
+    private System.Windows.Forms.ListView MonitoredItemsListView;
     private System.Windows.Forms.ColumnHeader columnHeader1;
     private System.Windows.Forms.ColumnHeader columnHeader3;
     private System.Windows.Forms.ContextMenuStrip AddButtonContextMenuStrip;

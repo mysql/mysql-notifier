@@ -40,6 +40,7 @@ namespace MySql.Notifier
     private NotifyIcon notifyIcon;
 
     private MySQLServicesList mySQLServicesList { get; set; }
+    private MySQLInstancesList mySQLInstancesList { get; set; }
 
     private List<ManagementEventWatcher> watchers = new List<ManagementEventWatcher>();
 
@@ -63,6 +64,10 @@ namespace MySql.Notifier
 
     public Notifier()
     {
+      //// Static initializations.
+      CustomizeInfoDialog();
+      InitializeMySQLWorkbenchStaticSettings();
+
       components = new System.ComponentModel.Container();
       notifyIcon = new NotifyIcon(components)
                     {
@@ -77,12 +82,16 @@ namespace MySql.Notifier
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleTextServiceStatus;
 
-      // Setup our service list
+      //// Setup our service list
       mySQLServicesList = new MySQLServicesList();
       mySQLServicesList.ServiceStatusChanged += mySQLServicesList_ServiceStatusChanged;
       mySQLServicesList.ServiceListChanged += new MySQLServicesList.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
 
-      // Create watcher for WB files
+      //// Setup instances list
+      mySQLInstancesList = new MySQLInstancesList();
+      //// TODO: Implement events for instance status changes and instances changes.
+
+      //// Create watcher for WB files
       string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
       if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
       {
@@ -128,21 +137,18 @@ namespace MySql.Notifier
       WatchForServiceChanges();
       WatchForServiceDeletion();
 
-      CustomizeInfoDialog();
-      InitializeHelperSettings();
-
       //// Migrate Notifier connections to the MySQL Workbench connections file if possible.
-      MySqlWorkbenchConnectionsHelper.MigrateConnectionsFromConsumerApplicationToWorkbench();
+      MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
     }
 
     /// <summary>
     /// Initializes settings for the <see cref="MySqlWorkbenchConnectionsHelper"/> and <see cref="MySqlWorkbenchPasswordVault"/> classes.
     /// </summary>
-    private void InitializeHelperSettings()
+    public static void InitializeMySQLWorkbenchStaticSettings()
     {
       string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-      MySqlWorkbenchConnectionsHelper.ApplicationName = AssemblyInfo.AssemblyTitle;
-      MySqlWorkbenchConnectionsHelper.ApplicationConnectionsFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\connections.xml";
+      MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
+      MySqlWorkbench.ExternalApplicationConnectionsFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\connections.xml";
       MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\user_data.dat";
     }
 
@@ -353,7 +359,6 @@ namespace MySql.Notifier
     private void connectionsFile_Changed(object sender, FileSystemEventArgs e)
     {
       MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
-      MySqlWorkbench.Connections = new MySqlWorkbenchConnectionCollection();
       MySqlWorkbench.LoadData();
 
       foreach (var item in mySQLServicesList.Services)
@@ -372,7 +377,6 @@ namespace MySql.Notifier
     private void serversFile_Changed(object sender, FileSystemEventArgs e)
     {
       MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
-      MySqlWorkbench.Connections = new MySqlWorkbenchConnectionCollection();
       MySqlWorkbench.LoadData();
     }
 
@@ -566,7 +570,7 @@ namespace MySql.Notifier
 
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
     {
-      ManageItemsDialog dialog = new ManageItemsDialog(mySQLServicesList);
+      ManageItemsDialog dialog = new ManageItemsDialog(mySQLServicesList, mySQLInstancesList);
       dialog.ShowDialog();
 
       //update icon

@@ -45,25 +45,44 @@ namespace MySql.Notifier
     /// </summary>
     private bool _lastShowMonitoredServices;
 
-    /// <summary>
-    ///
-    /// </summary>
-    private MySQLServicesList _mySQLServicesList;
-
     #endregion Fields
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MonitorMySQLServerInstancesDialog"/> class.
     /// </summary>
-    public MonitorMySQLServerInstancesDialog()
+    public MonitorMySQLServerInstancesDialog() : this(null, null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MonitorMySQLServerInstancesDialog"/> class.
+    /// </summary>
+    /// <param name="servicesList">List of <see cref="MySQLService"/> objects monitored by the Notifier.</param>
+    /// <param name="instancesList">List of names of MySQL instance monitored by the Notifier.</param>
+    public MonitorMySQLServerInstancesDialog(MySQLServicesList servicesList, MySQLInstancesList instancesList)
     {
       InitializeComponent();
 
-      _mySQLServicesList = null;
       _lastServicesNameFilter = FilterTextBox.Text;
       _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
-      SelectedWorkbenchConnection = null;
-      MySQLWorkbenchConnectionsList = null;
+      SelectedWorkbenchConnectionsList = new List<MySqlWorkbenchConnection>();
+      if (servicesList == null)
+      {
+        MySQLServicesList = new MySQLServicesList();
+      }
+      else
+      {
+        MySQLServicesList = servicesList;
+      }
+
+      if (instancesList == null)
+      {
+        MySQLInstancesList = new MySQLInstancesList();
+      }
+      else
+      {
+        MySQLInstancesList = instancesList;
+      }
     }
 
     #region Properties
@@ -81,34 +100,22 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Gets a list of names of MySQL instance monitored by the Notifier.
+    /// </summary>
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public MySQLInstancesList MySQLInstancesList { get; private set; }
+
+    /// <summary>
     /// Gets a list of <see cref="MySQLService"/> objects monitored by the Notifier.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public MySQLServicesList MySQLServicesList
-    {
-      get
-      {
-        if (_mySQLServicesList == null)
-        {
-          _mySQLServicesList = new MySQLServicesList();
-          _mySQLServicesList.LoadFromSettings();
-        }
-
-        return _mySQLServicesList;
-      }
-    }
-
-    /// <summary>
-    /// Gets a list of <see cref="MySqlWorkbenchConnection"/> objects from which to select a Workbench connection.
-    /// </summary>
-    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public List<MySqlWorkbenchConnection> MySQLWorkbenchConnectionsList { get; private set; }
+    public MySQLServicesList MySQLServicesList { get; private set; }
 
     /// <summary>
     /// Gets the Workbench connection selected to be monitored.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public MySqlWorkbenchConnection SelectedWorkbenchConnection { get; private set; }
+    public List<MySqlWorkbenchConnection> SelectedWorkbenchConnectionsList { get; private set; }
 
     #endregion Properties
 
@@ -162,7 +169,10 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void DialogOKButton_Click(object sender, EventArgs e)
     {
-      SelectedWorkbenchConnection = WorkbenchConnectionsListView.SelectedItems[0].Tag as MySqlWorkbenchConnection;
+      foreach (ListViewItem selectedItem in WorkbenchConnectionsListView.SelectedItems)
+      {
+        SelectedWorkbenchConnectionsList.Add(selectedItem.Tag as MySqlWorkbenchConnection);
+      }
     }
 
     /// <summary>
@@ -203,18 +213,23 @@ namespace MySql.Notifier
     /// <returns><see cref="true"/> if the connection is already being monitored, <see cref="false"/> otherwise.</returns>
     private bool IsWorkbenchConnectionAlreadyMonitored(MySqlWorkbenchConnection connection)
     {
-      bool isMonitored = false;
-
       foreach (var mySqlService in MySQLServicesList.Services)
       {
-        isMonitored = mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Name == connection.Name);
-        if (isMonitored)
+        if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Name == connection.Name))
         {
-          break;
+          return true;
         }
       }
 
-      return isMonitored;
+      foreach (var mySqlInstance in MySQLInstancesList)
+      {
+        if (mySqlInstance.Name == connection.Name)
+        {
+          return true;
+        }
+      }
+
+      return false;
     }
 
     /// <summary>
@@ -258,13 +273,7 @@ namespace MySql.Notifier
 
       if (forceRefresh)
       {
-        if (MySQLWorkbenchConnectionsList != null)
-        {
-          MySQLWorkbenchConnectionsList.Clear();
-        }
-
-        MySQLWorkbenchConnectionsList = MySqlWorkbenchConnectionsHelper.GetConnections(forceRefresh);
-        _mySQLServicesList = null;
+        MySqlWorkbench.Connections.Load();
       }
 
       if (filterChanges || forceRefresh)
@@ -280,7 +289,7 @@ namespace MySql.Notifier
     /// <param name="showNonMonitoredConnections">Flag indicating if Workbench connections already being monitored are listed too.</param>
     private void RefreshMySQLInstancesList(string connectionNameFilter, bool showNonMonitoredConnections)
     {
-      if (MySQLWorkbenchConnectionsList == null)
+      if (MySqlWorkbench.Connections.Count == 0)
       {
         return;
       }
@@ -293,7 +302,7 @@ namespace MySql.Notifier
       WorkbenchConnectionsListView.Items.Clear();
       WorkbenchConnectionsListView.BeginUpdate();
 
-      foreach (var connection in MySQLWorkbenchConnectionsList.OrderBy(conn => conn.Name))
+      foreach (var connection in MySqlWorkbench.Connections.OrderBy(conn => conn.Name))
       {
         if (!string.IsNullOrEmpty(connectionNameFilter) && !connection.Name.ToLowerInvariant().Contains(connectionNameFilter))
         {
