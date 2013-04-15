@@ -64,7 +64,7 @@ namespace MySql.Notifier
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.lblSubTitle2 = new System.Windows.Forms.Label();
       this.lblText3 = new System.Windows.Forms.Label();
-      this.server = new System.Windows.Forms.ComboBox();
+      this.serverType = new System.Windows.Forms.ComboBox();
       this.timerForFiltering = new System.Windows.Forms.Timer(this.components);
       this.panel2.SuspendLayout();
       this.panel1.SuspendLayout();
@@ -118,7 +118,7 @@ namespace MySql.Notifier
       this.panel1.Controls.Add(this.lstServices);
       this.panel1.Controls.Add(this.lblSubTitle2);
       this.panel1.Controls.Add(this.lblText3);
-      this.panel1.Controls.Add(this.server);
+      this.panel1.Controls.Add(this.serverType);
       this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panel1.Location = new System.Drawing.Point(0, 0);
       this.panel1.Name = "panel1";
@@ -225,18 +225,18 @@ namespace MySql.Notifier
       this.lblText3.TabIndex = 47;
       this.lblText3.Text = "Computer:";
       // 
-      // server
+      // serverType
       // 
-      this.server.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.server.FormattingEnabled = true;
-      this.server.Items.AddRange(new object[] {
+      this.serverType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.serverType.FormattingEnabled = true;
+      this.serverType.Items.AddRange(new object[] {
             "Local",
             "Remote"});
-      this.server.Location = new System.Drawing.Point(152, 78);
-      this.server.Name = "server";
-      this.server.Size = new System.Drawing.Size(259, 21);
-      this.server.TabIndex = 46;
-      this.server.SelectedIndexChanged += new System.EventHandler(this.server_SelectedIndexChanged);
+      this.serverType.Location = new System.Drawing.Point(152, 78);
+      this.serverType.Name = "serverType";
+      this.serverType.Size = new System.Drawing.Size(259, 21);
+      this.serverType.TabIndex = 46;
+      this.serverType.SelectedIndexChanged += new System.EventHandler(this.server_SelectedIndexChanged);
       // 
       // timerForFiltering
       // 
@@ -285,7 +285,7 @@ namespace MySql.Notifier
     private System.Windows.Forms.ColumnHeader columnHeader3;
     private System.Windows.Forms.Label lblSubTitle2;
     private System.Windows.Forms.Label lblText3;
-    private System.Windows.Forms.ComboBox server;
+    private System.Windows.Forms.ComboBox serverType;
     private System.Windows.Forms.Timer timerForFiltering;
   }
 }

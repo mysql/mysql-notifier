@@ -25,6 +25,7 @@ using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
+using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Win32;
 using MySql.Notifier.Properties;
@@ -61,6 +62,8 @@ namespace MySql.Notifier
       NotifyOnStatusChange = notificationOnChange;
       UpdateTrayIconOnStatusChange = updatesTrayIcon;
       ServiceName = serviceName;
+      //TODO: Check this implementation is correct at destination ▼
+      //LOL = new Class1();
     }
 
     [XmlAttribute(AttributeName = "ServiceType")]
@@ -87,6 +90,9 @@ namespace MySql.Notifier
 
     [XmlAttribute(AttributeName = "NotifyOnStatusChange")]
     public bool NotifyOnStatusChange { get; set; }
+
+    //[XmlElement(ElementName = "Class1", Type = typeof(Class1))]
+    //public Class1 LOL { get; set; }
 
     [XmlIgnore]
     public ServiceProblem Problem

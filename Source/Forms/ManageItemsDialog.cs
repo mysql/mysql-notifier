@@ -23,22 +23,25 @@ namespace MySql.Notifier
   using System.Drawing;
   using System.Linq;
   using System.Windows.Forms;
+  using System.Collections.Generic;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
   using MySQL.Utility.Forms;
 
-  public partial class ManageItemsDialog : BaseForm
+  public partial class ManageItemsDialog : MachineAwareForm
   {
+    private MachinesList machinesList;
     public static string addServiceName;
     private object selectedItem;
     private MySQLServicesList serviceList;
     private MySQLInstancesList _instancesList;
 
-    public ManageItemsDialog(MySQLServicesList serviceList, MySQLInstancesList instancesList)
+    public ManageItemsDialog(MySQLServicesList serviceList, MySQLInstancesList instancesList, MachinesList machineList)
     {
-      _instancesList = instancesList;
-      this.serviceList = serviceList;
       InitializeComponent();
+      _instancesList = instancesList;
+      this.machinesList = machineList;
+      this.serviceList = serviceList;
       RefreshList();
     }
 
@@ -135,7 +138,7 @@ namespace MySql.Notifier
     {
       using (var monitorInstancesDialog = new MonitorMySQLServerInstancesDialog(serviceList, _instancesList))
       {
-        if(monitorInstancesDialog.ShowDialog() == DialogResult.OK)
+        if (monitorInstancesDialog.ShowDialog() == DialogResult.OK)
         {
           foreach (var workbenchConnection in monitorInstancesDialog.SelectedWorkbenchConnectionsList)
           {
@@ -173,6 +176,29 @@ namespace MySql.Notifier
         selectedInstance.MonitorAndNotifyStatus = notifyOnStatusChange.Checked;
       }
     }
+
+    //TODO Verify Changes are not broken ▼
+    //private void RefreshList()
+    //{
+    //  lstMonitoredServices.Items.Clear();
+    //  foreach (MySQLService service in serviceList.Services)
+    //  {
+    //    ListViewItem itemList = new ListViewItem(service.DisplayName, 0);
+    //    itemList.Tag = service;
+    //    itemList.SubItems.Add(service.WinServiceType.ToString());
+    //    itemList.SubItems.Add(service.Status.ToString());
+    //    lstMonitoredServices.Items.Add(itemList);
+    //  }
+    //  if (lstMonitoredServices.Items.Count > 0)
+    //    lstMonitoredServices.Items[0].Selected = true;
+    //  else
+    //  {
+    //    btnDelete.Enabled = false;
+    //    chkUpdateTrayIcon.Enabled = false;
+    //    notifyOnStatusChange.Enabled = false;
+    //  }
+    //  Cursor.Current = Cursors.Arrow;
+    //}
 
     private void RefreshList()
     {
@@ -220,7 +246,7 @@ namespace MySql.Notifier
 
     private void serviceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-      using (AddServiceDialog dialog = new AddServiceDialog())
+      using (AddServiceDialog dialog = new AddServiceDialog(RemoteMachine))
       {
         if (dialog.ShowDialog() == DialogResult.OK)
         {
@@ -232,9 +258,12 @@ namespace MySql.Notifier
             }
             else
             {
-              serviceList.AddService(service, ServiceListChangeType.Add);
+              serviceList.AddService(service, ChangeListChangeType.Add);
             }
           }
+          RemoteMachine = dialog.RemoteMachine;
+          if (RemoteMachine != null)
+            machinesList.ChangeMachine(dialog.RemoteMachine, ChangeListChangeType.Add);
 
           if (dialog.ServicesToAdd.Count > 0)
           {

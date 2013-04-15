@@ -84,8 +84,8 @@ namespace MySql.Notifier
     }
   }
 
-  public class LoginGathererForm : BaseForm
+  public class MachineAwareForm : BaseForm
   {
-    public AccountLogin Login { get; set; }
+    public Machine RemoteMachine { get; set; }
   }
 }

@@ -180,8 +180,8 @@
     <Compile Include="Forms\WindowsConnectionDialog.designer.cs">
       <DependentUpon>WindowsConnectionDialog.cs</DependentUpon>
     </Compile>
-	<Compile Include="RemoteMachine.cs" />
-    <Compile Include="RemoteMachinesList.cs" />
+    <Compile Include="Machine.cs" />
+    <Compile Include="MachinesList.cs" />
     <Compile Include="MySQLInstance.cs" />
     <Compile Include="MySQLInstancesList.cs" />
     <Compile Include="MySQLSecurity.cs" />
@@ -287,9 +287,6 @@
     <None Include="Resources\MySQLNotifier_Stopped_Strong.png" />
     <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
     <None Include="Resources\signal-yellow.gif" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

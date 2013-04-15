@@ -23,6 +23,9 @@
     <Setting Name="AutoCheckForUpdates" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="MachineList" Provider="MySql.Notifier.NotifierSettings" Type="System.Collections.Generic.List&lt;Machine&gt;" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="ServiceList" Provider="MySql.Notifier.NotifierSettings" Type="System.Collections.Generic.List&lt;MySQLService&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>

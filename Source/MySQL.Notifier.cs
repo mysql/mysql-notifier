@@ -41,6 +41,7 @@ namespace MySql.Notifier
 
     private MySQLServicesList mySQLServicesList { get; set; }
     private MySQLInstancesList mySQLInstancesList { get; set; }
+    private MachinesList machinesList { get; set; }
 
     private List<ManagementEventWatcher> watchers = new List<ManagementEventWatcher>();
 
@@ -87,9 +88,13 @@ namespace MySql.Notifier
       mySQLServicesList.ServiceStatusChanged += mySQLServicesList_ServiceStatusChanged;
       mySQLServicesList.ServiceListChanged += new MySQLServicesList.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
 
+      //TODO: Complete ▼ implement events for instance status changes and instances changes.
+	  machinesList = new MachinesList();      
+      machinesList.MachineListChanged += new MachinesList.MachineListChangedHandler(machineList_machineChanged);
+
       //// Setup instances list
       mySQLInstancesList = new MySQLInstancesList();
-      //// TODO: Implement events for instance status changes and instances changes.
+      // TODO: Implement events for instance status changes and instances changes.      	  
 
       //// Create watcher for WB files
       string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -116,7 +121,8 @@ namespace MySql.Notifier
       //TODO: Restore this ▼ function
       //UpdateListToRemoveDeletedServices();
 
-      mySQLServicesList.LoadFromSettings();
+      machinesList.LoadFromSettings();
+      mySQLServicesList.LoadFromSettings();      
 
       previousTotalServicesNumber = mySQLServicesList.Services.Count;
 
@@ -169,7 +175,8 @@ namespace MySql.Notifier
     {
       try
       {
-        foreach (ManagementScope managementScope in RemoteMachinesList.GetManagementScopes())
+        List<ManagementScope> ms = machinesList.GetManagementScopes();
+        foreach (ManagementScope managementScope in ms)
         {
           managementScope.Connect();
           WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
@@ -219,7 +226,8 @@ namespace MySql.Notifier
     {
       try
       {
-        foreach (ManagementScope managementScope in RemoteMachinesList.GetManagementScopes())
+        List<ManagementScope> ms = machinesList.GetManagementScopes();
+        foreach (ManagementScope managementScope in ms)
         {
           managementScope.Connect();
           WqlEventQuery query = new WqlEventQuery("__InstanceDeletionEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
@@ -479,16 +487,16 @@ namespace MySql.Notifier
       if (launchWorkbenchUtilitiesMenuItem != null) launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySQLUtilitiesInstalled();
     }
 
-    private void ServiceListChanged(MySQLService service, ServiceListChangeType changeType)
+    private void ServiceListChanged(MySQLService service, ChangeListChangeType changeType)
     {
-      if ((mySQLServicesList.Services.Count == 0 && changeType == ServiceListChangeType.Remove) ||
-         (previousTotalServicesNumber == 0 && changeType != ServiceListChangeType.Remove))
+      if ((mySQLServicesList.Services.Count == 0 && changeType == ChangeListChangeType.Remove) ||
+         (previousTotalServicesNumber == 0 && changeType != ChangeListChangeType.Remove))
       {
         ReBuildMenu();
         previousTotalServicesNumber = mySQLServicesList.Services.Count;
       }
 
-      if (changeType == ServiceListChangeType.Remove)
+      if (changeType == ChangeListChangeType.Remove)
       {
         service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);
       }
@@ -497,7 +505,7 @@ namespace MySql.Notifier
         if (service.MenuGroup != null)
           service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
         service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
-        if (changeType == ServiceListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
+        if (changeType == ChangeListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
         {
           notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
           notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
@@ -505,6 +513,11 @@ namespace MySql.Notifier
           notifyIcon.ShowBalloonTip(1500);
         }
       }
+    }
+   
+     private void MachineListChanged(Machine machine, ChangeListChangeType changeType)
+    {
+      //TODO: Verify this is this applies for MachineList.
     }
 
     private void service_StatusChangeError(object sender, Exception ex)
@@ -524,9 +537,15 @@ namespace MySql.Notifier
       notifyIcon.ContextMenuStrip.Refresh();
     }
 
-    private void mySQLServicesList_ServiceListChanged(object sender, MySQLService service, ServiceListChangeType changeType)
+    private void mySQLServicesList_ServiceListChanged(object sender, MySQLService service, ChangeListChangeType changeType)
     {
       ServiceListChanged(service, changeType);
+    }
+
+    //TODO:▼▼
+    private void machineList_machineChanged(object sender, Machine machine, ChangeListChangeType changeType)
+    {
+      MachineListChanged(machine, changeType);
     }
 
     /// <summary>
@@ -570,7 +589,7 @@ namespace MySql.Notifier
 
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
     {
-      ManageItemsDialog dialog = new ManageItemsDialog(mySQLServicesList, mySQLInstancesList);
+      ManageItemsDialog dialog = new ManageItemsDialog(mySQLServicesList, mySQLInstancesList, machinesList);
       dialog.ShowDialog();
 
       //update icon
@@ -627,8 +646,8 @@ namespace MySql.Notifier
     private void InstallAvailablelUpdates_Click(object sender, EventArgs e)
     {
       launchInstallerItem_Click(null, EventArgs.Empty);
-      Properties.Settings.Default.UpdateCheck = 0;
-      Properties.Settings.Default.Save();
+      Settings.Default.UpdateCheck = 0;
+      Settings.Default.Save();
       notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
     }
 
@@ -638,8 +657,8 @@ namespace MySql.Notifier
         "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
       if (result == DialogResult.Yes)
       {
-        Properties.Settings.Default.UpdateCheck = 0;
-        Properties.Settings.Default.Save();
+        Settings.Default.UpdateCheck = 0;
+        Settings.Default.Save();
         notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
       }
     }

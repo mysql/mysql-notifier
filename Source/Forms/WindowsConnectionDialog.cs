@@ -25,23 +25,28 @@ namespace MySql.Notifier
   using System.Text.RegularExpressions;
   using System.Windows.Forms;
 
-  public partial class WindowsConnectionDialog : LoginGathererForm
+  public partial class WindowsConnectionDialog : MachineAwareForm
   {
     public WindowsConnectionDialog()
     {
       InitializeComponent();
     }
 
-    public WindowsConnectionDialog(AccountLogin CurrentLogin)
+    //public WindowsConnectionDialog(AccountLogin CurrentLogin)
+    public WindowsConnectionDialog(Machine CurrentMachine)
     {
       InitializeComponent();
-      if (CurrentLogin != null)
-      {
-        Login = CurrentLogin;
-        HostTextbox.Text = CurrentLogin.Host ?? String.Empty;
-        UserTextBox.Text = CurrentLogin.User ?? String.Empty;
-        PasswordTextbox.Text = CurrentLogin.DecryptedPassword() ?? String.Empty;
-      }
+      //TODO UNhardcode this ▼
+      //if (CurrentMachine != null)
+      //{
+      //  RemoteMachine = CurrentMachine;
+      //  HostTextbox.Text = CurrentMachine.Name ?? String.Empty;
+      //  UserTextBox.Text = CurrentMachine.User ?? String.Empty;
+      //  PasswordTextbox.Text = CurrentMachine.Password ?? String.Empty;
+      //}              
+        HostTextbox.Text = "VMWIN7X64";
+        UserTextBox.Text = "Javier";
+        PasswordTextbox.Text = ",.";
     }
 
     private void Button_Click(object sender, EventArgs e)
@@ -86,27 +91,14 @@ namespace MySql.Notifier
         {
           return false;
         }
-        ManagementNamedValueCollection context = new ManagementNamedValueCollection();
-        ConnectionOptions co = new ConnectionOptions();
-        co.Username = UserTextBox.Text;
-        co.Password = PasswordTextbox.Text;
-        co.Impersonation = ImpersonationLevel.Impersonate;
-        co.Authentication = AuthenticationLevel.Packet;
-        co.EnablePrivileges = true;
-        co.Context = context;
-        co.Timeout = TimeSpan.FromSeconds(30);
 
-        var managementScope = new ManagementScope(@"\\" + HostTextbox.Text + @"\root\cimv2", co);
-
-        managementScope.Connect();
-        WqlObjectQuery query = new WqlObjectQuery("Select * From Win32_Service");
-        ManagementObjectSearcher searcher = new ManagementObjectSearcher(managementScope, query);
-        ManagementObjectCollection retObjectCollection = searcher.Get();
-        result = (retObjectCollection.Count > 0);
+        RemoteMachine = new Machine(HostTextbox.Text, UserTextBox.Text, PasswordTextbox.Text);
+        result = RemoteMachine.TestConnectionUnManaged();
       }
       catch (COMException ex)
       {
-        dialog = new MessageDialog(ex.Message, "This message can be displayed for one of the following reasons at the remote machine: Host is Offline, Incorrect WMI permission set, Firewall or DCOM settings.", true);
+        dialog = new MessageDialog(ex.Message, "This message can be displayed for one of the following reasons at the remote machine: "
+        + "Host is Offline, Incorrect WMI permission set, Firewall or DCOM settings.", true);
       }
       catch (UnauthorizedAccessException ex)
       {
@@ -122,10 +114,7 @@ namespace MySql.Notifier
         {
           dialog.ShowDialog();
           HostTextbox.SelectAll();
-        }
-        else
-        {
-          Login = new AccountLogin(HostTextbox.Text, UserTextBox.Text, PasswordTextbox.Text);
+          RemoteMachine = null;         
         }
       }
       return result;

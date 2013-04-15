@@ -28,7 +28,7 @@ namespace MySql.Notifier
   using MySql.Notifier.Properties;
   using MySQL.Utility;
 
-  public partial class AddServiceDialog : BaseForm
+  public partial class AddServiceDialog : MachineAwareForm
   {
     private class ListViewItemComparer : IComparer
     {
@@ -63,63 +63,24 @@ namespace MySql.Notifier
     private int sortColumn = -1;
     private string lastFilter = String.Empty;
     private string lastTextFilter = String.Empty;
+    //public ServiceType ServiceType {get; set;}
     private ServiceType serviceType = ServiceType.Local;
 
     public AccountLogin Login { get; set; }
 
-    public AddServiceDialog()
+    public AddServiceDialog(Machine remoteMachine)
     {
       InitializeComponent();
-      server.SelectedIndex = 0;
-      RefreshList();
+      serverType.SelectedIndex = 0;      
       lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);
+      RemoteMachine = remoteMachine;
     }
 
     public List<MySQLService> ServicesToAdd { get; set; }
 
     private void RefreshList()
     {
-      if (Login == null || serviceType == ServiceType.Local)
-      {
-        try
-        {
-          string currentFilter = filter.Checked ? Settings.Default.AutoAddPattern.Trim() : null;
-
-          //TODO: Restore filter persistance here ▼
-          //if (currentFilter == lastFilter && txtFilter.Text == lastTextFilter) return;
-
-          lstServices.BeginUpdate();
-          lastFilter = currentFilter;
-          lastTextFilter = txtFilter.Text;
-
-          lstServices.Items.Clear();
-          var services = Service.GetInstances(lastFilter);
-
-          if (!String.IsNullOrEmpty(lastTextFilter))
-          {
-            services = services.Where(t => t.Properties["DisplayName"].Value.ToString().ToLower().Contains(lastTextFilter.ToLower())).ToList();
-          }
-          foreach (var item in services)
-          {
-            ListViewItem newItem = new ListViewItem();
-            newItem.Text = item.Properties["DisplayName"].Value.ToString();
-            newItem.Tag = item.Properties["Name"].Value.ToString();
-            newItem.SubItems.Add(item.Properties["State"].Value.ToString());
-
-            lstServices.Items.Add(newItem);
-          }
-          lstServices.EndUpdate();
-        }
-        catch (Exception ex)
-        {
-          using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ex.Message, true))
-          {
-            errorDialog.ShowDialog(this);
-            MySQLNotifierTrace.GetSourceTrace().WriteError(ex.Message, 1);
-          }
-        }
-      }
-      else
+      try
       {
         string currentFilter = filter.Checked ? Settings.Default.AutoAddPattern.Trim() : null;
 
@@ -131,24 +92,22 @@ namespace MySql.Notifier
         lastTextFilter = txtFilter.Text;
 
         lstServices.Items.Clear();
-        ManagementNamedValueCollection context = new ManagementNamedValueCollection();
-        ConnectionOptions co = new ConnectionOptions();
-        co.Username = Login.User;
-        co.Password = Login.DecryptedPassword();
-        co.Impersonation = ImpersonationLevel.Impersonate;
-        co.Authentication = AuthenticationLevel.Packet;
-        co.EnablePrivileges = true;
-        co.Context = context;
-        co.Timeout = TimeSpan.FromSeconds(30);
 
-        var managementScope = new ManagementScope(@"\\" + Login.Host + @"\root\cimv2", co);
+        List<ManagementObject> services = Service.GetInstances(lastFilter);
 
-        managementScope.Connect();
-        WqlObjectQuery query = new WqlObjectQuery("Select * From Win32_Service");
-        ManagementObjectSearcher searcher = new ManagementObjectSearcher(managementScope, query);
-        var services = searcher.Get();
+        if (RemoteMachine != null && serviceType == ServiceType.Remote)
+        {
+          services.Clear();
+          foreach (ManagementObject mo in RemoteMachine.GetServices(currentFilter))
+            services.Add(mo);
+        }
 
-        foreach (var item in services)
+        if (!String.IsNullOrEmpty(lastTextFilter))
+        {
+          services = services.Where(t => t.Properties["DisplayName"].Value.ToString().ToLower().Contains(lastTextFilter.ToLower())).ToList();
+        }
+
+        foreach (ManagementObject item in services)
         {
           ListViewItem newItem = new ListViewItem();
           newItem.Text = item.Properties["DisplayName"].Value.ToString();
@@ -157,13 +116,27 @@ namespace MySql.Notifier
 
           lstServices.Items.Add(newItem);
         }
+
         lstServices.EndUpdate();
+      }
+      catch (Exception ex)
+      {
+        using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ex.Message, true))
+        {
+          errorDialog.ShowDialog(this);
+          MySQLNotifierTrace.GetSourceTrace().WriteError(ex.Message, 1);
+        }
       }
     }
 
     private void btnOK_Click(object sender, EventArgs e)
     {
+    AccountLogin Login = null;
+    if(RemoteMachine!=null)
+      Login = new AccountLogin(RemoteMachine.Name, RemoteMachine.User, RemoteMachine.UnprotectedPassword);
       Cursor.Current = Cursors.WaitCursor;
+
+      //TODO: Add machinery to lists here. Verify if machine already exist on list.
       ServicesToAdd = new List<MySQLService>();
       foreach (ListViewItem lvi in lstServices.SelectedItems)
       {
@@ -216,15 +189,15 @@ namespace MySql.Notifier
 
     private void server_SelectedIndexChanged(object sender, EventArgs e)
     {
-      serviceType = (ServiceType)server.SelectedIndex;
+      serviceType = (ServiceType)serverType.SelectedIndex;
       DialogResult dr = DialogResult.None;
 
       if (serviceType == ServiceType.Remote)
       {
-        using (var windowsConnectionDialog = new WindowsConnectionDialog(Login))
+        using (var windowsConnectionDialog = new WindowsConnectionDialog(RemoteMachine))
         {
-          dr = windowsConnectionDialog.ShowDialog();
-          Login = windowsConnectionDialog.Login;
+          dr = windowsConnectionDialog.ShowDialog();          
+          RemoteMachine = (dr != DialogResult.Cancel) ? windowsConnectionDialog.RemoteMachine : RemoteMachine;          
         }
       }
 

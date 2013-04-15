@@ -17,20 +17,14 @@
 // 02110-1301  USA
 //
 
-using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using MySql.Notifier.Properties;
-using MySQL.Utility;
-
 namespace MySql.Notifier
 {
-  public enum ServiceListChangeType
-  {
-    Add,
-    AutoAdd,
-    Remove
-  }
+  using System;
+  using System.Collections.Generic;
+  using System.Text.RegularExpressions;
+  using MySql.Notifier.Properties;
+  using MySql.Notifier;
+  using MySQL.Utility;
 
   public class MySQLServicesList
   {
@@ -39,17 +33,19 @@ namespace MySql.Notifier
     public List<MySQLService> Services
     {
       get { return Settings.Default.ServiceList; }
-      //TODO: Check why this breaks the program ▼
-      //set { Settings.Default.ServiceList = value; }
+      set { Settings.Default.ServiceList = value; }
+    }
+
+    public MySQLServicesList()
+    {
     }
 
     public void LoadFromSettings()
     {
       loading = true;
 
-      //TODO: Check why this breaks the program ▼
-      //if (Services == null)
-      //  Services = new List<MySQLService>();
+      if (Services == null)
+        Services = new List<MySQLService>();
       if (Settings.Default.FirstRun)
         AutoAddServices();
       else
@@ -64,7 +60,7 @@ namespace MySql.Notifier
           //if (service.ServiceName != null && Service.ExistsServiceInstance(service.ServiceName))
           {
             service.StatusChanged += new MySQLService.StatusChangedHandler(mySQLService_StatusChanged);
-            OnServiceListChanged(service, ServiceListChangeType.Add);
+            OnServiceListChanged(service, ChangeListChangeType.Add);
           }
           else
           {
@@ -82,13 +78,13 @@ namespace MySql.Notifier
       var services = Service.GetInstances(Settings.Default.AutoAddPattern);
 
       foreach (var service in Services)
-        AddService(service, ServiceListChangeType.AutoAdd);
+        AddService(service, ChangeListChangeType.AutoAdd);
 
       Settings.Default.FirstRun = false;
       Settings.Default.Save();
     }
 
-    public void AddService(MySQLService newService, ServiceListChangeType changeType)
+    public void AddService(MySQLService newService, ChangeListChangeType changeType)
     {
       newService.NotifyOnStatusChange = Settings.Default.NotifyOfStatusChange;
       newService.UpdateTrayIconOnStatusChange = true;
@@ -113,7 +109,7 @@ namespace MySql.Notifier
       if (serviceToDelete == null) return;
 
       Services.Remove(serviceToDelete);
-      OnServiceListChanged(serviceToDelete, ServiceListChangeType.Remove);
+      OnServiceListChanged(serviceToDelete, ChangeListChangeType.Remove);
       if (!loading)
         Settings.Default.Save();
     }
@@ -163,15 +159,15 @@ namespace MySql.Notifier
       if (regex.Match(path).Success)
 
         // TODO: DEPRECATED METHODS: IMPLEMENT CORRECTLY!!
-        // AddService(serviceName, ServiceListChangeType.AutoAdd);
-        AddService(GetServiceByName(serviceName), ServiceListChangeType.AutoAdd);
+        // AddService(serviceName, ChangeListChangeType.AutoAdd);
+        AddService(GetServiceByName(serviceName), ChangeListChangeType.AutoAdd);
     }
 
-    public delegate void ServiceListChangedHandler(object sender, MySQLService service, ServiceListChangeType changeType);
+    public delegate void ServiceListChangedHandler(object sender, MySQLService service, ChangeListChangeType changeType);
 
     public event ServiceListChangedHandler ServiceListChanged;
 
-    protected virtual void OnServiceListChanged(MySQLService service, ServiceListChangeType changeType)
+    protected virtual void OnServiceListChanged(MySQLService service, ChangeListChangeType changeType)
     {
       if (ServiceListChanged != null)
         ServiceListChanged(this, service, changeType);
