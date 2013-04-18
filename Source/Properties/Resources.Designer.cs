@@ -126,6 +126,26 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The MySQL instance {0} failed the most recent connection status check with the following error
+        ///
+        ///{1}.
+        /// </summary>
+        internal static string BalloonTextFailedStatusCheck {
+            get {
+                return ResourceManager.GetString("BalloonTextFailedStatusCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MySQL Instance {0} changed status to {1}....
+        /// </summary>
+        internal static string BalloonTextInstanceStatus {
+            get {
+                return ResourceManager.GetString("BalloonTextInstanceStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New service added to monitored list: {0}.
         /// </summary>
         internal static string BalloonTextServiceList {
@@ -149,6 +169,15 @@ namespace MySql.Notifier.Properties {
         internal static string BalloonTitleFailedStatusChange {
             get {
                 return ResourceManager.GetString("BalloonTitleFailedStatusChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MySQL Instance Status Changed.
+        /// </summary>
+        internal static string BalloonTitleTextInstanceStatus {
+            get {
+                return ResourceManager.GetString("BalloonTitleTextInstanceStatus", resourceCulture);
             }
         }
         
@@ -204,6 +233,33 @@ namespace MySql.Notifier.Properties {
         internal static string ConfigureInstance {
             get {
                 return ResourceManager.GetString("ConfigureInstance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is a MySQL instance already being monitored that this connection relates to..
+        /// </summary>
+        internal static string ConnectionAlreadyInInstancesDetail {
+            get {
+                return ResourceManager.GetString("ConnectionAlreadyInInstancesDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do you want to replace the monitored MySQL instance&apos;s Workbench connection with this one?.
+        /// </summary>
+        internal static string ConnectionAlreadyInInstancesSubDetail {
+            get {
+                return ResourceManager.GetString("ConnectionAlreadyInInstancesSubDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MySQL instance already exists.
+        /// </summary>
+        internal static string ConnectionAlreadyInInstancesTitle {
+            get {
+                return ResourceManager.GetString("ConnectionAlreadyInInstancesTitle", resourceCulture);
             }
         }
         
@@ -343,6 +399,15 @@ namespace MySql.Notifier.Properties {
         internal static string MissingMySQLInstaller {
             get {
                 return ResourceManager.GetString("MissingMySQLInstaller", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MySQL Instances.
+        /// </summary>
+        internal static string MySQLInstances {
+            get {
+                return ResourceManager.GetString("MySQLInstances", resourceCulture);
             }
         }
         
@@ -718,7 +783,7 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Monitoring {0} instances.
+        ///   Looks up a localized string similar to Monitoring {0} services and {1} instances.
         /// </summary>
         internal static string ToolTipText {
             get {

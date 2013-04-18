@@ -35,9 +35,6 @@
     <Setting Name="UpdateCheck" Provider="MySql.Notifier.NotifierSettings" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="SupportedWorkbenchVersion" Provider="MySql.Notifier.NotifierSettings" Type="System.String" Scope="User">
-      <Value Profile="(Default)">5.2.40.0</Value>
-    </Setting>
     <Setting Name="UseColorfulStatusIcons" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>

@@ -26,8 +26,6 @@ namespace MySql.Notifier
 {
   public partial class OptionsDialog : BaseForm
   {
-    private ServiceType serviceType = ServiceType.Local;
-
     internal OptionsDialog()
     {
       InitializeComponent();

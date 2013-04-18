@@ -55,6 +55,9 @@ namespace MySql.Notifier
       this.label2 = new System.Windows.Forms.Label();
       this.lblSubTitle1 = new System.Windows.Forms.Label();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.InstanceMonitorIntervalUOMComboBox = new System.Windows.Forms.ComboBox();
+      this.InstanceMonitorIntervalLabel = new System.Windows.Forms.Label();
+      this.InstanceMonitorIntervalNumericUpDown = new System.Windows.Forms.NumericUpDown();
       this.chkUpdateTrayIcon = new System.Windows.Forms.CheckBox();
       this.notifyOnStatusChange = new System.Windows.Forms.CheckBox();
       this.btnDelete = new System.Windows.Forms.Button();
@@ -70,6 +73,7 @@ namespace MySql.Notifier
       this.panel2.SuspendLayout();
       this.panel1.SuspendLayout();
       this.groupBox1.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.InstanceMonitorIntervalNumericUpDown)).BeginInit();
       this.AddButtonContextMenuStrip.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -78,7 +82,7 @@ namespace MySql.Notifier
       this.panel2.Controls.Add(this.btnClose);
       this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
       this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.panel2.Location = new System.Drawing.Point(0, 432);
+      this.panel2.Location = new System.Drawing.Point(0, 453);
       this.panel2.Name = "panel2";
       this.panel2.Size = new System.Drawing.Size(596, 48);
       this.panel2.TabIndex = 47;
@@ -108,7 +112,7 @@ namespace MySql.Notifier
       this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panel1.Location = new System.Drawing.Point(0, 0);
       this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(596, 480);
+      this.panel1.Size = new System.Drawing.Size(596, 501);
       this.panel1.TabIndex = 48;
       // 
       // label2
@@ -131,20 +135,59 @@ namespace MySql.Notifier
       // 
       // groupBox1
       // 
+      this.groupBox1.Controls.Add(this.InstanceMonitorIntervalUOMComboBox);
+      this.groupBox1.Controls.Add(this.InstanceMonitorIntervalLabel);
+      this.groupBox1.Controls.Add(this.InstanceMonitorIntervalNumericUpDown);
       this.groupBox1.Controls.Add(this.chkUpdateTrayIcon);
       this.groupBox1.Controls.Add(this.notifyOnStatusChange);
       this.groupBox1.Location = new System.Drawing.Point(32, 313);
       this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(448, 88);
+      this.groupBox1.Size = new System.Drawing.Size(448, 108);
       this.groupBox1.TabIndex = 23;
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "Service Options";
+      // 
+      // InstanceMonitorIntervalUOMComboBox
+      // 
+      this.InstanceMonitorIntervalUOMComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.InstanceMonitorIntervalUOMComboBox.Items.AddRange(new object[] {
+            "seconds",
+            "minutes",
+            "hours",
+            "days"});
+      this.InstanceMonitorIntervalUOMComboBox.Location = new System.Drawing.Point(285, 72);
+      this.InstanceMonitorIntervalUOMComboBox.Name = "InstanceMonitorIntervalUOMComboBox";
+      this.InstanceMonitorIntervalUOMComboBox.Size = new System.Drawing.Size(121, 23);
+      this.InstanceMonitorIntervalUOMComboBox.TabIndex = 4;
+      this.InstanceMonitorIntervalUOMComboBox.SelectedIndexChanged += new System.EventHandler(this.InstanceMonitorIntervalUOMComboBox_SelectedIndexChanged);
+      // 
+      // InstanceMonitorIntervalLabel
+      // 
+      this.InstanceMonitorIntervalLabel.AutoSize = true;
+      this.InstanceMonitorIntervalLabel.Location = new System.Drawing.Point(69, 75);
+      this.InstanceMonitorIntervalLabel.Name = "InstanceMonitorIntervalLabel";
+      this.InstanceMonitorIntervalLabel.Size = new System.Drawing.Size(210, 15);
+      this.InstanceMonitorIntervalLabel.TabIndex = 3;
+      this.InstanceMonitorIntervalLabel.Text = "MySQL Instance monitoring interval in";
+      // 
+      // InstanceMonitorIntervalNumericUpDown
+      // 
+      this.InstanceMonitorIntervalNumericUpDown.Location = new System.Drawing.Point(15, 73);
+      this.InstanceMonitorIntervalNumericUpDown.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+      this.InstanceMonitorIntervalNumericUpDown.Name = "InstanceMonitorIntervalNumericUpDown";
+      this.InstanceMonitorIntervalNumericUpDown.Size = new System.Drawing.Size(51, 23);
+      this.InstanceMonitorIntervalNumericUpDown.TabIndex = 2;
+      this.InstanceMonitorIntervalNumericUpDown.ValueChanged += new System.EventHandler(this.InstanceMonitorIntervalNumericUpDown_ValueChanged);
       // 
       // chkUpdateTrayIcon
       // 
       this.chkUpdateTrayIcon.AutoSize = true;
       this.chkUpdateTrayIcon.Enabled = false;
-      this.chkUpdateTrayIcon.Location = new System.Drawing.Point(30, 48);
+      this.chkUpdateTrayIcon.Location = new System.Drawing.Point(51, 48);
       this.chkUpdateTrayIcon.Name = "chkUpdateTrayIcon";
       this.chkUpdateTrayIcon.Size = new System.Drawing.Size(321, 19);
       this.chkUpdateTrayIcon.TabIndex = 1;
@@ -156,7 +199,7 @@ namespace MySql.Notifier
       // 
       this.notifyOnStatusChange.AutoSize = true;
       this.notifyOnStatusChange.Enabled = false;
-      this.notifyOnStatusChange.Location = new System.Drawing.Point(30, 22);
+      this.notifyOnStatusChange.Location = new System.Drawing.Point(51, 22);
       this.notifyOnStatusChange.Name = "notifyOnStatusChange";
       this.notifyOnStatusChange.Size = new System.Drawing.Size(192, 19);
       this.notifyOnStatusChange.TabIndex = 0;
@@ -254,7 +297,7 @@ namespace MySql.Notifier
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-      this.ClientSize = new System.Drawing.Size(596, 480);
+      this.ClientSize = new System.Drawing.Size(596, 501);
       this.Controls.Add(this.panel2);
       this.Controls.Add(this.panel1);
       this.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
@@ -270,6 +313,7 @@ namespace MySql.Notifier
       this.panel1.PerformLayout();
       this.groupBox1.ResumeLayout(false);
       this.groupBox1.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.InstanceMonitorIntervalNumericUpDown)).EndInit();
       this.AddButtonContextMenuStrip.ResumeLayout(false);
       this.ResumeLayout(false);
       this.PerformLayout();
@@ -296,5 +340,8 @@ namespace MySql.Notifier
     private System.Windows.Forms.Label lblSubTitle1;
     private System.Windows.Forms.Label lblHiperTitle;
     private System.Windows.Forms.ColumnHeader columnHeader2;
+    private System.Windows.Forms.Label InstanceMonitorIntervalLabel;
+    private System.Windows.Forms.NumericUpDown InstanceMonitorIntervalNumericUpDown;
+    private System.Windows.Forms.ComboBox InstanceMonitorIntervalUOMComboBox;
   }
 }

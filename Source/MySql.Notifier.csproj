@@ -180,6 +180,7 @@
     <Compile Include="Forms\WindowsConnectionDialog.designer.cs">
       <DependentUpon>WindowsConnectionDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="MySQLInstanceMenuGroup.cs" />
     <Compile Include="Machine.cs" />
     <Compile Include="MachinesList.cs" />
     <Compile Include="MySQLInstance.cs" />

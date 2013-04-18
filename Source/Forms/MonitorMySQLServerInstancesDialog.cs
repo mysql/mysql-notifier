@@ -25,6 +25,7 @@ namespace MySql.Notifier
   using System.Drawing;
   using System.Linq;
   using System.Windows.Forms;
+  using MySql.Notifier.Properties;
   using MySQL.Utility;
   using MySQL.Utility.Forms;
 
@@ -65,7 +66,7 @@ namespace MySql.Notifier
 
       _lastServicesNameFilter = FilterTextBox.Text;
       _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
-      SelectedWorkbenchConnectionsList = new List<MySqlWorkbenchConnection>();
+      SelectedWorkbenchConnection = null;
       if (servicesList == null)
       {
         MySQLServicesList = new MySQLServicesList();
@@ -115,7 +116,7 @@ namespace MySql.Notifier
     /// Gets the Workbench connection selected to be monitored.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public List<MySqlWorkbenchConnection> SelectedWorkbenchConnectionsList { get; private set; }
+    public MySqlWorkbenchConnection SelectedWorkbenchConnection { get; private set; }
 
     #endregion Properties
 
@@ -169,9 +170,9 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void DialogOKButton_Click(object sender, EventArgs e)
     {
-      foreach (ListViewItem selectedItem in WorkbenchConnectionsListView.SelectedItems)
+      if (WorkbenchConnectionsListView.SelectedItems.Count > 0)
       {
-        SelectedWorkbenchConnectionsList.Add(selectedItem.Tag as MySqlWorkbenchConnection);
+        SelectedWorkbenchConnection = WorkbenchConnectionsListView.SelectedItems[0].Tag as MySqlWorkbenchConnection;
       }
     }
 
@@ -215,7 +216,7 @@ namespace MySql.Notifier
     {
       foreach (var mySqlService in MySQLServicesList.Services)
       {
-        if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Name == connection.Name))
+        if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Id == connection.Id))
         {
           return true;
         }
@@ -223,13 +224,39 @@ namespace MySql.Notifier
 
       foreach (var mySqlInstance in MySQLInstancesList)
       {
-        if (mySqlInstance.Name == connection.Name)
+        if (mySqlInstance.RelatedConnections.Exists(wbConn => wbConn.Id == connection.Id))
         {
           return true;
         }
       }
 
       return false;
+    }
+
+    /// <summary>
+    /// Event delegate method fired before the <see cref="MonitorMySQLServerInstancesDialog"/> dialog is closed.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void MonitorMySQLServerInstancesDialog_FormClosing(object sender, FormClosingEventArgs e)
+    {
+      if (SelectedWorkbenchConnection != null && WorkbenchConnectionsListView.SelectedItems.Count > 0 && !WorkbenchConnectionsListView.SelectedItems[0].Checked)
+      {
+        DialogResult dr = InfoDialog.ShowYesNoDialog(
+          InfoDialog.InfoType.Info,
+          Resources.ConnectionAlreadyInInstancesTitle,
+          Resources.ConnectionAlreadyInInstancesDetail,
+          Resources.ConnectionAlreadyInInstancesSubDetail,
+          null,
+          true,
+          InfoDialog.DefaultButtonType.CancelButton,
+          10);
+        if (dr != DialogResult.Yes)
+        {
+          SelectedWorkbenchConnection = null;
+          e.Cancel = true;
+        }
+      }
     }
 
     /// <summary>
@@ -327,13 +354,13 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Event delegate method fired when the <see cref="WorkbenchConnectionsListView"/> selected item's index changes.
+    /// Event delegate method fired when the <see cref="WorkbenchConnectionsListView"/> selected itemText's index changes.
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
     private void WorkbenchConnectionsListView_SelectedIndexChanged(object sender, EventArgs e)
     {
-      DialogOKButton.Enabled = WorkbenchConnectionsListView.SelectedItems.Count > 0 && WorkbenchConnectionsListView.SelectedItems[0].Checked;
+      DialogOKButton.Enabled = WorkbenchConnectionsListView.SelectedItems.Count > 0;
     }
   }
 }

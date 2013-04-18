@@ -64,7 +64,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Deletes selected item from monitored items list
+    /// Deletes selected itemText from monitored items list
     /// </summary>
     /// <param name="sender">Sender Object</param>
     /// <param name="e">Event Arguments</param>
@@ -121,16 +121,30 @@ namespace MySql.Notifier
       {
         notifyOnStatusChange.Checked = false;
         chkUpdateTrayIcon.Checked = false;
+        InstanceMonitorIntervalNumericUpDown.Value = 0;
+        InstanceMonitorIntervalNumericUpDown.Enabled = false;
+        InstanceMonitorIntervalUOMComboBox.Text = string.Empty;
+        InstanceMonitorIntervalUOMComboBox.Enabled = false;
       }
       else if (selectedItem is MySQLService)
       {
-        notifyOnStatusChange.Checked = (selectedItem as MySQLService).NotifyOnStatusChange;
-        chkUpdateTrayIcon.Checked = (selectedItem as MySQLService).UpdateTrayIconOnStatusChange;
+        MySQLService service = selectedItem as MySQLService;
+        notifyOnStatusChange.Checked = service.NotifyOnStatusChange;
+        chkUpdateTrayIcon.Checked = service.UpdateTrayIconOnStatusChange;
+        InstanceMonitorIntervalNumericUpDown.Value = 0;
+        InstanceMonitorIntervalNumericUpDown.Enabled = false;
+        InstanceMonitorIntervalUOMComboBox.Text = string.Empty;
+        InstanceMonitorIntervalUOMComboBox.Enabled = false;
       }
       else if (selectedItem is MySQLInstance)
       {
-        notifyOnStatusChange.Checked = (selectedItem as MySQLInstance).MonitorAndNotifyStatus;
-        chkUpdateTrayIcon.Checked = (selectedItem as MySQLInstance).UpdateTrayIconOnStatusChange;
+        MySQLInstance instance = selectedItem as MySQLInstance;
+        notifyOnStatusChange.Checked = instance.MonitorAndNotifyStatus;
+        chkUpdateTrayIcon.Checked = instance.UpdateTrayIconOnStatusChange;
+        InstanceMonitorIntervalNumericUpDown.Enabled = true;
+        InstanceMonitorIntervalNumericUpDown.Value = instance.MonitoringInterval;
+        InstanceMonitorIntervalUOMComboBox.Enabled = true;
+        InstanceMonitorIntervalUOMComboBox.SelectedIndex = (int)instance.MonitoringIntervalUnitOfMeasure;
       }
     }
 
@@ -140,18 +154,27 @@ namespace MySql.Notifier
       {
         if (monitorInstancesDialog.ShowDialog() == DialogResult.OK)
         {
-          foreach (var workbenchConnection in monitorInstancesDialog.SelectedWorkbenchConnectionsList)
+          MySqlWorkbenchConnection selectedConnection = monitorInstancesDialog.SelectedWorkbenchConnection;
+          if (selectedConnection != null)
           {
-            if (_instancesList.Any(instance => instance.ConnectionId == workbenchConnection.Id))
+            bool connectionAlreadyInInstance = false;
+
+            //// If the selected connection exists for an already monitored instance but it is not its main connection, replace the main connection with this one.
+            foreach (var instance in _instancesList)
             {
-              continue;
+              if (instance.RelatedConnections.Exists(conn => conn.Id == selectedConnection.Id) && instance.WorkbenchConnection.Id != selectedConnection.Id)
+              {
+                instance.WorkbenchConnection = selectedConnection;
+                connectionAlreadyInInstance = true;
+                break;
+              }
             }
 
-            _instancesList.Add(new MySQLInstance(workbenchConnection));
-          }
+            if (!connectionAlreadyInInstance)
+            {
+              _instancesList.Add(new MySQLInstance(selectedConnection));
+            }
 
-          if (monitorInstancesDialog.SelectedWorkbenchConnectionsList.Count > 0)
-          {
             RefreshList();
           }
         }
@@ -220,14 +243,14 @@ namespace MySql.Notifier
       //// Add monitored instances.
       foreach (var instance in _instancesList)
       {
-        ListViewItem newItem = new ListViewItem(instance.VerboseName);
+        ListViewItem newItem = new ListViewItem(instance.HostIdentifier);
         newItem.Tag = instance;
         newItem.SubItems.Add(instance.WorkbenchConnection.DriverType.ToString());
-        newItem.SubItems.Add(instance.WorkbenchConnection.ConnectionStatusText);
+        newItem.SubItems.Add(instance.ConnectionStatusText);
         MonitoredItemsListView.Items.Add(newItem);
       }
 
-      //// Select automatically the first item or disable controls if no items exist.
+      //// Select automatically the first itemText or disable controls if no items exist.
       if (MonitoredItemsListView.Items.Count > 0)
       {
         MonitoredItemsListView.Items[0].Selected = true;
@@ -271,6 +294,28 @@ namespace MySql.Notifier
           }
         }
       }
+    }
+
+    private void InstanceMonitorIntervalUOMComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      if (selectedItem == null || !(selectedItem is MySQLInstance))
+      {
+        return;
+      }
+
+      MySQLInstance selectedInstance = selectedItem as MySQLInstance;
+      selectedInstance.MonitoringIntervalUnitOfMeasure = (MySQLInstance.IntervalUnitOfMeasure)InstanceMonitorIntervalUOMComboBox.SelectedIndex;
+    }
+
+    private void InstanceMonitorIntervalNumericUpDown_ValueChanged(object sender, EventArgs e)
+    {
+      if (selectedItem == null || !(selectedItem is MySQLInstance))
+      {
+        return;
+      }
+
+      MySQLInstance selectedInstance = selectedItem as MySQLInstance;
+      selectedInstance.MonitoringInterval = (uint)InstanceMonitorIntervalNumericUpDown.Value;
     }
   }
 }

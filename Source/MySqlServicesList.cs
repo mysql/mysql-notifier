@@ -45,16 +45,22 @@ namespace MySql.Notifier
       loading = true;
 
       if (Services == null)
+      {
         Services = new List<MySQLService>();
+      }
+
       if (Settings.Default.FirstRun)
+      {
         AutoAddServices();
+      }
       else
       {
-        // we have to manually call our service list changed event handler since that isn't done
+        // We have to manually call our service list changed event handler since that isn't done
         // with how we are using settings
-        var copyofServices = Services;
-        foreach (MySQLService service in copyofServices)
+        for (int serviceIndex = 0; serviceIndex < Services.Count; serviceIndex++)
         {
+          var service = Services[serviceIndex];
+
           //TODO: Check This ▼  is correct, service.managementObject should not be null!
           if (service.ServiceName != null && service.Problem != ServiceProblem.ServiceDoesNotExist)
           //if (service.ServiceName != null && Service.ExistsServiceInstance(service.ServiceName))
@@ -65,6 +71,7 @@ namespace MySql.Notifier
           else
           {
             Services.Remove(service);
+            serviceIndex--;
           }
         }
         Settings.Default.Save();

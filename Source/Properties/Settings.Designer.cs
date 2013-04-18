@@ -167,19 +167,6 @@ namespace MySql.Notifier.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5.2.40.0")]
-        public string SupportedWorkbenchVersion {
-            get {
-                return ((string)(this["SupportedWorkbenchVersion"]));
-            }
-            set {
-                this["SupportedWorkbenchVersion"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool UseColorfulStatusIcons {
             get {

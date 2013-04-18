@@ -51,15 +51,7 @@ namespace MySql.Notifier
     private ToolStripMenuItem ignoreAvailableUpdateMenuItem;
     private ToolStripSeparator hasUpdatesSeparator;
 
-    private int previousTotalServicesNumber;
-
-    private bool supportedWorkbenchVersion
-    {
-      get
-      {
-        return new Version(MySqlWorkbench.ProductVersion) >= new Version(Settings.Default.SupportedWorkbenchVersion);
-      }
-    }
+    private int previousServicesAndInstancesQuantity;
 
     private delegate void serviceWindowsEvent(string servicename, string path, string state);
 
@@ -89,24 +81,30 @@ namespace MySql.Notifier
       mySQLServicesList.ServiceListChanged += new MySQLServicesList.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
 
       //TODO: Complete ▼ implement events for instance status changes and instances changes.
-	  machinesList = new MachinesList();      
+      machinesList = new MachinesList();      
       machinesList.MachineListChanged += new MachinesList.MachineListChangedHandler(machineList_machineChanged);
 
       //// Setup instances list
       mySQLInstancesList = new MySQLInstancesList();
-      // TODO: Implement events for instance status changes and instances changes.      	  
+      mySQLInstancesList.InstanceStatusChanged += MySQLInstanceStatusChanged;
+      mySQLInstancesList.InstancesListChanged += MySQLInstancesListChanged;
+      mySQLInstancesList.InstanceConnectionStatusTestErrorThrown += MySQLInstanceConnectionStatusTestErrorThrown;
 
       //// Create watcher for WB files
       string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-      if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
+      if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
         string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", applicationDataFolderPath);
         if (File.Exists(file))
+        {
           StartWatcherForFile(file, connectionsFile_Changed);
+        }
 
         file = String.Format(@"{0}\MySQL\Workbench\server_instances.xml", applicationDataFolderPath);
         if (File.Exists(file))
+        {
           StartWatcherForFile(file, serversFile_Changed);
+        }
       }
 
       if (Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0)
@@ -121,10 +119,12 @@ namespace MySql.Notifier
       //TODO: Restore this ▼ function
       //UpdateListToRemoveDeletedServices();
 
+      //// Load services and instances
       machinesList.LoadFromSettings();
-      mySQLServicesList.LoadFromSettings();      
+      mySQLServicesList.LoadFromSettings();
+      mySQLInstancesList.RefreshInstances(true);
 
-      previousTotalServicesNumber = mySQLServicesList.Services.Count;
+      previousServicesAndInstancesQuantity = mySQLServicesList.Services.Count + mySQLInstancesList.Count;
 
       if (mySQLServicesList.Services.Count == 0)
       {
@@ -156,6 +156,8 @@ namespace MySql.Notifier
       MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
       MySqlWorkbench.ExternalApplicationConnectionsFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\connections.xml";
       MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\user_data.dat";
+      MySQLSourceTrace.LogFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier";
+      MySQLSourceTrace.SourceTraceClass = "MySqlNotifier";
     }
 
     /// <summary>
@@ -277,7 +279,7 @@ namespace MySql.Notifier
     /// </summary>
     private void ShowTooltip(bool error, string title, string text, int delay)
     {
-      notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+      notifyIcon.BalloonTipIcon = error ? ToolTipIcon.Error : ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = title;
       notifyIcon.BalloonTipText = text;
       notifyIcon.ShowBalloonTip(delay);
@@ -359,8 +361,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Method to handle the change events in the
-    /// connections file of workbench
+    /// Method to handle the change events in the Workbench's connections file.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -368,6 +369,7 @@ namespace MySql.Notifier
     {
       MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
       MySqlWorkbench.LoadData();
+      mySQLInstancesList.RefreshInstances(false);
 
       foreach (var item in mySQLServicesList.Services)
       {
@@ -376,9 +378,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Method to handle the change events in the
-    /// server instances file of workbench
-    /// no changes in UI
+    /// Method to handle the change events in the Workbench's server instances file, no changes in UI.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -424,7 +424,7 @@ namespace MySql.Notifier
       checkForUpdates.Click += new EventHandler(checkUpdatesItem_Click);
       checkForUpdates.Image = Resources.CheckForUpdatesIcon;
 
-      if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
+      if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
         launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem("MySQL Utilities Shell");
         launchWorkbenchUtilitiesMenuItem.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
@@ -452,7 +452,7 @@ namespace MySql.Notifier
       menu.Items.Add(aboutMenu);
       menu.Items.Add(exitMenu);
 
-      if (mySQLServicesList.Services.Count > 0)
+      if (mySQLServicesList.Services.Count + mySQLInstancesList.Count > 0)
       {
         ToolStripMenuItem actionsMenu = new ToolStripMenuItem("Actions", null);
         actionsMenu.DropDown = menu;
@@ -487,16 +487,25 @@ namespace MySql.Notifier
       if (launchWorkbenchUtilitiesMenuItem != null) launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySQLUtilitiesInstalled();
     }
 
-    private void ServiceListChanged(MySQLService service, ChangeListChangeType changeType)
+    /// <summary>
+    /// Checks if the context menus need to be rebuilt.
+    /// </summary>
+    /// <param name="itemRemoved">Flag indicating if a service or instance was removed.</param>
+    private void RebuildMenuIfNeeded(bool itemRemoved)
     {
-      if ((mySQLServicesList.Services.Count == 0 && changeType == ChangeListChangeType.Remove) ||
-         (previousTotalServicesNumber == 0 && changeType != ChangeListChangeType.Remove))
+      if ((mySQLServicesList.Services.Count + mySQLInstancesList.Count == 0 && itemRemoved) ||
+         (previousServicesAndInstancesQuantity == 0 && !itemRemoved))
       {
         ReBuildMenu();
-        previousTotalServicesNumber = mySQLServicesList.Services.Count;
+        previousServicesAndInstancesQuantity = mySQLServicesList.Services.Count + mySQLInstancesList.Count;
       }
+    }
 
-      if (changeType == ChangeListChangeType.Remove)
+    private void ServiceListChanged(MySQLService service, ChangeListChangeType changeType)
+    {
+      bool serviceRemoved = changeType == ChangeListChangeType.Remove;
+      RebuildMenuIfNeeded(serviceRemoved);
+      if (serviceRemoved)
       {
         service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);
       }
@@ -507,15 +516,11 @@ namespace MySql.Notifier
         service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
         if (changeType == ChangeListChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
         {
-          notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-          notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceList;
-          notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceList, service.DisplayName);
-          notifyIcon.ShowBalloonTip(1500);
+          ShowTooltip(false, Resources.BalloonTitleTextServiceList, string.Format(Resources.BalloonTextServiceList, service.DisplayName), 1500);
         }
       }
     }
-   
-     private void MachineListChanged(Machine machine, ChangeListChangeType changeType)
+    private void MachineListChanged(Machine machine, ChangeListChangeType changeType)
     {
       //TODO: Verify this is this applies for MachineList.
     }
@@ -523,10 +528,7 @@ namespace MySql.Notifier
     private void service_StatusChangeError(object sender, Exception ex)
     {
       MySQLService service = (MySQLService)sender;
-      notifyIcon.BalloonTipIcon = ToolTipIcon.Error;
-      notifyIcon.BalloonTipTitle = Resources.BalloonTitleFailedStatusChange;
-      notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, Environment.NewLine + ex.Message + Environment.NewLine + Resources.AskRestartApplication);
-      notifyIcon.ShowBalloonTip(1500);
+      ShowTooltip(true, Resources.BalloonTitleFailedStatusChange, string.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, Environment.NewLine + ex.Message + Environment.NewLine + Resources.AskRestartApplication), 1500);
       MySQLNotifierTrace.GetSourceTrace().WriteError("Critical Error when trying to update the service status - " + (ex.Message + " " + ex.InnerException), 1);
     }
 
@@ -570,21 +572,23 @@ namespace MySql.Notifier
 
     private void mySQLServicesList_ServiceStatusChanged(object sender, ServiceStatus args)
     {
-      if (!Settings.Default.NotifyOfStatusChange) return;
+      if (!Settings.Default.NotifyOfStatusChange)
+      {
+        return;
+      }
 
       MySQLService service = mySQLServicesList.GetServiceByDisplayName(args.ServiceDisplayName);
+      if (!service.NotifyOnStatusChange)
+      {
+        return;
+      }
 
-      if (!service.NotifyOnStatusChange) return;
+      if (service.UpdateTrayIconOnStatusChange)
+      {
+        notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+      }
 
-      if (service.UpdateTrayIconOnStatusChange) notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
-
-      notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-      notifyIcon.BalloonTipTitle = Resources.BalloonTitleTextServiceStatus;
-      notifyIcon.BalloonTipText = String.Format(Resources.BalloonTextServiceStatus,
-                                                      args.ServiceDisplayName,
-                                                      args.PreviousStatus.ToString(),
-                                                      args.CurrentStatus.ToString());
-      notifyIcon.ShowBalloonTip(1500);
+      ShowTooltip(false, Resources.BalloonTitleTextServiceStatus, string.Format(Resources.BalloonTextServiceStatus, args.ServiceDisplayName, args.PreviousStatus.ToString(), args.CurrentStatus.ToString()), 1500);
     }
 
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
@@ -599,7 +603,7 @@ namespace MySql.Notifier
     private void launchInstallerItem_Click(object sender, EventArgs e)
     {
       string path = MySqlInstaller.GetInstallerPath();
-      if (String.IsNullOrEmpty(path)) return;  // this should not happen since our menu item is enabled
+      if (String.IsNullOrEmpty(path)) return;  // this should not happen since our menu itemText is enabled
 
       Process proc = new Process();
       ProcessStartInfo startInfo = new ProcessStartInfo();
@@ -669,7 +673,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// When the exit menu item is clicked, make a call to terminate the ApplicationContext.
+    /// When the exit menu itemText is clicked, make a call to terminate the ApplicationContext.
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -688,8 +692,8 @@ namespace MySql.Notifier
 
       string toolTipText = string.Format("{0} ({1})\n{2}.",
                                          Properties.Resources.AppName,
-                                         String.Format("{0}.{1}.{2}", version[0], version[1], version[2]),
-                                         String.Format(Properties.Resources.ToolTipText, mySQLServicesList.Services.Count));
+                                         string.Format("{0}.{1}.{2}", version[0], version[1], version[2]),
+                                         string.Format(Properties.Resources.ToolTipText, mySQLServicesList.Services.Count, mySQLInstancesList.Count));
       notifyIcon.Text = (toolTipText.Length >= MAX_TOOLTIP_LENGHT ? toolTipText.Substring(0, MAX_TOOLTIP_LENGHT - 3) + "..." : toolTipText);
     }
 
@@ -756,36 +760,152 @@ namespace MySql.Notifier
       }
     }
 
+    /// <summary>
+    /// Adds or removes a context menu item that represents the parent of the MySQL instances menu items.
+    /// </summary>
+    private void SetupMySQLInstancesMainMenuItem()
+    {
+      int index = MySQLInstanceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, Resources.MySQLInstances);
+      if (index < 0 && mySQLInstancesList.Count > 0)
+      {
+        index = MySQLInstanceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, Resources.Actions);
+        if (index < 0)
+        {
+          index = 0;
+        }
+
+        //// Hide the separator just above this new menu item.
+        if (notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
+        {
+          notifyIcon.ContextMenuStrip.Items[index - 1].Visible = false;
+        }
+
+        ToolStripMenuItem instancesMainMenuItem = new ToolStripMenuItem(Resources.MySQLInstances);
+        Font boldFont = new Font(instancesMainMenuItem.Font, FontStyle.Bold);
+        instancesMainMenuItem.Font = boldFont;
+        instancesMainMenuItem.BackColor = SystemColors.MenuText;
+        instancesMainMenuItem.ForeColor = SystemColors.Menu;
+        notifyIcon.ContextMenuStrip.Items.Insert(index, instancesMainMenuItem);
+        notifyIcon.ContextMenuStrip.Refresh();
+      }
+      else if (index >= 0 && mySQLInstancesList.Count == 0)
+      {
+        //// Show the separator just above this new menu item if it's hidden.
+        if (notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
+        {
+          notifyIcon.ContextMenuStrip.Items[index - 1].Visible = true;
+        }
+
+        notifyIcon.ContextMenuStrip.Items.RemoveAt(index);
+        notifyIcon.ContextMenuStrip.Refresh();
+      }
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="mySQLInstancesList"/> list changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="args">Event arguments.</param>
+    private void MySQLInstancesListChanged(object sender, InstancesListChangedArgs args)
+    {
+      bool instanceRemoved = args.ListChange == ListChangedType.ItemDeleted;
+      RebuildMenuIfNeeded(instanceRemoved);
+      switch (args.ListChange)
+      {
+        case ListChangedType.ItemAdded:
+          SetupMySQLInstancesMainMenuItem();
+          args.Instance.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
+          break;
+
+        case ListChangedType.ItemDeleted:
+          SetupMySQLInstancesMainMenuItem();
+          args.Instance.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);
+          break;
+
+        case ListChangedType.ItemChanged:
+          args.Instance.MenuGroup.Update();
+          break;
+
+        case ListChangedType.Reset:
+          SetupMySQLInstancesMainMenuItem();
+          mySQLInstancesList.RefreshInstances(false);
+          break;
+      }
+    }
+
+    /// <summary>
+    /// Event delegate method fired when a MySQL Instance's status witin the <see cref="mySQLInstancesList"/> changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="args">Event arguments.</param>
+    private void MySQLInstanceStatusChanged(object sender, InstanceStatusChangedArgs args)
+    {
+      args.Instance.MenuGroup.Update();
+      notifyIcon.ContextMenuStrip.Refresh();
+
+      if (!args.Instance.MonitorAndNotifyStatus)
+      {
+        return;
+      }
+
+      if (args.Instance.UpdateTrayIconOnStatusChange)
+      {
+        Icon.FromHandle(GetIconForNotifier().GetHicon());
+      }
+
+      ShowTooltip(false, Resources.BalloonTitleTextInstanceStatus, string.Format(Resources.BalloonTextInstanceStatus, args.Instance.HostIdentifier, args.NewInstanceStatusText), 1500);
+    }
+
+    /// <summary>
+    /// Event delegate method fired when an error is thrown while testing a MySQL Instance's status witin the <see cref="mySQLInstancesList"/>.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="args">Event arguments.</param>
+    private void MySQLInstanceConnectionStatusTestErrorThrown(object sender, InstanceConnectionStatusTestErrorThrownArgs args)
+    {
+      ShowTooltip(true, Resources.ErrorTitle, string.Format(Resources.BalloonTextFailedStatusCheck, args.Instance.HostIdentifier, args.ErrorException.Message), 1500);
+    }
+
+    /// <summary>
+    /// Returns a new tray icon for the Notifier based on current Services/Instances/Updates statuses.
+    /// </summary>
+    /// <returns>A bitmap of the updated tray icon.</returns>
     private Bitmap GetIconForNotifier()
     {
       bool hasUpdates = (Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0;
       bool useColorfulIcon = Settings.Default.UseColorfulStatusIcons;
 
-      if (Settings.Default.ServiceList != null)
+      var updateIconServicesList = Settings.Default.ServiceList == null ? new List<MySQLService>() : Settings.Default.ServiceList.Where(t => t.UpdateTrayIconOnStatusChange);
+      var updateIconInstancesList = Settings.Default.MySQLInstancesList == null ? new List<MySQLInstance>() : Settings.Default.MySQLInstancesList.Where(instance => instance.UpdateTrayIconOnStatusChange);
+
+      //// Stopped or update+stopped notifier icon.
+      if (updateIconServicesList.Where(t => t.Status == ServiceControllerStatus.Stopped).Count() + updateIconInstancesList.Where(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections).Count() > 0)
       {
-        var updateTrayIconServices = Settings.Default.ServiceList.Where(t => t.UpdateTrayIconOnStatusChange);
-
-        if (updateTrayIconServices != null)
-        {
-          if (updateTrayIconServices.Where(t => t.Status == ServiceControllerStatus.Stopped).Count() > 0)
-            if (!useColorfulIcon)
-              return hasUpdates ? Properties.Resources.NotifierIconStoppedAlert : Properties.Resources.NotifierIconStopped;
-            else
-              return hasUpdates ? Properties.Resources.NotifierIconStoppedAlertStrong : Properties.Resources.NotifierIconStoppedStrong;
-
-          if (updateTrayIconServices.Where(t => t.Status == ServiceControllerStatus.StartPending).Count() > 0)
-            if (!useColorfulIcon)
-              return hasUpdates ? Properties.Resources.NotifierIconStartingAlert : Properties.Resources.NotifierIconStarting;
-            else
-              return hasUpdates ? Properties.Resources.NotifierIconStartingAlertStrong : Properties.Resources.NotifierIconStartingStrong;
-
-          if (updateTrayIconServices.Where(t => t.Status == ServiceControllerStatus.Running).Count() > 0)
-            return hasUpdates ? Properties.Resources.NotifierIconRunningAlert : Properties.Resources.NotifierIconRunning;
-        }
+        return useColorfulIcon ? (hasUpdates ? Properties.Resources.NotifierIconStoppedAlertStrong : Properties.Resources.NotifierIconStoppedStrong) : (hasUpdates ? Properties.Resources.NotifierIconStoppedAlert : Properties.Resources.NotifierIconStopped);
       }
 
+      //// Starting or update+starting notifier icon.
+      if (updateIconServicesList.Where(t => t.Status == ServiceControllerStatus.StartPending).Count() > 0)
+      {
+        return useColorfulIcon ? (hasUpdates ? Properties.Resources.NotifierIconStartingAlertStrong : Properties.Resources.NotifierIconStartingStrong) : (hasUpdates ? Properties.Resources.NotifierIconStartingAlert : Properties.Resources.NotifierIconStarting);
+      }
+
+      //// Running or update+running notifier icon.
+      if (updateIconServicesList.Where(t => t.Status == ServiceControllerStatus.Running).Count() + updateIconInstancesList.Where(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections).Count() > 0)
+      {
+        return hasUpdates ? Properties.Resources.NotifierIconRunningAlert : Properties.Resources.NotifierIconRunning;
+      }
+
+      //// Clean or update+clean notifier icon.
       return hasUpdates ? Properties.Resources.NotifierIconAlert : Properties.Resources.NotifierIcon;
     }
+  }
+
+  public enum ServiceListChangeType
+  {
+    Add,
+    AutoAdd,
+    Remove
   }
 
   public enum SoftwareUpdateStaus : int

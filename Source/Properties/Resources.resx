@@ -122,7 +122,7 @@
     <comment>Application name with a placeholder for the version</comment>
   </data>
   <data name="ToolTipText" xml:space="preserve">
-    <value>Monitoring {0} instances</value>
+    <value>Monitoring {0} services and {1} instances</value>
     <comment>ToolTip Text appended to the AppName</comment>
   </data>
   <data name="ConfigureInstance" xml:space="preserve">
@@ -361,5 +361,28 @@
   </data>
   <data name="refresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\refresh.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="BalloonTextInstanceStatus" xml:space="preserve">
+    <value>MySQL Instance {0} changed status to {1}...</value>
+  </data>
+  <data name="BalloonTitleTextInstanceStatus" xml:space="preserve">
+    <value>MySQL Instance Status Changed</value>
+  </data>
+  <data name="ConnectionAlreadyInInstancesDetail" xml:space="preserve">
+    <value>There is a MySQL instance already being monitored that this connection relates to.</value>
+  </data>
+  <data name="ConnectionAlreadyInInstancesSubDetail" xml:space="preserve">
+    <value>Do you want to replace the monitored MySQL instance's Workbench connection with this one?</value>
+  </data>
+  <data name="ConnectionAlreadyInInstancesTitle" xml:space="preserve">
+    <value>MySQL instance already exists</value>
+  </data>
+  <data name="MySQLInstances" xml:space="preserve">
+    <value>MySQL Instances</value>
+  </data>
+  <data name="BalloonTextFailedStatusCheck" xml:space="preserve">
+    <value>The MySQL instance {0} failed the most recent connection status check with the following error
+
+{1}</value>
   </data>
 </root>

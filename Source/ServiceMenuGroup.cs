@@ -42,21 +42,13 @@ namespace MySql.Notifier
 
     private delegate void menuRefreshDelegate(ContextMenuStrip menu);
 
-    private bool supportedWorkbenchVersion
-    {
-      get
-      {
-        return new Version(MySqlWorkbench.ProductVersion) >= new Version(Settings.Default.SupportedWorkbenchVersion);
-      }
-    }
-
     public ServiceMenuGroup(MySQLService mySQLBoundService)
     {
       boundService = mySQLBoundService;
 
       statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.DisplayName, boundService.Status));
 
-      if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
+      if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
         configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
         configureMenu.Click += new EventHandler(configureInstanceItem_Click);
@@ -200,12 +192,12 @@ namespace MySql.Notifier
       string[] menuItems = new string[4];
       int index = -1;
 
-      if (boundService.IsRealMySQLService && MySqlWorkbench.IsInstalled && supportedWorkbenchVersion)
+      if (boundService.IsRealMySQLService && MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
         menuItems[0] = "Configure Menu";
         menuItems[1] = "Editor Menu";
         menuItems[2] = "Separator";
-        menuItems[3] = statusMenu.Text; // the last item we delete is the service name item which is the reference for the others
+        menuItems[3] = statusMenu.Text; // the last itemText we delete is the service name itemText which is the reference for the others
       }
       else
       {
@@ -267,7 +259,7 @@ namespace MySql.Notifier
       startMenu.Enabled = boundService.Status == ServiceControllerStatus.Stopped;
       stopMenu.Enabled = boundService.Status != ServiceControllerStatus.Stopped;
       restartMenu.Enabled = stopMenu.Enabled;
-      if (MySqlWorkbench.IsInstalled && supportedWorkbenchVersion && boundService.IsRealMySQLService)
+      if (MySqlWorkbench.AllowsExternalConnectionsManagement && boundService.IsRealMySQLService)
       {
         if (editorMenu != null) editorMenu.Enabled = true;
         if (configureMenu != null) configureMenu.Enabled = true;
@@ -355,13 +347,13 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Adds a new item to the Notify Icon's context menu.
+    /// Adds a new itemText to the Notify Icon's context menu.
     /// </summary>
-    /// <param name="displayText">Menu item's text</param>
-    /// <param name="menuName">Menu item object's name</param>
-    /// <param name="image">Menu item's icon displayed at its left</param>
+    /// <param name="displayText">Menu itemText's text</param>
+    /// <param name="menuName">Menu itemText object's name</param>
+    /// <param name="image">Menu itemText's icon displayed at its left</param>
     /// <param name="eventHandler">Event handler method to register with the Click event</param>
-    /// <param name="enable">Flag that indicates the Enabled status of the menu item</param>
+    /// <param name="enable">Flag that indicates the Enabled status of the menu itemText</param>
     /// <returns>A new ToolStripMenuItem object</returns>
     public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, string menuName, System.Drawing.Image image, EventHandler eventHandler, bool enable)
     {
@@ -376,11 +368,11 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Adds a new item to the Notify Icon's context menu.
+    /// Adds a new itemText to the Notify Icon's context menu.
     /// </summary>
-    /// <param name="displayText">Menu item's text</param>
-    /// <param name="menuName">Menu item object's name</param>
-    /// <param name="image">Menu item's icon displayed at its left</param>
+    /// <param name="displayText">Menu itemText's text</param>
+    /// <param name="menuName">Menu itemText object's name</param>
+    /// <param name="image">Menu itemText's icon displayed at its left</param>
     /// <param name="eventHandler">Event handler method to register with the Click event</param>
     /// <returns>A new ToolStripMenuItem object</returns>
     public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, string menuName, System.Drawing.Image image, EventHandler eventHandler)
@@ -389,12 +381,12 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Adds a new item to the Notify Icon's context menu.
+    /// Adds a new itemText to the Notify Icon's context menu.
     /// </summary>
-    /// <param name="displayText">Menu item's text</param>
-    /// <param name="image">Menu item's icon displayed at its left</param>
+    /// <param name="displayText">Menu itemText's text</param>
+    /// <param name="image">Menu itemText's icon displayed at its left</param>
     /// <param name="eventHandler">Event handler method to register with the Click event</param>
-    /// <param name="enable">Flag that indicates the Enabled status of the menu item</param>
+    /// <param name="enable">Flag that indicates the Enabled status of the menu itemText</param>
     /// <returns>A new ToolStripMenuItem object</returns>
     public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, System.Drawing.Image image, EventHandler eventHandler, bool enable)
     {
@@ -402,10 +394,10 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Adds a new item to the Notify Icon's context menu.
+    /// Adds a new itemText to the Notify Icon's context menu.
     /// </summary>
-    /// <param name="displayText">Menu item's text</param>
-    /// <param name="image">Menu item's icon displayed at its left</param>
+    /// <param name="displayText">Menu itemText's text</param>
+    /// <param name="image">Menu itemText's icon displayed at its left</param>
     /// <param name="eventHandler">Event handler method to register with the Click event</param>
     /// <returns>A new ToolStripMenuItem object</returns>
     public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, System.Drawing.Image image, EventHandler eventHandler)
@@ -414,11 +406,11 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Adds a new item to the Notify Icon's context menu.
+    /// Adds a new itemText to the Notify Icon's context menu.
     /// </summary>
-    /// <param name="displayText">Menu item's text</param>
+    /// <param name="displayText">Menu itemText's text</param>
     /// <param name="eventHandler">Event handler method to register with the Click event</param>
-    /// <param name="enable">Flag that indicates the Enabled status of the menu item</param>
+    /// <param name="enable">Flag that indicates the Enabled status of the menu itemText</param>
     /// <returns>A new ToolStripMenuItem object</returns>
     public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, EventHandler eventHandler, bool enable)
     {
@@ -426,9 +418,9 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Adds a new item to the Notify Icon's context menu.
+    /// Adds a new itemText to the Notify Icon's context menu.
     /// </summary>
-    /// <param name="displayText">Menu item's text</param>
+    /// <param name="displayText">Menu itemText's text</param>
     /// <param name="eventHandler">Event handler method to register with the Click event</param>
     /// <returns>A new ToolStripMenuItem object</returns>
     public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, EventHandler eventHandler)
