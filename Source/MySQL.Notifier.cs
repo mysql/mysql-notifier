@@ -775,7 +775,7 @@ namespace MySql.Notifier
         }
 
         //// Hide the separator just above this new menu item.
-        if (notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
+        if (index > 0 && notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
         {
           notifyIcon.ContextMenuStrip.Items[index - 1].Visible = false;
         }

@@ -260,6 +260,8 @@ namespace MySql.Notifier
         btnDelete.Enabled = false;
         chkUpdateTrayIcon.Enabled = false;
         notifyOnStatusChange.Enabled = false;
+        InstanceMonitorIntervalNumericUpDown.Enabled = false;
+        InstanceMonitorIntervalUOMComboBox.Enabled = false;
       }
 
       //// Revert cursor back to normal and paint changes in list.

@@ -340,7 +340,7 @@ namespace MySql.Notifier
         //// Remove the instances without a Workbench connection, which means the connection no longer exists.
         if (instance.WorkbenchConnection == null)
         {
-          InstancesList.RemoveAt(instanceIndex--);
+          RemoveAt(instanceIndex--);
         }
 
         //// Check the instance's connection status now or restore the monitor timeout if possible.
@@ -350,9 +350,13 @@ namespace MySql.Notifier
           instance.SetupMenuGroup();
           OnInstancesListChanged(instance, ListChangedType.ItemAdded);
         }
-        else if (_instanceMonitoringTimeouts.ContainsKey(instance.WorkbenchConnectionId))
+        else
         {
-          instance.SecondsToMonitorInstance = _instanceMonitoringTimeouts[instance.WorkbenchConnectionId];
+          instance.MenuGroup.RecreateSQLEditorMenus();
+          if (_instanceMonitoringTimeouts.ContainsKey(instance.WorkbenchConnectionId))
+          {
+            instance.SecondsToMonitorInstance = _instanceMonitoringTimeouts[instance.WorkbenchConnectionId];
+          }
         }
 
         //// Subscribe to instance events.

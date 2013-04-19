@@ -41,16 +41,17 @@ namespace MySql.Notifier
     {
       BoundInstance = boundInstance;
       InstanceMenuItem = new ToolStripMenuItem();
+      Font menuItemFont = new Font(InstanceMenuItem.Font, FontStyle.Bold);
+      InstanceMenuItem.Font = menuItemFont;
+
       if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
         ConfigureMenuItem = new ToolStripMenuItem(Resources.ConfigureInstance);
         ConfigureMenuItem.Click += new EventHandler(ConfigureMenuItem_Click);
-        CreateSQLEditorMenus();
       }
 
+      RecreateSQLEditorMenus();
       Separator = new ToolStripSeparator();
-      Font menuItemFont = new Font(InstanceMenuItem.Font, FontStyle.Bold);
-      InstanceMenuItem.Font = menuItemFont;
       Update();
     }
 
@@ -162,19 +163,46 @@ namespace MySql.Notifier
     /// <summary>
     /// Recreates the SQL Editor sub menu items.
     /// </summary>
-    /// <param name="menu">Context menu strip containing the MySQL instance's menu items.</param>
-    public void RefreshSQLEditorMenu(ContextMenuStrip menu)
+    public void RecreateSQLEditorMenus()
     {
-      CreateSQLEditorMenus();
-
-      if (menu.InvokeRequired)
+      if (!MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
-        MenuRefreshDelegate md = new MenuRefreshDelegate(RefreshSQLEditorItems);
-        menu.Invoke(md, menu);
+        return;
+      }
+
+      if (SQLEditorMenuItem == null)
+      {
+        SQLEditorMenuItem = new ToolStripMenuItem(Resources.SQLEditor);
       }
       else
       {
-        RefreshSQLEditorItems(menu);
+        SQLEditorMenuItem.DropDownItems.Clear();
+      }
+
+      //// If there are 0 or 1 connections then the single menu will suffice.
+      if (BoundInstance.RelatedConnections.Count <= 1)
+      {
+        SQLEditorMenuItem.Enabled = true;
+        SQLEditorMenuItem.Click += new EventHandler(SQLEditorMenuItem_Click);
+        return;
+      }
+      else
+      {
+        SQLEditorMenuItem.Enabled = false;
+      }
+
+      //// We have more than 1 connection so we create a submenu.
+      foreach (var conn in BoundInstance.RelatedConnections)
+      {
+        ToolStripMenuItem menu = new ToolStripMenuItem(conn.Name);
+        if (conn == BoundInstance.WorkbenchConnection)
+        {
+          Font boldFont = new Font(menu.Font, FontStyle.Bold);
+          menu.Font = boldFont;
+        }
+
+        menu.Click += new EventHandler(SQLEditorMenuItem_Click);
+        SQLEditorMenuItem.DropDownItems.Add(menu);
       }
     }
 
@@ -277,53 +305,6 @@ namespace MySql.Notifier
         InfoDialog.ShowErrorDialog(Resources.ErrorTitle, string.Format(Resources.FailureToLaunchWorkbench, ex.Message));
         MySQLSourceTrace.WriteAppErrorToLog(ex);
       }
-    }
-
-    /// <summary>
-    /// Creates the SQL Editor sub menu items.
-    /// </summary>
-    private void CreateSQLEditorMenus()
-    {
-      SQLEditorMenuItem = new ToolStripMenuItem(Resources.SQLEditor);
-      SQLEditorMenuItem.Enabled = false;
-
-      //// If there are 0 or 1 connections then the single menu will suffice.
-      if (BoundInstance.RelatedConnections.Count <= 1)
-      {
-        SQLEditorMenuItem.Click += new EventHandler(SQLEditorMenuItem_Click);
-        return;
-      }
-
-      //// We have more than 1 connection so we create a submenu.
-      foreach (var conn in BoundInstance.RelatedConnections)
-      {
-        ToolStripMenuItem menu = new ToolStripMenuItem(conn.Name);
-        if (conn == BoundInstance.WorkbenchConnection)
-        {
-          Font boldFont = new Font(menu.Font, FontStyle.Bold);
-          menu.Font = boldFont;
-        }
-
-        menu.Click += new EventHandler(SQLEditorMenuItem_Click);
-        SQLEditorMenuItem.DropDownItems.Add(menu);
-      }
-    }
-
-    /// <summary>
-    /// Recreates the SQL Editor sub menu items.
-    /// </summary>
-    /// <param name="menu">Context menu strip containing the MySQL instance's menu items.</param>
-    private void RefreshSQLEditorItems(ContextMenuStrip menu)
-    {
-      int index = FindInstanceMenuItemWithinMenuStrip(menu);
-      if (index >= 0 && index <= menu.Items.Count)
-      {
-        menu.Items.RemoveAt(index + 2);
-        menu.Refresh();
-      }
-
-      SQLEditorMenuItem.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement;
-      menu.Items.Insert(index + 2, SQLEditorMenuItem);
     }
 
     /// <summary>

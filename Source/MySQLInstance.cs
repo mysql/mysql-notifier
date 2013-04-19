@@ -114,7 +114,6 @@ namespace MySql.Notifier
       : this()
     {
       WorkbenchConnection = workbenchConnection;
-      SetupMenuGroup();
     }
 
     /// <summary>
@@ -433,6 +432,8 @@ namespace MySql.Notifier
           HostName = _workbenchConnection.Host;
           Port = _workbenchConnection.Port;
         }
+
+        SetupMenuGroup();
       }
     }
 
