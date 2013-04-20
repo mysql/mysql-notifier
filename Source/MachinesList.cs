@@ -21,11 +21,8 @@ namespace MySql.Notifier
 {
   using System;
   using System.Collections.Generic;
-  using System.Text.RegularExpressions;
-  using MySql.Notifier.Properties;
-  using MySQL.Utility;
   using System.Management;
-  using System.Diagnostics;
+  using MySql.Notifier.Properties;
 
   /// <summary>
   /// TODO: Refine this class ▼
@@ -41,9 +38,8 @@ namespace MySql.Notifier
     }
 
     public MachinesList()
-  {
-
-  }
+    {
+    }
 
     //TODO: ▼
     /// <summary>
@@ -61,20 +57,21 @@ namespace MySql.Notifier
         AutoAddMachines();
       else
       {
-        // we have to manually call our machine list changed event handler since that isn't done with how we are using settings
-        var copyofMachines = Machines;
-        foreach (Machine machine in copyofMachines)
+        foreach (Machine machine in Machines)
         {
-          //TODO: Check machine connectivity or deny all services here for X time.         
-          if (machine.Name != null ) //&& machine.Problem == None)
+          //TODO: Check machine connectivity or deny all services here for X time.
+          if (machine.Name == "localhost" || machine.Name != null && machine.IsOnline)
           {
             //machine.StatusChanged += new Machine.StatusChangedHandler(machine_StatusChanged);
             OnMachineListChanged(machine, ChangeListChangeType.Add);
+
+            //TODO: ▼ Validate
+            machine.LoadServiceParameters();
           }
-          //else
-          //{
-          //  Machines.Disable(machine);
-          //}
+          else
+          {
+            // Machines.AddToFailover(machine);
+          }
         }
         Settings.Default.Save();
       }
@@ -84,6 +81,8 @@ namespace MySql.Notifier
 
     private void AutoAddMachines()
     {
+      //TODO: ▼ Verify services. If any local MySQL server is installed, auto add localhost machine and call AutoAdd [services] from Machine scope.
+
       //var services = Service.GetInstances(Settings.Default.AutoAddPattern);
 
       //foreach (var service in Services)
@@ -98,29 +97,44 @@ namespace MySql.Notifier
       switch (changeType)
       {
         case ChangeListChangeType.Add:
-          //TODO:
+
+          //// Verify if this is the first machine that would be added to the list, in that case, initialize the list.
           if (Machines == null)
+          {
             Machines = new List<Machine>();
-          if (!Machines.Contains(newMachine))
-            Machines.Add(newMachine);
-          //newMachine.StatusChanged += new Machine.StatusChangedHandler(machine_StatusChanged);          
-           OnMachineListChanged(newMachine, changeType);
-          //if (!loading)
-           Settings.Default.Save();
+          }
+
+          //TODO: ▼ Check if this line is required.
+          //newMachine.StatusChanged += new Machine.StatusChangedHandler(machine_StatusChanged);
+
+          //// If Machine already exists we don't need to do anything else here;
+          if (MachineIsOnTheList(newMachine))
+          {
+            return;
+          }
+
+          OnMachineListChanged(newMachine, changeType);
+          Machines.Add(newMachine);
+
+          if (!loading)
+            Settings.Default.Save();
           break;
+
         case ChangeListChangeType.AutoAdd:
+
           //???
           break;
+
         case ChangeListChangeType.Remove:
           {
-
+            //TODO: Complete Removal functionality, check if machine is empty (of services), etc;
             Machine machineToDelete = null;
 
             foreach (Machine machine in Machines)
             {
               if (String.Compare(machine.Name, newMachine.Name, true) != 0) continue;
               machineToDelete = machine;
-              //TODO:
+
               //DeleteMachineServices(machineToDelete);
               Machines.Remove(machineToDelete);
 
@@ -139,12 +153,33 @@ namespace MySql.Notifier
       }
     }
 
-    public bool Contains(Machine machine)
+    /// <summary>
+    /// GetManagement
+    /// </summary>
+    /// <returns></returns>
+    public List<ManagementScope> GetManagementScopes()
     {
-      if (Machines == null || Machines.Count == 0) return false;
+      List<ManagementScope> managementScopes = new List<ManagementScope>();
+      foreach (Machine machine in Machines)
+      {
+        ManagementScope ms = machine.GetManagementScope();
+        if (ms != null)
+        {
+          managementScopes.Add(machine.GetManagementScope());
+        }
+      }
+      return managementScopes;
+    }
+
+    private bool MachineIsOnTheList(Machine machine)
+    {
+      if (Machines == null || Machines.Count == 0)
+      {
+        return false;
+      }
       foreach (Machine m in Machines)
       {
-        if (m == machine)
+        if (m.MachineIDMatch(machine.Name, machine.User))
         {
           return true;
         }
@@ -152,13 +187,15 @@ namespace MySql.Notifier
       return false;
     }
 
-    public Machine GetMachineByName(string name)
+    public Machine GetMachineByID(string name, string user)
     {
       foreach (Machine machine in Machines)
-        if (String.Compare(machine.Name, name, true) == 0)
+      {
+        if (machine.MachineIDMatch(name, user))
         {
           return machine;
         }
+      }
       return null;
     }
 
@@ -198,25 +235,6 @@ namespace MySql.Notifier
     //UnableToConnect,
     //lol
     //}
-
-    /// <summary>
-    /// GetManagement
-    /// </summary>
-    /// <returns></returns>
-    public List<ManagementScope> GetManagementScopes()
-    {
-      List<ManagementScope> managementScopes = new List<ManagementScope>();
-      managementScopes.Add(new ManagementScope(@"root\cimv2"));
-
-      foreach (Machine machine in Machines)
-      {
-        if (machine.IsOnline)
-        {
-          managementScopes.Add(machine.GetManagementScope());
-        }
-      }
-      return managementScopes;
-    }
   }
 
   public enum ChangeListChangeType

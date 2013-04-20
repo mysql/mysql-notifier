@@ -82,6 +82,8 @@ namespace MySql.Notifier
       editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
       editorMenu.Enabled = false;
 
+      if (boundService.WorkbenchConnections == null) return;
+
       // if there are 0 or 1 connections then the single menu will suffice
       if (boundService.WorkbenchConnections.Count <= 1)
       {

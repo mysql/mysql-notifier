@@ -27,7 +27,6 @@ using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using System.Xml;
 using System.Xml.Serialization;
-using Microsoft.Win32;
 using MySql.Notifier.Properties;
 using MySQL.Utility;
 
@@ -44,6 +43,8 @@ namespace MySql.Notifier
     private ServiceProblem serviceProblem;
     private ServiceMenuGroup menuGroup;
 
+    private MySQLStartupParameters parameters;
+
     /// <summary>
     /// Default constructor. DO NOT REMOVE.
     /// </summary>
@@ -51,39 +52,21 @@ namespace MySql.Notifier
     {
     }
 
-    public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, AccountLogin login = null)
+    public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, Machine machine = null)
     {
-      Login = login ?? new AccountLogin();
-      WinServiceType = Login.ServiceType;
-      //TODO: Solve problem ▼ ...
-      Host = Login.Host ?? ".";
-      User = Login.User ?? string.Empty;
-      Password = Login.Password;
+      WinServiceType = (machine == null) ? ServiceMachineType.Local : ServiceMachineType.Remote;
+      Host = machine ?? new Machine("localhost");
       NotifyOnStatusChange = notificationOnChange;
       UpdateTrayIconOnStatusChange = updatesTrayIcon;
       ServiceName = serviceName;
-      //TODO: Check this implementation is correct at destination ▼
-      //LOL = new Class1();
+      GetServiceInstance();
     }
 
     [XmlAttribute(AttributeName = "ServiceType")]
-    public ServiceType WinServiceType { get; set; }
-
-    [XmlAttribute(AttributeName = "Host")]
-    public string Host { get; set; }
-
-    [XmlAttribute(AttributeName = "User")]
-    public string User { get; set; }
-
-    [XmlAttribute(AttributeName = "Password")]
-    public string Password { get; set; }
+    public ServiceMachineType WinServiceType { get; set; }
 
     [XmlAttribute(AttributeName = "ServiceName")]
-    public string ServiceName
-    {
-      get { return serviceName; }
-      set { SetServiceName(value); }
-    }
+    public string ServiceName { get; set; }
 
     [XmlAttribute(AttributeName = "UpdateTrayIconOnStatusChange")]
     public bool UpdateTrayIconOnStatusChange { get; set; }
@@ -91,8 +74,8 @@ namespace MySql.Notifier
     [XmlAttribute(AttributeName = "NotifyOnStatusChange")]
     public bool NotifyOnStatusChange { get; set; }
 
-    //[XmlElement(ElementName = "Class1", Type = typeof(Class1))]
-    //public Class1 LOL { get; set; }
+    [XmlIgnore]
+    public Machine Host { get; set; }
 
     [XmlIgnore]
     public ServiceProblem Problem
@@ -114,6 +97,7 @@ namespace MySql.Notifier
 
     [XmlIgnore]
     public ServiceMenuGroup MenuGroup //{ get; private set; }
+
     //TODO: Check why this implementation is correct ▼
     {
       get
@@ -138,27 +122,24 @@ namespace MySql.Notifier
     public bool FoundInSystem { get; private set; }
 
     [XmlIgnore]
-    public AccountLogin Login { get; private set; }
-
-    [XmlIgnore]
-    public ManagementObject sManagementObject
+    public ManagementObject serviceManagementObject
     {
       get
       {
-        return managementObject ?? ReturnServiceInstance();
+        return managementObject;
       }
     }
 
-    private void SetService()
+    public void SetService()
     {
-      if (sManagementObject == null) return;
+      GetServiceInstance();
 
       try
       {
-        DisplayName = sManagementObject.Properties["DisplayName"].Value.ToString();
+        if (Host == null) throw new Exception("epic-FAIL");
+        DisplayName = serviceManagementObject.Properties["DisplayName"].Value.ToString();
         FindMatchingWBConnections();
-        menuGroup = new ServiceMenuGroup(this);
-        switch (sManagementObject.Properties["State"].Value.ToString())
+        switch (serviceManagementObject.Properties["State"].Value.ToString())
         {
           case "ContinuePending":
             Status = ServiceControllerStatus.ContinuePending;
@@ -192,6 +173,7 @@ namespace MySql.Notifier
             Status = ServiceControllerStatus.Stopped;
             break;
         }
+        menuGroup = new ServiceMenuGroup(this);
       }
       catch (InvalidOperationException ioEx)
       {
@@ -202,15 +184,13 @@ namespace MySql.Notifier
         MySQLNotifierTrace.GetSourceTrace().WriteError(ioEx.Message, 1);
         managementObject = null;
       }
+      catch (Exception)
+      {
+        throw;
+      }
     }
 
-    private void SetServiceName(string _serviceName)
-    {
-      serviceName = _serviceName;
-      SetService();
-    }
-
-    private void SeeIfRealMySQLService(string cmd)
+    public void SeeIfRealMySQLService(string cmd)
     {
       IsRealMySQLService = cmd.EndsWith("mysqld.exe") || cmd.EndsWith("mysqld-nt.exe") || cmd.EndsWith("mysqld") || cmd.EndsWith("mysqld-nt");
     }
@@ -218,7 +198,8 @@ namespace MySql.Notifier
     internal void FindMatchingWBConnections()
     {
       // first we discover what parameters we were started with
-      MySQLStartupParameters parameters = GetStartupParameters();
+      //MySQLStartupParameters parameters = GetStartupParameters();
+      if (String.IsNullOrEmpty(parameters.HostName)) return;
       WorkbenchConnections = new List<MySqlWorkbenchConnection>();
 
       if (!IsRealMySQLService) return;
@@ -349,7 +330,7 @@ namespace MySql.Notifier
       {
         // else no error
         // TODO Check if this ▼ call replaces exactly the managed call --> winService.Refresh() of type ServiceController.Refresh();
-        managementObject = ReturnServiceInstance();
+        //managementObject = ReturnServiceInstance();
         WorkCompleted = true;
       }
     }
@@ -396,6 +377,7 @@ namespace MySql.Notifier
         proc.StartInfo.Arguments = "/C net stop " + @"" + serviceName + @"" + " && net start " + serviceName + @"";
         proc.StartInfo.UseShellExecute = true;
         proc.Start();
+
         //TODO: Investigate how to replace this waiting calls ▼
         //if(WinServiceType == ServiceType.Local)
         //winService.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));
@@ -406,86 +388,21 @@ namespace MySql.Notifier
         proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, ServiceName);
         proc.StartInfo.UseShellExecute = true;
         proc.Start();
+
         //TODO: Investigate how to replace this waiting calls ▼
         //if(WinServiceType == ServiceType.Local)
         //winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running : ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
       }
     }
 
-    private MySQLStartupParameters GetStartupParameters()
+    private void GetServiceInstance()
     {
-      MySQLStartupParameters parameters = new MySQLStartupParameters();
-      parameters.PipeName = "mysql";
-
-      // get our host information
-      parameters.HostName = (String.IsNullOrEmpty(Host) || Host == "." || Host == "localhost" || WinServiceType == ServiceType.Local) ? "localhost" : Host;
-      parameters.HostIPv4 = Utility.GetIPv4ForHostName(parameters.HostName);
-
-      if (WinServiceType != ServiceType.Local) return parameters;
-      RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format(@"SYSTEM\CurrentControlSet\Services\{0}", ServiceName));
-      if (key == null) return parameters;
-
-      string imagepath = (string)key.GetValue("ImagePath", null);
-      key.Close();
-
-      if (imagepath == null) return parameters;
-
-      string[] args = Utility.SplitArgs(imagepath);
-      SeeIfRealMySQLService(args[0]);
-
-      // Parse our command line args
-      Mono.Options.OptionSet p = new Mono.Options.OptionSet()
-        .Add("defaults-file=", "", v => parameters.DefaultsFile = v)
-        .Add("port=|P=", "", v => Int32.TryParse(v, out parameters.Port))
-        .Add("enable-named-pipe", v => parameters.NamedPipesEnabled = true)
-        .Add("socket=", "", v => parameters.PipeName = v);
-      p.Parse(args);
-      if (parameters.DefaultsFile == null) return parameters;
-
-      // we have a valid defaults file
-      IniFile f = new IniFile(parameters.DefaultsFile);
-      Int32.TryParse(f.ReadValue("mysqld", "port", parameters.Port.ToString()), out parameters.Port);
-      parameters.PipeName = f.ReadValue("mysqld", "socket", parameters.PipeName);
-
-      // now see if named pipes are enabled
-      parameters.NamedPipesEnabled = parameters.NamedPipesEnabled || f.HasKey("mysqld", "enable-named-pipe");
-
-      return parameters;
-    }
-
-    public ManagementObject ReturnServiceInstance()
-    {
-      ManagementObject result = null;
+      managementObject = null;
       serviceProblem = ServiceProblem.None;
 
       try
       {
-        ManagementScope managementScope;
-
-        if (WinServiceType == ServiceType.Local)
-        {
-          managementScope = new ManagementScope(@"root\cimv2");
-        }
-        else
-        {
-          Login = Login ?? new AccountLogin(Host, User, MySQLSecurity.DecryptPassword(Password));
-
-          ManagementNamedValueCollection context = new ManagementNamedValueCollection();
-          ConnectionOptions co = new ConnectionOptions();
-          co.Username = User;
-          co.Password = MySQLSecurity.DecryptPassword(Password);
-          co.Impersonation = ImpersonationLevel.Impersonate;
-          co.Authentication = AuthenticationLevel.Packet;
-          co.EnablePrivileges = true;
-          co.Context = context;
-          co.Timeout = TimeSpan.FromSeconds(30);
-
-          managementScope = new ManagementScope(@"\\" + Host + @"\root\cimv2", co);
-        }
-        managementScope.Connect();
-        WqlObjectQuery query = new WqlObjectQuery(String.Format("Select * From Win32_Service Where Name = \"{0}\"", ServiceName));
-        ManagementObjectSearcher searcher = new ManagementObjectSearcher(managementScope, query);
-        ManagementObjectCollection retObjectCollection = searcher.Get();
+        ManagementObjectCollection retObjectCollection = Host.GetServices(ServiceName);
         serviceProblem = (retObjectCollection.Count > 0) ? ServiceProblem.None : ServiceProblem.ServiceDoesNotExist;
         if (serviceProblem == ServiceProblem.None)
         {
@@ -493,7 +410,7 @@ namespace MySql.Notifier
           {
             if (mo != null)
             {
-              result = mo;
+              managementObject = mo;
               break;
             }
           }
@@ -515,8 +432,6 @@ namespace MySql.Notifier
       {
         FoundInSystem = (serviceProblem == ServiceProblem.ServiceDoesNotExist || serviceProblem == ServiceProblem.Other) ? false : true;
       }
-      managementObject = result;
-      return result;
     }
   }
 
@@ -537,5 +452,11 @@ namespace MySql.Notifier
     IncorrectUserOrPassword,
     Other,
     ServiceDoesNotExist
+  }
+
+  public enum ServiceMachineType
+  {
+    Local,
+    Remote
   }
 }

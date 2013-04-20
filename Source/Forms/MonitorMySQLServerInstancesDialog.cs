@@ -20,7 +20,6 @@
 namespace MySql.Notifier
 {
   using System;
-  using System.Collections.Generic;
   using System.ComponentModel;
   using System.Drawing;
   using System.Linq;
@@ -51,7 +50,8 @@ namespace MySql.Notifier
     /// <summary>
     /// Initializes a new instance of the <see cref="MonitorMySQLServerInstancesDialog"/> class.
     /// </summary>
-    public MonitorMySQLServerInstancesDialog() : this(null, null)
+    public MonitorMySQLServerInstancesDialog()
+      : this(null, null)
     {
     }
 
@@ -60,21 +60,13 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="servicesList">List of <see cref="MySQLService"/> objects monitored by the Notifier.</param>
     /// <param name="instancesList">List of names of MySQL instance monitored by the Notifier.</param>
-    public MonitorMySQLServerInstancesDialog(MySQLServicesList servicesList, MySQLInstancesList instancesList)
+    public MonitorMySQLServerInstancesDialog(MachinesList machinesList, MySQLInstancesList instancesList)
     {
       InitializeComponent();
 
       _lastServicesNameFilter = FilterTextBox.Text;
       _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
-      SelectedWorkbenchConnection = null;
-      if (servicesList == null)
-      {
-        MySQLServicesList = new MySQLServicesList();
-      }
-      else
-      {
-        MySQLServicesList = servicesList;
-      }
+      MachinesList = machinesList;
 
       if (instancesList == null)
       {
@@ -110,7 +102,7 @@ namespace MySql.Notifier
     /// Gets a list of <see cref="MySQLService"/> objects monitored by the Notifier.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public MySQLServicesList MySQLServicesList { get; private set; }
+    public MachinesList MachinesList { get; private set; }
 
     /// <summary>
     /// Gets the Workbench connection selected to be monitored.
@@ -214,11 +206,20 @@ namespace MySql.Notifier
     /// <returns><see cref="true"/> if the connection is already being monitored, <see cref="false"/> otherwise.</returns>
     private bool IsWorkbenchConnectionAlreadyMonitored(MySqlWorkbenchConnection connection)
     {
-      foreach (var mySqlService in MySQLServicesList.Services)
+      //foreach (var mySqlService in MySQLServicesList.Services)
+      //{
+      //  if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Id == connection.Id))
+      //  {
+      //    return true;
+      //  }
+      if (MachinesList.Machines[0].Name == "localhost")
       {
-        if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Id == connection.Id))
+        foreach (var mySqlService in MachinesList.Machines[0].Services)
         {
-          return true;
+          if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Name == connection.Name))
+          {
+            return true;
+          }
         }
       }
 

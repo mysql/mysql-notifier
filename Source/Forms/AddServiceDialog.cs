@@ -63,15 +63,13 @@ namespace MySql.Notifier
     private int sortColumn = -1;
     private string lastFilter = String.Empty;
     private string lastTextFilter = String.Empty;
-    //public ServiceType ServiceType {get; set;}
-    private ServiceType serviceType = ServiceType.Local;
 
-    public AccountLogin Login { get; set; }
+    public ServiceMachineType ServiceType { get; set; }
 
     public AddServiceDialog(Machine remoteMachine)
     {
       InitializeComponent();
-      serverType.SelectedIndex = 0;      
+      serverType.SelectedIndex = 0;
       lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);
       RemoteMachine = remoteMachine;
     }
@@ -93,13 +91,16 @@ namespace MySql.Notifier
 
         lstServices.Items.Clear();
 
-        List<ManagementObject> services = Service.GetInstances(lastFilter);
+        List<ManagementObject> services = new List<ManagementObject>();
 
-        if (RemoteMachine != null && serviceType == ServiceType.Remote)
+        if (RemoteMachine != null && ServiceType == ServiceMachineType.Remote)
         {
-          services.Clear();
           foreach (ManagementObject mo in RemoteMachine.GetServices(currentFilter))
             services.Add(mo);
+        }
+        else
+        {
+          services = Service.GetInstances(String.Empty);
         }
 
         if (!String.IsNullOrEmpty(lastTextFilter))
@@ -131,16 +132,11 @@ namespace MySql.Notifier
 
     private void btnOK_Click(object sender, EventArgs e)
     {
-    AccountLogin Login = null;
-    if(RemoteMachine!=null)
-      Login = new AccountLogin(RemoteMachine.Name, RemoteMachine.User, RemoteMachine.UnprotectedPassword);
       Cursor.Current = Cursors.WaitCursor;
-
-      //TODO: Add machinery to lists here. Verify if machine already exist on list.
       ServicesToAdd = new List<MySQLService>();
       foreach (ListViewItem lvi in lstServices.SelectedItems)
       {
-        ServicesToAdd.Add(new MySQLService(lvi.Tag as string, true, true, Login));
+        ServicesToAdd.Add(new MySQLService(lvi.Tag as string, true, true, RemoteMachine));
       }
     }
 
@@ -189,15 +185,15 @@ namespace MySql.Notifier
 
     private void server_SelectedIndexChanged(object sender, EventArgs e)
     {
-      serviceType = (ServiceType)serverType.SelectedIndex;
+      ServiceType = (ServiceMachineType)serverType.SelectedIndex;
       DialogResult dr = DialogResult.None;
 
-      if (serviceType == ServiceType.Remote)
+      if (ServiceType == ServiceMachineType.Remote)
       {
         using (var windowsConnectionDialog = new WindowsConnectionDialog(RemoteMachine))
         {
-          dr = windowsConnectionDialog.ShowDialog();          
-          RemoteMachine = (dr != DialogResult.Cancel) ? windowsConnectionDialog.RemoteMachine : RemoteMachine;          
+          dr = windowsConnectionDialog.ShowDialog();
+          RemoteMachine = (dr != DialogResult.Cancel) ? windowsConnectionDialog.RemoteMachine : RemoteMachine;
         }
       }
 

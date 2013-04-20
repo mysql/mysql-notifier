@@ -23,7 +23,6 @@ namespace MySql.Notifier
   using System.Drawing;
   using System.Linq;
   using System.Windows.Forms;
-  using System.Collections.Generic;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
   using MySQL.Utility.Forms;
@@ -33,15 +32,13 @@ namespace MySql.Notifier
     private MachinesList machinesList;
     public static string addServiceName;
     private object selectedItem;
-    private MySQLServicesList serviceList;
     private MySQLInstancesList _instancesList;
 
-    public ManageItemsDialog(MySQLServicesList serviceList, MySQLInstancesList instancesList, MachinesList machineList)
+    public ManageItemsDialog(MySQLInstancesList instancesList, MachinesList machineList)
     {
       InitializeComponent();
       _instancesList = instancesList;
       this.machinesList = machineList;
-      this.serviceList = serviceList;
       RefreshList();
     }
 
@@ -64,7 +61,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Deletes selected itemText from monitored items list
+    /// Deletes selected item from monitored items list
     /// </summary>
     /// <param name="sender">Sender Object</param>
     /// <param name="e">Event Arguments</param>
@@ -78,8 +75,10 @@ namespace MySql.Notifier
       if (selectedItem is MySQLService)
       {
         MySQLService selectedService = selectedItem as MySQLService;
-        serviceList.RemoveService(selectedService.ServiceName);
-        RefreshList();
+
+        //TODO: LOCATE MACHINE CLICKED!! ▼ search the right ServicesList on the right machine
+        //serviceList.RemoveService(selectedService.ServiceName);
+        //RefreshList();
       }
       else if (selectedItem is MySQLInstance)
       {
@@ -150,7 +149,7 @@ namespace MySql.Notifier
 
     private void mySQLInstanceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-      using (var monitorInstancesDialog = new MonitorMySQLServerInstancesDialog(serviceList, _instancesList))
+      using (var monitorInstancesDialog = new MonitorMySQLServerInstancesDialog(machinesList, _instancesList))
       {
         if (monitorInstancesDialog.ShowDialog() == DialogResult.OK)
         {
@@ -200,29 +199,6 @@ namespace MySql.Notifier
       }
     }
 
-    //TODO Verify Changes are not broken ▼
-    //private void RefreshList()
-    //{
-    //  lstMonitoredServices.Items.Clear();
-    //  foreach (MySQLService service in serviceList.Services)
-    //  {
-    //    ListViewItem itemList = new ListViewItem(service.DisplayName, 0);
-    //    itemList.Tag = service;
-    //    itemList.SubItems.Add(service.WinServiceType.ToString());
-    //    itemList.SubItems.Add(service.Status.ToString());
-    //    lstMonitoredServices.Items.Add(itemList);
-    //  }
-    //  if (lstMonitoredServices.Items.Count > 0)
-    //    lstMonitoredServices.Items[0].Selected = true;
-    //  else
-    //  {
-    //    btnDelete.Enabled = false;
-    //    chkUpdateTrayIcon.Enabled = false;
-    //    notifyOnStatusChange.Enabled = false;
-    //  }
-    //  Cursor.Current = Cursors.Arrow;
-    //}
-
     private void RefreshList()
     {
       //// Set cursor to waiting, stop painting of list view to avoid flickering and clear its items.
@@ -231,13 +207,21 @@ namespace MySql.Notifier
       MonitoredItemsListView.Items.Clear();
 
       //// Add monitored services.
-      foreach (MySQLService service in serviceList.Services)
+      foreach (Machine machine in machinesList.Machines)
       {
-        ListViewItem newItem = new ListViewItem(service.DisplayName);
-        newItem.Tag = service;
-        newItem.SubItems.Add(service.WinServiceType.ToString());
-        newItem.SubItems.Add(service.Status.ToString());
-        MonitoredItemsListView.Items.Add(newItem);
+        foreach (MySQLService service in machine.Services)
+        {
+          if (service.Host == null)
+          {
+            service.Host = machine;
+            service.SetService();
+          }
+          ListViewItem newItem = new ListViewItem(service.DisplayName);
+          newItem.Tag = service;
+          newItem.SubItems.Add(service.WinServiceType.ToString());
+          newItem.SubItems.Add(service.Status.ToString());
+          MonitoredItemsListView.Items.Add(newItem);
+        }
       }
 
       //// Add monitored instances.
@@ -275,25 +259,39 @@ namespace MySql.Notifier
       {
         if (dialog.ShowDialog() == DialogResult.OK)
         {
+          //// Attempt to add machine to the list.
+          RemoteMachine = dialog.RemoteMachine ?? new Machine("localhost");
+          if (RemoteMachine != null)
+            machinesList.ChangeMachine(dialog.RemoteMachine, ChangeListChangeType.Add);
+
+          Machine machine = null;
+
+          //TODO: Assign services to the correct machine...
+          if (dialog.ServiceType == ServiceMachineType.Local)
+            machine = machinesList.Machines[0];
+          else
+          {
+            machine = machinesList.Machines.FirstOrDefault(m => m.MachineIDMatch(RemoteMachine.Name, RemoteMachine.User));
+            if (machine == null)
+            {
+              machinesList.Machines.Add(RemoteMachine);
+              machine = RemoteMachine;
+            }
+          }
+
           foreach (MySQLService service in dialog.ServicesToAdd)
           {
-            if (serviceList.Contains(service))
+            if (service.WinServiceType == ServiceMachineType.Remote && machine.ContainsService(service))
             {
               InfoDialog.ShowWarningDialog("Warning", "Selected Service is already in the Monitor List");
             }
             else
             {
-              serviceList.AddService(service, ChangeListChangeType.Add);
+              machine.ChangeService(ChangeListChangeType.Add, service);
             }
           }
-          RemoteMachine = dialog.RemoteMachine;
-          if (RemoteMachine != null)
-            machinesList.ChangeMachine(dialog.RemoteMachine, ChangeListChangeType.Add);
 
-          if (dialog.ServicesToAdd.Count > 0)
-          {
-            RefreshList();
-          }
+          RefreshList();
         }
       }
     }

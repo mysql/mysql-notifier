@@ -40,7 +40,9 @@ namespace MySql.Notifier
     private NotifyIcon notifyIcon;
 
     private MySQLServicesList mySQLServicesList { get; set; }
+
     private MySQLInstancesList mySQLInstancesList { get; set; }
+
     private MachinesList machinesList { get; set; }
 
     private List<ManagementEventWatcher> watchers = new List<ManagementEventWatcher>();
@@ -53,7 +55,7 @@ namespace MySql.Notifier
 
     private int previousServicesAndInstancesQuantity;
 
-    private delegate void serviceWindowsEvent(string servicename, string path, string state);
+    private delegate void serviceWindowsEvent(Machine machine, string servicename, string path, string state);
 
     public Notifier()
     {
@@ -75,20 +77,20 @@ namespace MySql.Notifier
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleTextServiceStatus;
 
-      //// Setup our service list
-      mySQLServicesList = new MySQLServicesList();
-      mySQLServicesList.ServiceStatusChanged += mySQLServicesList_ServiceStatusChanged;
-      mySQLServicesList.ServiceListChanged += new MySQLServicesList.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
-
-      //TODO: Complete ▼ implement events for instance status changes and instances changes.
-      machinesList = new MachinesList();      
-      machinesList.MachineListChanged += new MachinesList.MachineListChangedHandler(machineList_machineChanged);
-
       //// Setup instances list
       mySQLInstancesList = new MySQLInstancesList();
+      if (mySQLInstancesList.InstancesList == null) mySQLInstancesList.InstancesList = new List<MySQLInstance>();
       mySQLInstancesList.InstanceStatusChanged += MySQLInstanceStatusChanged;
       mySQLInstancesList.InstancesListChanged += MySQLInstancesListChanged;
       mySQLInstancesList.InstanceConnectionStatusTestErrorThrown += MySQLInstanceConnectionStatusTestErrorThrown;
+
+      machinesList = new MachinesList();
+      machinesList.LoadFromSettings();
+      machinesList.MachineListChanged += new MachinesList.MachineListChangedHandler(machineList_machineChanged);
+
+      MigrateOldServices();
+
+      previousServicesAndInstancesQuantity = CountServices() + mySQLInstancesList.Count;
 
       //// Create watcher for WB files
       string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -110,31 +112,32 @@ namespace MySql.Notifier
       if (Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0)
       {
         var location = Utility.GetInstallLocation("MySQL Notifier");
-        if (!String.IsNullOrEmpty(location))
+        if (!String.IsNullOrEmpty(location) && mySQLInstancesList.Count > 0)
         {
           Utility.CreateScheduledTask("MySQLNotifierTask", location + @"MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, false, Utility.GetOsVersion() == Utility.OSVersion.WindowsXp);
         }
       }
 
-      //TODO: Restore this ▼ function
+      // TODO: Complete ▼ implement events for instance status changes and instances changes add old services to local machine.
+      machinesList.MachineListChanged += new MachinesList.MachineListChangedHandler(machineList_machineChanged);
+
+      //// Suscribe each service list from each machine to the corresponding event handlers.
+      foreach (Machine m in machinesList.Machines)
+      {
+        // TODO: Support New Architecture
+        //suscribe each Services list from each machine to the events.
+        m.ServiceStatusChanged += mySQLServicesList_ServiceStatusChanged;
+        m.ServiceListChanged += new Machine.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
+      }
+
+      //// Setup instances list
+      mySQLInstancesList = new MySQLInstancesList();
+
+      //TODO: Restore this ▼ function, handle machines unable to connect, dialogs and all...
       //UpdateListToRemoveDeletedServices();
 
-      //// Load services and instances
-      machinesList.LoadFromSettings();
-      mySQLServicesList.LoadFromSettings();
-      mySQLInstancesList.RefreshInstances(true);
-
-      previousServicesAndInstancesQuantity = mySQLServicesList.Services.Count + mySQLInstancesList.Count;
-
-      if (mySQLServicesList.Services.Count == 0)
-      {
-        AddStaticMenuItems();
-        UpdateStaticMenuItems();
-      }
-      else
-      {
-        notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
-      }
+      AddStaticMenuItems();
+      UpdateStaticMenuItems();
 
       SetNotifyIconToolTip();
 
@@ -145,6 +148,45 @@ namespace MySql.Notifier
 
       //// Migrate Notifier connections to the MySQL Workbench connections file if possible.
       MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
+    }
+
+    private int CountServices()
+    {
+      int servicesCount = 0;
+      foreach (Machine machine in machinesList.Machines)
+      {
+        servicesCount += machine.Services.Count;
+      }
+      return servicesCount;
+    }
+
+    /// <summary>
+    /// Merge the old services schema into the new one
+    /// </summary>
+    private void MigrateOldServices()
+    {
+      //// Load old services schema
+      mySQLServicesList = new MySQLServicesList();
+
+      //// Attempt migration only if services were found
+      if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
+      {
+        //// Create a local machine if it doesn't exist
+        if (machinesList.Machines.Count <= 0 || machinesList.Machines[0].Name != "localhost")
+        {
+          machinesList.Machines.Insert(0, new Machine("localhost"));
+        }
+
+        //Copy services from old schema to the Local machine.
+        foreach (MySQLService service in mySQLServicesList.Services)
+          machinesList.Machines[0].ChangeService(ChangeListChangeType.AutoAdd, service);
+
+        // Clear the old list of services to erase the duplicates on the newer schema
+        mySQLServicesList.Services.Clear();
+
+        //Persist the merged services into the newer machine.
+        Settings.Default.Save();
+      }
     }
 
     /// <summary>
@@ -184,14 +226,17 @@ namespace MySql.Notifier
           WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
           ManagementEventWatcher watcher = new ManagementEventWatcher(managementScope, query);
           watcher.EventArrived += new EventArrivedEventHandler(ServiceChangedHandler);
+          watcher.Start();
           watchers.Add(watcher);
         }
-        foreach (ManagementEventWatcher w in watchers)
-          w.Start();
       }
       catch (ManagementException ex)
       {
         MySQLNotifierTrace.GetSourceTrace().WriteWarning("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, 1);
+      }
+      catch (Exception)
+      {
+        //TODO ▲ Check why is it breaking up with remote connections now.
       }
     }
 
@@ -208,20 +253,24 @@ namespace MySql.Notifier
 
       if (state.Contains("Pending")) return;
 
-      if (mode == "Disabled")
-      {
-        mySQLServicesList.RemoveService(serviceName);
-        return;
-      }
+      //if (mode == "Disabled")
+      //{
+      //  //TODO: ▼ search the right ServicesList on the right machine
+      //  mySQLServicesList.RemoveService(serviceName);
+      //  return;
+      //}
+
+      //TODO: Unhardcode ▼
+      Machine machine = machinesList.Machines.FirstOrDefault(m => m.MachineIDMatch("WIN7X64VM", "Javier"));
 
       Control c = notifyIcon.ContextMenuStrip;
       if (c.InvokeRequired)
       {
         serviceWindowsEvent se = new serviceWindowsEvent(GetWindowsEvent);
-        se.Invoke(serviceName, path, state);
+        se.Invoke(machine, serviceName, path, state);
       }
       else
-        GetWindowsEvent(serviceName, path, state);
+        GetWindowsEvent(machine, serviceName, path, state);
     }
 
     private void WatchForServiceDeletion()
@@ -235,14 +284,17 @@ namespace MySql.Notifier
           WqlEventQuery query = new WqlEventQuery("__InstanceDeletionEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
           ManagementEventWatcher watcher = new ManagementEventWatcher(managementScope, query);
           watcher.EventArrived += new EventArrivedEventHandler(ServiceDeletedHandler);
+          watcher.Start();
           watchers.Add(watcher);
         }
-        foreach (ManagementEventWatcher w in watchers)
-          w.Start();
       }
       catch (ManagementException ex)
       {
         MySQLNotifierTrace.GetSourceTrace().WriteWarning("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, 1);
+      }
+      catch (Exception)
+      {
+        //TODO ▲ Check why is it breaking up with remote connections now.
       }
     }
 
@@ -251,27 +303,35 @@ namespace MySql.Notifier
       var e = args.NewEvent;
       ManagementBaseObject o = ((ManagementBaseObject)e["TargetInstance"]);
       if (o == null) return;
+
+      //TODO: Fix ▼
       string serviceName = o["Name"].ToString().Trim();
       Control c = notifyIcon.ContextMenuStrip;
+
+      //TODO: UNharcode this ▼▼ and find something more eficient than look for servicename.
+      Machine machine = machinesList.Machines.FirstOrDefault(m => m.MachineIDMatch("WIN7X64VM", "Javier"));
+      MySQLService service = machine.GetServiceByName(serviceName);
+
       if (c.InvokeRequired)
         c.Invoke(new MethodInvoker(() =>
         {
-          RemoveServiceAndNotify(serviceName);
+          RemoveServiceAndNotify(machine, service);
         }));
       else
-        RemoveServiceAndNotify(serviceName);
+        RemoveServiceAndNotify(machine, service);
     }
 
     /// <summary>
     /// Remove Service and Notify the user
     /// </summary>
-    private void RemoveServiceAndNotify(string serviceName)
+    private void RemoveServiceAndNotify(Machine machine, MySQLService service)
     {
-      mySQLServicesList.RemoveService(serviceName);
+      //TODO: ▼ search the right ServicesList on the right machine
+      machine.ChangeService(ChangeListChangeType.Remove, service);
       notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
       if (!Settings.Default.NotifyOfStatusChange) return;
       SetNotifyIconToolTip();
-      ShowTooltip(false, Resources.BalloonTitleTextServiceList, String.Format(Resources.ServiceRemoved, serviceName), 1500);
+      ShowTooltip(false, Resources.BalloonTitleTextServiceList, String.Format(Resources.ServiceRemoved, service.ServiceName), 1500);
     }
 
     /// <summary>
@@ -393,15 +453,23 @@ namespace MySql.Notifier
       if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
       {
         MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
-        mi.Invoke(notifyIcon, null);
+
+        // TODO: FIX ▼ mi.Invoke(notifyIcon, null); and dispose of the null check
+        if (mi != null)
+          if (notifyIcon != null)
+            mi.Invoke(notifyIcon, null);
       }
     }
 
+    // TODO: UPDATE every ContextMenuStrip Method ▲▼ to use machineList instead of mySQLServicesList.
     private void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
     {
-      foreach (MySQLService service in mySQLServicesList.Services)
-        if (service.WinServiceType == ServiceType.Local)
-          service.MenuGroup.Update();
+      foreach (Machine machine in machinesList.Machines)
+      {
+        foreach (MySQLService service in machine.Services)
+          if (service.WinServiceType == ServiceMachineType.Local)
+            service.MenuGroup.Update();
+      }
       UpdateStaticMenuItems();
     }
 
@@ -452,7 +520,7 @@ namespace MySql.Notifier
       menu.Items.Add(aboutMenu);
       menu.Items.Add(exitMenu);
 
-      if (mySQLServicesList.Services.Count + mySQLInstancesList.Count > 0)
+      if (CountServices() + mySQLInstancesList.Count > 0)
       {
         ToolStripMenuItem actionsMenu = new ToolStripMenuItem("Actions", null);
         actionsMenu.DropDown = menu;
@@ -520,9 +588,10 @@ namespace MySql.Notifier
         }
       }
     }
+
     private void MachineListChanged(Machine machine, ChangeListChangeType changeType)
     {
-      //TODO: Verify this is this applies for MachineList.
+      //TODO: Add newer machine to the Group Menu.
     }
 
     private void service_StatusChangeError(object sender, Exception ex)
@@ -577,7 +646,10 @@ namespace MySql.Notifier
         return;
       }
 
-      MySQLService service = mySQLServicesList.GetServiceByDisplayName(args.ServiceDisplayName);
+      //TODO: ▼ UNhardcode this.
+      Machine machine = machinesList.Machines.FirstOrDefault(m => m.MachineIDMatch("WIN7X64VM", "Javier"));
+      MySQLService service = machine.GetServiceByDisplayName(args.ServiceDisplayName);
+
       if (!service.NotifyOnStatusChange)
       {
         return;
@@ -593,7 +665,7 @@ namespace MySql.Notifier
 
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
     {
-      ManageItemsDialog dialog = new ManageItemsDialog(mySQLServicesList, mySQLInstancesList, machinesList);
+      ManageItemsDialog dialog = new ManageItemsDialog(mySQLInstancesList, machinesList);
       dialog.ShowDialog();
 
       //update icon
@@ -693,22 +765,25 @@ namespace MySql.Notifier
       string toolTipText = string.Format("{0} ({1})\n{2}.",
                                          Properties.Resources.AppName,
                                          string.Format("{0}.{1}.{2}", version[0], version[1], version[2]),
-                                         string.Format(Properties.Resources.ToolTipText, mySQLServicesList.Services.Count, mySQLInstancesList.Count));
+                                         string.Format(Properties.Resources.ToolTipText, CountServices(), mySQLInstancesList.Count));
       notifyIcon.Text = (toolTipText.Length >= MAX_TOOLTIP_LENGHT ? toolTipText.Substring(0, MAX_TOOLTIP_LENGHT - 3) + "..." : toolTipText);
     }
 
-    private void GetWindowsEvent(string serviceName, string path, string state)
+    private void GetWindowsEvent(Machine machine, string serviceName, string path, string state)
     {
       Control c = notifyIcon.ContextMenuStrip;
 
       if (c.InvokeRequired)
       {
-        c.Invoke(new MethodInvoker(() => { GetWindowsEvent(serviceName, path, state); }));
+        c.Invoke(new MethodInvoker(() => { GetWindowsEvent(machine, serviceName, path, state); }));
       }
       else
       {
         // TODO: FIX THE WAY WMI Notifies for all services... :/
-        var service = mySQLServicesList.GetServiceByName(serviceName);
+        //TODO: ▼ search the right ServicesList on the right machine
+        //var service = mySQLServicesList.GetServiceByName(serviceName);
+        var service = machine.GetServiceByName(serviceName);
+
         ServiceControllerStatus copyPreviousStatus = ServiceControllerStatus.Stopped;
         if (service != null)
         {
@@ -728,7 +803,7 @@ namespace MySql.Notifier
           service.MenuGroup.RefreshRoot(notifyIcon.ContextMenuStrip, copyPreviousStatus);
         }
 
-        mySQLServicesList.SetServiceStatus(serviceName, path, state);
+        machine.SetServiceStatus(serviceName, path, state);
 
         if (service == null || service.UpdateTrayIconOnStatusChange)
           notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());

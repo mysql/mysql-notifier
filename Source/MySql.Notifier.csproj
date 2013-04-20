@@ -186,7 +186,6 @@
     <Compile Include="MySQLInstance.cs" />
     <Compile Include="MySQLInstancesList.cs" />
     <Compile Include="MySQLSecurity.cs" />
-    <Compile Include="AccountLogin.cs" />
     <Compile Include="NotifierSettings.cs" />
     <Compile Include="Forms\MessageDialog.cs">
       <SubType>Form</SubType>

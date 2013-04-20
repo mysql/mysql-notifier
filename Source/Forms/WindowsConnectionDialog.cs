@@ -36,6 +36,7 @@ namespace MySql.Notifier
     public WindowsConnectionDialog(Machine CurrentMachine)
     {
       InitializeComponent();
+
       //TODO UNhardcode this ▼
       //if (CurrentMachine != null)
       //{
@@ -43,10 +44,10 @@ namespace MySql.Notifier
       //  HostTextbox.Text = CurrentMachine.Name ?? String.Empty;
       //  UserTextBox.Text = CurrentMachine.User ?? String.Empty;
       //  PasswordTextbox.Text = CurrentMachine.Password ?? String.Empty;
-      //}              
-        HostTextbox.Text = "VMWIN7X64";
-        UserTextBox.Text = "Javier";
-        PasswordTextbox.Text = ",.";
+      //}
+      HostTextbox.Text = "WIN7X64VM";
+      UserTextBox.Text = "Javier";
+      PasswordTextbox.Text = ",.";
     }
 
     private void Button_Click(object sender, EventArgs e)
@@ -114,7 +115,7 @@ namespace MySql.Notifier
         {
           dialog.ShowDialog();
           HostTextbox.SelectAll();
-          RemoteMachine = null;         
+          RemoteMachine = null;
         }
       }
       return result;

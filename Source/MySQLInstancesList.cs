@@ -90,7 +90,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets or sets a list of <see cref="MySQLInstance"/> objects representing instances being monitored.
     /// </summary>
-    private List<MySQLInstance> InstancesList
+    public List<MySQLInstance> InstancesList
     {
       get
       {
@@ -114,7 +114,7 @@ namespace MySql.Notifier
     {
       get
       {
-        return InstancesList.Count;
+        return (InstancesList == null) ? 0 : InstancesList.Count;
       }
     }
 
