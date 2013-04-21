@@ -54,8 +54,8 @@ namespace MySql.Notifier
 
     public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, Machine machine = null)
     {
-      WinServiceType = (machine == null) ? ServiceMachineType.Local : ServiceMachineType.Remote;
       Host = machine ?? new Machine("localhost");
+      WinServiceType = (Host.Name == "localhost") ? ServiceMachineType.Local : ServiceMachineType.Remote;      
       NotifyOnStatusChange = notificationOnChange;
       UpdateTrayIconOnStatusChange = updatesTrayIcon;
       ServiceName = serviceName;
@@ -136,7 +136,7 @@ namespace MySql.Notifier
 
       try
       {
-        if (Host == null) throw new Exception("epic-FAIL");
+        if (Host == null) throw new Exception("NullHost Exception");
         DisplayName = serviceManagementObject.Properties["DisplayName"].Value.ToString();
         FindMatchingWBConnections();
         switch (serviceManagementObject.Properties["State"].Value.ToString())
@@ -186,7 +186,7 @@ namespace MySql.Notifier
       }
       catch (Exception)
       {
-        throw;
+        //TODO: Findout why NullHost Exception occurs and fix the root cause.
       }
     }
 

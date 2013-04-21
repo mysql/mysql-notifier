@@ -71,7 +71,7 @@ namespace MySql.Notifier
       InitializeComponent();
       serverType.SelectedIndex = 0;
       lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);
-      RemoteMachine = remoteMachine;
+      newMachine = remoteMachine ?? newMachine;
     }
 
     public List<MySQLService> ServicesToAdd { get; set; }
@@ -93,9 +93,9 @@ namespace MySql.Notifier
 
         List<ManagementObject> services = new List<ManagementObject>();
 
-        if (RemoteMachine != null && ServiceType == ServiceMachineType.Remote)
+        if (newMachine != null && ServiceType == ServiceMachineType.Remote)
         {
-          foreach (ManagementObject mo in RemoteMachine.GetServices(currentFilter))
+          foreach (ManagementObject mo in newMachine.GetServices(currentFilter))
             services.Add(mo);
         }
         else
@@ -136,7 +136,7 @@ namespace MySql.Notifier
       ServicesToAdd = new List<MySQLService>();
       foreach (ListViewItem lvi in lstServices.SelectedItems)
       {
-        ServicesToAdd.Add(new MySQLService(lvi.Tag as string, true, true, RemoteMachine));
+        ServicesToAdd.Add(new MySQLService(lvi.Tag as string, true, true, newMachine));
       }
     }
 
@@ -188,13 +188,18 @@ namespace MySql.Notifier
       ServiceType = (ServiceMachineType)serverType.SelectedIndex;
       DialogResult dr = DialogResult.None;
 
-      if (ServiceType == ServiceMachineType.Remote)
+      switch (ServiceType)
       {
-        using (var windowsConnectionDialog = new WindowsConnectionDialog(RemoteMachine))
-        {
-          dr = windowsConnectionDialog.ShowDialog();
-          RemoteMachine = (dr != DialogResult.Cancel) ? windowsConnectionDialog.RemoteMachine : RemoteMachine;
-        }
+        case ServiceMachineType.Local:
+          newMachine = new Machine("localhost");
+          break;
+        case ServiceMachineType.Remote:
+          using (var windowsConnectionDialog = new WindowsConnectionDialog(newMachine))
+          {
+            dr = windowsConnectionDialog.ShowDialog();
+            newMachine = (dr != DialogResult.Cancel) ? windowsConnectionDialog.newMachine : newMachine;
+          }
+          break;
       }
 
       RefreshList();

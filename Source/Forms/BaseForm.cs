@@ -86,6 +86,6 @@ namespace MySql.Notifier
 
   public class MachineAwareForm : BaseForm
   {
-    public Machine RemoteMachine { get; set; }
+    public Machine newMachine { get; set; }
   }
 }

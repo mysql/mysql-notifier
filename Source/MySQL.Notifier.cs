@@ -171,6 +171,7 @@ namespace MySql.Notifier
       //// Attempt migration only if services were found
       if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
       {
+        // TODO ▼ Unhardcode the index 0 based insertion.
         //// Create a local machine if it doesn't exist
         if (machinesList.Machines.Count <= 0 || machinesList.Machines[0].Name != "localhost")
         {
@@ -180,6 +181,7 @@ namespace MySql.Notifier
         //Copy services from old schema to the Local machine.
         foreach (MySQLService service in mySQLServicesList.Services)
           machinesList.Machines[0].ChangeService(ChangeListChangeType.AutoAdd, service);
+        // TODO ▲ Unhardcode the index 0 based insertion.
 
         // Clear the old list of services to erase the duplicates on the newer schema
         mySQLServicesList.Services.Clear();

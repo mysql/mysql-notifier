@@ -212,6 +212,8 @@ namespace MySql.Notifier
       //  {
       //    return true;
       //  }
+
+      // TODO ▼ Unhardcode the index 0 based insertion.
       if (MachinesList.Machines[0].Name == "localhost")
       {
         foreach (var mySqlService in MachinesList.Machines[0].Services)

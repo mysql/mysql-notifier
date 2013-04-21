@@ -93,8 +93,8 @@ namespace MySql.Notifier
           return false;
         }
 
-        RemoteMachine = new Machine(HostTextbox.Text, UserTextBox.Text, PasswordTextbox.Text);
-        result = RemoteMachine.TestConnectionUnManaged();
+        newMachine = new Machine(HostTextbox.Text, UserTextBox.Text, PasswordTextbox.Text);
+        result = newMachine.TestConnectionUnManaged();
       }
       catch (COMException ex)
       {
@@ -115,7 +115,7 @@ namespace MySql.Notifier
         {
           dialog.ShowDialog();
           HostTextbox.SelectAll();
-          RemoteMachine = null;
+          newMachine = null;
         }
       }
       return result;

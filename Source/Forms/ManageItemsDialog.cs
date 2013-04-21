@@ -255,39 +255,23 @@ namespace MySql.Notifier
 
     private void serviceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-      using (AddServiceDialog dialog = new AddServiceDialog(RemoteMachine))
+      using (AddServiceDialog dialog = new AddServiceDialog(newMachine))
       {
         if (dialog.ShowDialog() == DialogResult.OK)
         {
-          //// Attempt to add machine to the list.
-          RemoteMachine = dialog.RemoteMachine ?? new Machine("localhost");
-          if (RemoteMachine != null)
-            machinesList.ChangeMachine(dialog.RemoteMachine, ChangeListChangeType.Add);
+          machinesList.ChangeMachine(dialog.newMachine, ChangeListChangeType.Add);
 
-          Machine machine = null;
-
-          //TODO: Assign services to the correct machine...
-          if (dialog.ServiceType == ServiceMachineType.Local)
-            machine = machinesList.Machines[0];
-          else
-          {
-            machine = machinesList.Machines.FirstOrDefault(m => m.MachineIDMatch(RemoteMachine.Name, RemoteMachine.User));
-            if (machine == null)
-            {
-              machinesList.Machines.Add(RemoteMachine);
-              machine = RemoteMachine;
-            }
-          }
+          newMachine = machinesList.GetMachineByID(dialog.newMachine.Name, dialog.newMachine.User);
 
           foreach (MySQLService service in dialog.ServicesToAdd)
           {
-            if (service.WinServiceType == ServiceMachineType.Remote && machine.ContainsService(service))
+            if (service.WinServiceType == ServiceMachineType.Remote && newMachine.ContainsService(service))
             {
               InfoDialog.ShowWarningDialog("Warning", "Selected Service is already in the Monitor List");
             }
             else
             {
-              machine.ChangeService(ChangeListChangeType.Add, service);
+              newMachine.ChangeService(ChangeListChangeType.Add, service);
             }
           }
 

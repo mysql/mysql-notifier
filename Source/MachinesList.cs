@@ -22,6 +22,7 @@ namespace MySql.Notifier
   using System;
   using System.Collections.Generic;
   using System.Management;
+  using System.Linq;
   using MySql.Notifier.Properties;
 
   /// <summary>
@@ -114,7 +115,15 @@ namespace MySql.Notifier
           }
 
           OnMachineListChanged(newMachine, changeType);
+
+          if (newMachine.Name == "localhost")
+          {
+          Machines.Insert(0,newMachine);
+          }
+          else
+          {
           Machines.Add(newMachine);
+          }
 
           if (!loading)
             Settings.Default.Save();
@@ -177,14 +186,17 @@ namespace MySql.Notifier
       {
         return false;
       }
-      foreach (Machine m in Machines)
+
+      Machine newMachine = Machines.FirstOrDefault(m => m.MachineIDMatch(machine.Name, machine.User));
+
+      if (newMachine == null)
       {
-        if (m.MachineIDMatch(machine.Name, machine.User))
-        {
-          return true;
-        }
+        return false;
       }
-      return false;
+      else
+      {
+        return true;
+      }
     }
 
     public Machine GetMachineByID(string name, string user)
