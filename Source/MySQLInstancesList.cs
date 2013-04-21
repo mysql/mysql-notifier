@@ -156,8 +156,9 @@ namespace MySql.Notifier
     {
       InstancesList.Add(item);
       item.InstanceStatusChanged += SingleInstanceStatusChanged;
-      item.InstanceMonitoringFlagChanged += SingleInstanceMonitoringFlagChanged;
+      item.PropertyChanged += SingleInstancePropertyChanged;
       item.InstanceConnectionStatusTestErrorThrown += SingleInstanceConnectionStatusTestErrorThrown;
+      item.CheckInstanceStatus(false);
       Settings.Default.Save();
       StartInstanceMonitoring();
       OnInstancesListChanged(item, ListChangedType.ItemAdded);
@@ -230,7 +231,7 @@ namespace MySql.Notifier
     {
       InstancesList.Insert(index, item);
       item.InstanceStatusChanged += SingleInstanceStatusChanged;
-      item.InstanceMonitoringFlagChanged += SingleInstanceMonitoringFlagChanged;
+      item.PropertyChanged += SingleInstancePropertyChanged;
       item.InstanceConnectionStatusTestErrorThrown += SingleInstanceConnectionStatusTestErrorThrown;
       Settings.Default.Save();
       StartInstanceMonitoring();
@@ -334,8 +335,9 @@ namespace MySql.Notifier
       {
         //// Unsubscribe events as a safeguard.
         var instance = InstancesList[instanceIndex];
-        instance.InstanceMonitoringFlagChanged -= SingleInstanceMonitoringFlagChanged;
+        instance.PropertyChanged -= SingleInstancePropertyChanged;
         instance.InstanceStatusChanged -= SingleInstanceStatusChanged;
+        instance.InstanceConnectionStatusTestErrorThrown -= SingleInstanceConnectionStatusTestErrorThrown;
 
         //// Remove the instances without a Workbench connection, which means the connection no longer exists.
         if (instance.WorkbenchConnection == null)
@@ -343,10 +345,15 @@ namespace MySql.Notifier
           RemoveAt(instanceIndex--);
         }
 
+        //// Subscribe to instance events.
+        instance.PropertyChanged += SingleInstancePropertyChanged;
+        instance.InstanceStatusChanged += SingleInstanceStatusChanged;
+        instance.InstanceConnectionStatusTestErrorThrown += SingleInstanceConnectionStatusTestErrorThrown;
+
         //// Check the instance's connection status now or restore the monitor timeout if possible.
         if (initialRefresh)
         {
-          instance.CheckInstanceStatus();
+          instance.CheckInstanceStatus(true);
           instance.SetupMenuGroup();
           OnInstancesListChanged(instance, ListChangedType.ItemAdded);
         }
@@ -358,11 +365,6 @@ namespace MySql.Notifier
             instance.SecondsToMonitorInstance = _instanceMonitoringTimeouts[instance.WorkbenchConnectionId];
           }
         }
-
-        //// Subscribe to instance events.
-        instance.InstanceMonitoringFlagChanged += SingleInstanceMonitoringFlagChanged;
-        instance.InstanceStatusChanged += SingleInstanceStatusChanged;
-        instance.InstanceConnectionStatusTestErrorThrown += SingleInstanceConnectionStatusTestErrorThrown;
       }
 
       StartInstanceMonitoring();
@@ -432,13 +434,24 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Event delegate method fired when a MySQL instance monitoring flag value changes.
+    /// Event delegate method fired when a MySQL instance property value changes.
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="args">Event arguments.</param>
-    private void SingleInstanceMonitoringFlagChanged(object sender, InstanceMonitoringFlagChangedArgs args)
+    private void SingleInstancePropertyChanged(object sender, PropertyChangedEventArgs args)
     {
-      StartInstanceMonitoring();
+      MySQLInstance instance = sender as MySQLInstance;
+      switch (args.PropertyName)
+      {
+        case "MonitorAndNotifyStatus":
+          StartInstanceMonitoring();
+          OnInstancesListChanged(instance, ListChangedType.ItemChanged);
+          break;
+
+        case "UpdateTrayIconOnStatusChange":
+          OnInstancesListChanged(instance, ListChangedType.ItemChanged);
+          break;
+      }
     }
 
     /// <summary>

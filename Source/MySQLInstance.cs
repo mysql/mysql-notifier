@@ -23,6 +23,7 @@ namespace MySql.Notifier
   using System.Collections.Generic;
   using System.ComponentModel;
   using System.Linq;
+  using System.Windows.Forms;
   using System.Xml;
   using System.Xml.Serialization;
   using MySql.Data.MySqlClient;
@@ -32,24 +33,19 @@ namespace MySql.Notifier
   /// A MySQL Server instance that can be reached through a <see cref="MySqlWorkbenchConnection"/>.
   /// </summary>
   [Serializable]
-  public class MySQLInstance
+  public class MySQLInstance : INotifyPropertyChanged
   {
     /// <summary>
     /// Default monitoring interval in seconds for a MySQL instance, set to 10 minutes.
     /// </summary>
-    public const int DEFAULT_MONITORING_INTERVAL = 600;
+    public const int DEFAULT_MONITORING_INTERVAL = 10;
 
     /// <summary>
     /// Default monitoring interval unit of measures, set to seconds by default.
     /// </summary>
-    public const IntervalUnitOfMeasure DEFAULT_MONITORING_UOM = IntervalUnitOfMeasure.Seconds;
+    public const IntervalUnitOfMeasure DEFAULT_MONITORING_UOM = IntervalUnitOfMeasure.Minutes;
 
     #region Fields
-
-    /// <summary>
-    /// The Id of the <see cref="MySqlWorkbenchConnection"/> connection.
-    /// </summary>
-    private string _workbenchConnectionId;
 
     /// <summary>
     /// Flag indicating if this instance is being monitored and status changes notified to users.
@@ -82,9 +78,19 @@ namespace MySql.Notifier
     private double _secondsToMonitorInstance;
 
     /// <summary>
+    /// Flag indicating whether status changes of this instance trigger an update of the tray icon.
+    /// </summary>
+    private bool _updateTrayIconOnStatusChange;
+
+    /// <summary>
     /// A <see cref="MySqlWorkbenchConnection"/> object with the connection properties for this instance.
     /// </summary>
     private MySqlWorkbenchConnection _workbenchConnection;
+
+    /// <summary>
+    /// The Id of the <see cref="MySqlWorkbenchConnection"/> connection.
+    /// </summary>
+    private string _workbenchConnectionId;
 
     #endregion Fields
 
@@ -99,11 +105,11 @@ namespace MySql.Notifier
       _monitorAndNotifyStatus = true;
       _relatedConnections = null;
       _oldInstanceStatus = MySqlWorkbenchConnection.ConnectionStatusType.Unknown;
+      _updateTrayIconOnStatusChange = true;
       _workbenchConnection = null;
       ConnectionTestInProgress = false;
       MenuGroup = null;
       SecondsToMonitorInstance = MonitoringIntervalInSeconds;
-      UpdateTrayIconOnStatusChange = true;
     }
 
     /// <summary>
@@ -145,16 +151,9 @@ namespace MySql.Notifier
     #region Events
 
     /// <summary>
-    /// Event handler delegate for the <see cref="InstanceMonitoringFlagChanged"/> event.
+    /// Event occurring when a property value changes.
     /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="args">Event arguments.</param>
-    public delegate void InstanceMonitoringFlagChangedEventHandler(object sender, InstanceMonitoringFlagChangedArgs args);
-
-    /// <summary>
-    /// Event ocurring when the value of the <see cref="MonitorAndNotifyStatus"/> property changes.
-    /// </summary>
-    public event InstanceMonitoringFlagChangedEventHandler InstanceMonitoringFlagChanged;
+    public event PropertyChangedEventHandler PropertyChanged;
 
     /// <summary>
     /// Event handler delegate for the <see cref="InstanceStatusChanged"/> event.
@@ -256,10 +255,7 @@ namespace MySql.Notifier
         if (lastValue != value)
         {
           SecondsToMonitorInstance = MonitoringIntervalInSeconds;
-        }
-        else
-        {
-          OnInstanceMonitoringFlagChanged(lastValue, value);
+          OnPropertyChanged("MonitorAndNotifyStatus");
         }
       }
     }
@@ -282,6 +278,7 @@ namespace MySql.Notifier
         if (lastValue != value)
         {
           SecondsToMonitorInstance = MonitoringIntervalInSeconds;
+          OnPropertyChanged("MonitoringInterval");
         }
       }
     }
@@ -331,6 +328,7 @@ namespace MySql.Notifier
         if (lastValue != value)
         {
           SecondsToMonitorInstance = MonitoringIntervalInSeconds;
+          OnPropertyChanged("MonitoringIntervalUnitOfMeasure");
         }
       }
     }
@@ -394,8 +392,10 @@ namespace MySql.Notifier
         if (_secondsToMonitorInstance <= 0)
         {
           _secondsToMonitorInstance = MonitoringIntervalInSeconds;
-          CheckInstanceStatus();
+          CheckInstanceStatus(true);
         }
+
+        OnPropertyChanged("SecondsToMonitorInstance");
       }
     }
 
@@ -403,7 +403,19 @@ namespace MySql.Notifier
     /// Gets or sets a value indicating whether status changes of this instance trigger an update of the tray icon.
     /// </summary>
     [XmlAttribute(AttributeName = "UpdateTrayIconOnStatusChange")]
-    public bool UpdateTrayIconOnStatusChange { get; set; }
+    public bool UpdateTrayIconOnStatusChange
+    {
+      get
+      {
+        return _updateTrayIconOnStatusChange;
+      }
+
+      set
+      {
+        _updateTrayIconOnStatusChange = value;
+        OnPropertyChanged("UpdateTrayIconOnStatusChange");
+      }
+    }
 
     /// <summary>
     /// Gets a <see cref="MySqlWorkbenchConnection"/> object with the connection properties for this instance.
@@ -434,6 +446,7 @@ namespace MySql.Notifier
         }
 
         SetupMenuGroup();
+        OnPropertyChanged("WorkbenchConnection");
       }
     }
 
@@ -455,6 +468,8 @@ namespace MySql.Notifier
         {
           WorkbenchConnection = MySqlWorkbench.Connections.First(conn => conn.Id == _workbenchConnectionId);
         }
+
+        OnPropertyChanged("WorkbenchConnectionId");
       }
     }
 
@@ -475,7 +490,8 @@ namespace MySql.Notifier
     /// <summary>
     /// Checks if this instance can connect to its corresponding MySQL Server instance with its Workbench connection.
     /// </summary>
-    public void CheckInstanceStatus()
+    /// <param name="asynchronous">Flag indicating if the status check is run asynchronously or synchronously.</param>
+    public void CheckInstanceStatus(bool asynchronous)
     {
       if (WorkbenchConnection == null || ConnectionTestInProgress)
       {
@@ -484,12 +500,23 @@ namespace MySql.Notifier
 
       ConnectionTestInProgress = true;
       _oldInstanceStatus = ConnectionStatus;
-      BackgroundWorker worker = new BackgroundWorker();
-      worker.WorkerSupportsCancellation = false;
-      worker.WorkerReportsProgress = false;
-      worker.DoWork += new DoWorkEventHandler(CheckInstanceStatusWorkerDoWork);
-      worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(CheckInstanceStatusWorkerCompleted);
-      worker.RunWorkerAsync();
+
+      if (asynchronous)
+      {
+        BackgroundWorker worker = new BackgroundWorker();
+        worker.WorkerSupportsCancellation = false;
+        worker.WorkerReportsProgress = false;
+        worker.DoWork += new DoWorkEventHandler(CheckInstanceStatusWorkerDoWork);
+        worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(CheckInstanceStatusWorkerCompleted);
+        worker.RunWorkerAsync();
+      }
+      else
+      {
+        Cursor.Current = Cursors.WaitCursor;
+        CheckInstanceStatusWorkerDoWork(this, new DoWorkEventArgs(null));
+        CheckInstanceStatusWorkerCompleted(this, new RunWorkerCompletedEventArgs(null, null, false));
+        Cursor.Current = Cursors.Default;
+      }
     }
 
     /// <summary>
@@ -529,21 +556,17 @@ namespace MySql.Notifier
       WorkbenchConnection.TestConnection(out ex);
       if (ex != null && ex is MySqlException)
       {
-        //MySqlException mySqlEx = ex as MySqlException;
-        OnInstanceStatusTestErrorThrown(ex);
-      }
-    }
+        MySqlException mySqlEx = ex as MySqlException;
+        switch (mySqlEx.Number)
+        {
+          case 1042:
+            //// Unable to connect to any of the specified MySQL hosts.
+            break;
 
-    /// <summary>
-    /// Fires the <see cref="InstanteMonitoringFlagChanged"/> event.
-    /// </summary>
-    /// <param name="oldValue">Old value of the instance monitoring flag.</param>
-    /// <param name="newValue">New value of the instance monitoring flag.</param>
-    private void OnInstanceMonitoringFlagChanged(bool oldValue, bool newValue)
-    {
-      if (InstanceMonitoringFlagChanged != null)
-      {
-        InstanceMonitoringFlagChanged(this, new InstanceMonitoringFlagChangedArgs(oldValue, newValue));
+          default:
+            OnInstanceStatusTestErrorThrown(ex);
+            break;
+        }
       }
     }
 
@@ -570,33 +593,18 @@ namespace MySql.Notifier
         InstanceConnectionStatusTestErrorThrown(this, new InstanceConnectionStatusTestErrorThrownArgs(this, ex));
       }
     }
-  }
 
-  /// <summary>
-  /// Provides information for the <see cref="InstanteMonitoringFlagChanged"/> event.
-  /// </summary>
-  public class InstanceMonitoringFlagChangedArgs : EventArgs
-  {
     /// <summary>
-    /// Initializes a new instance of the <see cref="InstanceMonitoringFlagChangedArgs"/> class.
+    /// Raises the <see cref="PropertyChanged"/> event.
     /// </summary>
-    /// <param name="oldValue">Old value of the instance monitoring flag.</param>
-    /// <param name="newValue">New value of the instance monitoring flag.</param>
-    public InstanceMonitoringFlagChangedArgs(bool oldValue, bool newValue)
+    /// <param name="propertyName">The name of the property that changed.</param>
+    private void OnPropertyChanged(string propertyName)
     {
-      NewValue = newValue;
-      OldValue = oldValue;
+      if (PropertyChanged != null)
+      {
+        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+      }
     }
-
-    /// <summary>
-    /// Gets the new value of the instance monitoring flag.
-    /// </summary>
-    public bool NewValue { get; private set; }
-
-    /// <summary>
-    /// Gets the old value of the instance monitoring flag.
-    /// </summary>
-    public bool OldValue { get; private set; }
   }
 
   /// <summary>

@@ -179,7 +179,7 @@ namespace MySql.Notifier
       // HostnameColumnHeader
       // 
       this.HostnameColumnHeader.Text = "Host";
-      this.HostnameColumnHeader.Width = 152;
+      this.HostnameColumnHeader.Width = 145;
       // 
       // PortColumnHeader
       // 

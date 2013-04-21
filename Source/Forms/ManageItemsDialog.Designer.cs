@@ -259,7 +259,7 @@ namespace MySql.Notifier
       // columnHeader1
       // 
       this.columnHeader1.Text = "Name";
-      this.columnHeader1.Width = 301;
+      this.columnHeader1.Width = 266;
       // 
       // columnHeader2
       // 
@@ -268,7 +268,7 @@ namespace MySql.Notifier
       // columnHeader3
       // 
       this.columnHeader3.Text = "Status";
-      this.columnHeader3.Width = 127;
+      this.columnHeader3.Width = 114;
       // 
       // AddButtonContextMenuStrip
       // 

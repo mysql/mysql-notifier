@@ -40,9 +40,7 @@ namespace MySql.Notifier
     private NotifyIcon notifyIcon;
 
     private MySQLServicesList mySQLServicesList { get; set; }
-
     private MySQLInstancesList mySQLInstancesList { get; set; }
-
     private MachinesList machinesList { get; set; }
 
     private List<ManagementEventWatcher> watchers = new List<ManagementEventWatcher>();
@@ -64,22 +62,15 @@ namespace MySql.Notifier
       InitializeMySQLWorkbenchStaticSettings();
 
       components = new System.ComponentModel.Container();
-      notifyIcon = new NotifyIcon(components)
-                    {
-                      ContextMenuStrip = new ContextMenuStrip(),
-                      Icon = Icon.FromHandle(GetIconForNotifier().GetHicon()),
-                      Visible = true
-                    };
-
+      notifyIcon = new NotifyIcon(components);
+      notifyIcon.Visible = true;
+      RefreshNotifierIcon();
       notifyIcon.MouseClick += notifyIcon_MouseClick;
-      notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
-
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
       notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleTextServiceStatus;
 
       //// Setup instances list
       mySQLInstancesList = new MySQLInstancesList();
-      if (mySQLInstancesList.InstancesList == null) mySQLInstancesList.InstancesList = new List<MySQLInstance>();
       mySQLInstancesList.InstanceStatusChanged += MySQLInstanceStatusChanged;
       mySQLInstancesList.InstancesListChanged += MySQLInstancesListChanged;
       mySQLInstancesList.InstanceConnectionStatusTestErrorThrown += MySQLInstanceConnectionStatusTestErrorThrown;
@@ -90,7 +81,9 @@ namespace MySql.Notifier
 
       MigrateOldServices();
 
+      RebuildMenuIfNeeded(false);
       previousServicesAndInstancesQuantity = CountServices() + mySQLInstancesList.Count;
+      SetNotifyIconToolTip();
 
       //// Create watcher for WB files
       string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -112,7 +105,7 @@ namespace MySql.Notifier
       if (Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0)
       {
         var location = Utility.GetInstallLocation("MySQL Notifier");
-        if (!String.IsNullOrEmpty(location) && mySQLInstancesList.Count > 0)
+        if (!String.IsNullOrEmpty(location))
         {
           Utility.CreateScheduledTask("MySQLNotifierTask", location + @"MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, false, Utility.GetOsVersion() == Utility.OSVersion.WindowsXp);
         }
@@ -130,21 +123,17 @@ namespace MySql.Notifier
         m.ServiceListChanged += new Machine.ServiceListChangedHandler(mySQLServicesList_ServiceListChanged);
       }
 
-      //// Setup instances list
-      mySQLInstancesList = new MySQLInstancesList();
-
       //TODO: Restore this ▼ function, handle machines unable to connect, dialogs and all...
       //UpdateListToRemoveDeletedServices();
 
-      AddStaticMenuItems();
-      UpdateStaticMenuItems();
-
-      SetNotifyIconToolTip();
+      //// Load instances
+      mySQLInstancesList.RefreshInstances(true);
 
       StartWatcherForFile(applicationDataFolderPath + @"\Oracle\MySQL Notifier\settings.config", settingsFile_Changed);
 
       WatchForServiceChanges();
       WatchForServiceDeletion();
+      RefreshNotifierIcon();
 
       //// Migrate Notifier connections to the MySQL Workbench connections file if possible.
       MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
@@ -330,7 +319,7 @@ namespace MySql.Notifier
     {
       //TODO: ▼ search the right ServicesList on the right machine
       machine.ChangeService(ChangeListChangeType.Remove, service);
-      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+      RefreshNotifierIcon();
       if (!Settings.Default.NotifyOfStatusChange) return;
       SetNotifyIconToolTip();
       ShowTooltip(false, Resources.BalloonTitleTextServiceList, String.Format(Resources.ServiceRemoved, service.ServiceName), 1500);
@@ -419,7 +408,7 @@ namespace MySql.Notifier
       Settings.Default.UpdateCheck |= (int)SoftwareUpdateStaus.Notified;
       Settings.Default.Save();
 
-      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+      RefreshNotifierIcon();
     }
 
     /// <summary>
@@ -524,7 +513,7 @@ namespace MySql.Notifier
 
       if (CountServices() + mySQLInstancesList.Count > 0)
       {
-        ToolStripMenuItem actionsMenu = new ToolStripMenuItem("Actions", null);
+        ToolStripMenuItem actionsMenu = new ToolStripMenuItem(Resources.Actions, null);
         actionsMenu.DropDown = menu;
         notifyIcon.ContextMenuStrip.Items.Add(actionsMenu);
       }
@@ -561,14 +550,20 @@ namespace MySql.Notifier
     /// Checks if the context menus need to be rebuilt.
     /// </summary>
     /// <param name="itemRemoved">Flag indicating if a service or instance was removed.</param>
-    private void RebuildMenuIfNeeded(bool itemRemoved)
+    /// <returns>true if the menu was rebuilt, false otherwise.</returns>
+    private bool RebuildMenuIfNeeded(bool itemRemoved)
     {
-      if ((mySQLServicesList.Services.Count + mySQLInstancesList.Count == 0 && itemRemoved) ||
+      bool menuWasRebuilt = false;
+
+      if ((CountServices() + mySQLInstancesList.Count == 0 && itemRemoved) ||
          (previousServicesAndInstancesQuantity == 0 && !itemRemoved))
       {
         ReBuildMenu();
-        previousServicesAndInstancesQuantity = mySQLServicesList.Services.Count + mySQLInstancesList.Count;
+        previousServicesAndInstancesQuantity = CountServices() + mySQLInstancesList.Count;
+        menuWasRebuilt = true;
       }
+
+      return menuWasRebuilt;
     }
 
     private void ServiceListChanged(MySQLService service, ChangeListChangeType changeType)
@@ -659,7 +654,7 @@ namespace MySql.Notifier
 
       if (service.UpdateTrayIconOnStatusChange)
       {
-        notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+        RefreshNotifierIcon();
       }
 
       ShowTooltip(false, Resources.BalloonTitleTextServiceStatus, string.Format(Resources.BalloonTextServiceStatus, args.ServiceDisplayName, args.PreviousStatus.ToString(), args.CurrentStatus.ToString()), 1500);
@@ -670,8 +665,8 @@ namespace MySql.Notifier
       ManageItemsDialog dialog = new ManageItemsDialog(mySQLInstancesList, machinesList);
       dialog.ShowDialog();
 
-      //update icon
-      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+      //// Update icon
+      RefreshNotifierIcon();
     }
 
     private void launchInstallerItem_Click(object sender, EventArgs e)
@@ -716,9 +711,11 @@ namespace MySql.Notifier
       OptionsDialog dialog = new OptionsDialog();
       dialog.ShowDialog();
 
-      // if there was a change in the setting for the icons then refresh Icon
+      //// If there was a change in the setting for the icons then refresh Icon
       if (usecolorfulIcons != Properties.Settings.Default.UseColorfulStatusIcons)
-        notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+      {
+        RefreshNotifierIcon();
+      }
     }
 
     private void InstallAvailablelUpdates_Click(object sender, EventArgs e)
@@ -726,7 +723,7 @@ namespace MySql.Notifier
       launchInstallerItem_Click(null, EventArgs.Empty);
       Settings.Default.UpdateCheck = 0;
       Settings.Default.Save();
-      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+      RefreshNotifierIcon();
     }
 
     private void IgnoreAvailableUpdateItem_Click(object sender, EventArgs e)
@@ -737,7 +734,7 @@ namespace MySql.Notifier
       {
         Settings.Default.UpdateCheck = 0;
         Settings.Default.Save();
-        notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+        RefreshNotifierIcon();
       }
     }
 
@@ -808,7 +805,9 @@ namespace MySql.Notifier
         machine.SetServiceStatus(serviceName, path, state);
 
         if (service == null || service.UpdateTrayIconOnStatusChange)
-          notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+        {
+          RefreshNotifierIcon();
+        }
       }
     }
 
@@ -897,15 +896,18 @@ namespace MySql.Notifier
         case ListChangedType.ItemDeleted:
           SetupMySQLInstancesMainMenuItem();
           args.Instance.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);
+          RefreshNotifierIcon();
           break;
 
         case ListChangedType.ItemChanged:
           args.Instance.MenuGroup.Update();
+          RefreshNotifierIcon();
           break;
 
         case ListChangedType.Reset:
           SetupMySQLInstancesMainMenuItem();
           mySQLInstancesList.RefreshInstances(false);
+          RefreshNotifierIcon();
           break;
       }
     }
@@ -920,17 +922,15 @@ namespace MySql.Notifier
       args.Instance.MenuGroup.Update();
       notifyIcon.ContextMenuStrip.Refresh();
 
-      if (!args.Instance.MonitorAndNotifyStatus)
+      if (args.OldInstanceStatus != MySqlWorkbenchConnection.ConnectionStatusType.Unknown && args.Instance.MonitorAndNotifyStatus)
       {
-        return;
+        ShowTooltip(false, Resources.BalloonTitleTextInstanceStatus, string.Format(Resources.BalloonTextInstanceStatus, args.Instance.HostIdentifier, args.NewInstanceStatusText), 1500);
       }
 
       if (args.Instance.UpdateTrayIconOnStatusChange)
       {
-        Icon.FromHandle(GetIconForNotifier().GetHicon());
+        RefreshNotifierIcon();
       }
-
-      ShowTooltip(false, Resources.BalloonTitleTextInstanceStatus, string.Format(Resources.BalloonTextInstanceStatus, args.Instance.HostIdentifier, args.NewInstanceStatusText), 1500);
     }
 
     /// <summary>
@@ -941,6 +941,14 @@ namespace MySql.Notifier
     private void MySQLInstanceConnectionStatusTestErrorThrown(object sender, InstanceConnectionStatusTestErrorThrownArgs args)
     {
       ShowTooltip(true, Resources.ErrorTitle, string.Format(Resources.BalloonTextFailedStatusCheck, args.Instance.HostIdentifier, args.ErrorException.Message), 1500);
+    }
+
+    /// <summary>
+    /// Refreshes the Notifier main icon based on current services and instances statuses.
+    /// </summary>
+    private void RefreshNotifierIcon()
+    {
+      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
     }
 
     /// <summary>
