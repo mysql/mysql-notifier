@@ -187,8 +187,8 @@ namespace MySql.Notifier
     {
       string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
       MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
-      MySqlWorkbench.ExternalApplicationConnectionsFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\connections.xml";
       MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\user_data.dat";
+      MySqlWorkbench.ExternalApplicationConnectionsFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\connections.xml";
       MySQLSourceTrace.LogFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier";
       MySQLSourceTrace.SourceTraceClass = "MySqlNotifier";
     }
@@ -422,9 +422,12 @@ namespace MySql.Notifier
       MySqlWorkbench.LoadData();
       mySQLInstancesList.RefreshInstances(false);
 
-      foreach (var item in mySQLServicesList.Services)
+      foreach (Machine machine in machinesList.Machines)
       {
-        item.MenuGroup.RefreshMenu(notifyIcon.ContextMenuStrip);
+        foreach (var item in machine.Services)
+        {
+          item.MenuGroup.RefreshMenu(notifyIcon.ContextMenuStrip);
+        }
       }
     }
 
@@ -444,23 +447,12 @@ namespace MySql.Notifier
       if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
       {
         MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        // TODO: FIX ▼ mi.Invoke(notifyIcon, null); and dispose of the null check
-        if (mi != null)
-          if (notifyIcon != null)
-            mi.Invoke(notifyIcon, null);
+        mi.Invoke(notifyIcon, null);
       }
     }
 
-    // TODO: UPDATE every ContextMenuStrip Method ▲▼ to use machineList instead of mySQLServicesList.
     private void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
     {
-      foreach (Machine machine in machinesList.Machines)
-      {
-        foreach (MySQLService service in machine.Services)
-          if (service.WinServiceType == ServiceMachineType.Local)
-            service.MenuGroup.Update();
-      }
       UpdateStaticMenuItems();
     }
 

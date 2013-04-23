@@ -58,7 +58,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Initializes a new instance of the <see cref="MonitorMySQLServerInstancesDialog"/> class.
     /// </summary>
-    /// <param name="servicesList">List of <see cref="MySQLService"/> objects monitored by the Notifier.</param>
+    /// <param name="machinesList">List of <see cref="MySQLService"/> objects monitored by the Notifier.</param>
     /// <param name="instancesList">List of names of MySQL instance monitored by the Notifier.</param>
     public MonitorMySQLServerInstancesDialog(MachinesList machinesList, MySQLInstancesList instancesList)
     {
@@ -99,7 +99,7 @@ namespace MySql.Notifier
     public MySQLInstancesList MySQLInstancesList { get; private set; }
 
     /// <summary>
-    /// Gets a list of <see cref="MySQLService"/> objects monitored by the Notifier.
+    /// Gets a list of <see cref="Machine"/> objects monitored by the Notifier.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public MachinesList MachinesList { get; private set; }
@@ -156,6 +156,35 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Event delegate method fired when the <see cref="ConnectionsContextMenuStrip"/> context menu is being opened.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments</param>
+    private void ConnectionsContextMenuStrip_Opening(object sender, CancelEventArgs e)
+    {
+      DeleteConnectionToolStripMenuItem.Visible = WorkbenchConnectionsListView.SelectedItems.Count > 0;
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="DeleteConnectionToolStripMenuItem"/> context menu item is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void DeleteConnectionToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      if (WorkbenchConnectionsListView.SelectedItems.Count == 0)
+      {
+        return;
+      }
+
+      var workbenchConnection = WorkbenchConnectionsListView.SelectedItems[0].Tag as MySqlWorkbenchConnection;
+      if (MySqlWorkbench.Connections.DeleteConnection(workbenchConnection.Id))
+      {
+        RefreshMySQLInstancesList(true);
+      }
+    }
+
+    /// <summary>
     /// Event delegate method fired when the <see cref="DialogOKButton"/> button is clicked.
     /// </summary>
     /// <param name="sender">Sender object.</param>
@@ -206,18 +235,15 @@ namespace MySql.Notifier
     /// <returns><see cref="true"/> if the connection is already being monitored, <see cref="false"/> otherwise.</returns>
     private bool IsWorkbenchConnectionAlreadyMonitored(MySqlWorkbenchConnection connection)
     {
-      //foreach (var mySqlService in MySQLServicesList.Services)
-      //{
-      //  if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Id == connection.Id))
-      //  {
-      //    return true;
-      //  }
-
-      // TODO ▼ Unhardcode the index 0 based insertion.
-      if (MachinesList.Machines[0].Name == "localhost")
+      foreach (var machine in MachinesList.Machines)
       {
-        foreach (var mySqlService in MachinesList.Machines[0].Services)
+        foreach (var mySqlService in machine.Services)
         {
+          if (mySqlService.WorkbenchConnections == null)
+          {
+            continue;
+          }
+
           if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Name == connection.Name))
           {
             return true;
