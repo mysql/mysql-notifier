@@ -31,17 +31,6 @@ namespace MySql.Notifier
   /// </summary>
   public class ServiceMenuGroup
   {
-    private ToolStripMenuItem statusMenu;
-    private ToolStripMenuItem startMenu;
-    private ToolStripMenuItem stopMenu;
-    private ToolStripMenuItem restartMenu;
-    private ToolStripMenuItem configureMenu;
-    private ToolStripMenuItem editorMenu;
-    private ToolStripSeparator separator;
-    private MySQLService boundService;
-
-    private delegate void menuRefreshDelegate(ContextMenuStrip menu);
-
     public ServiceMenuGroup(MySQLService mySQLBoundService)
     {
       boundService = mySQLBoundService;
@@ -75,6 +64,38 @@ namespace MySql.Notifier
       statusMenu.DropDownItems.Add(restartMenu);
 
       Update();
+    }
+
+    private ToolStripMenuItem statusMenu;
+    private ToolStripMenuItem startMenu;
+    private ToolStripMenuItem stopMenu;
+    private ToolStripMenuItem restartMenu;
+    private ToolStripMenuItem configureMenu;
+    private ToolStripMenuItem editorMenu;
+    private ToolStripSeparator separator;
+    private MySQLService boundService;
+    private Machine boundMachine;
+
+    /// <summary>
+    /// Finds the menu item's index within a context menu strip corresponding to the menu item with the given text.
+    /// </summary>
+    /// <param name="menu"><see cref="ContextMenuStrip"/> containing the itemText to find.</param>
+    /// <param name="menuItemText">Menu item text.</param>
+    /// <returns>Index of the dound menu itemText, -1 if  not found.</returns>
+    public static int FindMenuItemWithinMenuStrip(ContextMenuStrip menu, string menuItemText)
+    {
+      int index = -1;
+
+      for (int i = 0; i < menu.Items.Count; i++)
+      {
+        if (menu.Items[i].Text.ToString().StartsWith(menuItemText))
+        {
+          index = i;
+          break;
+        }
+      }
+
+      return index;
     }
 
     private void CreateEditorMenus()
@@ -170,7 +191,7 @@ namespace MySql.Notifier
       }
     }
 
-    public void AddToContextMenu(ContextMenuStrip menu)
+    public void AddToContextMenu(ContextMenuStrip menu, int index = 0)
     {
       if (menu.InvokeRequired)
       {
@@ -178,14 +199,13 @@ namespace MySql.Notifier
       }
       else
       {
-        int index = 0;
-        menu.Items.Insert(index++, statusMenu);
+        menu.Items.Insert(index, statusMenu);
         if (boundService.IsRealMySQLService)
         {
-          if (configureMenu != null) menu.Items.Insert(index++, configureMenu);
-          if (editorMenu != null) menu.Items.Insert(index++, editorMenu);
+          if (configureMenu != null) menu.Items.Insert(index, configureMenu);
+          if (editorMenu != null) menu.Items.Insert(index, editorMenu);
         }
-        menu.Items.Insert(index++, separator);
+        menu.Items.Insert(index, separator);
       }
     }
 
@@ -307,6 +327,8 @@ namespace MySql.Notifier
         }
       }
     }
+
+    private delegate void menuRefreshDelegate(ContextMenuStrip menu);
 
     public void RefreshRoot(ContextMenuStrip menu, ServiceControllerStatus previousStatus)
     {

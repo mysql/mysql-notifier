@@ -23,14 +23,11 @@ namespace MySql.Notifier
   using System.Collections.Generic;
   using System.Management;
   using System.Runtime.InteropServices;
-  using System.Text.RegularExpressions;
   using System.Xml.Serialization;
-  using Microsoft.Win32;
   using MySql.Notifier.Properties;
-  using MySQL.Utility;
 
   /// <summary>
-  /// TODO: Refine this class ▼
+  /// The machine class contains all the information required to connect to a remote host, plus a list of of the services that will be monitored by Notifier inside it and logic to manage them.
   /// </summary>
   [Serializable]
   public class Machine
@@ -54,13 +51,19 @@ namespace MySql.Notifier
     }
 
     [XmlIgnore]
+    public Status Status
+    {
+      get { return IsOnline ? Status.Online : Status.Unavailable; }
+    }
+
+    [XmlIgnore]
     public bool IsOnline
     {
       get { return CanConnect(); }
     }
 
     /// <summary>
-    /// Default constructor. DO NOT REMOVE. Required for serialization-deserialization.
+    /// DO NOT REMOVE. Default constructor required for serialization-deserialization.
     /// </summary>
     public Machine()
     {
@@ -69,10 +72,10 @@ namespace MySql.Notifier
     /// <summary>
     /// Constructor designed for local machines
     /// </summary>
-    /// <param name="name"></param>
+    /// <param name="name">localhost</param>
     public Machine(string name)
     {
-      Name = (name == "localhost") ? name : name.ToUpper();
+      Name = "localhost";
       User = String.Empty;
       Password = String.Empty;
       Services = new List<MySQLService>();
@@ -81,9 +84,9 @@ namespace MySql.Notifier
     /// <summary>
     /// Constructor designed for remote machines
     /// </summary>
-    /// <param name="name"></param>
-    /// <param name="user"></param>
-    /// <param name="password"></param>
+    /// <param name="name">Host name</param>
+    /// <param name="user">User name</param>
+    /// <param name="password">Password</param>
     public Machine(string name, string user, string password)
     {
       Name = (name == "localhost") ? name : name.ToUpper();
@@ -96,14 +99,9 @@ namespace MySql.Notifier
     /// Returns true or false if the application is able to connect to the machine.
     /// </summary>
     /// <returns></returns>
-    public bool CanConnect()
+    private bool CanConnect()
     {
       return (TestConnectionManaged() == ServiceProblem.None);
-    }
-
-    public bool MachineIDMatch(string host, string user)
-    {
-      return (String.Compare(Name, host, true) == 0 && String.Compare(User, user, true) == 0);
     }
 
     /// <summary>
@@ -196,131 +194,103 @@ namespace MySql.Notifier
       return new ManagementScope(@"\\" + Name + @"\root\cimv2", co);
     }
 
-    private MySQLStartupParameters GetStartupParameters(MySQLService mysqlService)
+    /// <summary>
+    /// Load Calculated, Machine dependant parameters
+    /// </summary>
+    internal void LoadServiceParameters()
     {
-      MySQLStartupParameters parameters = new MySQLStartupParameters();
-      parameters.PipeName = "mysql";
+      if (Services == null)
+        Services = new List<MySQLService>();
 
-      //// Get our host information
-      parameters.HostName = (mysqlService.WinServiceType == ServiceMachineType.Local) ? "localhost" : Name;
-      parameters.HostIPv4 = Utility.GetIPv4ForHostName(parameters.HostName);
+      // We have to manually call our service list changed event handler since that isn't done with how we are using settings
+      foreach (MySQLService service in Services)
+      {
+        service.Host = this;
+        service.SetServiceParameters();
 
-      if (mysqlService.WinServiceType != ServiceMachineType.Local) return parameters;
-      RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format(@"SYSTEM\CurrentControlSet\Services\{0}", mysqlService.ServiceName));
-      if (key == null) return parameters;
-
-      string imagepath = (string)key.GetValue("ImagePath", null);
-      key.Close();
-
-      if (imagepath == null) return parameters;
-
-      string[] args = Utility.SplitArgs(imagepath);
-      mysqlService.SeeIfRealMySQLService(args[0]);
-
-      //// Parse our command line args
-      Mono.Options.OptionSet p = new Mono.Options.OptionSet()
-        .Add("defaults-file=", "", v => parameters.DefaultsFile = v)
-        .Add("port=|P=", "", v => Int32.TryParse(v, out parameters.Port))
-        .Add("enable-named-pipe", v => parameters.NamedPipesEnabled = true)
-        .Add("socket=", "", v => parameters.PipeName = v);
-      p.Parse(args);
-      if (parameters.DefaultsFile == null) return parameters;
-
-      //// We have a valid defaults file
-      IniFile f = new IniFile(parameters.DefaultsFile);
-      Int32.TryParse(f.ReadValue("mysqld", "port", parameters.Port.ToString()), out parameters.Port);
-      parameters.PipeName = f.ReadValue("mysqld", "socket", parameters.PipeName);
-
-      //// Now see if named pipes are enabled
-      parameters.NamedPipesEnabled = parameters.NamedPipesEnabled || f.HasKey("mysqld", "enable-named-pipe");
-
-      return parameters;
+        if (service.ServiceName != null && service.Problem != ServiceProblem.ServiceDoesNotExist)
+        {
+          service.StatusChanged += new MySQLService.StatusChangedHandler(OnServiceStatusChanged);
+          service.StatusChangeError += new MySQLService.StatusChangeErrorHandler(OnMachineConnectionError);
+          OnServiceListChanged(service, ChangeType.Add);
+        }
+        else
+        {
+          Services.Remove(service);
+        }
+      }
     }
 
-    #region Services Management
-
-    public void ChangeService(ChangeListChangeType changeType, MySQLService service)
+    /// <summary>
+    /// Add or Delete a Service for current machine
+    /// </summary>
+    /// <param name="service">MySQLService instance</param>
+    /// <param name="changeType">Add/Delete</param>
+    public void ChangeService(MySQLService service, ChangeType changeType)
     {
-      //TODO: ▼ Check all this is correct
       switch (changeType)
       {
-        case ChangeListChangeType.Add:
-          AddServiceIfNotExist(service);
+        case ChangeType.Add:
+          if (GetServiceByName(service.ServiceName) == null)
+            AddService(service, ChangeType.Add);
           break;
 
-        case ChangeListChangeType.AutoAdd:
-          var services = Service.GetInstances(Settings.Default.AutoAddPattern);
+        case ChangeType.AutoAdd:
+          AddService(service, ChangeType.AutoAdd);
+          return;
 
-          foreach (var newService in Services)
-            AddService(newService, ChangeListChangeType.AutoAdd);
-
-          Settings.Default.FirstRun = false;
-          Settings.Default.Save();
-          break;
-
-        case ChangeListChangeType.Remove:
-
-          //TODO: Change definition and remove by object, no by name:
-          //RemoveService(string serviceName)
+        case ChangeType.Remove:
+          RemoveService(service);
           break;
       }
       LoadServiceParameters();
     }
 
-    private void AddServiceIfNotExist(MySQLService service)
-    {
-      if (GetServiceByName(service.ServiceName) == null)
-        AddService(service, ChangeListChangeType.Add);
-    }
-
-    private void AddService(MySQLService newService, ChangeListChangeType changeType)
+    /// <summary>
+    /// Adds a service on the current machine.
+    /// </summary>
+    /// <param name="newService">MySQLService instance</param>
+    /// <param name="changeType">Add/AutoAdd</param>
+    private void AddService(MySQLService newService, ChangeType changeType)
     {
       newService.NotifyOnStatusChange = Settings.Default.NotifyOfStatusChange;
       newService.UpdateTrayIconOnStatusChange = true;
-      newService.StatusChanged += new MySQLService.StatusChangedHandler(mySQLService_StatusChanged);
       Services.Add(newService);
 
       OnServiceListChanged(newService, changeType);
       Properties.Settings.Default.Save();
     }
 
-    private void RemoveService(string serviceName)
+    /// <summary>
+    /// Removes a service on the current machine, if its the only service monitored on it also triggers machine deletion from the list.
+    /// </summary>
+    /// <param name="service">MySQLService instance</param>
+    private void RemoveService(MySQLService service)
     {
-      MySQLService serviceToDelete = null;
-
-      foreach (MySQLService service in Services)
-      {
-        if (String.Compare(service.ServiceName, serviceName, true) != 0) continue;
-        serviceToDelete = service;
-        break;
-      }
-      if (serviceToDelete == null) return;
-
-      Services.Remove(serviceToDelete);
-      OnServiceListChanged(serviceToDelete, ChangeListChangeType.Remove);
+      if (GetServiceByName(service.ServiceName) != null)
+        Services.Remove(service);
       Settings.Default.Save();
+      OnServiceListChanged(service, ChangeType.Remove);
     }
 
+    /// <summary>
+    /// Used to see if service is already on the list
+    /// </summary>
+    /// <param name="service">MySQLService instance to look for</param>
+    /// <returns>True if current machine contains it already</returns>
     public bool ContainsService(MySQLService service)
     {
       if (Services == null || Services.Count == 0) return false;
       {
-        return GetService(service) == null ? false : true;
+        return GetServiceByName(service.ServiceName) == null ? false : true;
       }
     }
 
-    public MySQLService GetService(MySQLService service)
-    {
-      foreach (MySQLService s in Services)
-      {
-        if (String.Compare(service.ServiceName, s.ServiceName, true) == 0)
-        {
-          return service;
-        }
-      }
-      return null;
-    }
-
+    /// <summary>
+    /// Returns an instance of a service if is already on the list, searching by name
+    /// </summary>
+    /// <param name="name">MySQLService instance name</param>
+    /// <returns>MySQLService instance</returns>
     public MySQLService GetServiceByName(string name)
     {
       foreach (MySQLService service in Services)
@@ -331,6 +301,7 @@ namespace MySql.Notifier
       return null;
     }
 
+    // TODO ▼ Dispose of this method and attempt to use GetServiceByName instead.
     public MySQLService GetServiceByDisplayName(string displayName)
     {
       foreach (MySQLService service in Services)
@@ -341,97 +312,64 @@ namespace MySql.Notifier
       return null;
     }
 
-    // TODO: DEPRECATED METHODS: IMPLEMENT CORRECTLY!!
-    public void SetServiceStatus(string serviceName, string path, string status)
+    internal void SetServiceStatus(MySQLService service, string state)
     {
-      // if we get here the service doesn't exist in the list
-      // if we are not supposed to auto add then just exit
-      if (!Settings.Default.AutoAddServicesToMonitor) return;
-
-      Regex regex = new Regex(Settings.Default.AutoAddPattern, RegexOptions.IgnoreCase);
-      if (regex.Match(path).Success)
-
-        // TODO: DEPRECATED METHODS: IMPLEMENT CORRECTLY!!
-        // AddService(serviceName, ChangeListChangeType.AutoAdd);
-        AddService(GetServiceByName(serviceName), ChangeListChangeType.AutoAdd);
-    }
-
-    // TODO: Check spelling ▼
-    /// <summary>
-    /// Load Calculated, Machine dependant parameters
-    /// </summary>
-    internal void LoadServiceParameters()
-    {
-      if (Services == null)
-        Services = new List<MySQLService>();
-      if (Settings.Default.FirstRun)
-        AutoAddServices();
-      else
+      if (service != null)
       {
-        // we have to manually call our service list changed event handler since that isn't done
-        // with how we are using settings
-        foreach (MySQLService service in Services)
-        {
-          service.Host = this;
-          service.SetService();
-
-          //TODO: Check This ▼  is correct, service.managementObject should not be null!
-          if (service.ServiceName != null && service.Problem != ServiceProblem.ServiceDoesNotExist)
-
-          //if (service.ServiceName != null && Service.ExistsServiceInstance(service.ServiceName))
-          {
-            service.StatusChanged += new MySQLService.StatusChangedHandler(mySQLService_StatusChanged);
-            OnServiceListChanged(service, ChangeListChangeType.Add);
-          }
-          else
-          {
-            Services.Remove(service);
-          }
-        }
-        Settings.Default.Save();
+        service.SetStatus(state);
+        service.MenuGroup.Update();
+        return;
       }
     }
-
-    private void AutoAddServices()
-    {
-      //TODO: ▼ Verify local services(or continue operation from AutoLoadMachines() At MachinesList).
-      //var services = Service.GetInstances(Settings.Default.AutoAddPattern);
-
-      //foreach (var service in Services)
-      //  AddService(service, ChangeListChangeType.AutoAdd);
-
-      //Settings.Default.FirstRun = false;
-      //Settings.Default.Save();
-    }
-
-    public delegate void ServiceListChangedHandler(object sender, MySQLService service, ChangeListChangeType changeType);
-
-    public event ServiceListChangedHandler ServiceListChanged;
-
-    protected virtual void OnServiceListChanged(MySQLService service, ChangeListChangeType changeType)
-    {
-      if (ServiceListChanged != null)
-        ServiceListChanged(this, service, changeType);
-    }
-
-    public delegate void ServiceStatusChangedHandler(object sender, ServiceStatus args);
 
     /// <summary>
     /// Notifies that the status of one of the services in the list has changed
     /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="args"></param>
+    public delegate void ServiceStatusChangedHandler(Machine machine, MySQLService sender, ServiceStatus args);
+
     public event ServiceStatusChangedHandler ServiceStatusChanged;
 
-    protected virtual void OnServiceStatusChanged(ServiceStatus args)
+    protected virtual void OnServiceStatusChanged(MySQLService service, ServiceStatus args)
     {
       if (ServiceStatusChanged != null)
-        ServiceStatusChanged(this, args);
+        ServiceStatusChanged(this, service, args);
     }
 
-    private void mySQLService_StatusChanged(object sender, ServiceStatus args)
+    /// <summary>
+    /// This event system handles the case where the remote machine is unavailable, and a service has failed to connect to the host.
+    /// </summary>
+    public delegate void MachineConnectionErrorHandler(Machine sender, MySQLService service, Exception ex);
+
+    public event MachineConnectionErrorHandler MachineConnectionError;
+
+    private void OnMachineConnectionError(MySQLService service, Exception ex)
     {
-      OnServiceStatusChanged(args);
+      if (MachineConnectionError != null)
+        MachineConnectionError(this, service, ex);
     }
 
-    #endregion Services Management
+    /// <summary>
+    /// Event handler for changes on current machine services list
+    /// </summary>
+    /// <param name="sender">Machine instance</param>
+    /// <param name="service">MySQLService instance</param>
+    /// <param name="changeType">ChangeType</param>
+    public delegate void ServiceListChangedHandler(Machine sender, MySQLService service, ChangeType changeType);
+
+    public event ServiceListChangedHandler ServiceListChanged;
+
+    protected virtual void OnServiceListChanged(MySQLService service, ChangeType changeType)
+    {
+      if (ServiceListChanged != null)
+        ServiceListChanged(this, service, changeType);
+    }
+  }
+
+  public enum Status
+  {
+    Unavailable,
+    Online
   }
 }

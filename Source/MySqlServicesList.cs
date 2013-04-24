@@ -24,8 +24,6 @@ namespace MySql.Notifier
 
   public class MySQLServicesList
   {
-    private bool loading;
-
     public List<MySQLService> Services { get; set; }
 
     public MySQLServicesList()

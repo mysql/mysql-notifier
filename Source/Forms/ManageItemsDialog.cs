@@ -75,10 +75,9 @@ namespace MySql.Notifier
       if (selectedItem is MySQLService)
       {
         MySQLService selectedService = selectedItem as MySQLService;
-
-        //TODO: LOCATE MACHINE CLICKED!! ▼ search the right ServicesList on the right machine
-        //serviceList.RemoveService(selectedService.ServiceName);
-        //RefreshList();
+        Machine machine = machinesList.GetMachineByID(selectedService.Host.Name);
+        machine.ChangeService(selectedService, ChangeType.Remove);
+        RefreshList();
       }
       else if (selectedItem is MySQLInstance)
       {
@@ -214,12 +213,19 @@ namespace MySql.Notifier
           if (service.Host == null)
           {
             service.Host = machine;
-            service.SetService();
+            service.SetServiceParameters();
           }
           ListViewItem newItem = new ListViewItem(service.DisplayName);
           newItem.Tag = service;
           newItem.SubItems.Add(service.WinServiceType.ToString());
-          newItem.SubItems.Add(service.Status.ToString());
+          if (service.Status == 0)
+          {
+            newItem.SubItems.Add("Unavailable");
+          }
+          else
+          {
+            newItem.SubItems.Add(service.Status.ToString());
+          }
           MonitoredItemsListView.Items.Add(newItem);
         }
       }
@@ -259,9 +265,9 @@ namespace MySql.Notifier
       {
         if (dialog.ShowDialog() == DialogResult.OK)
         {
-          machinesList.ChangeMachine(dialog.newMachine, ChangeListChangeType.Add);
+          machinesList.ChangeMachine(dialog.newMachine, ChangeType.Add);
 
-          newMachine = machinesList.GetMachineByID(dialog.newMachine.Name, dialog.newMachine.User);
+          newMachine = machinesList.GetMachineByID(dialog.newMachine.Name);
 
           foreach (MySQLService service in dialog.ServicesToAdd)
           {
@@ -271,7 +277,7 @@ namespace MySql.Notifier
             }
             else
             {
-              newMachine.ChangeService(ChangeListChangeType.Add, service);
+              newMachine.ChangeService(service, ChangeType.Add);
             }
           }
 

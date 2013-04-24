@@ -35,38 +35,39 @@ namespace MySql.Notifier
   [Serializable]
   public class MySQLService
   {
-    //private ServiceType winServiceType;
-    // TODO: Verify all of these ▼ fields are required for a correct operation
+    [XmlIgnore]
     private ManagementObject managementObject;
 
-    private string serviceName;
+    [XmlIgnore]
     private ServiceProblem serviceProblem;
+
+    [XmlIgnore]
     private ServiceMenuGroup menuGroup;
 
-    private MySQLStartupParameters parameters;
-
-    /// <summary>
-    /// Default constructor. DO NOT REMOVE.
-    /// </summary>
-    public MySQLService()
-    {
-    }
-
-    public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, Machine machine = null)
-    {
-      Host = machine ?? new Machine("localhost");
-      WinServiceType = (Host.Name == "localhost") ? ServiceMachineType.Local : ServiceMachineType.Remote;      
-      NotifyOnStatusChange = notificationOnChange;
-      UpdateTrayIconOnStatusChange = updatesTrayIcon;
-      ServiceName = serviceName;
-      GetServiceInstance();
-    }
+    [XmlIgnore]
+    private string displayName;
 
     [XmlAttribute(AttributeName = "ServiceType")]
     public ServiceMachineType WinServiceType { get; set; }
 
     [XmlAttribute(AttributeName = "ServiceName")]
     public string ServiceName { get; set; }
+
+    [XmlAttribute(AttributeName = "DisplayName")]
+    public string DisplayName
+    {
+      get
+      {
+        return displayName;
+      }
+      set
+      {
+        if (!String.IsNullOrEmpty(value))
+        {
+          displayName = value;
+        }
+      }
+    }
 
     [XmlAttribute(AttributeName = "UpdateTrayIconOnStatusChange")]
     public bool UpdateTrayIconOnStatusChange { get; set; }
@@ -78,6 +79,20 @@ namespace MySql.Notifier
     public Machine Host { get; set; }
 
     [XmlIgnore]
+    public ServiceMenuGroup MenuGroup
+    {
+      get
+      {
+        if (menuGroup == null) SetServiceParameters();
+        return menuGroup;
+      }
+      set
+      {
+        menuGroup = value;
+      }
+    }
+
+    [XmlIgnore]
     public ServiceProblem Problem
     {
       get
@@ -87,30 +102,19 @@ namespace MySql.Notifier
     }
 
     [XmlIgnore]
+    public ManagementObject serviceManagementObject
+    {
+      get
+      {
+        return managementObject;
+      }
+    }
+
+    [XmlIgnore]
     public bool IsRealMySQLService { get; private set; }
 
     [XmlIgnore]
     public ServiceControllerStatus Status { get; set; }
-
-    [XmlIgnore]
-    public string DisplayName { get; private set; }
-
-    [XmlIgnore]
-    public ServiceMenuGroup MenuGroup //{ get; private set; }
-
-    //TODO: Check why this implementation is correct ▼
-    {
-      get
-      {
-        if (menuGroup == null) SetService();
-        return menuGroup;
-      }
-
-      set
-      {
-        menuGroup = value;
-      }
-    }
 
     [XmlIgnore]
     public List<MySqlWorkbenchConnection> WorkbenchConnections { get; private set; }
@@ -122,21 +126,43 @@ namespace MySql.Notifier
     public bool FoundInSystem { get; private set; }
 
     [XmlIgnore]
-    public ManagementObject serviceManagementObject
+    private MySQLStartupParameters parameters { get; set; }
+
+    /// <summary>
+    /// DO NOT REMOVE. Default constructor required for serialization-deserialization.
+    /// </summary>
+    public MySQLService()
     {
-      get
-      {
-        return managementObject;
-      }
     }
 
-    public void SetService()
+    public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, Machine machine = null)
+      : this()
+    {
+      Host = machine ?? new Machine("localhost");
+      WinServiceType = (Host.Name == "localhost") ? ServiceMachineType.Local : ServiceMachineType.Remote;
+      NotifyOnStatusChange = notificationOnChange;
+      UpdateTrayIconOnStatusChange = updatesTrayIcon;
+      ServiceName = serviceName;
+      displayName = String.Empty;
+      SetServiceParameters();
+    }
+
+    public void SeeIfRealMySQLService(string cmd)
+    {
+      IsRealMySQLService = cmd.EndsWith("mysqld.exe") || cmd.EndsWith("mysqld-nt.exe") || cmd.EndsWith("mysqld") || cmd.EndsWith("mysqld-nt");
+    }
+
+    public void SetServiceParameters()
     {
       GetServiceInstance();
 
+      if (serviceProblem != ServiceProblem.ServiceDoesNotExist && serviceProblem != ServiceProblem.None)
+      {
+        return;
+      }
+
       try
       {
-        if (Host == null) throw new Exception("NullHost Exception");
         DisplayName = serviceManagementObject.Properties["DisplayName"].Value.ToString();
         FindMatchingWBConnections();
         switch (serviceManagementObject.Properties["State"].Value.ToString())
@@ -184,15 +210,45 @@ namespace MySql.Notifier
         MySQLNotifierTrace.GetSourceTrace().WriteError(ioEx.Message, 1);
         managementObject = null;
       }
-      catch (Exception)
-      {
-        //TODO: Findout why NullHost Exception occurs and fix the root cause.
-      }
     }
 
-    public void SeeIfRealMySQLService(string cmd)
+    private void GetServiceInstance()
     {
-      IsRealMySQLService = cmd.EndsWith("mysqld.exe") || cmd.EndsWith("mysqld-nt.exe") || cmd.EndsWith("mysqld") || cmd.EndsWith("mysqld-nt");
+      managementObject = null;
+      serviceProblem = ServiceProblem.None;
+
+      try
+      {
+        ManagementObjectCollection retObjectCollection = Host.GetServices(ServiceName);
+        serviceProblem = (retObjectCollection.Count > 0) ? ServiceProblem.None : ServiceProblem.ServiceDoesNotExist;
+        if (serviceProblem == ServiceProblem.None)
+        {
+          foreach (ManagementObject mo in retObjectCollection)
+          {
+            if (mo != null)
+            {
+              managementObject = mo;
+              break;
+            }
+          }
+        }
+      }
+      catch (COMException)
+      {
+        serviceProblem = ServiceProblem.LackOfRemotePermissions;
+      }
+      catch (UnauthorizedAccessException)
+      {
+        serviceProblem = ServiceProblem.IncorrectUserOrPassword;
+      }
+      catch
+      {
+        serviceProblem = ServiceProblem.Other;
+      }
+      finally
+      {
+        FoundInSystem = (serviceProblem == ServiceProblem.ServiceDoesNotExist || serviceProblem == ServiceProblem.Other) ? false : true;
+      }
     }
 
     internal void FindMatchingWBConnections()
@@ -240,38 +296,6 @@ namespace MySql.Notifier
       }
     }
 
-    /// <summary>
-    /// This event system handles the case where the service failed to move to a proposed status
-    /// </summary>
-    public delegate void StatusChangeErrorHandler(object sender, Exception ex);
-
-    public event StatusChangeErrorHandler StatusChangeError;
-
-    private void OnStatusChangeError(Exception ex)
-    {
-      if (StatusChangeError != null)
-        StatusChangeError(this, ex);
-    }
-
-    /// <summary>
-    /// This event system handles the case where the service successfully moved to a new status
-    /// </summary>
-    public delegate void StatusChangedHandler(object sender, ServiceStatus args);
-
-    public event StatusChangedHandler StatusChanged;
-
-    protected virtual void OnStatusChanged(ServiceStatus args)
-    {
-      if (this.StatusChanged != null)
-        this.StatusChanged(this, args);
-    }
-
-    public void UpdateMenu(string statusString)
-    {
-      SetStatus(statusString);
-      MenuGroup.Update();
-    }
-
     public void SetStatus(string statusString)
     {
       ServiceControllerStatus newStatus;
@@ -281,7 +305,7 @@ namespace MySql.Notifier
         if (newStatus == Status) return;
         ServiceControllerStatus copyPreviousStatus = Status;
         Status = newStatus;
-        OnStatusChanged(new ServiceStatus(DisplayName, copyPreviousStatus, Status));
+        OnStatusChanged(this, new ServiceStatus(DisplayName, copyPreviousStatus, Status));
       }
     }
 
@@ -337,11 +361,12 @@ namespace MySql.Notifier
 
     private void worker_DoWork(object sender, DoWorkEventArgs e)
     {
+      //TODO: ▼ ReEngineer this functionality ▼
       BackgroundWorker worker = sender as BackgroundWorker;
 
-      if (!Service.ExistsServiceInstance(serviceName))
+      if (!Service.ExistsServiceInstance(ServiceName))
       {
-        throw new Exception(String.Format(Resources.ServiceNotFound, serviceName));
+        throw new Exception(String.Format(Resources.ServiceNotFound, ServiceName));
       }
 
       TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
@@ -367,71 +392,72 @@ namespace MySql.Notifier
 
     private void ProcessStatusService(string action)
     {
-      Process proc = new Process();
-      proc.StartInfo.Verb = "runas";
-      proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
-      if (action == "restart")
+      if (WinServiceType == ServiceMachineType.Local)
       {
-        proc.StartInfo.FileName = "cmd.exe";
-        proc.StartInfo.Arguments = "/C net stop " + @"" + serviceName + @"" + " && net start " + serviceName + @"";
-        proc.StartInfo.UseShellExecute = true;
-        proc.Start();
+        ServiceController winService = new ServiceController(ServiceName);
+        Process proc = new Process();
+        proc.StartInfo.Verb = "runas";
+        proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-        //TODO: Investigate how to replace this waiting calls ▼
-        //if(WinServiceType == ServiceType.Local)
-        //winService.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));
+        if (action == "restart")
+        {
+          proc.StartInfo.FileName = "cmd.exe";
+          proc.StartInfo.Arguments = "/C net stop " + @"" + ServiceName + @"" + " && net start " + ServiceName + @"";
+          proc.StartInfo.UseShellExecute = true;
+          proc.Start();
+
+          if (WinServiceType == ServiceMachineType.Local)
+            winService.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));
+        }
+        else
+        {
+          proc.StartInfo.FileName = "sc";
+          proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, ServiceName);
+          proc.StartInfo.UseShellExecute = true;
+          proc.Start();
+
+          if (WinServiceType == ServiceMachineType.Local)
+            winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running : ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
+        }
       }
+
+      // TODO: ▼ Implement start/stop wql commands for remote services▼
       else
       {
-        proc.StartInfo.FileName = "sc";
-        proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, ServiceName);
-        proc.StartInfo.UseShellExecute = true;
-        proc.Start();
-
-        //TODO: Investigate how to replace this waiting calls ▼
-        //if(WinServiceType == ServiceType.Local)
-        //winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running : ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
+        //if(Host == null) return;
       }
     }
 
-    private void GetServiceInstance()
-    {
-      managementObject = null;
-      serviceProblem = ServiceProblem.None;
+    /// <summary>
+    /// This event system handles the case where the service failed to move to a proposed status
+    /// </summary>
+    public delegate void StatusChangeErrorHandler(MySQLService sender, Exception ex);
 
-      try
-      {
-        ManagementObjectCollection retObjectCollection = Host.GetServices(ServiceName);
-        serviceProblem = (retObjectCollection.Count > 0) ? ServiceProblem.None : ServiceProblem.ServiceDoesNotExist;
-        if (serviceProblem == ServiceProblem.None)
-        {
-          foreach (ManagementObject mo in retObjectCollection)
-          {
-            if (mo != null)
-            {
-              managementObject = mo;
-              break;
-            }
-          }
-        }
-      }
-      catch (COMException)
-      {
-        serviceProblem = ServiceProblem.LackOfRemotePermissions;
-      }
-      catch (UnauthorizedAccessException)
-      {
-        serviceProblem = ServiceProblem.IncorrectUserOrPassword;
-      }
-      catch
-      {
-        serviceProblem = ServiceProblem.Other;
-      }
-      finally
-      {
-        FoundInSystem = (serviceProblem == ServiceProblem.ServiceDoesNotExist || serviceProblem == ServiceProblem.Other) ? false : true;
-      }
+    public event StatusChangeErrorHandler StatusChangeError;
+
+    private void OnStatusChangeError(Exception ex)
+    {
+      if (StatusChangeError != null)
+        StatusChangeError(this, ex);
+    }
+
+    /// <summary>
+    /// This event system handles the case where the service successfully moved to a new status
+    /// </summary>
+    public delegate void StatusChangedHandler(MySQLService sender, ServiceStatus args);
+
+    public event StatusChangedHandler StatusChanged;
+
+    protected virtual void OnStatusChanged(MySQLService sender, ServiceStatus args)
+    {
+      if (this.StatusChanged != null)
+        this.StatusChanged(this, args);
+    }
+
+    public void UpdateMenu(string statusString)
+    {
+      SetStatus(statusString);
+      MenuGroup.Update();
     }
   }
 

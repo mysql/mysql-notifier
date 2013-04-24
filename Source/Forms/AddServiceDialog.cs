@@ -198,6 +198,10 @@ namespace MySql.Notifier
           {
             dr = windowsConnectionDialog.ShowDialog();
             newMachine = (dr != DialogResult.Cancel) ? windowsConnectionDialog.newMachine : newMachine;
+            if(dr == DialogResult.Cancel)
+            {
+             serverType.SelectedIndex = 0;
+            }
           }
           break;
       }
