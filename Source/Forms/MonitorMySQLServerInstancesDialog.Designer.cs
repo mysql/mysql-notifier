@@ -54,7 +54,7 @@ namespace MySql.Notifier
       this.ShowMonitoredInstancesCheckBox = new System.Windows.Forms.CheckBox();
       this.FilterTextBox = new System.Windows.Forms.TextBox();
       this.MySQLConnectionsHelpLabel = new System.Windows.Forms.Label();
-      this.MySQLConnectionsHiperTitleLabel = new System.Windows.Forms.Label();
+      this.MySQLConnectionsHyperTitleLabel = new System.Windows.Forms.Label();
       this.WorkbenchConnectionsListView = new System.Windows.Forms.ListView();
       this.MethodColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.ConnectionNameColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -81,7 +81,7 @@ namespace MySql.Notifier
       this.ContentAreaPanel.Controls.Add(this.ShowMonitoredInstancesCheckBox);
       this.ContentAreaPanel.Controls.Add(this.FilterTextBox);
       this.ContentAreaPanel.Controls.Add(this.MySQLConnectionsHelpLabel);
-      this.ContentAreaPanel.Controls.Add(this.MySQLConnectionsHiperTitleLabel);
+      this.ContentAreaPanel.Controls.Add(this.MySQLConnectionsHyperTitleLabel);
       this.ContentAreaPanel.Controls.Add(this.WorkbenchConnectionsListView);
       this.ContentAreaPanel.Controls.Add(this.CommandAreaPanel);
       this.ContentAreaPanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -133,14 +133,14 @@ namespace MySql.Notifier
       this.MySQLConnectionsHelpLabel.Text = "Select a connection from MySQL Workbench that you want to monitor. You can filter" +
     " the list by typing into the filter control.";
       // 
-      // MySQLConnectionsHiperTitleLabel
+      // MySQLConnectionsHyperTitleLabel
       // 
-      this.MySQLConnectionsHiperTitleLabel.AutoSize = true;
-      this.MySQLConnectionsHiperTitleLabel.Location = new System.Drawing.Point(20, 23);
-      this.MySQLConnectionsHiperTitleLabel.Name = "MySQLConnectionsHiperTitleLabel";
-      this.MySQLConnectionsHiperTitleLabel.Size = new System.Drawing.Size(198, 15);
-      this.MySQLConnectionsHiperTitleLabel.TabIndex = 0;
-      this.MySQLConnectionsHiperTitleLabel.Text = "Choose a MySQL Server connection:";
+      this.MySQLConnectionsHyperTitleLabel.AutoSize = true;
+      this.MySQLConnectionsHyperTitleLabel.Location = new System.Drawing.Point(20, 23);
+      this.MySQLConnectionsHyperTitleLabel.Name = "MySQLConnectionsHyperTitleLabel";
+      this.MySQLConnectionsHyperTitleLabel.Size = new System.Drawing.Size(198, 15);
+      this.MySQLConnectionsHyperTitleLabel.TabIndex = 0;
+      this.MySQLConnectionsHyperTitleLabel.Text = "Choose a MySQL Server connection:";
       // 
       // WorkbenchConnectionsListView
       // 
@@ -310,7 +310,7 @@ namespace MySql.Notifier
     private System.Windows.Forms.ColumnHeader HostnameColumnHeader;
     private System.Windows.Forms.ColumnHeader PortColumnHeader;
     private System.Windows.Forms.Label MySQLConnectionsHelpLabel;
-    private System.Windows.Forms.Label MySQLConnectionsHiperTitleLabel;
+    private System.Windows.Forms.Label MySQLConnectionsHyperTitleLabel;
     private System.Windows.Forms.Button AddConnectionButton;
     private System.Windows.Forms.ColumnHeader MethodColumnHeader;
     private System.Windows.Forms.ColumnHeader MonitoredColumnHeader;

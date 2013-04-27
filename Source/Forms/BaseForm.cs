@@ -59,7 +59,7 @@ namespace MySql.Notifier
         {
           c.BackColor = Color.Transparent;
           string name = c.Name.ToLower();
-          if (name.Contains("hipertitle"))
+          if (name.Contains("hypertitle"))
           {
             c.Font = largeFont;
             c.ForeColor = Color.FromArgb(39, 73, 161);
@@ -87,5 +87,6 @@ namespace MySql.Notifier
   public class MachineAwareForm : BaseForm
   {
     public Machine newMachine { get; set; }
+    public MachinesList machinesList { get; set; }
   }
 }

@@ -95,6 +95,11 @@ namespace MySql.Notifier
       Services = new List<MySQLService>();
     }
 
+    public override string ToString()
+    {
+      return Name;
+    }
+
     /// <summary>
     /// Returns true or false if the application is able to connect to the machine.
     /// </summary>
@@ -364,6 +369,12 @@ namespace MySql.Notifier
     {
       if (ServiceListChanged != null)
         ServiceListChanged(this, service, changeType);
+    }
+
+    internal void OverwriteCredentials(string user, string password)
+    {
+      User = user;
+      Password = MySQLSecurity.EncryptPassword(password);
     }
   }
 

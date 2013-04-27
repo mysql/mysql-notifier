@@ -80,6 +80,24 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Incorrect User or Password.
+        /// </summary>
+        internal static string AccessDeniedMessage {
+            get {
+                return ResourceManager.GetString("AccessDeniedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access Denied.
+        /// </summary>
+        internal static string AccessDeniedTitle {
+            get {
+                return ResourceManager.GetString("AccessDeniedTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Actions.
         /// </summary>
         internal static string Actions {
@@ -264,6 +282,24 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You are able to monitor services in this remote machine..
+        /// </summary>
+        internal static string ConnectionSuccessfulMessage {
+            get {
+                return ResourceManager.GetString("ConnectionSuccessfulMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connection Successful.
+        /// </summary>
+        internal static string ConnectionSuccessfulTitle {
+            get {
+                return ResourceManager.GetString("ConnectionSuccessfulTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Continue Pending.
         /// </summary>
         internal static string ContinuePending {
@@ -337,6 +373,51 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The host you selected is not able at this moment. It was not possible to stablish a connection right now, please try again later..
+        /// </summary>
+        internal static string HostUnavailableMessage {
+            get {
+                return ResourceManager.GetString("HostUnavailableMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Host Currently Unavailable.
+        /// </summary>
+        internal static string HostUnavailableTitle {
+            get {
+                return ResourceManager.GetString("HostUnavailableTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This message can be displayed if the machine you&apos;re trying to reach is offline or the firewall actively refused the connection..
+        /// </summary>
+        internal static string HostUnreachableMessage {
+            get {
+                return ResourceManager.GetString("HostUnreachableMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This message can be displayed for one of the following reasons at the remote machine: Incorrect WMI permission set, Incorrect Firewall configuration or not enough DCOM permissions for the user you&apos;re attempting to log with..
+        /// </summary>
+        internal static string HostUnreachableMessageDefault {
+            get {
+                return ResourceManager.GetString("HostUnreachableMessageDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The host was unreachable..
+        /// </summary>
+        internal static string HostUnreachableTitle {
+            get {
+                return ResourceManager.GetString("HostUnreachableTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap InstallAvailableUpdatesIcon {
@@ -381,6 +462,42 @@ namespace MySql.Notifier.Properties {
             get {
                 object obj = ResourceManager.GetObject("logo_mysql", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The machine you&apos;re attempting to add already exist on the list, do you want to overwrite the credentials?.
+        /// </summary>
+        internal static string MachineAlreadyExistMessage {
+            get {
+                return ResourceManager.GetString("MachineAlreadyExistMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Machine already exist.
+        /// </summary>
+        internal static string MachineAlreadyExistTitle {
+            get {
+                return ResourceManager.GetString("MachineAlreadyExistTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It seems you have not enabled browse for services on the remote machine.
+        /// </summary>
+        internal static string ManagementExceptionMessage {
+            get {
+                return ResourceManager.GetString("ManagementExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Browsing for services is not enabled.
+        /// </summary>
+        internal static string ManagementExceptionTitle {
+            get {
+                return ResourceManager.GetString("ManagementExceptionTitle", resourceCulture);
             }
         }
         

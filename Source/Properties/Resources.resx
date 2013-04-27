@@ -388,4 +388,43 @@
   <data name="delete" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\delete.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="AccessDeniedMessage" xml:space="preserve">
+    <value>Incorrect User or Password</value>
+  </data>
+  <data name="AccessDeniedTitle" xml:space="preserve">
+    <value>Access Denied</value>
+  </data>
+  <data name="ConnectionSuccessfulMessage" xml:space="preserve">
+    <value>You are able to monitor services in this remote machine.</value>
+  </data>
+  <data name="ConnectionSuccessfulTitle" xml:space="preserve">
+    <value>Connection Successful</value>
+  </data>
+  <data name="HostUnavailableMessage" xml:space="preserve">
+    <value>The host you selected is not able at this moment. It was not possible to stablish a connection right now, please try again later.</value>
+  </data>
+  <data name="HostUnavailableTitle" xml:space="preserve">
+    <value>Host Currently Unavailable</value>
+  </data>
+  <data name="HostUnreachableMessage" xml:space="preserve">
+    <value>This message can be displayed if the machine you're trying to reach is offline or the firewall actively refused the connection.</value>
+  </data>
+  <data name="HostUnreachableMessageDefault" xml:space="preserve">
+    <value>This message can be displayed for one of the following reasons at the remote machine: Incorrect WMI permission set, Incorrect Firewall configuration or not enough DCOM permissions for the user you're attempting to log with.</value>
+  </data>
+  <data name="HostUnreachableTitle" xml:space="preserve">
+    <value>The host was unreachable.</value>
+  </data>
+  <data name="MachineAlreadyExistMessage" xml:space="preserve">
+    <value>The machine you're attempting to add already exist on the list, do you want to overwrite the credentials?</value>
+  </data>
+  <data name="MachineAlreadyExistTitle" xml:space="preserve">
+    <value>Machine already exist</value>
+  </data>
+  <data name="ManagementExceptionMessage" xml:space="preserve">
+    <value>It seems you have not enabled browse for services on the remote machine</value>
+  </data>
+  <data name="ManagementExceptionTitle" xml:space="preserve">
+    <value>Browsing for services is not enabled</value>
+  </data>
 </root>

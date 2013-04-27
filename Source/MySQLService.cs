@@ -25,6 +25,7 @@ using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
+using System.Timers;
 using System.Xml;
 using System.Xml.Serialization;
 using MySql.Notifier.Properties;
@@ -128,11 +129,21 @@ namespace MySql.Notifier
     [XmlIgnore]
     private MySQLStartupParameters parameters { get; set; }
 
+    [XmlIgnore]
+    private Timer t;
+
+    [XmlIgnore]
+    private int Loops;
+
+    [XmlIgnore]
+    private bool IsWaitingOnStatusChange;
+
     /// <summary>
     /// DO NOT REMOVE. Default constructor required for serialization-deserialization.
     /// </summary>
     public MySQLService()
     {
+      t = new Timer(100);
     }
 
     public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, Machine machine = null)
@@ -315,7 +326,14 @@ namespace MySql.Notifier
     /// <returns>Flag indicating if the action completed succesfully</returns>
     public void Start()
     {
-      ChangeServiceStatus(1);
+      if (WinServiceType == ServiceMachineType.Local)
+      {
+        ChangeServiceStatus(1);
+      }
+      else
+      {
+        StartRemoteService();
+      }
     }
 
     /// <summary>
@@ -324,7 +342,14 @@ namespace MySql.Notifier
     /// <returns>Flag indicating if the action completed succesfully</returns>
     public void Stop()
     {
-      ChangeServiceStatus(0);
+      if (WinServiceType == ServiceMachineType.Local)
+      {
+        ChangeServiceStatus(0);
+      }
+      else
+      {
+        StopRemoteService();
+      }
     }
 
     /// <summary>
@@ -333,7 +358,14 @@ namespace MySql.Notifier
     /// <returns>Flag indicating if the action completed succesfully</returns>
     public void Restart()
     {
-      ChangeServiceStatus(2);
+      if (WinServiceType == ServiceMachineType.Local)
+      {
+        ChangeServiceStatus(2);
+      }
+      else
+      {
+        RestartRemoteService();
+      }
     }
 
     private void ChangeServiceStatus(int action)
@@ -361,15 +393,10 @@ namespace MySql.Notifier
 
     private void worker_DoWork(object sender, DoWorkEventArgs e)
     {
-      //TODO: ▼ ReEngineer this functionality ▼
-      BackgroundWorker worker = sender as BackgroundWorker;
-
       if (!Service.ExistsServiceInstance(ServiceName))
       {
         throw new Exception(String.Format(Resources.ServiceNotFound, ServiceName));
       }
-
-      TimeSpan timeout = TimeSpan.FromMilliseconds(5000);
 
       int action = (int)e.Argument;
       WorkCompleted = false;
@@ -392,39 +419,124 @@ namespace MySql.Notifier
 
     private void ProcessStatusService(string action)
     {
-      if (WinServiceType == ServiceMachineType.Local)
+      ServiceController winService = new ServiceController(ServiceName);
+      Process proc = new Process();
+      proc.StartInfo.Verb = "runas";
+      proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+
+      if (action == "restart")
       {
-        ServiceController winService = new ServiceController(ServiceName);
-        Process proc = new Process();
-        proc.StartInfo.Verb = "runas";
-        proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        proc.StartInfo.FileName = "cmd.exe";
+        proc.StartInfo.Arguments = "/C net stop " + @"" + ServiceName + @"" + " && net start " + ServiceName + @"";
+        proc.StartInfo.UseShellExecute = true;
+        proc.Start();
 
-        if (action == "restart")
-        {
-          proc.StartInfo.FileName = "cmd.exe";
-          proc.StartInfo.Arguments = "/C net stop " + @"" + ServiceName + @"" + " && net start " + ServiceName + @"";
-          proc.StartInfo.UseShellExecute = true;
-          proc.Start();
-
-          if (WinServiceType == ServiceMachineType.Local)
-            winService.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));
-        }
-        else
-        {
-          proc.StartInfo.FileName = "sc";
-          proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, ServiceName);
-          proc.StartInfo.UseShellExecute = true;
-          proc.Start();
-
-          if (WinServiceType == ServiceMachineType.Local)
-            winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running : ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
-        }
+        if (WinServiceType == ServiceMachineType.Local)
+          winService.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));
       }
-
-      // TODO: ▼ Implement start/stop wql commands for remote services▼
       else
       {
-        //if(Host == null) return;
+        proc.StartInfo.FileName = "sc";
+        proc.StartInfo.Arguments = string.Format(@" {0} {1}", action, ServiceName);
+        proc.StartInfo.UseShellExecute = true;
+        proc.Start();
+
+        if (WinServiceType == ServiceMachineType.Local)
+          winService.WaitForStatus(action == "start" ? ServiceControllerStatus.Running : ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
+      }
+    }
+
+    /// <summary>
+    /// Executes WMI command to start the service
+    /// </summary>
+    private void StartRemoteService()
+    {
+      try
+      {
+        serviceManagementObject.InvokeMethod("StartService", null, null);
+      }
+      catch
+      {
+        throw;
+      }
+    }
+
+    /// <summary>
+    /// Executes WMI command to stop the service
+    /// </summary>
+    private void StopRemoteService()
+    {
+      try
+      {
+        serviceManagementObject.InvokeMethod("StopService", null, null);
+      }
+      catch
+      {
+        throw;
+      }
+    }
+
+    /// <summary>
+    /// Executes WMI command to stop the service
+    /// </summary>
+    private void RestartRemoteService()
+    {
+      Loops = 0;
+      IsWaitingOnStatusChange = true;
+      t.Elapsed += new ElapsedEventHandler(t_ElapsedToStop);
+      t.Start();
+      StopRemoteService();
+
+      while (IsWaitingOnStatusChange)
+      {
+        SetServiceParameters();
+        System.Threading.Thread.Sleep(2000);
+      }
+
+      t.Elapsed -= new ElapsedEventHandler(t_ElapsedToStop);
+
+      if (Status != ServiceControllerStatus.Stopped && Loops >= 50)
+      {
+        throw new System.TimeoutException("Unable to stop service, the operation has timed out.");
+      }
+
+      Loops = 0;
+      IsWaitingOnStatusChange = true;
+      t.Elapsed += new ElapsedEventHandler(t_ElapsedToStart);
+      t.Start();
+      StartRemoteService();
+
+      while (IsWaitingOnStatusChange)
+      {
+        SetServiceParameters();
+        System.Threading.Thread.Sleep(2000);
+      }
+
+      t.Elapsed -= new ElapsedEventHandler(t_ElapsedToStart);
+
+      if (Status != ServiceControllerStatus.Running && Loops >= 100)
+      {
+        throw new System.TimeoutException("Unable to restart service, the operation has timed out.");
+      }
+    }
+
+    private void t_ElapsedToStop(object sender, ElapsedEventArgs e)
+    {
+      Loops++;
+      if (Status == ServiceControllerStatus.Stopped || Loops >= 100)
+      {
+        t.Stop();
+        IsWaitingOnStatusChange = false;
+      }
+    }
+
+    private void t_ElapsedToStart(object sender, ElapsedEventArgs e)
+    {
+      Loops++;
+      if (Status == ServiceControllerStatus.Running || Loops >= 50)
+      {
+        t.Stop();
+        IsWaitingOnStatusChange = false;
       }
     }
 

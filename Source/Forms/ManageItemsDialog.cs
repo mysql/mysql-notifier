@@ -29,16 +29,15 @@ namespace MySql.Notifier
 
   public partial class ManageItemsDialog : MachineAwareForm
   {
-    private MachinesList machinesList;
     public static string addServiceName;
     private object selectedItem;
     private MySQLInstancesList _instancesList;
 
-    public ManageItemsDialog(MySQLInstancesList instancesList, MachinesList machineList)
+    public ManageItemsDialog(MySQLInstancesList instancesList, MachinesList machineslist)
     {
       InitializeComponent();
       _instancesList = instancesList;
-      this.machinesList = machineList;
+      machinesList = machineslist;
       RefreshList();
     }
 
@@ -75,7 +74,7 @@ namespace MySql.Notifier
       if (selectedItem is MySQLService)
       {
         MySQLService selectedService = selectedItem as MySQLService;
-        Machine machine = machinesList.GetMachineByID(selectedService.Host.Name);
+        Machine machine = machinesList.GetMachineByHostName(selectedService.Host.Name);
         machine.ChangeService(selectedService, ChangeType.Remove);
         RefreshList();
       }
@@ -261,13 +260,13 @@ namespace MySql.Notifier
 
     private void serviceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-      using (AddServiceDialog dialog = new AddServiceDialog(newMachine))
+      using (AddServiceDialog dialog = new AddServiceDialog(machinesList, newMachine))
       {
         if (dialog.ShowDialog() == DialogResult.OK)
         {
           machinesList.ChangeMachine(dialog.newMachine, ChangeType.Add);
 
-          newMachine = machinesList.GetMachineByID(dialog.newMachine.Name);
+          newMachine = machinesList.GetMachineByHostName(dialog.newMachine.Name);
 
           foreach (MySQLService service in dialog.ServicesToAdd)
           {

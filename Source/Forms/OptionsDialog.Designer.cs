@@ -62,7 +62,7 @@ namespace MySql.Notifier
       this.chkAutoCheckUpdates = new System.Windows.Forms.CheckBox();
       this.chkRunAtStartup = new System.Windows.Forms.CheckBox();
       this.lblSubTitle1 = new System.Windows.Forms.Label();
-      this.lblHiperTitle = new System.Windows.Forms.Label();
+      this.lblHyperTitle = new System.Windows.Forms.Label();
       this.chkUseColorfulIcons = new System.Windows.Forms.CheckBox();
       this.panel2.SuspendLayout();
       this.panel1.SuspendLayout();
@@ -116,7 +116,7 @@ namespace MySql.Notifier
       this.panel1.Controls.Add(this.chkAutoCheckUpdates);
       this.panel1.Controls.Add(this.chkRunAtStartup);
       this.panel1.Controls.Add(this.lblSubTitle1);
-      this.panel1.Controls.Add(this.lblHiperTitle);
+      this.panel1.Controls.Add(this.lblHyperTitle);
       this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panel1.Location = new System.Drawing.Point(0, 0);
       this.panel1.Name = "panel1";
@@ -216,15 +216,15 @@ namespace MySql.Notifier
       this.lblSubTitle1.TabIndex = 52;
       this.lblSubTitle1.Text = "General Options";
       // 
-      // lblHiperTitle
+      // lblHyperTitle
       // 
-      this.lblHiperTitle.AutoSize = true;
-      this.lblHiperTitle.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.lblHiperTitle.Location = new System.Drawing.Point(14, 27);
-      this.lblHiperTitle.Name = "lblHiperTitle";
-      this.lblHiperTitle.Size = new System.Drawing.Size(133, 15);
-      this.lblHiperTitle.TabIndex = 21;
-      this.lblHiperTitle.Text = "MySQL Notifier Options";
+      this.lblHyperTitle.AutoSize = true;
+      this.lblHyperTitle.ForeColor = System.Drawing.SystemColors.ControlText;
+      this.lblHyperTitle.Location = new System.Drawing.Point(14, 27);
+      this.lblHyperTitle.Name = "lblHyperTitle";
+      this.lblHyperTitle.Size = new System.Drawing.Size(133, 15);
+      this.lblHyperTitle.TabIndex = 21;
+      this.lblHyperTitle.Text = "MySQL Notifier Options";
       // 
       // chkUseColorfulIcons
       // 
@@ -266,7 +266,7 @@ namespace MySql.Notifier
     private System.Windows.Forms.Button btnCancel;
     private System.Windows.Forms.Button btnOK;
     private System.Windows.Forms.Panel panel1;
-    private System.Windows.Forms.Label lblHiperTitle;
+    private System.Windows.Forms.Label lblHyperTitle;
     private System.Windows.Forms.Label lblSubTitle2;
     private System.Windows.Forms.CheckBox notifyOfStatusChange;
     private System.Windows.Forms.CheckBox notifyOfAutoAdd;

@@ -1,5 +1,5 @@
 ﻿// 
-// Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
+// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -57,14 +57,14 @@ namespace MySql.Notifier
       this.lblText6 = new System.Windows.Forms.Label();
       this.lblText4 = new System.Windows.Forms.Label();
       this.lblText1 = new System.Windows.Forms.Label();
-      this.lblSubTitle1 = new System.Windows.Forms.Label();
+      this.lblHyperTitle1 = new System.Windows.Forms.Label();
       this.filter = new System.Windows.Forms.CheckBox();
       this.lstServices = new System.Windows.Forms.ListView();
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-      this.lblSubTitle2 = new System.Windows.Forms.Label();
+      this.lblHyperTitle2 = new System.Windows.Forms.Label();
       this.lblText3 = new System.Windows.Forms.Label();
-      this.serverType = new System.Windows.Forms.ComboBox();
+      this.cboxServerSelection = new System.Windows.Forms.ComboBox();
       this.timerForFiltering = new System.Windows.Forms.Timer(this.components);
       this.panel2.SuspendLayout();
       this.panel1.SuspendLayout();
@@ -113,12 +113,12 @@ namespace MySql.Notifier
       this.panel1.Controls.Add(this.lblText6);
       this.panel1.Controls.Add(this.lblText4);
       this.panel1.Controls.Add(this.lblText1);
-      this.panel1.Controls.Add(this.lblSubTitle1);
+      this.panel1.Controls.Add(this.lblHyperTitle1);
       this.panel1.Controls.Add(this.filter);
       this.panel1.Controls.Add(this.lstServices);
-      this.panel1.Controls.Add(this.lblSubTitle2);
+      this.panel1.Controls.Add(this.lblHyperTitle2);
       this.panel1.Controls.Add(this.lblText3);
-      this.panel1.Controls.Add(this.serverType);
+      this.panel1.Controls.Add(this.cboxServerSelection);
       this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panel1.Location = new System.Drawing.Point(0, 0);
       this.panel1.Name = "panel1";
@@ -160,14 +160,14 @@ namespace MySql.Notifier
       this.lblText1.Text = "Select the machine you want to monitor services on. The machines need to be on yo" +
     "ur local network. ";
       // 
-      // lblSubTitle1
+      // lblHyperTitle1
       // 
-      this.lblSubTitle1.AutoSize = true;
-      this.lblSubTitle1.Location = new System.Drawing.Point(20, 24);
-      this.lblSubTitle1.Name = "lblSubTitle1";
-      this.lblSubTitle1.Size = new System.Drawing.Size(105, 13);
-      this.lblSubTitle1.TabIndex = 51;
-      this.lblSubTitle1.Text = "Choose a Machine:";
+      this.lblHyperTitle1.AutoSize = true;
+      this.lblHyperTitle1.Location = new System.Drawing.Point(20, 24);
+      this.lblHyperTitle1.Name = "lblHyperTitle1";
+      this.lblHyperTitle1.Size = new System.Drawing.Size(105, 13);
+      this.lblHyperTitle1.TabIndex = 51;
+      this.lblHyperTitle1.Text = "Choose a Machine:";
       // 
       // filter
       // 
@@ -207,36 +207,37 @@ namespace MySql.Notifier
       this.columnHeader3.Text = "Status";
       this.columnHeader3.Width = 102;
       // 
-      // lblSubTitle2
+      // lblHyperTitle2
       // 
-      this.lblSubTitle2.AutoSize = true;
-      this.lblSubTitle2.Location = new System.Drawing.Point(21, 120);
-      this.lblSubTitle2.Name = "lblSubTitle2";
-      this.lblSubTitle2.Size = new System.Drawing.Size(148, 13);
-      this.lblSubTitle2.TabIndex = 48;
-      this.lblSubTitle2.Text = "Choose a Windows Service:";
+      this.lblHyperTitle2.AutoSize = true;
+      this.lblHyperTitle2.Location = new System.Drawing.Point(21, 120);
+      this.lblHyperTitle2.Name = "lblHyperTitle2";
+      this.lblHyperTitle2.Size = new System.Drawing.Size(148, 13);
+      this.lblHyperTitle2.TabIndex = 48;
+      this.lblHyperTitle2.Text = "Choose a Windows Service:";
       // 
       // lblText3
       // 
       this.lblText3.AutoSize = true;
-      this.lblText3.Location = new System.Drawing.Point(77, 81);
+      this.lblText3.Location = new System.Drawing.Point(81, 81);
       this.lblText3.Name = "lblText3";
       this.lblText3.Size = new System.Drawing.Size(61, 13);
       this.lblText3.TabIndex = 47;
       this.lblText3.Text = "Computer:";
       // 
-      // serverType
+      // cboxServerSelection
       // 
-      this.serverType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.serverType.FormattingEnabled = true;
-      this.serverType.Items.AddRange(new object[] {
+      this.cboxServerSelection.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cboxServerSelection.FormattingEnabled = true;
+      this.cboxServerSelection.Items.AddRange(new object[] {
             "Local",
-            "Remote"});
-      this.serverType.Location = new System.Drawing.Point(152, 78);
-      this.serverType.Name = "serverType";
-      this.serverType.Size = new System.Drawing.Size(259, 21);
-      this.serverType.TabIndex = 46;
-      this.serverType.SelectedIndexChanged += new System.EventHandler(this.server_SelectedIndexChanged);
+            "Remote...",
+            "-------------------------------------------"});
+      this.cboxServerSelection.Location = new System.Drawing.Point(148, 78);
+      this.cboxServerSelection.Name = "cboxServerSelection";
+      this.cboxServerSelection.Size = new System.Drawing.Size(193, 21);
+      this.cboxServerSelection.TabIndex = 46;
+      this.cboxServerSelection.SelectedIndexChanged += new System.EventHandler(this.server_SelectedIndexChanged);
       // 
       // timerForFiltering
       // 
@@ -278,14 +279,14 @@ namespace MySql.Notifier
     private System.Windows.Forms.Label lblText6;
     private System.Windows.Forms.Label lblText4;
     private System.Windows.Forms.Label lblText1;
-    private System.Windows.Forms.Label lblSubTitle1;
+    private System.Windows.Forms.Label lblHyperTitle1;
     private System.Windows.Forms.CheckBox filter;
     private System.Windows.Forms.ListView lstServices;
     private System.Windows.Forms.ColumnHeader columnHeader1;
     private System.Windows.Forms.ColumnHeader columnHeader3;
-    private System.Windows.Forms.Label lblSubTitle2;
+    private System.Windows.Forms.Label lblHyperTitle2;
     private System.Windows.Forms.Label lblText3;
-    private System.Windows.Forms.ComboBox serverType;
+    private System.Windows.Forms.ComboBox cboxServerSelection;
     private System.Windows.Forms.Timer timerForFiltering;
   }
 }

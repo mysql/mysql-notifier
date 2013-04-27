@@ -191,11 +191,11 @@ namespace MySql.Notifier
       }
     }
 
-    public void AddToContextMenu(ContextMenuStrip menu, int index = 0)
+    public void AddToContextMenu(MySQLService service, ContextMenuStrip menu, int index = 0)
     {
       if (menu.InvokeRequired)
       {
-        menu.Invoke(new MethodInvoker(() => { AddToContextMenu(menu); }));
+        menu.Invoke(new MethodInvoker(() => { AddToContextMenu(service, menu); }));
       }
       else
       {
@@ -205,7 +205,11 @@ namespace MySql.Notifier
           if (configureMenu != null) menu.Items.Insert(index, configureMenu);
           if (editorMenu != null) menu.Items.Insert(index, editorMenu);
         }
-        menu.Items.Insert(index, separator);
+
+        //if (service.WinServiceType == ServiceMachineType.Local)
+        //{
+        //  menu.Items.Insert(index, separator);
+        //}
       }
     }
 

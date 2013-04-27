@@ -24,6 +24,9 @@ namespace MySql.Notifier
   using System.Runtime.InteropServices;
   using System.Text.RegularExpressions;
   using System.Windows.Forms;
+  using MySql.Notifier.Properties;
+  using MySQL.Utility;
+  using MySQL.Utility.Forms;
 
   public partial class WindowsConnectionDialog : MachineAwareForm
   {
@@ -32,34 +35,35 @@ namespace MySql.Notifier
       InitializeComponent();
     }
 
-    //public WindowsConnectionDialog(AccountLogin CurrentLogin)
-    public WindowsConnectionDialog(Machine CurrentMachine)
+    public WindowsConnectionDialog(MachinesList machineslist, Machine CurrentMachine)
     {
       InitializeComponent();
 
-      //TODO UNhardcode this ▼
-      //if (CurrentMachine != null)
-      //{
-      //  RemoteMachine = CurrentMachine;
-      //  HostTextbox.Text = CurrentMachine.Name ?? String.Empty;
-      //  UserTextBox.Text = CurrentMachine.User ?? String.Empty;
-      //  PasswordTextbox.Text = CurrentMachine.Password ?? String.Empty;
-      //}
-      HostTextbox.Text = "WIN7X64VM";
-      UserTextBox.Text = "Javier";
-      PasswordTextbox.Text = ",.";
+      if (CurrentMachine != null)
+      {
+        newMachine = CurrentMachine;
+        HostTextbox.Text = (string.IsNullOrEmpty(CurrentMachine.Name) || CurrentMachine.Name == "localhost") ? String.Empty : CurrentMachine.Name;
+        UserTextBox.Text = CurrentMachine.User ?? String.Empty;
+        PasswordTextbox.Text = CurrentMachine.UnprotectedPassword ?? String.Empty;
+      }
+      if (machineslist != null)
+      {
+        if (machineslist.Machines != null)
+        {
+          machinesList = machineslist;
+        }
+      }
     }
 
     private void Button_Click(object sender, EventArgs e)
     {
       Cursor = Cursors.WaitCursor;
       DialogOKButton.Enabled = TestConnectionButton.Enabled = false;
-      if (ValidateConnectionAndPermissions())
+      if (ValidateConnectionAndPermissions(sender.Equals(this.TestConnectionButton)))
       {
         if (sender.Equals(this.TestConnectionButton))
         {
-          MessageDialog dialog = new MessageDialog("Connection Successful", "You are able to monitor services in this remote machine.", false);
-          dialog.ShowDialog();
+          InfoDialog.ShowSuccessDialog(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage);
         }
         else
         {
@@ -67,7 +71,7 @@ namespace MySql.Notifier
         }
       }
       Textbox_TextChanged(sender, e);
-      Cursor = Cursors.Arrow;
+      Cursor = Cursors.Default;
     }
 
     private void Textbox_TextChanged(object sender, EventArgs e)
@@ -79,13 +83,13 @@ namespace MySql.Notifier
     {
       //// Validate all textboxes are filled properly and the Host name is either a valid IP address or a machine name
       return (!String.IsNullOrEmpty(HostTextbox.Text) && !String.IsNullOrEmpty(UserTextBox.Text) && !String.IsNullOrEmpty(PasswordTextbox.Text) &&
-        Regex.IsMatch(UserTextBox.Text, @"^[\w\.\-_]{1,64}$") && (Regex.IsMatch(HostTextbox.Text, @"^[\w\.\-_]{1,64}$") || Regex.IsMatch(HostTextbox.Text, @"^([01]?[\d][\d]?|2[0-4][\d]|25[0-5])(\.([01]?[\d][\d]?|2[0-4][\d]|25[0-5])){3}$")));
+        Regex.IsMatch(UserTextBox.Text, @"^[\w\.\-_]{1,64}$") && (Regex.IsMatch(HostTextbox.Text, @"^[\w\.\-_]{1,64}$") ||
+        Regex.IsMatch(HostTextbox.Text, @"^([01]?[\d][\d]?|2[0-4][\d]|25[0-5])(\.([01]?[\d][\d]?|2[0-4][\d]|25[0-5])){3}$")));
     }
 
-    private bool ValidateConnectionAndPermissions()
+    private bool ValidateConnectionAndPermissions(bool OnlyTest)
     {
-      MessageDialog dialog = null;
-      bool result = false;
+      bool result = false, machineAlreadyExist = false;
       try
       {
         if (!ValidateTextEntries())
@@ -95,27 +99,53 @@ namespace MySql.Notifier
 
         newMachine = new Machine(HostTextbox.Text, UserTextBox.Text, PasswordTextbox.Text);
         result = newMachine.TestConnectionUnManaged();
+        if (!OnlyTest)
+          machineAlreadyExist = (machinesList.GetMachineByHostName(newMachine.Name) != null);
       }
       catch (COMException ex)
       {
-        dialog = new MessageDialog(ex.Message, "This message can be displayed for one of the following reasons at the remote machine: "
-        + "Host is Offline, Incorrect WMI permission set, Firewall or DCOM settings.", true);
+        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        switch (ex.ErrorCode)
+        {
+          case -2147023174:
+            InfoDialog.ShowErrorDialog(Resources.HostUnreachableTitle, Resources.HostUnreachableMessage);
+            break;
+
+          default:
+            InfoDialog.ShowErrorDialog(Resources.HostUnreachableTitle, Resources.HostUnreachableMessageDefault, null, ex.Message + ex.StackTrace);
+            break;
+        }
       }
       catch (UnauthorizedAccessException ex)
       {
-        dialog = new MessageDialog(ex.Message, "This message is displayed because of an incorrect User or Password", true);
+        //// -2147024891
+        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        InfoDialog.ShowErrorDialog(Resources.AccessDeniedTitle, Resources.AccessDeniedMessage, null, ex.Message + ex.StackTrace);
       }
       catch (ManagementException ex)
       {
-        dialog = new MessageDialog(ex.Message, "This message is displayed because you are not allowed to browse services on the remote machine.", true);
+        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        InfoDialog.ShowErrorDialog(Resources.ManagementExceptionTitle, Resources.ManagementExceptionMessage, null, ex.Message + ex.StackTrace);
       }
       finally
       {
-        if (dialog != null)
+        if (machineAlreadyExist)
         {
-          dialog.ShowDialog();
-          HostTextbox.SelectAll();
-          newMachine = null;
+          if (InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage) == DialogResult.Yes)
+          {
+            machinesList.OverwriteMachine(newMachine);
+            newMachine = machinesList.GetMachineByHostName(newMachine.Name);
+          }
+          else
+          {
+            result = false;
+          }
+          if (!result)
+          {
+            HostTextbox.Focus();
+            HostTextbox.SelectAll();
+            newMachine = null;
+          }
         }
       }
       return result;

@@ -27,6 +27,7 @@ namespace MySql.Notifier
   using System.Windows.Forms;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
+  using MySQL.Utility.Forms;
 
   public partial class AddServiceDialog : MachineAwareForm
   {
@@ -64,14 +65,30 @@ namespace MySql.Notifier
     private string lastFilter = String.Empty;
     private string lastTextFilter = String.Empty;
 
-    public ServiceMachineType ServiceType { get; set; }
+    public ServiceMachineType MachineType { get; set; }
 
-    public AddServiceDialog(Machine remoteMachine)
+    public AddServiceDialog(MachinesList machineslist, Machine machine)
     {
       InitializeComponent();
-      serverType.SelectedIndex = 0;
+      cboxServerSelection.SelectedIndex = 0;
       lstServices.ColumnClick += new ColumnClickEventHandler(lstServices_ColumnClick);
-      newMachine = remoteMachine ?? newMachine;
+      newMachine = machine ?? newMachine;
+      machinesList = machineslist;
+      InsertMachinesIntoComboBox();
+    }
+
+    private void InsertMachinesIntoComboBox()
+    {
+      if (machinesList == null) return;
+      if (machinesList.Machines == null) return;
+
+      foreach (Machine machine in machinesList.Machines)
+      {
+        if (machine.Name != "localhost")
+        {
+          cboxServerSelection.Items.Add(machine);
+        }
+      }
     }
 
     public List<MySQLService> ServicesToAdd { get; set; }
@@ -87,13 +104,13 @@ namespace MySql.Notifier
 
         lstServices.BeginUpdate();
         lastFilter = currentFilter;
-        lastTextFilter = txtFilter.Text;
+        lastTextFilter = txtFilter.Text.ToLower();
 
         lstServices.Items.Clear();
 
         List<ManagementObject> services = new List<ManagementObject>();
 
-        if (newMachine != null && ServiceType == ServiceMachineType.Remote)
+        if (newMachine != null && MachineType == ServiceMachineType.Remote)
         {
           foreach (ManagementObject mo in newMachine.GetServices(currentFilter))
             services.Add(mo);
@@ -103,9 +120,11 @@ namespace MySql.Notifier
           services = Service.GetInstances(String.Empty);
         }
 
+        services = services.OrderBy(x => x.Properties["DisplayName"].Value).ToList();
+
         if (!String.IsNullOrEmpty(lastTextFilter))
         {
-          services = services.Where(t => t.Properties["DisplayName"].Value.ToString().ToLower().Contains(lastTextFilter.ToLower())).ToList();
+          services = services.Where(f => f.Properties["DisplayName"].Value.ToString().ToLower().Contains(lastTextFilter)).ToList();
         }
 
         foreach (ManagementObject item in services)
@@ -114,7 +133,6 @@ namespace MySql.Notifier
           newItem.Text = item.Properties["DisplayName"].Value.ToString();
           newItem.Tag = item.Properties["Name"].Value.ToString();
           newItem.SubItems.Add(item.Properties["State"].Value.ToString());
-
           lstServices.Items.Add(newItem);
         }
 
@@ -185,28 +203,70 @@ namespace MySql.Notifier
 
     private void server_SelectedIndexChanged(object sender, EventArgs e)
     {
-      ServiceType = (ServiceMachineType)serverType.SelectedIndex;
+      Cursor.Current = Cursors.WaitCursor;
       DialogResult dr = DialogResult.None;
-
-      switch (ServiceType)
+      switch (cboxServerSelection.SelectedIndex)
       {
-        case ServiceMachineType.Local:
+        case 0:
+          MachineType = ServiceMachineType.Local;
           newMachine = new Machine("localhost");
           break;
-        case ServiceMachineType.Remote:
-          using (var windowsConnectionDialog = new WindowsConnectionDialog(newMachine))
+
+        case 1:
+          MachineType = ServiceMachineType.Remote;
+          using (var windowsConnectionDialog = new WindowsConnectionDialog(machinesList, newMachine))
           {
             dr = windowsConnectionDialog.ShowDialog();
             newMachine = (dr != DialogResult.Cancel) ? windowsConnectionDialog.newMachine : newMachine;
-            if(dr == DialogResult.Cancel)
+
+            if (dr == DialogResult.Cancel)
             {
-             serverType.SelectedIndex = 0;
+              cboxServerSelection.SelectedIndex = 0;
+            }
+            else
+            {
+              int index = -1;
+              foreach (var item in cboxServerSelection.Items)
+              {
+                if (item.ToString() == newMachine.Name)
+                {
+                  index = cboxServerSelection.Items.IndexOf(item);
+                  break;
+                }
+              }
+              if (index == -1)
+              {
+                cboxServerSelection.Items.Add(newMachine);
+                cboxServerSelection.SelectedIndex = (cboxServerSelection.Items.Count - 1);
+              }
+              else
+              {
+                cboxServerSelection.SelectedIndex = index <= 0 ? 0 : index;
+              }
             }
           }
           break;
-      }
 
+        case 2:
+          Cursor.Current = Cursors.Default;
+          return;
+
+        default:
+          MachineType = ServiceMachineType.Remote;
+          Machine m = (Machine)cboxServerSelection.SelectedItem;
+          if (m.IsOnline)
+          {
+            newMachine = m;
+          }
+          else
+          {
+            InfoDialog.ShowInformationDialog(Resources.HostUnavailableTitle, Resources.HostUnavailableMessage);
+            cboxServerSelection.SelectedIndex = 0;
+          }
+          break;
+      }
       RefreshList();
+      Cursor.Current = Cursors.Default;
     }
   }
 }

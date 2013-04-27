@@ -62,7 +62,7 @@ namespace MySql.Notifier
       this.notifyOnStatusChange = new System.Windows.Forms.CheckBox();
       this.btnDelete = new System.Windows.Forms.Button();
       this.btnAdd = new System.Windows.Forms.Button();
-      this.lblHiperTitle = new System.Windows.Forms.Label();
+      this.lblHyperTitle = new System.Windows.Forms.Label();
       this.MonitoredItemsListView = new System.Windows.Forms.ListView();
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -107,7 +107,7 @@ namespace MySql.Notifier
       this.panel1.Controls.Add(this.groupBox1);
       this.panel1.Controls.Add(this.btnDelete);
       this.panel1.Controls.Add(this.btnAdd);
-      this.panel1.Controls.Add(this.lblHiperTitle);
+      this.panel1.Controls.Add(this.lblHyperTitle);
       this.panel1.Controls.Add(this.MonitoredItemsListView);
       this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panel1.Location = new System.Drawing.Point(0, 0);
@@ -228,15 +228,15 @@ namespace MySql.Notifier
       this.btnAdd.UseVisualStyleBackColor = true;
       this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
       // 
-      // lblHiperTitle
+      // lblHyperTitle
       // 
-      this.lblHiperTitle.AutoSize = true;
-      this.lblHiperTitle.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.lblHiperTitle.Location = new System.Drawing.Point(12, 18);
-      this.lblHiperTitle.Name = "lblHiperTitle";
-      this.lblHiperTitle.Size = new System.Drawing.Size(141, 15);
-      this.lblHiperTitle.TabIndex = 20;
-      this.lblHiperTitle.Text = "Manage Monitored Items";
+      this.lblHyperTitle.AutoSize = true;
+      this.lblHyperTitle.ForeColor = System.Drawing.SystemColors.ControlText;
+      this.lblHyperTitle.Location = new System.Drawing.Point(12, 18);
+      this.lblHyperTitle.Name = "lblHyperTitle";
+      this.lblHyperTitle.Size = new System.Drawing.Size(141, 15);
+      this.lblHyperTitle.TabIndex = 20;
+      this.lblHyperTitle.Text = "Manage Monitored Items";
       // 
       // MonitoredItemsListView
       // 
@@ -338,7 +338,7 @@ namespace MySql.Notifier
     private System.Windows.Forms.ToolStripMenuItem mySQLInstanceToolStripMenuItem;
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label lblSubTitle1;
-    private System.Windows.Forms.Label lblHiperTitle;
+    private System.Windows.Forms.Label lblHyperTitle;
     private System.Windows.Forms.ColumnHeader columnHeader2;
     private System.Windows.Forms.Label InstanceMonitorIntervalLabel;
     private System.Windows.Forms.NumericUpDown InstanceMonitorIntervalNumericUpDown;

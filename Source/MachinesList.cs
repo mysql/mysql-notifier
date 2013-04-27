@@ -53,9 +53,12 @@ namespace MySql.Notifier
       get
       {
         int servicesCount = 0;
-        foreach (Machine machine in Machines)
+        if (Machines != null)
         {
-          servicesCount += machine.Services.Count;
+          foreach (Machine machine in Machines)
+          {
+            servicesCount += machine.Services.Count;
+          }
         }
         return servicesCount;
       }
@@ -113,7 +116,7 @@ namespace MySql.Notifier
         ChangeMachine(machine, ChangeType.AutoAdd);
 
         //// ...then we will try to add the services we found on it.
-        machine = GetMachineByID("localhost");
+        machine = GetMachineByHostName("localhost");
         foreach (ManagementObject mo in services)
         {
           MySQLService service = new MySQLService(mo.Properties["Name"].Value.ToString(), true, true, machine);
@@ -184,7 +187,7 @@ namespace MySql.Notifier
         return false;
       }
 
-      Machine newMachine = GetMachineByID(machine.Name);
+      Machine newMachine = GetMachineByHostName(machine.Name);
 
       if (newMachine == null)
       {
@@ -196,7 +199,7 @@ namespace MySql.Notifier
       }
     }
 
-    public Machine GetMachineByID(string name)
+    public Machine GetMachineByHostName(string name)
     {
       foreach (Machine machine in Machines)
       {
@@ -266,6 +269,12 @@ namespace MySql.Notifier
     {
       if (CompleteServiceListChanged != null)
         CompleteServiceListChanged(machine, service, changeType);
+    }
+
+    internal void OverwriteMachine(Machine newMachine)
+    {
+      GetMachineByHostName(newMachine.Name).OverwriteCredentials(newMachine.User, newMachine.UnprotectedPassword);
+      Settings.Default.Save();
     }
   }
 

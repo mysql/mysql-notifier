@@ -56,7 +56,7 @@ namespace MySql.Notifier
       this.HostTextbox = new System.Windows.Forms.TextBox();
       this.UserTextBox = new System.Windows.Forms.TextBox();
       this.LogoPictureBox = new System.Windows.Forms.PictureBox();
-      this.HipertitleLabel = new System.Windows.Forms.Label();
+      this.HypertitleLabel = new System.Windows.Forms.Label();
       this.PasswordTextbox = new System.Windows.Forms.TextBox();
       this.HostLabel = new System.Windows.Forms.Label();
       this.UserLabel = new System.Windows.Forms.Label();
@@ -124,7 +124,7 @@ namespace MySql.Notifier
       this.ContentAreaPanel.Controls.Add(this.HostTextbox);
       this.ContentAreaPanel.Controls.Add(this.UserTextBox);
       this.ContentAreaPanel.Controls.Add(this.LogoPictureBox);
-      this.ContentAreaPanel.Controls.Add(this.HipertitleLabel);
+      this.ContentAreaPanel.Controls.Add(this.HypertitleLabel);
       this.ContentAreaPanel.Controls.Add(this.PasswordTextbox);
       this.ContentAreaPanel.Controls.Add(this.HostLabel);
       this.ContentAreaPanel.Controls.Add(this.UserLabel);
@@ -157,25 +157,26 @@ namespace MySql.Notifier
       // 
       // LogoPictureBox
       // 
-      this.LogoPictureBox.Image = global::MySql.Notifier.Properties.Resources.NotifierWarningImage;
-      this.LogoPictureBox.Location = new System.Drawing.Point(18, 23);
+      this.LogoPictureBox.Image = global::MySql.Notifier.Properties.Resources.ApplicationLogo;
+      this.LogoPictureBox.Location = new System.Drawing.Point(24, 35);
       this.LogoPictureBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.LogoPictureBox.Name = "LogoPictureBox";
-      this.LogoPictureBox.Size = new System.Drawing.Size(82, 69);
+      this.LogoPictureBox.Size = new System.Drawing.Size(60, 60);
+      this.LogoPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
       this.LogoPictureBox.TabIndex = 31;
       this.LogoPictureBox.TabStop = false;
       // 
-      // HipertitleLabel
+      // HypertitleLabel
       // 
-      this.HipertitleLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.HipertitleLabel.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.HipertitleLabel.Location = new System.Drawing.Point(105, 35);
-      this.HipertitleLabel.MaximumSize = new System.Drawing.Size(320, 0);
-      this.HipertitleLabel.Name = "HipertitleLabel";
-      this.HipertitleLabel.Size = new System.Drawing.Size(275, 23);
-      this.HipertitleLabel.TabIndex = 0;
-      this.HipertitleLabel.Text = "Please enter the requested information:";
-      this.HipertitleLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+      this.HypertitleLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.HypertitleLabel.ForeColor = System.Drawing.SystemColors.ControlText;
+      this.HypertitleLabel.Location = new System.Drawing.Point(105, 35);
+      this.HypertitleLabel.MaximumSize = new System.Drawing.Size(320, 0);
+      this.HypertitleLabel.Name = "HypertitleLabel";
+      this.HypertitleLabel.Size = new System.Drawing.Size(275, 23);
+      this.HypertitleLabel.TabIndex = 0;
+      this.HypertitleLabel.Text = "Please enter the requested information:";
+      this.HypertitleLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
       // 
       // PasswordTextbox
       // 
@@ -254,7 +255,7 @@ namespace MySql.Notifier
     private System.Windows.Forms.TextBox HostTextbox;
     private System.Windows.Forms.TextBox UserTextBox;
     private System.Windows.Forms.PictureBox LogoPictureBox;
-    private System.Windows.Forms.Label HipertitleLabel;
+    private System.Windows.Forms.Label HypertitleLabel;
     private System.Windows.Forms.TextBox PasswordTextbox;
     private System.Windows.Forms.Label HostLabel;
     private System.Windows.Forms.Label UserLabel;

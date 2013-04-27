@@ -143,12 +143,12 @@ namespace MySql.Notifier
       //// Attempt migration only if services were found
       if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
       {
-        if (machinesList.Machines.Count == 0 || machinesList.GetMachineByID("localhost") == null)
+        if (machinesList.Machines.Count == 0 || machinesList.GetMachineByHostName("localhost") == null)
         {
           machinesList.ChangeMachine(new Machine("localhost"), ChangeType.Add);
         }
 
-        Machine machine = machinesList.GetMachineByID("localhost");
+        Machine machine = machinesList.GetMachineByHostName("localhost");
 
         //Copy services from old schema to the Local machine.
         foreach (MySQLService service in mySQLServicesList.Services)
@@ -758,7 +758,7 @@ namespace MySql.Notifier
       string mode = o["StartMode"].ToString();
       if (state.Contains("Pending")) return;
 
-      Machine machine = (string.Compare(server, Environment.MachineName, true) == 0) ? machinesList.GetMachineByID("localhost") : machinesList.GetMachineByID(server);
+      Machine machine = (string.Compare(server, Environment.MachineName, true) == 0) ? machinesList.GetMachineByHostName("localhost") : machinesList.GetMachineByHostName(server);
 
       Control c = notifyIcon.ContextMenuStrip;
       if (c.InvokeRequired)
@@ -780,7 +780,7 @@ namespace MySql.Notifier
       string serviceName = o["Name"].ToString().Trim();
       Control c = notifyIcon.ContextMenuStrip;
 
-      Machine machine = (string.Compare(server, Environment.MachineName, true) == 0) ? machinesList.GetMachineByID("localhost") : machinesList.GetMachineByID(server);
+      Machine machine = (string.Compare(server, Environment.MachineName, true) == 0) ? machinesList.GetMachineByHostName("localhost") : machinesList.GetMachineByHostName(server);
       MySQLService service = machine.GetServiceByName(serviceName);
 
       if (c.InvokeRequired)
@@ -813,7 +813,7 @@ namespace MySql.Notifier
 
     private void machinesList_CompleteServiceListChanged(Machine machine, MySQLService service, ChangeType changeType)
     {
-      int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, machine.User + @"@" + machine.Name);
+      int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, machine.Name);
       if (index < 0 && machinesList.ServicesCount > 0)
       {
         index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, Resources.Actions);
@@ -832,7 +832,7 @@ namespace MySql.Notifier
       else
       {
         if (service.MenuGroup != null)
-          machine.GetServiceByName(service.ServiceName).MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip, index + 1);
+          machine.GetServiceByName(service.ServiceName).MenuGroup.AddToContextMenu(service, notifyIcon.ContextMenuStrip, index + 1);
         machine.GetServiceByName(service.ServiceName).StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
         if (changeType == ChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
         {
@@ -840,8 +840,9 @@ namespace MySql.Notifier
         }
       }
 
-      // TODO: ▼ Update completely (Include services in the calculation).
+      // TODO: ▼ Update completely (Include services in the calculation).      
       RefreshNotifierIcon();
+      RebuildMenuIfNeeded(false);
     }
 
     private void ServiceListChanged(MySQLService service, ChangeType changeType)
@@ -852,7 +853,7 @@ namespace MySql.Notifier
     private void machinesList_MachineListChanged(Machine machine, ChangeType changeType)
     {
       //TODO ▼ Implement/Verify it works when notifier is running ▼
-      int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, machine.User + @"@" + machine.Name);
+      int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, machine.Name);
 
       if (index < 0 && machinesList.ServicesCount > 0)
       {
@@ -868,7 +869,7 @@ namespace MySql.Notifier
           notifyIcon.ContextMenuStrip.Items[index - 1].Visible = false;
         }
 
-        ToolStripMenuItem instancesMainMenuItem = new ToolStripMenuItem(machine.User + @"@" + machine.Name + @" - " + machine.Status);
+        ToolStripMenuItem instancesMainMenuItem = new ToolStripMenuItem(machine.Name + @" (" + machine.Status + @")");
         Font boldFont = new Font(instancesMainMenuItem.Font, FontStyle.Bold);
         instancesMainMenuItem.Font = boldFont;
         instancesMainMenuItem.BackColor = SystemColors.MenuText;
