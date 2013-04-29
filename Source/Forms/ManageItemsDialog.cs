@@ -21,133 +21,205 @@ namespace MySql.Notifier
 {
   using System;
   using System.Drawing;
-  using System.Linq;
   using System.Windows.Forms;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
   using MySQL.Utility.Forms;
 
+  /// <summary>
+  /// Dialog window where users manage the monitored local and remote services and MySQL instances.
+  /// </summary>
   public partial class ManageItemsDialog : MachineAwareForm
   {
-    public static string addServiceName;
-    private object selectedItem;
-    private MySQLInstancesList _instancesList;
+    /// <summary>
+    /// The service or instance object selected by the user from the corresponding list view.
+    /// </summary>
+    private object _selectedItem;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ManageItemsDialog"/> class.
+    /// </summary>
+    /// <param name="instancesList">List of <see cref="MySQLInstance"/> objects.</param>
+    /// <param name="machineslist">List of <see cref="Machine"/> objects.</param>
     public ManageItemsDialog(MySQLInstancesList instancesList, MachinesList machineslist)
     {
       InitializeComponent();
-      _instancesList = instancesList;
+      InstancesList = instancesList;
       machinesList = machineslist;
-      RefreshList();
+      RefreshServicesAndInstancesListViews(MonitoredItemType.Service);
     }
 
-    private void btnAdd_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Specifies the monitored item type.
+    /// </summary>
+    public enum MonitoredItemType : int
     {
-      Point screenPoint = btnAdd.PointToScreen(new Point(btnAdd.Left, btnAdd.Bottom));
+      /// <summary>
+      /// Local or remote Windows service.
+      /// </summary>
+      Service = 0,
+
+      /// <summary>
+      /// MySQL server instance.
+      /// </summary>
+      MySqlInstance = 1,
+
+      /// <summary>
+      /// Default value.
+      /// </summary>
+      None = -1
+    }
+
+    /// <summary>
+    /// Gets an object representing a list of <see cref="MySQLInstance"/> objects used to monitor MySQL Server instances.
+    /// </summary>
+    public MySQLInstancesList InstancesList { get; private set; }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="AddButton"/> button is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void AddButton_Click(object sender, EventArgs e)
+    {
+      Point screenPoint = AddButton.PointToScreen(new Point(AddButton.Left, AddButton.Bottom));
       if (screenPoint.Y + AddButtonContextMenuStrip.Size.Height > Screen.PrimaryScreen.WorkingArea.Height)
       {
-        AddButtonContextMenuStrip.Show(btnAdd, new Point(0, -AddButtonContextMenuStrip.Size.Height));
+        AddButtonContextMenuStrip.Show(AddButton, new Point(0, -AddButtonContextMenuStrip.Size.Height));
       }
       else
       {
-        AddButtonContextMenuStrip.Show(btnAdd, new Point(0, btnAdd.Height));
+        AddButtonContextMenuStrip.Show(AddButton, new Point(0, AddButton.Height));
       }
     }
 
-    private void btnClose_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Event delegate method fired when the <see cref="CloseButton"/> button is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void CloseButton_Click(object sender, EventArgs e)
     {
       Settings.Default.Save();
     }
 
     /// <summary>
-    /// Deletes selected item from monitored items list
+    /// Event delegate method fired when the <see cref="DeleteButton"/> button is clicked.
     /// </summary>
-    /// <param name="sender">Sender Object</param>
-    /// <param name="e">Event Arguments</param>
-    private void btnDelete_Click(object sender, EventArgs e)
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void DeleteButton_Click(object sender, EventArgs e)
     {
-      if (selectedItem == null)
+      if (_selectedItem == null)
       {
         return;
       }
 
-      if (selectedItem is MySQLService)
+      if (_selectedItem is MySQLService)
       {
-        MySQLService selectedService = selectedItem as MySQLService;
+        MySQLService selectedService = _selectedItem as MySQLService;
         Machine machine = machinesList.GetMachineByHostName(selectedService.Host.Name);
         machine.ChangeService(selectedService, ChangeType.Remove);
-        RefreshList();
+        RefreshServicesAndInstancesListViews(MonitoredItemType.Service);
       }
-      else if (selectedItem is MySQLInstance)
+      else if (_selectedItem is MySQLInstance)
       {
-        MySQLInstance selectedInstance = selectedItem as MySQLInstance;
-        if (_instancesList.Remove(selectedInstance))
+        MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
+        if (InstancesList.Remove(selectedInstance))
         {
-          RefreshList();
+          RefreshServicesAndInstancesListViews(MonitoredItemType.MySqlInstance);
         }
       }
     }
 
-    private void chkUpdateTrayIcon_CheckedChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Event delegate method fired when the <see cref="InstanceMonitorIntervalNumericUpDown"/> value changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void InstanceMonitorIntervalNumericUpDown_ValueChanged(object sender, EventArgs e)
     {
-      if (selectedItem == null)
+      if (_selectedItem == null || !(_selectedItem is MySQLInstance))
       {
         return;
       }
 
-      if (selectedItem is MySQLService)
+      MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
+      selectedInstance.MonitoringInterval = (uint)InstanceMonitorIntervalNumericUpDown.Value;
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="InstanceMonitorIntervalUOMComboBox"/> selected index changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void InstanceMonitorIntervalUOMComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      if (_selectedItem == null || !(_selectedItem is MySQLInstance))
       {
-        MySQLService selectedService = selectedItem as MySQLService;
-        selectedService.UpdateTrayIconOnStatusChange = chkUpdateTrayIcon.Checked;
+        return;
       }
-      else if (selectedItem is MySQLInstance)
+
+      MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
+      selectedInstance.MonitoringIntervalUnitOfMeasure = (MySQLInstance.IntervalUnitOfMeasure)InstanceMonitorIntervalUOMComboBox.SelectedIndex;
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="ItemsTabControl"/> selected index changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void ItemsTabControl_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      switch (ItemsTabControl.SelectedIndex)
       {
-        MySQLInstance selectedInstance = selectedItem as MySQLInstance;
-        selectedInstance.UpdateTrayIconOnStatusChange = chkUpdateTrayIcon.Checked;
+        case 0:
+          //// Services tab page
+          MonitoredServicesListView_SelectedIndexChanged(MonitoredServicesListView, EventArgs.Empty);
+          break;
+
+        case 1:
+          //// Instances tab page
+          MonitoredInstancesListView_SelectedIndexChanged(MonitoredInstancesListView, EventArgs.Empty);
+          break;
+
+        default:
+          _selectedItem = null;
+          SetDialogControlsAvailability();
+          break;
       }
     }
 
-    private void MonitoredItemsListView_SelectedIndexChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Event delegate method fired when the <see cref="MonitoredInstancesListView"/> selected index changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void MonitoredInstancesListView_SelectedIndexChanged(object sender, EventArgs e)
     {
-      btnDelete.Enabled = MonitoredItemsListView.SelectedItems.Count > 0;
-      notifyOnStatusChange.Enabled = btnDelete.Enabled;
-      chkUpdateTrayIcon.Enabled = btnDelete.Enabled;
-
-      selectedItem = MonitoredItemsListView.SelectedItems.Count > 0 ? MonitoredItemsListView.SelectedItems[0].Tag : null;
-      if (selectedItem == null)
-      {
-        notifyOnStatusChange.Checked = false;
-        chkUpdateTrayIcon.Checked = false;
-        InstanceMonitorIntervalNumericUpDown.Value = 0;
-        InstanceMonitorIntervalNumericUpDown.Enabled = false;
-        InstanceMonitorIntervalUOMComboBox.Text = string.Empty;
-        InstanceMonitorIntervalUOMComboBox.Enabled = false;
-      }
-      else if (selectedItem is MySQLService)
-      {
-        MySQLService service = selectedItem as MySQLService;
-        notifyOnStatusChange.Checked = service.NotifyOnStatusChange;
-        chkUpdateTrayIcon.Checked = service.UpdateTrayIconOnStatusChange;
-        InstanceMonitorIntervalNumericUpDown.Value = 0;
-        InstanceMonitorIntervalNumericUpDown.Enabled = false;
-        InstanceMonitorIntervalUOMComboBox.Text = string.Empty;
-        InstanceMonitorIntervalUOMComboBox.Enabled = false;
-      }
-      else if (selectedItem is MySQLInstance)
-      {
-        MySQLInstance instance = selectedItem as MySQLInstance;
-        notifyOnStatusChange.Checked = instance.MonitorAndNotifyStatus;
-        chkUpdateTrayIcon.Checked = instance.UpdateTrayIconOnStatusChange;
-        InstanceMonitorIntervalNumericUpDown.Enabled = true;
-        InstanceMonitorIntervalNumericUpDown.Value = instance.MonitoringInterval;
-        InstanceMonitorIntervalUOMComboBox.Enabled = true;
-        InstanceMonitorIntervalUOMComboBox.SelectedIndex = (int)instance.MonitoringIntervalUnitOfMeasure;
-      }
+      _selectedItem = MonitoredInstancesListView.SelectedItems.Count > 0 ? MonitoredInstancesListView.SelectedItems[0].Tag : null;
+      SetDialogControlsAvailability();
     }
 
-    private void mySQLInstanceToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Event delegate method fired when the <see cref="MonitoredServicesListView"/> selected index changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void MonitoredServicesListView_SelectedIndexChanged(object sender, EventArgs e)
     {
-      using (var monitorInstancesDialog = new MonitorMySQLServerInstancesDialog(machinesList, _instancesList))
+      _selectedItem = MonitoredServicesListView.SelectedItems.Count > 0 ? MonitoredServicesListView.SelectedItems[0].Tag : null;
+      SetDialogControlsAvailability();
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="MySQLInstanceToolStripMenuItem"/> context menu item is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void MySQLInstanceToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      using (var monitorInstancesDialog = new MonitorMySQLServerInstancesDialog(machinesList, InstancesList))
       {
         if (monitorInstancesDialog.ShowDialog() == DialogResult.OK)
         {
@@ -157,7 +229,7 @@ namespace MySql.Notifier
             bool connectionAlreadyInInstance = false;
 
             //// If the selected connection exists for an already monitored instance but it is not its main connection, replace the main connection with this one.
-            foreach (var instance in _instancesList)
+            foreach (var instance in InstancesList)
             {
               if (instance.RelatedConnections.Exists(conn => conn.Id == selectedConnection.Id) && instance.WorkbenchConnection.Id != selectedConnection.Id)
               {
@@ -169,40 +241,52 @@ namespace MySql.Notifier
 
             if (!connectionAlreadyInInstance)
             {
-              _instancesList.Add(new MySQLInstance(selectedConnection));
+              InstancesList.Add(new MySQLInstance(selectedConnection));
             }
 
-            RefreshList();
+            RefreshServicesAndInstancesListViews(MonitoredItemType.MySqlInstance);
           }
         }
       }
     }
 
-    private void notifyOnStatusChange_CheckedChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Event delegate method fired when the <see cref="NotifyOnStatusChangeCheckBox"/> checked status changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void NotifyOnStatusChangeCheckBox_CheckedChanged(object sender, EventArgs e)
     {
-      if (selectedItem == null)
+      if (_selectedItem == null)
       {
         return;
       }
 
-      if (selectedItem is MySQLService)
+      if (_selectedItem is MySQLService)
       {
-        MySQLService selectedService = selectedItem as MySQLService;
-        selectedService.NotifyOnStatusChange = notifyOnStatusChange.Checked;
+        MySQLService selectedService = _selectedItem as MySQLService;
+        selectedService.NotifyOnStatusChange = NotifyOnStatusChangeCheckBox.Checked;
       }
-      else if (selectedItem is MySQLInstance)
+      else if (_selectedItem is MySQLInstance)
       {
-        MySQLInstance selectedInstance = selectedItem as MySQLInstance;
-        selectedInstance.MonitorAndNotifyStatus = notifyOnStatusChange.Checked;
+        MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
+        selectedInstance.MonitorAndNotifyStatus = NotifyOnStatusChangeCheckBox.Checked;
       }
     }
 
-    private void RefreshList()
+    /// <summary>
+    /// Refreshes the contents of the services and instances list view controls.
+    /// </summary>
+    private void RefreshServicesAndInstancesListViews(MonitoredItemType itemType)
     {
-      //// Set cursor to waiting, stop painting of list view to avoid flickering and clear its items.
+      int pageIndex = itemType == MonitoredItemType.None ? ItemsTabControl.SelectedIndex : (int)itemType;
+
+      //// Set cursor to waiting, stop painting of list views to avoid flickering and clear their items.
       Cursor.Current = Cursors.WaitCursor;
-      MonitoredItemsListView.BeginUpdate();
-      MonitoredItemsListView.Items.Clear();
+      MonitoredServicesListView.BeginUpdate();
+      MonitoredInstancesListView.BeginUpdate();
+      MonitoredServicesListView.Items.Clear();
+      MonitoredInstancesListView.Items.Clear();
 
       //// Add monitored services.
       foreach (Machine machine in machinesList.Machines)
@@ -214,51 +298,54 @@ namespace MySql.Notifier
             service.Host = machine;
             service.SetServiceParameters();
           }
+
           ListViewItem newItem = new ListViewItem(service.DisplayName);
           newItem.Tag = service;
-          newItem.SubItems.Add(service.WinServiceType.ToString());
-          if (service.Status == 0)
-          {
-            newItem.SubItems.Add("Unavailable");
-          }
-          else
-          {
-            newItem.SubItems.Add(service.Status.ToString());
-          }
-          MonitoredItemsListView.Items.Add(newItem);
+          newItem.SubItems.Add(machine.Name);
+          newItem.SubItems.Add(service.Status.ToString());
+          MonitoredServicesListView.Items.Add(newItem);
         }
       }
 
       //// Add monitored instances.
-      foreach (var instance in _instancesList)
+      foreach (var instance in InstancesList)
       {
         ListViewItem newItem = new ListViewItem(instance.HostIdentifier);
         newItem.Tag = instance;
         newItem.SubItems.Add(instance.WorkbenchConnection.DriverType.ToString());
         newItem.SubItems.Add(instance.ConnectionStatusText);
-        MonitoredItemsListView.Items.Add(newItem);
+        MonitoredInstancesListView.Items.Add(newItem);
       }
 
       //// Select automatically the first itemText or disable controls if no items exist.
-      if (MonitoredItemsListView.Items.Count > 0)
+      ListView pageListView = pageIndex == 0 ? MonitoredServicesListView : MonitoredInstancesListView;
+      if (pageListView.Items.Count > 0)
       {
-        MonitoredItemsListView.Items[0].Selected = true;
+        pageListView.Items[0].Selected = true;
       }
       else
       {
-        btnDelete.Enabled = false;
-        chkUpdateTrayIcon.Enabled = false;
-        notifyOnStatusChange.Enabled = false;
-        InstanceMonitorIntervalNumericUpDown.Enabled = false;
-        InstanceMonitorIntervalUOMComboBox.Enabled = false;
+        pageListView.SelectedItems.Clear();
+      }
+
+      //// Set tab page focus
+      if (pageIndex != ItemsTabControl.SelectedIndex)
+      {
+        ItemsTabControl.SelectedIndex = pageIndex;
       }
 
       //// Revert cursor back to normal and paint changes in list.
-      MonitoredItemsListView.EndUpdate();
+      MonitoredServicesListView.EndUpdate();
+      MonitoredInstancesListView.EndUpdate();
       Cursor.Current = Cursors.Default;
     }
 
-    private void serviceToolStripMenuItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Event delegate method fired when the <see cref="ServiceToolStripMenuItem"/> context menu item is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void ServiceToolStripMenuItem_Click(object sender, EventArgs e)
     {
       using (AddServiceDialog dialog = new AddServiceDialog(machinesList, newMachine))
       {
@@ -280,31 +367,73 @@ namespace MySql.Notifier
             }
           }
 
-          RefreshList();
+          RefreshServicesAndInstancesListViews(MonitoredItemType.Service);
         }
       }
     }
 
-    private void InstanceMonitorIntervalUOMComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Sets the availability of controls related to services or instances based on the selected item.
+    /// </summary>
+    private void SetDialogControlsAvailability()
     {
-      if (selectedItem == null || !(selectedItem is MySQLInstance))
-      {
-        return;
-      }
+      DeleteButton.Enabled = _selectedItem != null;
+      NotifyOnStatusChangeCheckBox.Enabled = DeleteButton.Enabled;
+      UpdateTrayIconCheckBox.Enabled = DeleteButton.Enabled;
 
-      MySQLInstance selectedInstance = selectedItem as MySQLInstance;
-      selectedInstance.MonitoringIntervalUnitOfMeasure = (MySQLInstance.IntervalUnitOfMeasure)InstanceMonitorIntervalUOMComboBox.SelectedIndex;
+      if (_selectedItem == null)
+      {
+        NotifyOnStatusChangeCheckBox.Checked = false;
+        UpdateTrayIconCheckBox.Checked = false;
+        InstanceMonitorIntervalNumericUpDown.Value = 0;
+        InstanceMonitorIntervalNumericUpDown.Enabled = false;
+        InstanceMonitorIntervalUOMComboBox.Text = string.Empty;
+        InstanceMonitorIntervalUOMComboBox.Enabled = false;
+      }
+      else if (_selectedItem is MySQLService)
+      {
+        MySQLService service = _selectedItem as MySQLService;
+        NotifyOnStatusChangeCheckBox.Checked = service.NotifyOnStatusChange;
+        UpdateTrayIconCheckBox.Checked = service.UpdateTrayIconOnStatusChange;
+        InstanceMonitorIntervalNumericUpDown.Value = 0;
+        InstanceMonitorIntervalNumericUpDown.Enabled = false;
+        InstanceMonitorIntervalUOMComboBox.Text = string.Empty;
+        InstanceMonitorIntervalUOMComboBox.Enabled = false;
+      }
+      else if (_selectedItem is MySQLInstance)
+      {
+        MySQLInstance instance = _selectedItem as MySQLInstance;
+        NotifyOnStatusChangeCheckBox.Checked = instance.MonitorAndNotifyStatus;
+        UpdateTrayIconCheckBox.Checked = instance.UpdateTrayIconOnStatusChange;
+        InstanceMonitorIntervalNumericUpDown.Enabled = true;
+        InstanceMonitorIntervalNumericUpDown.Value = instance.MonitoringInterval;
+        InstanceMonitorIntervalUOMComboBox.Enabled = true;
+        InstanceMonitorIntervalUOMComboBox.SelectedIndex = (int)instance.MonitoringIntervalUnitOfMeasure;
+      }
     }
 
-    private void InstanceMonitorIntervalNumericUpDown_ValueChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Event delegate method fired when the <see cref="UpdateTrayIconCheckBox"/> checked status changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void UpdateTrayIconCheckBox_CheckedChanged(object sender, EventArgs e)
     {
-      if (selectedItem == null || !(selectedItem is MySQLInstance))
+      if (_selectedItem == null)
       {
         return;
       }
 
-      MySQLInstance selectedInstance = selectedItem as MySQLInstance;
-      selectedInstance.MonitoringInterval = (uint)InstanceMonitorIntervalNumericUpDown.Value;
+      if (_selectedItem is MySQLService)
+      {
+        MySQLService selectedService = _selectedItem as MySQLService;
+        selectedService.UpdateTrayIconOnStatusChange = UpdateTrayIconCheckBox.Checked;
+      }
+      else if (_selectedItem is MySQLInstance)
+      {
+        MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
+        selectedInstance.UpdateTrayIconOnStatusChange = UpdateTrayIconCheckBox.Checked;
+      }
     }
   }
 }
