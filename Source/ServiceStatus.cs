@@ -18,7 +18,6 @@
 //
 
 using System;
-using System.ServiceProcess;
 
 namespace MySql.Notifier
 {
@@ -28,29 +27,75 @@ namespace MySql.Notifier
   public class ServiceStatus : EventArgs
   {
     private string serviceDisplayName;
-    private ServiceControllerStatus currentStatus;
-    private ServiceControllerStatus previousStatus;
+    private MySQLServiceStatus currentStatus;
+    private MySQLServiceStatus previousStatus;
 
     public string ServiceDisplayName
     {
       get { return this.serviceDisplayName; }
     }
 
-    public ServiceControllerStatus CurrentStatus
+    public MySQLServiceStatus CurrentStatus
     {
       get { return this.currentStatus; }
     }
 
-    public ServiceControllerStatus PreviousStatus
+    public MySQLServiceStatus PreviousStatus
     {
       get { return this.previousStatus; }
     }
 
-    public ServiceStatus(string serviceDisplayName, ServiceControllerStatus previousStatus, ServiceControllerStatus currentStatus)
+    public ServiceStatus(string serviceDisplayName, MySQLServiceStatus previousStatus, MySQLServiceStatus currentStatus)
     {
       this.serviceDisplayName = serviceDisplayName;
       this.previousStatus = previousStatus;
       this.currentStatus = currentStatus;
     }
+  }
+
+  /// <summary>
+  /// Indicates the current state of the service.
+  /// </summary>
+  public enum MySQLServiceStatus
+  {
+    /// <summary>
+    /// The service is not reachable. Verify WMI connection with the host.
+    /// </summary>
+    Unavailable = 0,
+
+    /// <summary>
+    /// The service is not running. This corresponds to the Win32 SERVICE_STOPPED constant, which is defined as 0x00000001.
+    /// </summary>
+    Stopped = 1,
+
+    /// <summary>
+    /// The service is starting. This corresponds to the Win32 SERVICE_START_PENDING constant, which is defined as 0x00000002.
+    /// </summary>
+    StartPending = 2,
+
+    /// <summary>
+    /// The service is stopping. This corresponds to the Win32 SERVICE_STOP_PENDING constant, which is defined as 0x00000003.
+    /// </summary>
+    StopPending = 3,
+
+    /// <summary>
+    /// The service is running. This corresponds to the Win32 SERVICE_RUNNING constant, which is defined as 0x00000004.
+    /// </summary>
+    Running = 4,
+
+    /// <summary>
+    /// The service continue is pending. This corresponds to the Win32 SERVICE_CONTINUE_PENDING constant, which is defined as 0x00000005.
+    /// </summary>
+    ContinuePending = 5,
+
+    /// <summary>
+    /// The service pause is pending. This corresponds to the Win32 SERVICE_PAUSE_PENDING constant, which is defined as 0x00000006.
+    /// </summary>
+    PausePending = 6,
+
+    /// <summary>
+    /// The service is paused. This corresponds to the Win32 SERVICE_PAUSED constant, which is defined as 0x00000007.
+    /// </summary>
+    Paused = 7,
   }
 }

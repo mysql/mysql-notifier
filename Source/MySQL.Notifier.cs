@@ -26,7 +26,6 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Reflection;
-using System.ServiceProcess;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
 using MySQL.Utility;
@@ -322,19 +321,19 @@ namespace MySql.Notifier
       var updateIconInstancesList = Settings.Default.MySQLInstancesList == null ? new List<MySQLInstance>() : Settings.Default.MySQLInstancesList.Where(instance => instance.UpdateTrayIconOnStatusChange);
 
       //// Stopped or update+stopped notifier icon.
-      if (updateIconServicesList.Where(t => t.Status == ServiceControllerStatus.Stopped).Count() + updateIconInstancesList.Where(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections).Count() > 0)
+      if (updateIconServicesList.Where(t => t.Status == MySQLServiceStatus.Stopped).Count() + updateIconInstancesList.Where(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections).Count() > 0)
       {
         return useColorfulIcon ? (hasUpdates ? Properties.Resources.NotifierIconStoppedAlertStrong : Properties.Resources.NotifierIconStoppedStrong) : (hasUpdates ? Properties.Resources.NotifierIconStoppedAlert : Properties.Resources.NotifierIconStopped);
       }
 
       //// Starting or update+starting notifier icon.
-      if (updateIconServicesList.Where(t => t.Status == ServiceControllerStatus.StartPending).Count() > 0)
+      if (updateIconServicesList.Where(t => t.Status == MySQLServiceStatus.StartPending).Count() > 0)
       {
         return useColorfulIcon ? (hasUpdates ? Properties.Resources.NotifierIconStartingAlertStrong : Properties.Resources.NotifierIconStartingStrong) : (hasUpdates ? Properties.Resources.NotifierIconStartingAlert : Properties.Resources.NotifierIconStarting);
       }
 
       //// Running or update+running notifier icon.
-      if (updateIconServicesList.Where(t => t.Status == ServiceControllerStatus.Running).Count() + updateIconInstancesList.Where(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections).Count() > 0)
+      if (updateIconServicesList.Where(t => t.Status == MySQLServiceStatus.Running).Count() + updateIconInstancesList.Where(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections).Count() > 0)
       {
         return hasUpdates ? Properties.Resources.NotifierIconRunningAlert : Properties.Resources.NotifierIconRunning;
       }
@@ -370,7 +369,7 @@ namespace MySql.Notifier
       else
       {
         MySQLService service = machine.GetServiceByName(serviceName);
-        ServiceControllerStatus copyPreviousStatus = ServiceControllerStatus.Stopped;
+        MySQLServiceStatus copyPreviousStatus = MySQLServiceStatus.Stopped;
         if (service != null)
         {
           copyPreviousStatus = service.Status;
@@ -835,7 +834,7 @@ namespace MySql.Notifier
         }
       }
 
-      // TODO: ▼ Update completely (Include services in the calculation).      
+      // TODO: ▼ Update completely (Include services in the calculation).
       RefreshNotifierIcon();
       RebuildMenuIfNeeded(false);
     }

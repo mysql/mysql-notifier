@@ -116,7 +116,7 @@ namespace MySql.Notifier
     public bool IsRealMySQLService { get; private set; }
 
     [XmlIgnore]
-    public ServiceControllerStatus Status { get; set; }
+    public MySQLServiceStatus Status { get; private set; }
 
     [XmlIgnore]
     public List<MySqlWorkbenchConnection> WorkbenchConnections { get; private set; }
@@ -180,35 +180,35 @@ namespace MySql.Notifier
         switch (serviceManagementObject.Properties["State"].Value.ToString())
         {
           case "ContinuePending":
-            Status = ServiceControllerStatus.ContinuePending;
+            Status = MySQLServiceStatus.ContinuePending;
             break;
 
           case "PausePending":
-            Status = ServiceControllerStatus.PausePending;
+            Status = MySQLServiceStatus.PausePending;
             break;
 
           case "Paused":
-            Status = ServiceControllerStatus.Paused;
+            Status = MySQLServiceStatus.Paused;
             break;
 
           case "Running":
-            Status = ServiceControllerStatus.Running;
+            Status = MySQLServiceStatus.Running;
             break;
 
           case "StartPending":
-            Status = ServiceControllerStatus.StartPending;
+            Status = MySQLServiceStatus.StartPending;
             break;
 
           case "StopPending":
-            Status = ServiceControllerStatus.StopPending;
+            Status = MySQLServiceStatus.StopPending;
             break;
 
           case "Stopped":
-            Status = ServiceControllerStatus.Stopped;
+            Status = MySQLServiceStatus.Stopped;
             break;
 
           default:
-            Status = ServiceControllerStatus.Stopped;
+            Status = MySQLServiceStatus.Stopped;
             break;
         }
         menuGroup = new ServiceMenuGroup(this);
@@ -307,12 +307,12 @@ namespace MySql.Notifier
 
     public void SetStatus(string statusString)
     {
-      ServiceControllerStatus newStatus;
+      MySQLServiceStatus newStatus;
       bool parsed = Enum.TryParse(statusString, out newStatus);
       if (parsed)
       {
         if (newStatus == Status) return;
-        ServiceControllerStatus copyPreviousStatus = Status;
+        MySQLServiceStatus copyPreviousStatus = Status;
         Status = newStatus;
         OnStatusChanged(this, new ServiceStatus(DisplayName, copyPreviousStatus, Status));
       }
@@ -493,7 +493,7 @@ namespace MySql.Notifier
 
       t.Elapsed -= new ElapsedEventHandler(t_ElapsedToStop);
 
-      if (Status != ServiceControllerStatus.Stopped && Loops >= 50)
+      if (Status != MySQLServiceStatus.Stopped && Loops >= 50)
       {
         throw new System.TimeoutException("Unable to stop service, the operation has timed out.");
       }
@@ -512,7 +512,7 @@ namespace MySql.Notifier
 
       t.Elapsed -= new ElapsedEventHandler(t_ElapsedToStart);
 
-      if (Status != ServiceControllerStatus.Running && Loops >= 100)
+      if (Status != MySQLServiceStatus.Running && Loops >= 100)
       {
         throw new System.TimeoutException("Unable to restart service, the operation has timed out.");
       }
@@ -521,7 +521,7 @@ namespace MySql.Notifier
     private void t_ElapsedToStop(object sender, ElapsedEventArgs e)
     {
       Loops++;
-      if (Status == ServiceControllerStatus.Stopped || Loops >= 100)
+      if (Status == MySQLServiceStatus.Stopped || Loops >= 100)
       {
         t.Stop();
         IsWaitingOnStatusChange = false;
@@ -531,7 +531,7 @@ namespace MySql.Notifier
     private void t_ElapsedToStart(object sender, ElapsedEventArgs e)
     {
       Loops++;
-      if (Status == ServiceControllerStatus.Running || Loops >= 50)
+      if (Status == MySQLServiceStatus.Running || Loops >= 50)
       {
         t.Stop();
         IsWaitingOnStatusChange = false;

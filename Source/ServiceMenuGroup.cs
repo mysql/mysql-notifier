@@ -21,7 +21,6 @@ namespace MySql.Notifier
 {
   using System;
   using System.Drawing;
-  using System.ServiceProcess;
   using System.Windows.Forms;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
@@ -75,7 +74,6 @@ namespace MySql.Notifier
     private ToolStripMenuItem editorMenu;
     private ToolStripSeparator separator;
     private MySQLService boundService;
-    private Machine boundMachine;
 
     /// <summary>
     /// Finds the menu item's index within a context menu strip corresponding to the menu item with the given text.
@@ -259,26 +257,26 @@ namespace MySql.Notifier
       Image image = null;
       switch (boundService.Status)
       {
-        case ServiceControllerStatus.ContinuePending:
-        case ServiceControllerStatus.Paused:
-        case ServiceControllerStatus.PausePending:
-        case ServiceControllerStatus.StartPending:
-        case ServiceControllerStatus.StopPending:
+        case MySQLServiceStatus.ContinuePending:
+        case MySQLServiceStatus.Paused:
+        case MySQLServiceStatus.PausePending:
+        case MySQLServiceStatus.StartPending:
+        case MySQLServiceStatus.StopPending:
           image = Resources.NotifierIconStarting;
           break;
 
-        case ServiceControllerStatus.Stopped:
+        case MySQLServiceStatus.Stopped:
           image = Resources.NotifierIconStopped;
           break;
 
-        case ServiceControllerStatus.Running:
+        case MySQLServiceStatus.Running:
           image = Resources.NotifierIconRunning;
           break;
       }
       statusMenu.Image = image;
 
-      startMenu.Enabled = boundService.Status == ServiceControllerStatus.Stopped;
-      stopMenu.Enabled = boundService.Status != ServiceControllerStatus.Stopped;
+      startMenu.Enabled = boundService.Status == MySQLServiceStatus.Stopped;
+      stopMenu.Enabled = boundService.Status != MySQLServiceStatus.Stopped;
       restartMenu.Enabled = stopMenu.Enabled;
       if (MySqlWorkbench.AllowsExternalConnectionsManagement && boundService.IsRealMySQLService)
       {
@@ -329,7 +327,7 @@ namespace MySql.Notifier
 
     private delegate void menuRefreshDelegate(ContextMenuStrip menu);
 
-    public void RefreshRoot(ContextMenuStrip menu, ServiceControllerStatus previousStatus)
+    public void RefreshRoot(ContextMenuStrip menu, MySQLServiceStatus previousStatus)
     {
       var newStatusText = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
       var previousStatusText = String.Format("{0} - {1}", boundService.DisplayName, previousStatus);
@@ -343,26 +341,26 @@ namespace MySql.Notifier
           Image image = null;
           switch (boundService.Status)
           {
-            case ServiceControllerStatus.ContinuePending:
-            case ServiceControllerStatus.Paused:
-            case ServiceControllerStatus.PausePending:
-            case ServiceControllerStatus.StartPending:
-            case ServiceControllerStatus.StopPending:
+            case MySQLServiceStatus.ContinuePending:
+            case MySQLServiceStatus.Paused:
+            case MySQLServiceStatus.PausePending:
+            case MySQLServiceStatus.StartPending:
+            case MySQLServiceStatus.StopPending:
               image = Resources.NotifierIconStarting;
               break;
 
-            case ServiceControllerStatus.Stopped:
+            case MySQLServiceStatus.Stopped:
               image = Resources.NotifierIconStopped;
               break;
 
-            case ServiceControllerStatus.Running:
+            case MySQLServiceStatus.Running:
               image = Resources.NotifierIconRunning;
               break;
           }
           menu.Items[i].Image = image;
           ToolStripMenuItem menuItem = (ToolStripMenuItem)menu.Items[i];
-          menuItem.DropDownItems[0].Enabled = boundService.Status == ServiceControllerStatus.Stopped;
-          menuItem.DropDownItems[1].Enabled = boundService.Status != ServiceControllerStatus.Stopped;
+          menuItem.DropDownItems[0].Enabled = boundService.Status == MySQLServiceStatus.Stopped;
+          menuItem.DropDownItems[1].Enabled = boundService.Status != MySQLServiceStatus.Stopped;
           menuItem.DropDownItems[2].Enabled = menuItem.DropDownItems[1].Enabled;
           break;
         }
