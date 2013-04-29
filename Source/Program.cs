@@ -17,24 +17,22 @@
 // 02110-1301  USA
 //
 
-using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Windows.Forms;
-using MySql.Notifier.Properties;
-using MySQL.Utility;
-
 namespace MySql.Notifier
 {
+  using System;
+  using System.Diagnostics;
+  using System.Threading;
+  using System.Windows.Forms;
+  using MySql.Notifier.Properties;
+  using MySQL.Utility;
+  using MySQL.Utility.Forms;
+
   internal static class Program
   {
     private static void MySQLNotifierHandler(Exception e, bool critical)
     {
-      using (var errorDialog = new MessageDialog(Resources.HighSeverityError, e.Message, critical))
-      {
-        errorDialog.ShowDialog();
-        MySQLNotifierTrace.GetSourceTrace().WriteError("Unhandled Exception - " + (e.Message + " " + e.InnerException), 1);
-      }
+      InfoDialog.ShowErrorDialog(Resources.HighSeverityError, e.Message);
+      MySQLSourceTrace.WriteToLog("Unhandled Exception - " + e.Message + " " + e.InnerException, SourceLevels.Critical);
     }
 
     private static void MySQLNotifierThreadExceptionEventHandler(object sender, ThreadExceptionEventArgs args)
@@ -70,12 +68,11 @@ namespace MySql.Notifier
 
       Application.ThreadException += new ThreadExceptionEventHandler(MySQLNotifierThreadExceptionEventHandler);
 
-      // For Windows Forms errors to go through our handler.
+      //// For Windows Forms errors to go through our handler.
       Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
 
-      // For non-UI thread exceptions
-      AppDomain.CurrentDomain.UnhandledException +=
-          new UnhandledExceptionEventHandler(MySQLNotifierAppExceptionHandler);
+      //// For non-UI thread exceptions
+      AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(MySQLNotifierAppExceptionHandler);
 
       try
       {
@@ -84,12 +81,10 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ex.Message, true))
-        {
-          errorDialog.ShowDialog();
-          MySQLNotifierTrace.GetSourceTrace().WriteError("Application Error - " + (ex.Message + " " + ex.InnerException), 1);
-        }
+        InfoDialog.ShowErrorDialog(Resources.HighSeverityError, ex.Message);
+        MySQLSourceTrace.WriteAppErrorToLog(ex);
       }
+
       SingleInstance.Stop();
     }
 
@@ -101,15 +96,6 @@ namespace MySql.Notifier
         Settings.Default.Save();
       }
       return;
-    }
-  }
-
-  public static class MySQLNotifierTrace
-  {
-    public static MySQLSourceTrace GetSourceTrace()
-    {
-      var logPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier";
-      return new MySQLSourceTrace("MySqlNotifier", logPath + @"\MySQLNotifier.log", "", SourceLevels.Warning);
     }
   }
 }

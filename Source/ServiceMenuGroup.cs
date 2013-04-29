@@ -17,15 +17,16 @@
 // 02110-1301  USA
 //
 
-using System;
-using System.Drawing;
-using System.ServiceProcess;
-using System.Windows.Forms;
-using MySql.Notifier.Properties;
-using MySQL.Utility;
-
 namespace MySql.Notifier
 {
+  using System;
+  using System.Drawing;
+  using System.ServiceProcess;
+  using System.Windows.Forms;
+  using MySql.Notifier.Properties;
+  using MySQL.Utility;
+  using MySQL.Utility.Forms;
+
   /// <summary>
   /// Contains a group of ToolStripMenuItem instances for each of the corresponding MySQLService’s context menu items.
   /// </summary>
@@ -138,11 +139,8 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        using (var errorDialog = new MessageDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench, false))
-        {
-          errorDialog.ShowDialog();
-        }
-        MySQLNotifierTrace.GetSourceTrace().WriteError("Application Error - " + ex.Message + " " + ex.InnerException, 1);
+        InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
+        MySQLSourceTrace.WriteAppErrorToLog(ex);
       }
     }
 
@@ -155,11 +153,8 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        using (var errorDialog = new MessageDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench, false))
-        {
-          errorDialog.ShowDialog();
-        }
-        MySQLNotifierTrace.GetSourceTrace().WriteError("Application Error - " + ex.Message + " " + ex.InnerException, 1);
+        InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
+        MySQLSourceTrace.WriteAppErrorToLog(ex);
       }
     }
 

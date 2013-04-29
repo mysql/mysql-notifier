@@ -476,14 +476,12 @@ namespace MySql.Notifier
         }
         catch (IOException ex)
         {
-          MySQLNotifierTrace.GetSourceTrace().WriteWarning(Resources.SettingsFileFailedToLoad + " - " + (ex.Message + " " + ex.InnerException), 1);
+          MySQLSourceTrace.WriteToLog(Resources.SettingsFileFailedToLoad + " - " + ex.Message + " " + ex.InnerException, SourceLevels.Warning);
           System.Threading.Thread.Sleep(1000);
         }
       }
-      using (var errorDialog = new MessageDialog(Resources.HighSeverityError, Resources.SettingsFileFailedToLoad, true))
-      {
-        errorDialog.ShowDialog();
-      }
+
+      InfoDialog.ShowErrorDialog(Resources.HighSeverityError, Resources.SettingsFileFailedToLoad);
       return -1;
     }
 
@@ -588,11 +586,8 @@ namespace MySql.Notifier
     {
       if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
       {
-        using (var errorDialog = new MessageDialog(Resources.MissingMySQLInstaller, String.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine), false))
-        {
-          errorDialog.ShowDialog();
-          return;
-        }
+        InfoDialog.ShowErrorDialog(Resources.MissingMySQLInstaller, string.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine));
+        return;
       }
 
       string path = @MySqlInstaller.GetInstallerPath();
@@ -708,7 +703,7 @@ namespace MySql.Notifier
       }
       catch (ManagementException ex)
       {
-        MySQLNotifierTrace.GetSourceTrace().WriteWarning("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, 1);
+        MySQLSourceTrace.WriteToLog("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, SourceLevels.Critical);
       }
       catch (Exception)
       {
@@ -736,7 +731,7 @@ namespace MySql.Notifier
       }
       catch (ManagementException ex)
       {
-        MySQLNotifierTrace.GetSourceTrace().WriteWarning("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, 1);
+        MySQLSourceTrace.WriteToLog("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, SourceLevels.Critical);
       }
       catch (Exception)
       {
@@ -909,7 +904,7 @@ namespace MySql.Notifier
     {
       MySQLService service = (MySQLService)sender;
       ShowTooltip(true, Resources.BalloonTitleFailedStatusChange, string.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, Environment.NewLine + ex.Message + Environment.NewLine + Resources.AskRestartApplication), 1500);
-      MySQLNotifierTrace.GetSourceTrace().WriteError("Critical Error when trying to update the service status - " + (ex.Message + " " + ex.InnerException), 1);
+      MySQLSourceTrace.WriteToLog("Critical Error when trying to update the service status - " + ex.Message + " " + ex.InnerException, SourceLevels.Critical);
     }
 
     private void service_StatusChanged(object sender, ServiceStatus args)

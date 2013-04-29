@@ -17,22 +17,23 @@
 // 02110-1301  USA
 //
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Management;
-using System.Runtime.InteropServices;
-using System.ServiceProcess;
-using System.Timers;
-using System.Xml;
-using System.Xml.Serialization;
-using MySql.Notifier.Properties;
-using MySQL.Utility;
-
 namespace MySql.Notifier
 {
+  using System;
+  using System.Collections.Generic;
+  using System.ComponentModel;
+  using System.Diagnostics;
+  using System.Linq;
+  using System.Management;
+  using System.Runtime.InteropServices;
+  using System.ServiceProcess;
+  using System.Timers;
+  using System.Xml;
+  using System.Xml.Serialization;
+  using MySql.Notifier.Properties;
+  using MySQL.Utility;
+  using MySQL.Utility.Forms;
+
   [Serializable]
   public class MySQLService
   {
@@ -214,11 +215,8 @@ namespace MySql.Notifier
       }
       catch (InvalidOperationException ioEx)
       {
-        using (var errorDialog = new MessageDialog(Resources.HighSeverityError, ioEx.Message, true))
-        {
-          errorDialog.ShowDialog();
-        }
-        MySQLNotifierTrace.GetSourceTrace().WriteError(ioEx.Message, 1);
+        InfoDialog.ShowErrorDialog(Resources.HighSeverityError, ioEx.Message);
+        MySQLSourceTrace.WriteAppErrorToLog(ioEx);
         managementObject = null;
       }
     }

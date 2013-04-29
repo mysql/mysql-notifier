@@ -187,12 +187,6 @@
     <Compile Include="MySQLInstancesList.cs" />
     <Compile Include="MySQLSecurity.cs" />
     <Compile Include="NotifierSettings.cs" />
-    <Compile Include="Forms\MessageDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\MessageDialog.Designer.cs">
-      <DependentUpon>MessageDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="ServiceStatus.cs" />
     <Compile Include="MySQLServicesList.cs" />
     <Compile Include="ServiceMenuGroup.cs" />
@@ -214,10 +208,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ManageItemsDialog.resx">
       <DependentUpon>ManageItemsDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\MessageDialog.resx">
-      <DependentUpon>MessageDialog.cs</DependentUpon>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MonitorMySQLServerInstancesDialog.resx">
       <DependentUpon>MonitorMySQLServerInstancesDialog.cs</DependentUpon>
