@@ -30,8 +30,6 @@ namespace MySql.Notifier
   /// </summary>
   public class MachinesList
   {
-    private bool loading;
-
     /// <summary>
     /// List of all machines saved in the settings file.
     /// </summary>
@@ -73,8 +71,6 @@ namespace MySql.Notifier
 
     public void Refresh()
     {
-      loading = true;
-
       if (Machines == null)
         Machines = new List<Machine>();
       if (Settings.Default.FirstRun)
@@ -98,7 +94,6 @@ namespace MySql.Notifier
         //  // Machines.AddToFailover(machine);
         //}
       }
-      loading = false;
     }
 
     private void AutoAddServices()
@@ -157,8 +152,6 @@ namespace MySql.Notifier
         default:
           break;
       }
-      if (!loading)
-        Settings.Default.Save();
       OnMachineListChanged(machine, changeType);
     }
 

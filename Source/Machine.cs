@@ -263,7 +263,6 @@ namespace MySql.Notifier
       Services.Add(newService);
 
       OnServiceListChanged(newService, changeType);
-      Properties.Settings.Default.Save();
     }
 
     /// <summary>

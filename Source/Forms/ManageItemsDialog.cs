@@ -366,7 +366,7 @@ namespace MySql.Notifier
               newMachine.ChangeService(service, ChangeType.Add);
             }
           }
-
+          Settings.Default.Save();
           RefreshServicesAndInstancesListViews(MonitoredItemType.Service);
         }
       }
