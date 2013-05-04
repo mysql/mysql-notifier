@@ -52,6 +52,7 @@ namespace MySql.Notifier
       this.btnCancel = new System.Windows.Forms.Button();
       this.btnOK = new System.Windows.Forms.Button();
       this.panel1 = new System.Windows.Forms.Panel();
+      this.chkUseColorfulIcons = new System.Windows.Forms.CheckBox();
       this.lblSubTitle2 = new System.Windows.Forms.Label();
       this.notifyOfStatusChange = new System.Windows.Forms.CheckBox();
       this.notifyOfAutoAdd = new System.Windows.Forms.CheckBox();
@@ -63,7 +64,6 @@ namespace MySql.Notifier
       this.chkRunAtStartup = new System.Windows.Forms.CheckBox();
       this.lblSubTitle1 = new System.Windows.Forms.Label();
       this.lblHyperTitle = new System.Windows.Forms.Label();
-      this.chkUseColorfulIcons = new System.Windows.Forms.CheckBox();
       this.panel2.SuspendLayout();
       this.panel1.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.numCheckUpdatesWeeks)).BeginInit();
@@ -123,6 +123,16 @@ namespace MySql.Notifier
       this.panel1.Size = new System.Drawing.Size(422, 452);
       this.panel1.TabIndex = 6;
       // 
+      // chkUseColorfulIcons
+      // 
+      this.chkUseColorfulIcons.AutoSize = true;
+      this.chkUseColorfulIcons.Location = new System.Drawing.Point(21, 102);
+      this.chkUseColorfulIcons.Name = "chkUseColorfulIcons";
+      this.chkUseColorfulIcons.Size = new System.Drawing.Size(154, 19);
+      this.chkUseColorfulIcons.TabIndex = 62;
+      this.chkUseColorfulIcons.Text = "Use colorful status icons";
+      this.chkUseColorfulIcons.UseVisualStyleBackColor = true;
+      // 
       // lblSubTitle2
       // 
       this.lblSubTitle2.AutoSize = true;
@@ -137,9 +147,9 @@ namespace MySql.Notifier
       this.notifyOfStatusChange.AutoSize = true;
       this.notifyOfStatusChange.Location = new System.Drawing.Point(21, 359);
       this.notifyOfStatusChange.Name = "notifyOfStatusChange";
-      this.notifyOfStatusChange.Size = new System.Drawing.Size(243, 19);
+      this.notifyOfStatusChange.Size = new System.Drawing.Size(304, 19);
       this.notifyOfStatusChange.TabIndex = 60;
-      this.notifyOfStatusChange.Text = "Notify me when a service changes status.";
+      this.notifyOfStatusChange.Text = "Notify me when a service or instance changes status.";
       this.notifyOfStatusChange.UseVisualStyleBackColor = true;
       // 
       // notifyOfAutoAdd
@@ -225,16 +235,6 @@ namespace MySql.Notifier
       this.lblHyperTitle.Size = new System.Drawing.Size(133, 15);
       this.lblHyperTitle.TabIndex = 21;
       this.lblHyperTitle.Text = "MySQL Notifier Options";
-      // 
-      // chkUseColorfulIcons
-      // 
-      this.chkUseColorfulIcons.AutoSize = true;
-      this.chkUseColorfulIcons.Location = new System.Drawing.Point(21, 102);
-      this.chkUseColorfulIcons.Name = "chkUseColorfulIcons";
-      this.chkUseColorfulIcons.Size = new System.Drawing.Size(154, 19);
-      this.chkUseColorfulIcons.TabIndex = 62;
-      this.chkUseColorfulIcons.Text = "Use colorful status icons";
-      this.chkUseColorfulIcons.UseVisualStyleBackColor = true;
       // 
       // OptionsDialog
       // 

@@ -87,7 +87,7 @@ namespace MySql.Notifier
 
       for (int i = 0; i < menu.Items.Count; i++)
       {
-        if (menu.Items[i].Text.ToString().StartsWith(menuItemText))
+        if (menu.Items[i].Text.StartsWith(menuItemText))
         {
           index = i;
           break;
@@ -165,14 +165,18 @@ namespace MySql.Notifier
     {
       boundService.Restart();
       if (boundService.WorkCompleted)
-        boundService.UpdateMenu(boundService.Status.ToString());
+      {
+        Update();
+      }
     }
 
     private void stop_Click(object sender, EventArgs e)
     {
       boundService.Stop();
       if (boundService.WorkCompleted)
-        boundService.UpdateMenu(boundService.Status.ToString());
+      {
+        Update();
+      }
     }
 
     private void start_Click(object sender, EventArgs e)
@@ -180,32 +184,49 @@ namespace MySql.Notifier
       boundService.Start();
       if (boundService.WorkCompleted)
       {
-        boundService.UpdateMenu(boundService.Status.ToString());
+        Update();
       }
     }
 
-    public void AddToContextMenu(MySQLService service, ContextMenuStrip menu, int index = 0)
+    /// <summary>
+    /// Adds the contest menu items corresponding to the bound service.
+    /// </summary>
+    /// <param name="menu">The Notifier's context menu.</param>
+    public void AddToContextMenu(ContextMenuStrip menu)
     {
       if (menu.InvokeRequired)
       {
-        menu.Invoke(new MethodInvoker(() => { AddToContextMenu(service, menu); }));
+        menu.Invoke(new MethodInvoker(() => { AddToContextMenu(menu); }));
       }
       else
       {
+        int index = FindMenuItemWithinMenuStrip(menu, boundService.Host.Name) ;
+        if (index < 0)
+        {
+          return;
+        }
+
+        index++;
         menu.Items.Insert(index, statusMenu);
         if (boundService.IsRealMySQLService)
         {
-          if (configureMenu != null) menu.Items.Insert(index, configureMenu);
-          if (editorMenu != null) menu.Items.Insert(index, editorMenu);
-        }
+          if (configureMenu != null)
+          {
+            menu.Items.Insert(index, configureMenu);
+          }
 
-        //if (service.WinServiceType == ServiceMachineType.Local)
-        //{
-        //  menu.Items.Insert(index, separator);
-        //}
+          if (editorMenu != null)
+          {
+            menu.Items.Insert(index, editorMenu);
+          }
+        }
       }
     }
 
+    /// <summary>
+    /// Removes all menu items related to this service menu group from the main Notifier's context menu.
+    /// </summary>
+    /// <param name="menu">Main Notifier's context menu.</param>
     public void RemoveFromContextMenu(ContextMenuStrip menu)
     {
       string[] menuItems = new string[4];
@@ -224,26 +245,24 @@ namespace MySql.Notifier
         menuItems[1] = statusMenu.Text;
       }
 
+      index = FindMenuItemWithinMenuStrip(menu, statusMenu.Text);
+      if (index <= 0)
+      {
+        return;
+      }
+
       foreach (var item in menuItems)
       {
-        if (String.IsNullOrEmpty(item)) continue;
+        if (string.IsNullOrEmpty(item))
+        {
+          continue;
+        }
 
-        for (int i = 0; i < menu.Items.Count; i++)
-        {
-          if (menu.Items[i].Text.Equals(statusMenu.Text))
-          {
-            index = i;
-            break;
-          }
-        }
-        if (index >= 0 && index <= menu.Items.Count)
-        {
-          if (!item.Equals(statusMenu.Text))
-            index++;
-          menu.Items.RemoveAt(index);
-          menu.Refresh();
-        }
+        int plusItem = !item.Equals(statusMenu.Text) ? 1 : 0;
+        menu.Items.RemoveAt(index + plusItem);
       }
+
+      menu.Refresh();
     }
 
     /// <summary>
@@ -357,6 +376,7 @@ namespace MySql.Notifier
               image = Resources.NotifierIconRunning;
               break;
           }
+
           menu.Items[i].Image = image;
           ToolStripMenuItem menuItem = (ToolStripMenuItem)menu.Items[i];
           menuItem.DropDownItems[0].Enabled = boundService.Status == MySQLServiceStatus.Stopped;
@@ -379,9 +399,11 @@ namespace MySql.Notifier
     public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, string menuName, System.Drawing.Image image, EventHandler eventHandler, bool enable)
     {
       var menuItem = new ToolStripMenuItem(displayText);
-
       if (eventHandler != null)
+      {
         menuItem.Click += eventHandler;
+      }
+
       menuItem.Image = image;
       menuItem.Name = menuName;
       menuItem.Enabled = enable;

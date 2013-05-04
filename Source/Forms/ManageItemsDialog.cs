@@ -161,7 +161,7 @@ namespace MySql.Notifier
       }
 
       MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
-      selectedInstance.MonitoringIntervalUnitOfMeasure = (MySQLInstance.IntervalUnitOfMeasure)InstanceMonitorIntervalUOMComboBox.SelectedIndex;
+      selectedInstance.MonitoringIntervalUnitOfMeasure = (TimeUtilities.IntervalUnitOfMeasure)InstanceMonitorIntervalUOMComboBox.SelectedIndex;
     }
 
     /// <summary>
@@ -351,23 +351,24 @@ namespace MySql.Notifier
       {
         if (dialog.ShowDialog() == DialogResult.OK)
         {
-          machinesList.ChangeMachine(dialog.newMachine, ChangeType.Add);
-
           newMachine = machinesList.GetMachineByHostName(dialog.newMachine.Name);
-
-          foreach (MySQLService service in dialog.ServicesToAdd)
+          if (dialog.ServicesToAdd != null && dialog.ServicesToAdd.Count > 0)
           {
-            if (service.WinServiceType == ServiceMachineType.Remote && newMachine.ContainsService(service))
+            foreach (MySQLService service in dialog.ServicesToAdd)
             {
-              InfoDialog.ShowWarningDialog("Warning", "Selected Service is already in the Monitor List");
+              if (!service.Host.IsLocal && newMachine.ContainsService(service))
+              {
+                InfoDialog.ShowWarningDialog("Warning", "Selected Service is already in the Monitor List");
+              }
+              else
+              {
+                newMachine.ChangeService(service, ChangeType.Add);
+              }
             }
-            else
-            {
-              newMachine.ChangeService(service, ChangeType.Add);
-            }
+
+            Settings.Default.Save();
+            RefreshServicesAndInstancesListViews(MonitoredItemType.Service);
           }
-          Settings.Default.Save();
-          RefreshServicesAndInstancesListViews(MonitoredItemType.Service);
         }
       }
     }

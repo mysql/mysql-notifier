@@ -268,7 +268,7 @@ namespace MySql.Notifier
             "minutes",
             "hours",
             "days"});
-      this.InstanceMonitorIntervalUOMComboBox.Location = new System.Drawing.Point(285, 72);
+      this.InstanceMonitorIntervalUOMComboBox.Location = new System.Drawing.Point(296, 71);
       this.InstanceMonitorIntervalUOMComboBox.Name = "InstanceMonitorIntervalUOMComboBox";
       this.InstanceMonitorIntervalUOMComboBox.Size = new System.Drawing.Size(121, 23);
       this.InstanceMonitorIntervalUOMComboBox.TabIndex = 4;
@@ -277,15 +277,15 @@ namespace MySql.Notifier
       // InstanceMonitorIntervalLabel
       // 
       this.InstanceMonitorIntervalLabel.AutoSize = true;
-      this.InstanceMonitorIntervalLabel.Location = new System.Drawing.Point(69, 75);
+      this.InstanceMonitorIntervalLabel.Location = new System.Drawing.Point(30, 74);
       this.InstanceMonitorIntervalLabel.Name = "InstanceMonitorIntervalLabel";
-      this.InstanceMonitorIntervalLabel.Size = new System.Drawing.Size(210, 15);
+      this.InstanceMonitorIntervalLabel.Size = new System.Drawing.Size(203, 15);
       this.InstanceMonitorIntervalLabel.TabIndex = 3;
-      this.InstanceMonitorIntervalLabel.Text = "MySQL Instance monitoring interval in";
+      this.InstanceMonitorIntervalLabel.Text = "Monitor MySQL Instance status every";
       // 
       // InstanceMonitorIntervalNumericUpDown
       // 
-      this.InstanceMonitorIntervalNumericUpDown.Location = new System.Drawing.Point(15, 73);
+      this.InstanceMonitorIntervalNumericUpDown.Location = new System.Drawing.Point(239, 72);
       this.InstanceMonitorIntervalNumericUpDown.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -300,7 +300,7 @@ namespace MySql.Notifier
       // 
       this.UpdateTrayIconCheckBox.AutoSize = true;
       this.UpdateTrayIconCheckBox.Enabled = false;
-      this.UpdateTrayIconCheckBox.Location = new System.Drawing.Point(51, 48);
+      this.UpdateTrayIconCheckBox.Location = new System.Drawing.Point(33, 47);
       this.UpdateTrayIconCheckBox.Name = "UpdateTrayIconCheckBox";
       this.UpdateTrayIconCheckBox.Size = new System.Drawing.Size(321, 19);
       this.UpdateTrayIconCheckBox.TabIndex = 1;
@@ -312,7 +312,7 @@ namespace MySql.Notifier
       // 
       this.NotifyOnStatusChangeCheckBox.AutoSize = true;
       this.NotifyOnStatusChangeCheckBox.Enabled = false;
-      this.NotifyOnStatusChangeCheckBox.Location = new System.Drawing.Point(51, 22);
+      this.NotifyOnStatusChangeCheckBox.Location = new System.Drawing.Point(33, 22);
       this.NotifyOnStatusChangeCheckBox.Name = "NotifyOnStatusChangeCheckBox";
       this.NotifyOnStatusChangeCheckBox.Size = new System.Drawing.Size(192, 19);
       this.NotifyOnStatusChangeCheckBox.TabIndex = 0;
@@ -323,7 +323,7 @@ namespace MySql.Notifier
       // DeleteButton
       // 
       this.DeleteButton.Enabled = false;
-      this.DeleteButton.Location = new System.Drawing.Point(497, 155);
+      this.DeleteButton.Location = new System.Drawing.Point(497, 179);
       this.DeleteButton.Name = "DeleteButton";
       this.DeleteButton.Size = new System.Drawing.Size(87, 27);
       this.DeleteButton.TabIndex = 22;
@@ -333,7 +333,7 @@ namespace MySql.Notifier
       // 
       // AddButton
       // 
-      this.AddButton.Location = new System.Drawing.Point(497, 122);
+      this.AddButton.Location = new System.Drawing.Point(497, 146);
       this.AddButton.Name = "AddButton";
       this.AddButton.Size = new System.Drawing.Size(87, 27);
       this.AddButton.TabIndex = 21;

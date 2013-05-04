@@ -164,11 +164,29 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The machine {0} has been removed from the monitoring list..
+        /// </summary>
+        internal static string BalloonTextMachineRemoved {
+            get {
+                return ResourceManager.GetString("BalloonTextMachineRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New service added to monitored list: {0}.
         /// </summary>
         internal static string BalloonTextServiceList {
             get {
                 return ResourceManager.GetString("BalloonTextServiceList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The service {0} has been removed from the monitoring list.  .
+        /// </summary>
+        internal static string BalloonTextServiceRemoved {
+            get {
+                return ResourceManager.GetString("BalloonTextServiceRemoved", resourceCulture);
             }
         }
         
@@ -200,6 +218,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Machines List Changed.
+        /// </summary>
+        internal static string BalloonTitleTextMachinesList {
+            get {
+                return ResourceManager.GetString("BalloonTitleTextMachinesList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Services List Changed.
         /// </summary>
         internal static string BalloonTitleTextServiceList {
@@ -214,6 +241,15 @@ namespace MySql.Notifier.Properties {
         internal static string BalloonTitleTextServiceStatus {
             get {
                 return ResourceManager.GetString("BalloonTitleTextServiceStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The service {0} was not found in the Windows Services.
+        /// </summary>
+        internal static string BaloonTextServiceNotFound {
+            get {
+                return ResourceManager.GetString("BaloonTextServiceNotFound", resourceCulture);
             }
         }
         
@@ -373,7 +409,19 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The host you selected is not able at this moment. It was not possible to stablish a connection right now, please try again later..
+        ///   Looks up a localized string similar to This message can be displayed for one of the following reasons at the remote machine:
+        ///   * Machine is offline
+        ///   * WMI/DCOM access permissions are insufficient for user attempting to connect
+        ///   * Windows Firewall is not configured for WMI communication.
+        /// </summary>
+        internal static string HostUnavailableExtendedMessage {
+            get {
+                return ResourceManager.GetString("HostUnavailableExtendedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The host you selected is not available at this moment, it was not possible to establish a WMI connection..
         /// </summary>
         internal static string HostUnavailableMessage {
             get {
@@ -387,33 +435,6 @@ namespace MySql.Notifier.Properties {
         internal static string HostUnavailableTitle {
             get {
                 return ResourceManager.GetString("HostUnavailableTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This message can be displayed if the machine you&apos;re trying to reach is offline or the firewall actively refused the connection..
-        /// </summary>
-        internal static string HostUnreachableMessage {
-            get {
-                return ResourceManager.GetString("HostUnreachableMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This message can be displayed for one of the following reasons at the remote machine: Incorrect WMI permission set, Incorrect Firewall configuration or not enough DCOM permissions for the user you&apos;re attempting to log with..
-        /// </summary>
-        internal static string HostUnreachableMessageDefault {
-            get {
-                return ResourceManager.GetString("HostUnreachableMessageDefault", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The host was unreachable..
-        /// </summary>
-        internal static string HostUnreachableTitle {
-            get {
-                return ResourceManager.GetString("HostUnreachableTitle", resourceCulture);
             }
         }
         
@@ -480,24 +501,6 @@ namespace MySql.Notifier.Properties {
         internal static string MachineAlreadyExistTitle {
             get {
                 return ResourceManager.GetString("MachineAlreadyExistTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to It seems you have not enabled browse for services on the remote machine.
-        /// </summary>
-        internal static string ManagementExceptionMessage {
-            get {
-                return ResourceManager.GetString("ManagementExceptionMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Browsing for services is not enabled.
-        /// </summary>
-        internal static string ManagementExceptionTitle {
-            get {
-                return ResourceManager.GetString("ManagementExceptionTitle", resourceCulture);
             }
         }
         
@@ -814,24 +817,6 @@ namespace MySql.Notifier.Properties {
         internal static string ScheduledCheckRequiresInstaller11 {
             get {
                 return ResourceManager.GetString("ScheduledCheckRequiresInstaller11", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The service {0} was not found in the Windows Services.
-        /// </summary>
-        internal static string ServiceNotFound {
-            get {
-                return ResourceManager.GetString("ServiceNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The service {0} has been removed from the monitoring list.  .
-        /// </summary>
-        internal static string ServiceRemoved {
-            get {
-                return ResourceManager.GetString("ServiceRemoved", resourceCulture);
             }
         }
         

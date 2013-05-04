@@ -311,7 +311,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Reloads the list of MySQL Server instances from the ones contained in the MySQL Workbench connections file.
     /// </summary>
-    /// <param name="forceRefresh">Flag indicating if the refresh must be done although filters haven't changed.</param>
+    /// <param name="forceRefresh">Flag indicating if the refresh must be done although filters haven'_statusChangeTimer changed.</param>
     private void RefreshMySQLInstancesList(bool forceRefresh)
     {
       bool filterChanges = false;

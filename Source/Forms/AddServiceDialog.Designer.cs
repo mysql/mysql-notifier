@@ -50,194 +50,242 @@ namespace MySql.Notifier
       this.components = new System.ComponentModel.Container();
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddServiceDialog));
       this.panel2 = new System.Windows.Forms.Panel();
-      this.btnOK = new System.Windows.Forms.Button();
-      this.btnCancel = new System.Windows.Forms.Button();
+      this.DialogOKButton = new System.Windows.Forms.Button();
+      this.DialogCancelButton = new System.Windows.Forms.Button();
       this.panel1 = new System.Windows.Forms.Panel();
-      this.txtFilter = new System.Windows.Forms.TextBox();
-      this.lblText6 = new System.Windows.Forms.Label();
-      this.lblText4 = new System.Windows.Forms.Label();
-      this.lblText1 = new System.Windows.Forms.Label();
-      this.lblHyperTitle1 = new System.Windows.Forms.Label();
-      this.filter = new System.Windows.Forms.CheckBox();
-      this.lstServices = new System.Windows.Forms.ListView();
+      this.MachineAutoTestConnectionIntervalUOMComboBox = new System.Windows.Forms.ComboBox();
+      this.MachineAutoTestConnectionLabel = new System.Windows.Forms.Label();
+      this.MachineAutoTestConnectionIntervalNumericUpDown = new System.Windows.Forms.NumericUpDown();
+      this.FilterTextBox = new System.Windows.Forms.TextBox();
+      this.FilterLabel = new System.Windows.Forms.Label();
+      this.WindowsServiceInstructionsLabel = new System.Windows.Forms.Label();
+      this.MachineInstructionsLabel = new System.Windows.Forms.Label();
+      this.MachineHyperTitleLabel = new System.Windows.Forms.Label();
+      this.FilterCheckBox = new System.Windows.Forms.CheckBox();
+      this.ServicesListView = new System.Windows.Forms.ListView();
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-      this.lblHyperTitle2 = new System.Windows.Forms.Label();
-      this.lblText3 = new System.Windows.Forms.Label();
-      this.cboxServerSelection = new System.Windows.Forms.ComboBox();
+      this.WindowsServiceHyperTitleLabel = new System.Windows.Forms.Label();
+      this.ComputerLabel = new System.Windows.Forms.Label();
+      this.MachineSelectionComboBox = new System.Windows.Forms.ComboBox();
       this.timerForFiltering = new System.Windows.Forms.Timer(this.components);
       this.panel2.SuspendLayout();
       this.panel1.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.MachineAutoTestConnectionIntervalNumericUpDown)).BeginInit();
       this.SuspendLayout();
       // 
       // panel2
       // 
-      this.panel2.Controls.Add(this.btnOK);
-      this.panel2.Controls.Add(this.btnCancel);
+      this.panel2.Controls.Add(this.DialogOKButton);
+      this.panel2.Controls.Add(this.DialogCancelButton);
       this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
       this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.panel2.Location = new System.Drawing.Point(0, 468);
+      this.panel2.Location = new System.Drawing.Point(0, 492);
       this.panel2.Name = "panel2";
       this.panel2.Size = new System.Drawing.Size(488, 50);
-      this.panel2.TabIndex = 46;
+      this.panel2.TabIndex = 1;
       // 
-      // btnOK
+      // DialogOKButton
       // 
-      this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-      this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.btnOK.Enabled = false;
-      this.btnOK.Location = new System.Drawing.Point(319, 15);
-      this.btnOK.Name = "btnOK";
-      this.btnOK.Size = new System.Drawing.Size(75, 23);
-      this.btnOK.TabIndex = 13;
-      this.btnOK.Text = "OK";
-      this.btnOK.UseVisualStyleBackColor = true;
-      this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
+      this.DialogOKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+      this.DialogOKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+      this.DialogOKButton.Location = new System.Drawing.Point(319, 15);
+      this.DialogOKButton.Name = "DialogOKButton";
+      this.DialogOKButton.Size = new System.Drawing.Size(75, 23);
+      this.DialogOKButton.TabIndex = 0;
+      this.DialogOKButton.Text = "OK";
+      this.DialogOKButton.UseVisualStyleBackColor = true;
+      this.DialogOKButton.Click += new System.EventHandler(this.DialogOKButton_Click);
       // 
-      // btnCancel
+      // DialogCancelButton
       // 
-      this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-      this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.btnCancel.Location = new System.Drawing.Point(400, 15);
-      this.btnCancel.Name = "btnCancel";
-      this.btnCancel.Size = new System.Drawing.Size(75, 23);
-      this.btnCancel.TabIndex = 12;
-      this.btnCancel.Text = "Cancel";
-      this.btnCancel.UseVisualStyleBackColor = true;
+      this.DialogCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+      this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+      this.DialogCancelButton.Location = new System.Drawing.Point(400, 15);
+      this.DialogCancelButton.Name = "DialogCancelButton";
+      this.DialogCancelButton.Size = new System.Drawing.Size(75, 23);
+      this.DialogCancelButton.TabIndex = 1;
+      this.DialogCancelButton.Text = "Cancel";
+      this.DialogCancelButton.UseVisualStyleBackColor = true;
       // 
       // panel1
       // 
       this.panel1.AutoSize = true;
       this.panel1.BackColor = System.Drawing.Color.White;
-      this.panel1.Controls.Add(this.txtFilter);
-      this.panel1.Controls.Add(this.lblText6);
-      this.panel1.Controls.Add(this.lblText4);
-      this.panel1.Controls.Add(this.lblText1);
-      this.panel1.Controls.Add(this.lblHyperTitle1);
-      this.panel1.Controls.Add(this.filter);
-      this.panel1.Controls.Add(this.lstServices);
-      this.panel1.Controls.Add(this.lblHyperTitle2);
-      this.panel1.Controls.Add(this.lblText3);
-      this.panel1.Controls.Add(this.cboxServerSelection);
+      this.panel1.Controls.Add(this.MachineAutoTestConnectionIntervalUOMComboBox);
+      this.panel1.Controls.Add(this.MachineAutoTestConnectionLabel);
+      this.panel1.Controls.Add(this.MachineAutoTestConnectionIntervalNumericUpDown);
+      this.panel1.Controls.Add(this.FilterTextBox);
+      this.panel1.Controls.Add(this.FilterLabel);
+      this.panel1.Controls.Add(this.WindowsServiceInstructionsLabel);
+      this.panel1.Controls.Add(this.MachineInstructionsLabel);
+      this.panel1.Controls.Add(this.MachineHyperTitleLabel);
+      this.panel1.Controls.Add(this.FilterCheckBox);
+      this.panel1.Controls.Add(this.ServicesListView);
+      this.panel1.Controls.Add(this.WindowsServiceHyperTitleLabel);
+      this.panel1.Controls.Add(this.ComputerLabel);
+      this.panel1.Controls.Add(this.MachineSelectionComboBox);
       this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panel1.Location = new System.Drawing.Point(0, 0);
       this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(488, 518);
-      this.panel1.TabIndex = 47;
+      this.panel1.Size = new System.Drawing.Size(488, 542);
+      this.panel1.TabIndex = 0;
       // 
-      // txtFilter
+      // MachineAutoTestConnectionIntervalUOMComboBox
       // 
-      this.txtFilter.Location = new System.Drawing.Point(63, 179);
-      this.txtFilter.Name = "txtFilter";
-      this.txtFilter.Size = new System.Drawing.Size(130, 22);
-      this.txtFilter.TabIndex = 57;
-      this.txtFilter.TextChanged += new System.EventHandler(this.txtFilter_TextChanged);
+      this.MachineAutoTestConnectionIntervalUOMComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.MachineAutoTestConnectionIntervalUOMComboBox.Items.AddRange(new object[] {
+            "seconds",
+            "minutes",
+            "hours",
+            "days"});
+      this.MachineAutoTestConnectionIntervalUOMComboBox.Location = new System.Drawing.Point(308, 105);
+      this.MachineAutoTestConnectionIntervalUOMComboBox.Name = "MachineAutoTestConnectionIntervalUOMComboBox";
+      this.MachineAutoTestConnectionIntervalUOMComboBox.Size = new System.Drawing.Size(112, 21);
+      this.MachineAutoTestConnectionIntervalUOMComboBox.TabIndex = 6;
+      this.MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndexChanged += new System.EventHandler(this.MachineAutoTestConnectionIntervalUOMComboBox_SelectedIndexChanged);
       // 
-      // lblText6
+      // MachineAutoTestConnectionLabel
       // 
-      this.lblText6.AutoSize = true;
-      this.lblText6.Location = new System.Drawing.Point(21, 184);
-      this.lblText6.Name = "lblText6";
-      this.lblText6.Size = new System.Drawing.Size(36, 13);
-      this.lblText6.TabIndex = 56;
-      this.lblText6.Text = "Filter:";
+      this.MachineAutoTestConnectionLabel.AutoSize = true;
+      this.MachineAutoTestConnectionLabel.Location = new System.Drawing.Point(22, 108);
+      this.MachineAutoTestConnectionLabel.Name = "MachineAutoTestConnectionLabel";
+      this.MachineAutoTestConnectionLabel.Size = new System.Drawing.Size(214, 13);
+      this.MachineAutoTestConnectionLabel.TabIndex = 4;
+      this.MachineAutoTestConnectionLabel.Text = "Check computer connection status every";
       // 
-      // lblText4
+      // MachineAutoTestConnectionIntervalNumericUpDown
       // 
-      this.lblText4.Location = new System.Drawing.Point(21, 142);
-      this.lblText4.Name = "lblText4";
-      this.lblText4.Size = new System.Drawing.Size(454, 38);
-      this.lblText4.TabIndex = 54;
-      this.lblText4.Text = "Select the service you want to monitor. You can filter the list by typing into th" +
+      this.MachineAutoTestConnectionIntervalNumericUpDown.Location = new System.Drawing.Point(251, 106);
+      this.MachineAutoTestConnectionIntervalNumericUpDown.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+      this.MachineAutoTestConnectionIntervalNumericUpDown.Name = "MachineAutoTestConnectionIntervalNumericUpDown";
+      this.MachineAutoTestConnectionIntervalNumericUpDown.Size = new System.Drawing.Size(51, 22);
+      this.MachineAutoTestConnectionIntervalNumericUpDown.TabIndex = 5;
+      this.MachineAutoTestConnectionIntervalNumericUpDown.ValueChanged += new System.EventHandler(this.MachineAutoTestConnectionIntervalNumericUpDown_ValueChanged);
+      // 
+      // FilterTextBox
+      // 
+      this.FilterTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.FilterTextBox.Location = new System.Drawing.Point(64, 213);
+      this.FilterTextBox.Name = "FilterTextBox";
+      this.FilterTextBox.Size = new System.Drawing.Size(130, 22);
+      this.FilterTextBox.TabIndex = 10;
+      this.FilterTextBox.TextChanged += new System.EventHandler(this.FilterTextBox_TextChanged);
+      // 
+      // FilterLabel
+      // 
+      this.FilterLabel.AutoSize = true;
+      this.FilterLabel.Location = new System.Drawing.Point(22, 218);
+      this.FilterLabel.Name = "FilterLabel";
+      this.FilterLabel.Size = new System.Drawing.Size(36, 13);
+      this.FilterLabel.TabIndex = 9;
+      this.FilterLabel.Text = "Filter:";
+      // 
+      // WindowsServiceInstructionsLabel
+      // 
+      this.WindowsServiceInstructionsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.WindowsServiceInstructionsLabel.Location = new System.Drawing.Point(22, 176);
+      this.WindowsServiceInstructionsLabel.Name = "WindowsServiceInstructionsLabel";
+      this.WindowsServiceInstructionsLabel.Size = new System.Drawing.Size(454, 34);
+      this.WindowsServiceInstructionsLabel.TabIndex = 8;
+      this.WindowsServiceInstructionsLabel.Text = "Select the service you want to monitor. You can filter the list by typing into th" +
     "e filter control.";
       // 
-      // lblText1
+      // MachineInstructionsLabel
       // 
-      this.lblText1.Location = new System.Drawing.Point(20, 46);
-      this.lblText1.Name = "lblText1";
-      this.lblText1.Size = new System.Drawing.Size(455, 29);
-      this.lblText1.TabIndex = 52;
-      this.lblText1.Text = "Select the machine you want to monitor services on. The machines need to be on yo" +
+      this.MachineInstructionsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.MachineInstructionsLabel.Location = new System.Drawing.Point(20, 46);
+      this.MachineInstructionsLabel.Name = "MachineInstructionsLabel";
+      this.MachineInstructionsLabel.Size = new System.Drawing.Size(455, 29);
+      this.MachineInstructionsLabel.TabIndex = 1;
+      this.MachineInstructionsLabel.Text = "Select the machine you want to monitor services on. The machines need to be on yo" +
     "ur local network. ";
       // 
-      // lblHyperTitle1
+      // MachineHyperTitleLabel
       // 
-      this.lblHyperTitle1.AutoSize = true;
-      this.lblHyperTitle1.Location = new System.Drawing.Point(20, 24);
-      this.lblHyperTitle1.Name = "lblHyperTitle1";
-      this.lblHyperTitle1.Size = new System.Drawing.Size(105, 13);
-      this.lblHyperTitle1.TabIndex = 51;
-      this.lblHyperTitle1.Text = "Choose a Machine:";
+      this.MachineHyperTitleLabel.AutoSize = true;
+      this.MachineHyperTitleLabel.Location = new System.Drawing.Point(20, 24);
+      this.MachineHyperTitleLabel.Name = "MachineHyperTitleLabel";
+      this.MachineHyperTitleLabel.Size = new System.Drawing.Size(105, 13);
+      this.MachineHyperTitleLabel.TabIndex = 0;
+      this.MachineHyperTitleLabel.Text = "Choose a Machine:";
       // 
-      // filter
+      // FilterCheckBox
       // 
-      this.filter.AutoSize = true;
-      this.filter.Location = new System.Drawing.Point(211, 184);
-      this.filter.Name = "filter";
-      this.filter.Size = new System.Drawing.Size(264, 17);
-      this.filter.TabIndex = 50;
-      this.filter.Text = "Only show services that match auto-add filter?\r\n";
-      this.filter.UseVisualStyleBackColor = true;
-      this.filter.CheckedChanged += new System.EventHandler(this.filter_CheckedChanged);
+      this.FilterCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.FilterCheckBox.AutoSize = true;
+      this.FilterCheckBox.Location = new System.Drawing.Point(212, 218);
+      this.FilterCheckBox.Name = "FilterCheckBox";
+      this.FilterCheckBox.Size = new System.Drawing.Size(264, 17);
+      this.FilterCheckBox.TabIndex = 11;
+      this.FilterCheckBox.Text = "Only show services that match auto-add filter?\r\n";
+      this.FilterCheckBox.UseVisualStyleBackColor = true;
+      this.FilterCheckBox.CheckedChanged += new System.EventHandler(this.FilterCheckBox_CheckedChanged);
       // 
-      // lstServices
+      // ServicesListView
       // 
-      this.lstServices.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+      this.ServicesListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.lstServices.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+      this.ServicesListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader3});
-      this.lstServices.FullRowSelect = true;
-      this.lstServices.Location = new System.Drawing.Point(23, 216);
-      this.lstServices.Name = "lstServices";
-      this.lstServices.Size = new System.Drawing.Size(452, 208);
-      this.lstServices.TabIndex = 49;
-      this.lstServices.UseCompatibleStateImageBehavior = false;
-      this.lstServices.View = System.Windows.Forms.View.Details;
-      this.lstServices.SelectedIndexChanged += new System.EventHandler(this.lstServices_SelectedIndexChanged);
+      this.ServicesListView.FullRowSelect = true;
+      this.ServicesListView.Location = new System.Drawing.Point(23, 244);
+      this.ServicesListView.Name = "ServicesListView";
+      this.ServicesListView.Size = new System.Drawing.Size(452, 222);
+      this.ServicesListView.TabIndex = 12;
+      this.ServicesListView.UseCompatibleStateImageBehavior = false;
+      this.ServicesListView.View = System.Windows.Forms.View.Details;
       // 
       // columnHeader1
       // 
       this.columnHeader1.Text = "Display Name";
-      this.columnHeader1.Width = 350;
+      this.columnHeader1.Width = 337;
       // 
       // columnHeader3
       // 
       this.columnHeader3.Text = "Status";
-      this.columnHeader3.Width = 102;
+      this.columnHeader3.Width = 85;
       // 
-      // lblHyperTitle2
+      // WindowsServiceHyperTitleLabel
       // 
-      this.lblHyperTitle2.AutoSize = true;
-      this.lblHyperTitle2.Location = new System.Drawing.Point(21, 120);
-      this.lblHyperTitle2.Name = "lblHyperTitle2";
-      this.lblHyperTitle2.Size = new System.Drawing.Size(148, 13);
-      this.lblHyperTitle2.TabIndex = 48;
-      this.lblHyperTitle2.Text = "Choose a Windows Service:";
+      this.WindowsServiceHyperTitleLabel.AutoSize = true;
+      this.WindowsServiceHyperTitleLabel.Location = new System.Drawing.Point(22, 154);
+      this.WindowsServiceHyperTitleLabel.Name = "WindowsServiceHyperTitleLabel";
+      this.WindowsServiceHyperTitleLabel.Size = new System.Drawing.Size(148, 13);
+      this.WindowsServiceHyperTitleLabel.TabIndex = 7;
+      this.WindowsServiceHyperTitleLabel.Text = "Choose a Windows Service:";
       // 
-      // lblText3
+      // ComputerLabel
       // 
-      this.lblText3.AutoSize = true;
-      this.lblText3.Location = new System.Drawing.Point(81, 81);
-      this.lblText3.Name = "lblText3";
-      this.lblText3.Size = new System.Drawing.Size(61, 13);
-      this.lblText3.TabIndex = 47;
-      this.lblText3.Text = "Computer:";
+      this.ComputerLabel.AutoSize = true;
+      this.ComputerLabel.Location = new System.Drawing.Point(61, 81);
+      this.ComputerLabel.Name = "ComputerLabel";
+      this.ComputerLabel.Size = new System.Drawing.Size(61, 13);
+      this.ComputerLabel.TabIndex = 2;
+      this.ComputerLabel.Text = "Computer:";
       // 
-      // cboxServerSelection
+      // MachineSelectionComboBox
       // 
-      this.cboxServerSelection.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cboxServerSelection.FormattingEnabled = true;
-      this.cboxServerSelection.Items.AddRange(new object[] {
+      this.MachineSelectionComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.MachineSelectionComboBox.FormattingEnabled = true;
+      this.MachineSelectionComboBox.Items.AddRange(new object[] {
             "Local",
             "Remote...",
-            "-------------------------------------------"});
-      this.cboxServerSelection.Location = new System.Drawing.Point(148, 78);
-      this.cboxServerSelection.Name = "cboxServerSelection";
-      this.cboxServerSelection.Size = new System.Drawing.Size(193, 21);
-      this.cboxServerSelection.TabIndex = 46;
-      this.cboxServerSelection.SelectedIndexChanged += new System.EventHandler(this.server_SelectedIndexChanged);
+            "————————————————————————"});
+      this.MachineSelectionComboBox.Location = new System.Drawing.Point(128, 78);
+      this.MachineSelectionComboBox.Name = "MachineSelectionComboBox";
+      this.MachineSelectionComboBox.Size = new System.Drawing.Size(292, 21);
+      this.MachineSelectionComboBox.TabIndex = 3;
+      this.MachineSelectionComboBox.SelectedIndexChanged += new System.EventHandler(this.MachineSelectionComboBox_SelectedIndexChanged);
       // 
       // timerForFiltering
       // 
@@ -246,24 +294,25 @@ namespace MySql.Notifier
       // 
       // AddServiceDialog
       // 
-      this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+      this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
       this.BackColor = System.Drawing.SystemColors.Menu;
       this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-      this.ClientSize = new System.Drawing.Size(488, 518);
+      this.CancelButton = this.DialogCancelButton;
+      this.ClientSize = new System.Drawing.Size(488, 542);
       this.Controls.Add(this.panel2);
       this.Controls.Add(this.panel1);
       this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
-      this.MinimumSize = new System.Drawing.Size(449, 454);
+      this.MinimumSize = new System.Drawing.Size(504, 450);
       this.Name = "AddServiceDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Add Service";
       this.panel2.ResumeLayout(false);
       this.panel1.ResumeLayout(false);
       this.panel1.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.MachineAutoTestConnectionIntervalNumericUpDown)).EndInit();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -272,21 +321,24 @@ namespace MySql.Notifier
     #endregion
 
     private System.Windows.Forms.Panel panel2;
-    private System.Windows.Forms.Button btnOK;
-    private System.Windows.Forms.Button btnCancel;
+    private System.Windows.Forms.Button DialogOKButton;
+    private System.Windows.Forms.Button DialogCancelButton;
     private System.Windows.Forms.Panel panel1;
-    private System.Windows.Forms.TextBox txtFilter;
-    private System.Windows.Forms.Label lblText6;
-    private System.Windows.Forms.Label lblText4;
-    private System.Windows.Forms.Label lblText1;
-    private System.Windows.Forms.Label lblHyperTitle1;
-    private System.Windows.Forms.CheckBox filter;
-    private System.Windows.Forms.ListView lstServices;
+    private System.Windows.Forms.TextBox FilterTextBox;
+    private System.Windows.Forms.Label FilterLabel;
+    private System.Windows.Forms.Label WindowsServiceInstructionsLabel;
+    private System.Windows.Forms.Label MachineInstructionsLabel;
+    private System.Windows.Forms.Label MachineHyperTitleLabel;
+    private System.Windows.Forms.CheckBox FilterCheckBox;
+    private System.Windows.Forms.ListView ServicesListView;
     private System.Windows.Forms.ColumnHeader columnHeader1;
     private System.Windows.Forms.ColumnHeader columnHeader3;
-    private System.Windows.Forms.Label lblHyperTitle2;
-    private System.Windows.Forms.Label lblText3;
-    private System.Windows.Forms.ComboBox cboxServerSelection;
+    private System.Windows.Forms.Label WindowsServiceHyperTitleLabel;
+    private System.Windows.Forms.Label ComputerLabel;
+    private System.Windows.Forms.ComboBox MachineSelectionComboBox;
     private System.Windows.Forms.Timer timerForFiltering;
+    private System.Windows.Forms.ComboBox MachineAutoTestConnectionIntervalUOMComboBox;
+    private System.Windows.Forms.Label MachineAutoTestConnectionLabel;
+    private System.Windows.Forms.NumericUpDown MachineAutoTestConnectionIntervalNumericUpDown;
   }
 }

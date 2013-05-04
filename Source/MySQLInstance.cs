@@ -35,15 +35,19 @@ namespace MySql.Notifier
   [Serializable]
   public class MySQLInstance : INotifyPropertyChanged
   {
+    #region Constants
+
     /// <summary>
-    /// Default monitoring interval in seconds for a MySQL instance, set to 10 minutes.
+    /// Default monitoring interval for a MySQL instance, set to 10.
     /// </summary>
     public const int DEFAULT_MONITORING_INTERVAL = 10;
 
     /// <summary>
-    /// Default monitoring interval unit of measures, set to seconds by default.
+    /// Default monitoring interval unit of measures, set to minutes by default.
     /// </summary>
-    public const IntervalUnitOfMeasure DEFAULT_MONITORING_UOM = IntervalUnitOfMeasure.Minutes;
+    public const TimeUtilities.IntervalUnitOfMeasure DEFAULT_MONITORING_UOM = TimeUtilities.IntervalUnitOfMeasure.Minutes;
+
+    #endregion Constants
 
     #region Fields
 
@@ -60,7 +64,7 @@ namespace MySql.Notifier
     /// <summary>
     /// The unit of measure used for this instance's monitoring instance.
     /// </summary>
-    private IntervalUnitOfMeasure _monitoringIntervalUnitOfMeasure;
+    private TimeUtilities.IntervalUnitOfMeasure _monitoringIntervalUnitOfMeasure;
 
     /// <summary>
     /// The connection status of the instance before testing the connection for a new status.
@@ -120,32 +124,6 @@ namespace MySql.Notifier
       : this()
     {
       WorkbenchConnection = workbenchConnection;
-    }
-
-    /// <summary>
-    /// Unit of measure used for time intervals.
-    /// </summary>
-    public enum IntervalUnitOfMeasure
-    {
-      /// <summary>
-      /// Interval measured in seconds.
-      /// </summary>
-      Seconds = 0,
-
-      /// <summary>
-      /// Interval measured in minutes.
-      /// </summary>
-      Minutes = 1,
-
-      /// <summary>
-      /// Interval measured in hours.
-      /// </summary>
-      Hours = 2,
-
-      /// <summary>
-      /// Interval measured in days.
-      /// </summary>
-      Days = 3
     }
 
     #region Events
@@ -291,22 +269,7 @@ namespace MySql.Notifier
     {
       get
       {
-        switch (_monitoringIntervalUnitOfMeasure)
-        {
-          case IntervalUnitOfMeasure.Seconds:
-            return _monitoringInterval;
-
-          case IntervalUnitOfMeasure.Minutes:
-            return TimeSpan.FromMinutes(_monitoringInterval).TotalSeconds;
-
-          case IntervalUnitOfMeasure.Hours:
-            return TimeSpan.FromHours(_monitoringInterval).TotalSeconds;
-
-          case IntervalUnitOfMeasure.Days:
-            return TimeSpan.FromDays(_monitoringInterval).TotalSeconds;
-        }
-
-        return 0;
+        return TimeUtilities.ConvertToSeconds(_monitoringIntervalUnitOfMeasure, _monitoringInterval);
       }
     }
 
@@ -314,7 +277,7 @@ namespace MySql.Notifier
     /// Gets or sets the unit of measure used for this instance's monitoring instance.
     /// </summary>
     [XmlAttribute(AttributeName = "MonitoringIntervalUnitOfMeasure")]
-    public IntervalUnitOfMeasure MonitoringIntervalUnitOfMeasure
+    public TimeUtilities.IntervalUnitOfMeasure MonitoringIntervalUnitOfMeasure
     {
       get
       {
@@ -323,7 +286,7 @@ namespace MySql.Notifier
 
       set
       {
-        IntervalUnitOfMeasure lastValue = _monitoringIntervalUnitOfMeasure;
+        TimeUtilities.IntervalUnitOfMeasure lastValue = _monitoringIntervalUnitOfMeasure;
         _monitoringIntervalUnitOfMeasure = value;
         if (lastValue != value)
         {
@@ -574,7 +537,7 @@ namespace MySql.Notifier
     /// Fires the <see cref="InstanceStatusChanged"/> event.
     /// </summary>
     /// <param name="oldInstanceStatus">Old instance status.</param>
-    private void OnInstanceStatusChanged(MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
+    protected virtual void OnInstanceStatusChanged(MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
     {
       if (InstanceStatusChanged != null)
       {
@@ -586,7 +549,7 @@ namespace MySql.Notifier
     /// Fires the <see cref="InstanceConnectionStatusTestErrorThrown"/> event.
     /// </summary>
     /// <param name="ex">Exception thrown by a connection status test.</param>
-    private void OnInstanceStatusTestErrorThrown(Exception ex)
+    protected virtual void OnInstanceStatusTestErrorThrown(Exception ex)
     {
       if (InstanceConnectionStatusTestErrorThrown != null)
       {
@@ -598,7 +561,7 @@ namespace MySql.Notifier
     /// Raises the <see cref="PropertyChanged"/> event.
     /// </summary>
     /// <param name="propertyName">The name of the property that changed.</param>
-    private void OnPropertyChanged(string propertyName)
+    protected virtual void OnPropertyChanged(string propertyName)
     {
       if (PropertyChanged != null)
       {

@@ -90,64 +90,39 @@ namespace MySql.Notifier
     private bool ValidateConnectionAndPermissions(bool OnlyTest)
     {
       bool result = false, machineAlreadyExist = false;
-      try
+      if (!ValidateTextEntries())
       {
-        if (!ValidateTextEntries())
+        return false;
+      }
+
+      newMachine = new Machine(HostTextbox.Text, UserTextBox.Text, PasswordTextbox.Text);
+      newMachine.TestConnection(true, false);
+      result = newMachine.IsOnline;
+
+      if (!OnlyTest)
+      {
+        machineAlreadyExist = machinesList.GetMachineByHostName(newMachine.Name) != null;
+      }
+
+      if (machineAlreadyExist)
+      {
+        if (InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage) == DialogResult.Yes)
         {
-          return false;
+          newMachine = machinesList.OverwriteMachine(newMachine);
+        }
+        else
+        {
+          result = false;
         }
 
-        newMachine = new Machine(HostTextbox.Text, UserTextBox.Text, PasswordTextbox.Text);
-        result = newMachine.TestConnectionUnManaged();
-        if (!OnlyTest)
-          machineAlreadyExist = (machinesList.GetMachineByHostName(newMachine.Name) != null);
-      }
-      catch (COMException ex)
-      {
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
-        switch (ex.ErrorCode)
+        if (!result)
         {
-          case -2147023174:
-            InfoDialog.ShowErrorDialog(Resources.HostUnreachableTitle, Resources.HostUnreachableMessage);
-            break;
+          HostTextbox.Focus();
+          HostTextbox.SelectAll();
+          newMachine = null;
+        }
+      }
 
-          default:
-            InfoDialog.ShowErrorDialog(Resources.HostUnreachableTitle, Resources.HostUnreachableMessageDefault, null, ex.Message + ex.StackTrace);
-            break;
-        }
-      }
-      catch (UnauthorizedAccessException ex)
-      {
-        //// -2147024891
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
-        InfoDialog.ShowErrorDialog(Resources.AccessDeniedTitle, Resources.AccessDeniedMessage, null, ex.Message + ex.StackTrace);
-      }
-      catch (ManagementException ex)
-      {
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
-        InfoDialog.ShowErrorDialog(Resources.ManagementExceptionTitle, Resources.ManagementExceptionMessage, null, ex.Message + ex.StackTrace);
-      }
-      finally
-      {
-        if (machineAlreadyExist)
-        {
-          if (InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage) == DialogResult.Yes)
-          {
-            machinesList.OverwriteMachine(newMachine);
-            newMachine = machinesList.GetMachineByHostName(newMachine.Name);
-          }
-          else
-          {
-            result = false;
-          }
-          if (!result)
-          {
-            HostTextbox.Focus();
-            HostTextbox.SelectAll();
-            newMachine = null;
-          }
-        }
-      }
       return result;
     }
   }

@@ -35,27 +35,30 @@ namespace MySql.Notifier
 {
   internal class Notifier
   {
+    #region Fields
+
     private System.ComponentModel.IContainer components;
-    private NotifyIcon notifyIcon;
-
-    private MySQLServicesList mySQLServicesList { get; set; }
-
-    private MySQLInstancesList mySQLInstancesList { get; set; }
-
-    private MachinesList machinesList { get; set; }
-
-    private List<ManagementEventWatcher> watchers = new List<ManagementEventWatcher>();
-
-    private ToolStripMenuItem launchWorkbenchUtilitiesMenuItem;
-    private ToolStripMenuItem launchInstallerMenuItem;
-    private ToolStripMenuItem installAvailablelUpdatesMenuItem;
-    private ToolStripMenuItem ignoreAvailableUpdateMenuItem;
     private ToolStripSeparator hasUpdatesSeparator;
-
+    private ToolStripMenuItem ignoreAvailableUpdateMenuItem;
+    private ToolStripMenuItem installAvailablelUpdatesMenuItem;
+    private ToolStripMenuItem launchInstallerMenuItem;
+    private ToolStripMenuItem launchWorkbenchUtilitiesMenuItem;
+    private MachinesList machinesList;
+    private MySQLInstancesList mySQLInstancesList;
+    private MySQLServicesList mySQLServicesList;
+    private NotifyIcon notifyIcon;
     private int previousServicesAndInstancesQuantity;
 
-    private delegate void serviceWindowsEvent(Machine machine, string servicename, string path, string state);
+    /// <summary>
+    /// The timer that fires the connection status checks.
+    /// </summary>
+    private System.Timers.Timer _globalTimer;
 
+    #endregion Fields
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Notifier"/> class.
+    /// </summary>
     public Notifier()
     {
       //// Static initializations.
@@ -78,15 +81,16 @@ namespace MySql.Notifier
 
       machinesList = new MachinesList();
       MigrateOldServices();
-      machinesList.MachineListChanged += new MachinesList.MachineListChangedHandler(machinesList_MachineListChanged);
-      machinesList.CompleteMachineConnectionError += new MachinesList.CompleteMachineConnectionErrorHandler(machinesList_CompleteMachineConnectionError);
-      machinesList.CompleteServiceListChanged += new MachinesList.CompleteServiceListChangedHandler(machinesList_CompleteServiceListChanged);
-      machinesList.CompleteServiceStatusChanged += new MachinesList.CompleteServiceStatusChangedHandler(machinesList_CompleteServiceStatusChanged);
+      machinesList.MachineListChanged += machinesList_MachineListChanged;
+      machinesList.MachineServiceStatusChangeError += machinesList_MachineServiceStatusChangeError;
+      machinesList.MachineServiceListChanged += machinesList_MachineServiceListChanged;
+      machinesList.MachineServiceStatusChanged += machinesList_MachineServiceStatusChanged;
+      machinesList.MachineStatusChanged += machinesList_MachineStatusChanged;
 
       RebuildMenuIfNeeded(false);
       SetNotifyIconToolTip();
 
-      //This method ▼ populates services with post-load information, we need to execute it after the Popup-Menu has been initialized at RefreshMenuIfNeeded(bool).
+      //// This method ▼ populates services with post-load information, we need to execute it after the Popup-Menu has been initialized at RefreshMenuIfNeeded(bool).
       machinesList.Refresh();
       previousServicesAndInstancesQuantity = machinesList.ServicesCount + mySQLInstancesList.Count;
 
@@ -120,11 +124,9 @@ namespace MySql.Notifier
 
       //// Load instances
       mySQLInstancesList.RefreshInstances(true);
+      StartGlobalTimer();
 
       StartWatcherForFile(applicationDataFolderPath + @"\Oracle\MySQL Notifier\settings.config", settingsFile_Changed);
-
-      WatchForServiceChanges();
-      WatchForServiceDeletion();
       RefreshNotifierIcon();
 
       //// Migrate Notifier connections to the MySQL Workbench connections file if possible.
@@ -132,62 +134,61 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Merge the old services schema into the new one
+    /// Notifies that the Notifier wants to quit
     /// </summary>
-    private void MigrateOldServices()
+    public event EventHandler Exit;
+
+    /// <summary>
+    /// Initializes settings for the <see cref="MySqlWorkbenchConnectionsHelper"/> and <see cref="MySqlWorkbenchPasswordVault"/> classes.
+    /// </summary>
+    public static void InitializeMySQLWorkbenchStaticSettings()
     {
-      //// Load old services schema
-      mySQLServicesList = new MySQLServicesList();
+      string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+      MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
+      MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\user_data.dat";
+      MySqlWorkbench.ExternalApplicationConnectionsFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\connections.xml";
+      MySQLSourceTrace.LogFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier";
+      MySQLSourceTrace.SourceTraceClass = "MySqlNotifier";
+    }
 
-      //// Attempt migration only if services were found
-      if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
+    /// <summary>
+    /// Sets the text displayed in the notify icon's tooltip
+    /// </summary>
+    public void SetNotifyIconToolTip()
+    {
+      int MAX_TOOLTIP_LENGHT = 63; // framework constraint for notify icons
+      var version = Assembly.GetExecutingAssembly().GetName().Version.ToString().Split('.');
+
+      string toolTipText = string.Format("{0} ({1})\n{2}.",
+                                         Properties.Resources.AppName,
+                                         string.Format("{0}.{1}.{2}", version[0], version[1], version[2]),
+                                         string.Format(Properties.Resources.ToolTipText, machinesList.ServicesCount, mySQLInstancesList.Count));
+      notifyIcon.Text = (toolTipText.Length >= MAX_TOOLTIP_LENGHT ? toolTipText.Substring(0, MAX_TOOLTIP_LENGHT - 3) + "..." : toolTipText);
+    }
+
+    /// <summary>
+    /// Invokes the Exit event
+    /// </summary>
+    /// <param name="e">Event arguments</param>
+    protected virtual void OnExit(EventArgs e)
+    {
+      notifyIcon.Visible = false;
+      machinesList.Dispose();
+      if (_globalTimer != null && _globalTimer.Enabled)
       {
-        if (machinesList.Machines.Count == 0 || machinesList.GetMachineByHostName("localhost") == null)
-        {
-          machinesList.ChangeMachine(new Machine("localhost"), ChangeType.Add);
-        }
+        _globalTimer.Stop();
+      }
 
-        Machine machine = machinesList.GetMachineByHostName("localhost");
-
-        //Copy services from old schema to the Local machine.
-        foreach (MySQLService service in mySQLServicesList.Services)
-        {
-          machine.ChangeService(service, ChangeType.AutoAdd);
-        }
-
-        // Clear the old list of services to erase the duplicates on the newer schema
-        mySQLServicesList.Services.Clear();
-        Settings.Default.Save();
+      if (this.Exit != null)
+      {
+        Exit(this, e);
       }
     }
 
-    /// <summary>
-    /// Customizes the looks of the <see cref="MySQL.Utility.Forms.InfoDialog"/> form for the MySQL Notifier.
-    /// </summary>
-    private void CustomizeInfoDialog()
+    private void aboutMenu_Click(object sender, EventArgs e)
     {
-      InfoDialog.ApplicationName = AssemblyInfo.AssemblyTitle;
-      InfoDialog.SuccessLogo = Properties.Resources.ApplicationLogo;
-      InfoDialog.ErrorLogo = Properties.Resources.NotifierErrorImage;
-      InfoDialog.WarningLogo = Properties.Resources.NotifierWarningImage;
-      InfoDialog.InformationLogo = Properties.Resources.ApplicationLogo;
-      InfoDialog.ApplicationIcon = Properties.Resources.MySqlNotifierIcon;
-    }
-
-    /// <summary>
-    /// Generic routine to help with showing tooltips
-    /// </summary>
-    private void ShowTooltip(bool error, string title, string text, int delay)
-    {
-      notifyIcon.BalloonTipIcon = error ? ToolTipIcon.Error : ToolTipIcon.Info;
-      notifyIcon.BalloonTipTitle = title;
-      notifyIcon.BalloonTipText = text;
-      notifyIcon.ShowBalloonTip(delay);
-    }
-
-    private void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
-    {
-      UpdateStaticMenuItems();
+      AboutDialog dialog = new AboutDialog();
+      dialog.ShowDialog();
     }
 
     /// <summary>
@@ -262,50 +263,68 @@ namespace MySql.Notifier
       notifyIcon.ContextMenuStrip.Items.Add(ignoreAvailableUpdateMenuItem);
     }
 
-    private void UpdateStaticMenuItems()
+    private void checkUpdatesItem_Click(object sender, EventArgs e)
     {
-      bool hasUpdates = (Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0;
-      if (hasUpdatesSeparator != null) hasUpdatesSeparator.Visible = hasUpdates;
-      if (installAvailablelUpdatesMenuItem != null) installAvailablelUpdatesMenuItem.Visible = hasUpdates;
-      if (ignoreAvailableUpdateMenuItem != null) ignoreAvailableUpdateMenuItem.Visible = hasUpdates;
-      if (launchInstallerMenuItem != null) launchInstallerMenuItem.Enabled = MySqlInstaller.IsInstalled;
-      if (launchWorkbenchUtilitiesMenuItem != null) launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySQLUtilitiesInstalled();
+      if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
+      {
+        InfoDialog.ShowErrorDialog(Resources.MissingMySQLInstaller, string.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine));
+        return;
+      }
+
+      string path = @MySqlInstaller.GetInstallerPath();
+      Process proc = new Process();
+      ProcessStartInfo startInfo = new ProcessStartInfo();
+      startInfo.FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path);
+      startInfo.Arguments = "checkforupdates";
+      Process.Start(startInfo);
     }
 
     /// <summary>
-    /// Checks if the context menus need to be rebuilt.
+    /// Method to handle the change events in the Workbench's connections file.
     /// </summary>
-    /// <param name="itemRemoved">Flag indicating if a service or instance was removed.</param>
-    /// <returns>true if the menu was rebuilt, false otherwise.</returns>
-    private bool RebuildMenuIfNeeded(bool itemRemoved)
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void connectionsFile_Changed(object sender, FileSystemEventArgs e)
     {
-      bool menuWasRebuilt = false;
+      MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
+      MySqlWorkbench.LoadData();
+      mySQLInstancesList.RefreshInstances(false);
 
-      if ((machinesList.ServicesCount + mySQLInstancesList.Count == 0 && itemRemoved) ||
-         (previousServicesAndInstancesQuantity == 0 && !itemRemoved))
+      foreach (Machine machine in machinesList.Machines)
       {
-        ReBuildMenu();
-        previousServicesAndInstancesQuantity = machinesList.ServicesCount + mySQLInstancesList.Count;
-        menuWasRebuilt = true;
+        foreach (var item in machine.Services)
+        {
+          item.MenuGroup.RefreshMenu(notifyIcon.ContextMenuStrip);
+        }
       }
-
-      return menuWasRebuilt;
     }
 
-    private void ReBuildMenu()
+    private void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
     {
-      notifyIcon.ContextMenuStrip = new ContextMenuStrip();
-      notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
-      AddStaticMenuItems();
       UpdateStaticMenuItems();
     }
 
     /// <summary>
-    /// Refreshes the Notifier main icon based on current services and instances statuses.
+    /// Customizes the looks of the <see cref="MySQL.Utility.Forms.InfoDialog"/> form for the MySQL Notifier.
     /// </summary>
-    private void RefreshNotifierIcon()
+    private void CustomizeInfoDialog()
     {
-      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+      InfoDialog.ApplicationName = AssemblyInfo.AssemblyTitle;
+      InfoDialog.SuccessLogo = Properties.Resources.ApplicationLogo;
+      InfoDialog.ErrorLogo = Properties.Resources.NotifierErrorImage;
+      InfoDialog.WarningLogo = Properties.Resources.NotifierWarningImage;
+      InfoDialog.InformationLogo = Properties.Resources.ApplicationLogo;
+      InfoDialog.ApplicationIcon = Properties.Resources.MySqlNotifierIcon;
+    }
+
+    /// <summary>
+    /// When the exit menu itemText is clicked, make a call to terminate the ApplicationContext.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void exitItem_Click(object sender, EventArgs e)
+    {
+      OnExit(EventArgs.Empty);
     }
 
     /// <summary>
@@ -342,126 +361,40 @@ namespace MySql.Notifier
       return hasUpdates ? Properties.Resources.NotifierIconAlert : Properties.Resources.NotifierIcon;
     }
 
-    /// <summary>
-    /// Sets the text displayed in the notify icon's tooltip
-    /// </summary>
-    public void SetNotifyIconToolTip()
+    private void IgnoreAvailableUpdateItem_Click(object sender, EventArgs e)
     {
-      int MAX_TOOLTIP_LENGHT = 63; // framework constraint for notify icons
-      var version = Assembly.GetExecutingAssembly().GetName().Version.ToString().Split('.');
-
-      string toolTipText = string.Format("{0} ({1})\n{2}.",
-                                         Properties.Resources.AppName,
-                                         string.Format("{0}.{1}.{2}", version[0], version[1], version[2]),
-                                         string.Format(Properties.Resources.ToolTipText, machinesList.ServicesCount, mySQLInstancesList.Count));
-      notifyIcon.Text = (toolTipText.Length >= MAX_TOOLTIP_LENGHT ? toolTipText.Substring(0, MAX_TOOLTIP_LENGHT - 3) + "..." : toolTipText);
-    }
-
-    // TODO: FIX THE WAY WMI Notifies for all services...▼
-    private void GetWindowsEvent(Machine machine, string serviceName, string path, string state)
-    {
-      Control c = notifyIcon.ContextMenuStrip;
-
-      if (c.InvokeRequired)
+      DialogResult result = MessageBox.Show("This action will completely ignore the available software updates. Would you like to continue?",
+        "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+      if (result == DialogResult.Yes)
       {
-        c.Invoke(new MethodInvoker(() => { GetWindowsEvent(machine, serviceName, path, state); }));
-      }
-      else
-      {
-        MySQLService service = machine.GetServiceByName(serviceName);
-        MySQLServiceStatus copyPreviousStatus = MySQLServiceStatus.Stopped;
-        if (service != null)
-        {
-          copyPreviousStatus = service.Status;
-          service.UpdateMenu(state);
-
-          SetNotifyIconToolTip();
-
-          if (service.NotifyOnStatusChange && !copyPreviousStatus.Equals(service.Status))
-          {
-            ServiceStatus serviceStatusInfo = new ServiceStatus(service.DisplayName, copyPreviousStatus, service.Status);
-            mySQLServicesList_ServiceStatusChanged(this, machine, serviceStatusInfo);
-          }
-          machine.GetServiceByName(serviceName).MenuGroup.RefreshRoot(notifyIcon.ContextMenuStrip, copyPreviousStatus);
-        }
-
-        machine.SetServiceStatus(service, state);
-
-        if (service == null || service.UpdateTrayIconOnStatusChange)
-        {
-          RefreshNotifierIcon();
-        }
+        Settings.Default.UpdateCheck = 0;
+        Settings.Default.Save();
+        RefreshNotifierIcon();
       }
     }
 
-    /// <summary>
-    /// Adds or removes a context menu item that represents the parent of the MySQL instances menu items.
-    /// </summary>
-    private void SetupMySQLInstancesMainMenuItem()
+    private void InstallAvailablelUpdates_Click(object sender, EventArgs e)
     {
-      int index = MySQLInstanceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, Resources.MySQLInstances);
-      if (index < 0 && mySQLInstancesList.Count > 0)
-      {
-        index = MySQLInstanceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, Resources.Actions);
-        if (index < 0)
-        {
-          index = 0;
-        }
-
-        //// Hide the separator just above this new menu item.
-        if (index > 0 && notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
-        {
-          notifyIcon.ContextMenuStrip.Items[index - 1].Visible = false;
-        }
-
-        ToolStripMenuItem instancesMainMenuItem = new ToolStripMenuItem(Resources.MySQLInstances);
-        Font boldFont = new Font(instancesMainMenuItem.Font, FontStyle.Bold);
-        instancesMainMenuItem.Font = boldFont;
-        instancesMainMenuItem.BackColor = SystemColors.MenuText;
-        instancesMainMenuItem.ForeColor = SystemColors.Menu;
-        notifyIcon.ContextMenuStrip.Items.Insert(index, instancesMainMenuItem);
-        notifyIcon.ContextMenuStrip.Refresh();
-      }
-      else if (index >= 0 && mySQLInstancesList.Count == 0)
-      {
-        //// Show the separator just above this new menu item if it's hidden.
-        if (notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
-        {
-          notifyIcon.ContextMenuStrip.Items[index - 1].Visible = true;
-        }
-
-        notifyIcon.ContextMenuStrip.Items.RemoveAt(index);
-        notifyIcon.ContextMenuStrip.Refresh();
-      }
+      launchInstallerItem_Click(null, EventArgs.Empty);
+      Settings.Default.UpdateCheck = 0;
+      Settings.Default.Save();
+      RefreshNotifierIcon();
     }
 
-    /// <summary>
-    /// Initializes settings for the <see cref="MySqlWorkbenchConnectionsHelper"/> and <see cref="MySqlWorkbenchPasswordVault"/> classes.
-    /// </summary>
-    public static void InitializeMySQLWorkbenchStaticSettings()
+    private void launchInstallerItem_Click(object sender, EventArgs e)
     {
-      string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-      MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
-      MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\user_data.dat";
-      MySqlWorkbench.ExternalApplicationConnectionsFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier\connections.xml";
-      MySQLSourceTrace.LogFilePath = applicationDataFolderPath + @"\Oracle\MySQL Notifier";
-      MySQLSourceTrace.SourceTraceClass = "MySqlNotifier";
+      string path = MySqlInstaller.GetInstallerPath();
+      if (String.IsNullOrEmpty(path)) return;  // this should not happen since our menu itemText is enabled
+
+      Process proc = new Process();
+      ProcessStartInfo startInfo = new ProcessStartInfo();
+      startInfo.FileName = String.Format(@"{0}\MySQLInstaller.exe", path);
+      Process.Start(startInfo);
     }
 
-    /// <summary>
-    /// Creates a FileSystemWatcher for the specified file
-    /// </summary>
-    /// <param name="filePath">File to add the file system watcher</param>
-    /// <param name="method">Action method</param>
-
-    private void StartWatcherForFile(string filePath, FileSystemEventHandler method)
+    private void LaunchWorkbenchUtilities_Click(object sender, EventArgs e)
     {
-      FileSystemWatcher watcher = new FileSystemWatcher();
-      watcher.Path = Path.GetDirectoryName(filePath);
-      watcher.Filter = Path.GetFileName(filePath);
-      watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Attributes;
-      watcher.Changed += new FileSystemEventHandler(method);
-      watcher.EnableRaisingEvents = true;
+      MySqlWorkbench.LaunchUtilitiesShell();
     }
 
     private int LoadUpdateCheck()
@@ -484,81 +417,102 @@ namespace MySql.Notifier
       return -1;
     }
 
-    private void settingsFile_Changed(object sender, FileSystemEventArgs e)
+    /// <summary>
+    /// Event delegate method fired when a machine is added to or removed from the <see cref="machinesList"/>.
+    /// </summary>
+    /// <param name="machine">Added or removed machine.</param>
+    /// <param name="changeType">List change type.</param>
+    private void machinesList_MachineListChanged(Machine machine, ChangeType changeType)
     {
-      int settingsUpdateCheck = LoadUpdateCheck();
-
-      // if we have already notified our user then noting more to do
-      if (settingsUpdateCheck == 0 || (settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0) return;
-
-      // if we are supposed to check forupdates but the installer is too old then
-      // notify the user and exit
-      if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
+      RebuildMenuIfNeeded(changeType == ChangeType.Remove);
+      switch (changeType)
       {
-        ShowTooltip(false, Resources.SoftwareUpdate, Resources.ScheduledCheckRequiresInstaller11, 1500);
-        settingsUpdateCheck = 0;
+        case ChangeType.Add:
+        case ChangeType.AutoAdd:
+          machine.SetupMenuGroup(notifyIcon.ContextMenuStrip);
+          break;
+
+        case ChangeType.Remove:
+          machine.RemoveMenuGroup(notifyIcon.ContextMenuStrip);
+          ShowTooltip(false, Resources.BalloonTitleTextMachinesList, string.Format(Resources.BalloonTextMachineRemoved, machine.Name));
+          break;
       }
+    }
 
-      bool hasUpdates = true;
-
-      // let them know we are checking for updates
-      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Checking) != 0)
+    /// <summary>
+    /// Event delegate method fired when a machine in the <see cref="machinesList"/> has a service added or removed.
+    /// </summary>
+    /// <param name="machine">Machine with an added or removed service.</param>
+    /// <param name="service">Service added or removed.</param>
+    /// <param name="changeType">List change type.</param>
+    private void machinesList_MachineServiceListChanged(Machine machine, MySQLService service, ChangeType changeType)
+    {
+      RebuildMenuIfNeeded(changeType == ChangeType.Remove);
+      switch (changeType)
       {
-        ShowTooltip(false, Resources.SoftwareUpdate, Resources.CheckingForUpdates, 1500);
-        hasUpdates = MySqlInstaller.HasUpdates(10 * 1000);
-        Settings.Default.UpdateCheck = hasUpdates ? (int)SoftwareUpdateStaus.HasUpdates : 0;
-        settingsUpdateCheck = Settings.Default.UpdateCheck;
-        Settings.Default.Save();
+        case ChangeType.Add:
+        case ChangeType.AutoAdd:
+          service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
+          if (changeType == ChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
+          {
+            ShowTooltip(false, Resources.BalloonTitleTextServiceList, string.Format(Resources.BalloonTextServiceList, service.DisplayName));
+          }
+
+          break;
+
+        case ChangeType.Remove:
+          service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);
+          ShowTooltip(false, Resources.BalloonTitleTextServiceList, String.Format(Resources.BalloonTextServiceRemoved, service.ServiceName));
+          break;
       }
-
-      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0)
-        ShowTooltip(false, Resources.SoftwareUpdate, Resources.HasUpdatesLaunchInstaller, 1500);
-
-      // set that we have notified our user
-      Settings.Default.UpdateCheck |= (int)SoftwareUpdateStaus.Notified;
-      Settings.Default.Save();
 
       RefreshNotifierIcon();
     }
 
     /// <summary>
-    /// Method to handle the change events in the Workbench's connections file.
+    /// Event delegate method fired when a machine in the <see cref="machinesList"/> has a service that changes its status.
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void connectionsFile_Changed(object sender, FileSystemEventArgs e)
+    /// <param name="machine">Machine with a service whose status changed.</param>
+    /// <param name="service">Service whose status changed.</param>
+    private void machinesList_MachineServiceStatusChanged(Machine machine, MySQLService service)
     {
-      MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
-      MySqlWorkbench.LoadData();
-      mySQLInstancesList.RefreshInstances(false);
-
-      foreach (Machine machine in machinesList.Machines)
+      if (service.NotifyOnStatusChange && Settings.Default.NotifyOfStatusChange)
       {
-        foreach (var item in machine.Services)
-        {
-          item.MenuGroup.RefreshMenu(notifyIcon.ContextMenuStrip);
-        }
+        ShowTooltip(false, Resources.BalloonTitleTextServiceStatus, string.Format(Resources.BalloonTextServiceStatus, service.DisplayName, service.PreviousStatus.ToString(), service.Status.ToString()));
+      }
+
+      if (service.UpdateTrayIconOnStatusChange)
+      {
+        RefreshNotifierIcon();
       }
     }
 
     /// <summary>
-    /// Method to handle the change events in the Workbench's server instances file, no changes in UI.
+    /// Event delegate method fired when an error is thrown while trying to change the status of a service in a machine in the <see cref="machinesList"/>.
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void serversFile_Changed(object sender, FileSystemEventArgs e)
+    /// <param name="machine">Machine containing the service with a status change.</param>
+    /// <param name="service">Service with a status change.</param>
+    /// <param name="ex">Exception thrown by the service status change.</param>
+    private void machinesList_MachineServiceStatusChangeError(Machine machine, MySQLService service, Exception ex)
     {
-      MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
-      MySqlWorkbench.LoadData();
+      string errorText = string.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, Environment.NewLine + ex.Message + Environment.NewLine + Resources.AskRestartApplication);
+      ShowTooltip(true, Resources.BalloonTitleFailedStatusChange, errorText);
+      MySQLSourceTrace.WriteToLog("Critical Error when trying to update the service status - " + ex.Message + " " + ex.InnerException, SourceLevels.Critical);
     }
 
-    private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
+    /// <summary>
+    /// Event delegate method fired when a machine in the <see cref="machinesList"/> has a connection status change.
+    /// </summary>
+    /// <param name="machine">Machine with a connection status change.</param>
+    /// <param name="oldConnectionStatus">Previous machine status.</param>
+    private void machinesList_MachineStatusChanged(Machine machine, Machine.ConnectionStatusType oldConnectionStatus)
     {
-      if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
+      if (machine.IsLocal || machine.ConnectionStatus == Machine.ConnectionStatusType.Unknown)
       {
-        MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
-        mi.Invoke(notifyIcon, null);
+        return;
       }
+
+      machine.UpdateMenuGroup();
     }
 
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
@@ -570,356 +524,45 @@ namespace MySql.Notifier
       RefreshNotifierIcon();
     }
 
-    private void launchInstallerItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Merge the old services schema into the new one
+    /// </summary>
+    private void MigrateOldServices()
     {
-      string path = MySqlInstaller.GetInstallerPath();
-      if (String.IsNullOrEmpty(path)) return;  // this should not happen since our menu itemText is enabled
+      //// Load old services schema
+      mySQLServicesList = new MySQLServicesList();
 
-      Process proc = new Process();
-      ProcessStartInfo startInfo = new ProcessStartInfo();
-      startInfo.FileName = String.Format(@"{0}\MySQLInstaller.exe", path);
-      Process.Start(startInfo);
-    }
-
-    private void checkUpdatesItem_Click(object sender, EventArgs e)
-    {
-      if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
+      //// Attempt migration only if services were found
+      if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
       {
-        InfoDialog.ShowErrorDialog(Resources.MissingMySQLInstaller, string.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine));
-        return;
-      }
+        if (machinesList.Machines.Count == 0 || machinesList.GetMachineByHostName("localhost") == null)
+        {
+          machinesList.ChangeMachine(new Machine(), ChangeType.Add);
+        }
 
-      string path = @MySqlInstaller.GetInstallerPath();
-      Process proc = new Process();
-      ProcessStartInfo startInfo = new ProcessStartInfo();
-      startInfo.FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path);
-      startInfo.Arguments = "checkforupdates";
-      Process.Start(startInfo);
-    }
+        Machine machine = machinesList.GetMachineByHostName("localhost");
 
-    private void aboutMenu_Click(object sender, EventArgs e)
-    {
-      AboutDialog dialog = new AboutDialog();
-      dialog.ShowDialog();
-    }
+        //// Copy services from old schema to the Local machine.
+        foreach (MySQLService service in mySQLServicesList.Services)
+        {
+          machine.ChangeService(service, ChangeType.AutoAdd);
+        }
 
-    private void optionsItem_Click(object sender, EventArgs e)
-    {
-      var usecolorfulIcons = Properties.Settings.Default.UseColorfulStatusIcons;
-      OptionsDialog dialog = new OptionsDialog();
-      dialog.ShowDialog();
-
-      //// If there was a change in the setting for the icons then refresh Icon
-      if (usecolorfulIcons != Properties.Settings.Default.UseColorfulStatusIcons)
-      {
-        RefreshNotifierIcon();
-      }
-    }
-
-    private void InstallAvailablelUpdates_Click(object sender, EventArgs e)
-    {
-      launchInstallerItem_Click(null, EventArgs.Empty);
-      Settings.Default.UpdateCheck = 0;
-      Settings.Default.Save();
-      RefreshNotifierIcon();
-    }
-
-    private void IgnoreAvailableUpdateItem_Click(object sender, EventArgs e)
-    {
-      DialogResult result = MessageBox.Show("This action will completely ignore the available software updates. Would you like to continue?",
-        "Confirmation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-      if (result == DialogResult.Yes)
-      {
-        Settings.Default.UpdateCheck = 0;
+        //// Clear the old list of services to erase the duplicates on the newer schema
+        mySQLServicesList.Services.Clear();
         Settings.Default.Save();
-        RefreshNotifierIcon();
       }
     }
-
-    private void LaunchWorkbenchUtilities_Click(object sender, EventArgs e)
-    {
-      MySqlWorkbench.LaunchUtilitiesShell();
-    }
-
-    private void UpdateListToRemoveDeletedServices()
-    {
-      foreach (Machine machine in machinesList.Machines)
-      {
-        if (machine.Services.Count == 0) continue;
-
-        List<MySQLService> removingServices = machine.Services.FindAll(s => s.Problem == ServiceProblem.ServiceDoesNotExist);
-
-        foreach (MySQLService service in removingServices)
-        {
-          machine.Services.Remove(service);
-        }
-      }
-      Settings.Default.Save();
-    }
-
     /// <summary>
-    /// Invokes the Exit event
+    /// Event delegate method fired when an error is thrown while testing a MySQL Instance's status witin the <see cref="mySQLInstancesList"/>.
     /// </summary>
-    /// <param name="e">Event arguments</param>
-    protected virtual void OnExit(EventArgs e)
+    /// <param name="sender">Sender object.</param>
+    /// <param name="args">Event arguments.</param>
+    private void MySQLInstanceConnectionStatusTestErrorThrown(object sender, InstanceConnectionStatusTestErrorThrownArgs args)
     {
-      notifyIcon.Visible = false;
-
-      foreach (ManagementEventWatcher watcher in watchers)
-        watcher.Stop();
-
-      if (this.Exit != null)
-        Exit(this, e);
+      ShowTooltip(true, Resources.ErrorTitle, string.Format(Resources.BalloonTextFailedStatusCheck, args.Instance.HostIdentifier, args.ErrorException.Message));
+      MySQLSourceTrace.WriteToLog("Critical Error when trying to update the instance status - " + args.ErrorException.Message + " " + args.ErrorException.InnerException, SourceLevels.Critical);
     }
-
-    /// <summary>
-    /// When the exit menu itemText is clicked, make a call to terminate the ApplicationContext.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void exitItem_Click(object sender, EventArgs e)
-    {
-      OnExit(EventArgs.Empty);
-    }
-
-    /// <summary>
-    /// WMI watchers for Service changes.
-    /// </summary>
-    private void WatchForServiceChanges()
-    {
-      try
-      {
-        List<ManagementScope> ms = machinesList.GetManagementScopes();
-        foreach (ManagementScope managementScope in ms)
-        {
-          managementScope.Connect();
-          WqlEventQuery query = new WqlEventQuery("__InstanceModificationEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
-          ManagementEventWatcher watcher = new ManagementEventWatcher(managementScope, query);
-          watcher.EventArrived += new EventArrivedEventHandler(ServiceChangedHandler);
-          watcher.Start();
-          watchers.Add(watcher);
-        }
-      }
-      catch (ManagementException ex)
-      {
-        MySQLSourceTrace.WriteToLog("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, SourceLevels.Critical);
-      }
-      catch (Exception)
-      {
-        //TODO ▲▲▲ Check why is it breaking up with remote connections now.
-      }
-    }
-
-    /// <summary>
-    /// WMI watchers for Service Deletions.
-    /// </summary>
-    private void WatchForServiceDeletion()
-    {
-      try
-      {
-        List<ManagementScope> ms = machinesList.GetManagementScopes();
-        foreach (ManagementScope managementScope in ms)
-        {
-          managementScope.Connect();
-          WqlEventQuery query = new WqlEventQuery("__InstanceDeletionEvent", new TimeSpan(0, 0, 1), "TargetInstance isa \"Win32_Service\"");
-          ManagementEventWatcher watcher = new ManagementEventWatcher(managementScope, query);
-          watcher.EventArrived += new EventArrivedEventHandler(ServiceDeletedHandler);
-          watcher.Start();
-          watchers.Add(watcher);
-        }
-      }
-      catch (ManagementException ex)
-      {
-        MySQLSourceTrace.WriteToLog("Critical Error when adding listener for events. - " + ex.Message + " " + ex.InnerException, SourceLevels.Critical);
-      }
-      catch (Exception)
-      {
-        //TODO ▲▲▲ Check why is it breaking up with remote connections now.
-      }
-    }
-
-    public void ServiceChangedHandler(object sender, EventArrivedEventArgs args)
-    {
-      var e = args.NewEvent;
-      ManagementBaseObject o = ((ManagementBaseObject)e["TargetInstance"]);
-
-      if (o == null) return;
-
-      string server = o.ClassPath.Server;
-      string state = o["State"].ToString().Trim();
-      string serviceName = o["Name"].ToString().Trim();
-      string path = o["PathName"].ToString();
-      string mode = o["StartMode"].ToString();
-      if (state.Contains("Pending")) return;
-
-      Machine machine = (string.Compare(server, Environment.MachineName, true) == 0) ? machinesList.GetMachineByHostName("localhost") : machinesList.GetMachineByHostName(server);
-
-      Control c = notifyIcon.ContextMenuStrip;
-      if (c.InvokeRequired)
-      {
-        serviceWindowsEvent se = new serviceWindowsEvent(GetWindowsEvent);
-        se.Invoke(machine, serviceName, path, state);
-      }
-      else
-        GetWindowsEvent(machine, serviceName, path, state);
-    }
-
-    private void ServiceDeletedHandler(object sender, EventArrivedEventArgs args)
-    {
-      var e = args.NewEvent;
-      ManagementBaseObject o = ((ManagementBaseObject)e["TargetInstance"]);
-      if (o == null) return;
-
-      string server = o.ClassPath.Server;
-      string serviceName = o["Name"].ToString().Trim();
-      Control c = notifyIcon.ContextMenuStrip;
-
-      Machine machine = (string.Compare(server, Environment.MachineName, true) == 0) ? machinesList.GetMachineByHostName("localhost") : machinesList.GetMachineByHostName(server);
-      MySQLService service = machine.GetServiceByName(serviceName);
-
-      if (c.InvokeRequired)
-        c.Invoke(new MethodInvoker(() =>
-        {
-          RemoveServiceAndNotify(machine, service);
-        }));
-      else
-        RemoveServiceAndNotify(machine, service);
-    }
-
-    /// <summary>
-    /// Remove Service and Notify the user
-    /// </summary>
-    private void RemoveServiceAndNotify(Machine machine, MySQLService service)
-    {
-      machine.ChangeService(service, ChangeType.Remove);
-      if (!Settings.Default.NotifyOfStatusChange) return;
-      SetNotifyIconToolTip();
-      ShowTooltip(false, Resources.BalloonTitleTextServiceList, String.Format(Resources.ServiceRemoved, service.ServiceName), 1500);
-      ReBuildMenu();
-      RefreshNotifierIcon();
-    }
-
-    private void machinesList_CompleteServiceStatusChanged(Machine machine, MySQLService service, ServiceStatus args)
-    {
-      //TODO ▼ Implement ▼
-      //throw new NotImplementedException();
-    }
-
-    private void machinesList_CompleteServiceListChanged(Machine machine, MySQLService service, ChangeType changeType)
-    {
-      int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, machine.Name);
-      if (index < 0 && machinesList.ServicesCount > 0)
-      {
-        index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, Resources.Actions);
-        if (index < 0)
-        {
-          index = 0;
-        }
-      }
-
-      bool serviceRemoved = changeType == ChangeType.Remove;
-      RebuildMenuIfNeeded(serviceRemoved);
-      if (serviceRemoved)
-      {
-        machine.GetServiceByName(service.ServiceName).MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);
-      }
-      else
-      {
-        if (service.MenuGroup != null)
-          machine.GetServiceByName(service.ServiceName).MenuGroup.AddToContextMenu(service, notifyIcon.ContextMenuStrip, index + 1);
-        machine.GetServiceByName(service.ServiceName).StatusChangeError += new MySQLService.StatusChangeErrorHandler(service_StatusChangeError);
-        if (changeType == ChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
-        {
-          ShowTooltip(false, Resources.BalloonTitleTextServiceList, string.Format(Resources.BalloonTextServiceList, service.DisplayName), 1500);
-        }
-      }
-
-      // TODO: ▼ Update completely (Include services in the calculation).
-      RefreshNotifierIcon();
-      RebuildMenuIfNeeded(false);
-    }
-
-    private void ServiceListChanged(MySQLService service, ChangeType changeType)
-    {
-      bool serviceRemoved = changeType == ChangeType.Remove;
-    }
-
-    private void machinesList_MachineListChanged(Machine machine, ChangeType changeType)
-    {
-      //TODO ▼ Implement/Verify it works when notifier is running ▼
-      int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, machine.Name);
-
-      if (index < 0 && machinesList.ServicesCount > 0)
-      {
-        index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, Resources.Actions); //Actions is the first popup menu item.
-        if (index < 0)
-        {
-          index = 0;
-        }
-
-        //// Hide the separator just above this new menu item.
-        if (index > 0 && notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
-        {
-          notifyIcon.ContextMenuStrip.Items[index - 1].Visible = false;
-        }
-
-        ToolStripMenuItem instancesMainMenuItem = new ToolStripMenuItem(machine.Name + @" (" + machine.Status + @")");
-        Font boldFont = new Font(instancesMainMenuItem.Font, FontStyle.Bold);
-        instancesMainMenuItem.Font = boldFont;
-        instancesMainMenuItem.BackColor = SystemColors.MenuText;
-        instancesMainMenuItem.ForeColor = SystemColors.Menu;
-        notifyIcon.ContextMenuStrip.Items.Insert(index, instancesMainMenuItem);
-        notifyIcon.ContextMenuStrip.Refresh();
-      }
-
-      // Check if this line is required -->RebuildMenuIfNeeded()
-    }
-
-    private void mySQLServicesList_ServiceStatusChanged(object sender, Machine machine, ServiceStatus args)
-    {
-      if (!Settings.Default.NotifyOfStatusChange)
-      {
-        return;
-      }
-
-      MySQLService service = machine.GetServiceByDisplayName(args.ServiceDisplayName);
-
-      if (!service.NotifyOnStatusChange)
-      {
-        return;
-      }
-
-      if (service.UpdateTrayIconOnStatusChange)
-      {
-        RefreshNotifierIcon();
-      }
-
-      ShowTooltip(false, Resources.BalloonTitleTextServiceStatus, string.Format(Resources.BalloonTextServiceStatus, args.ServiceDisplayName, args.PreviousStatus.ToString(), args.CurrentStatus.ToString()), 1500);
-    }
-
-    //////////////////// ////////////////////////////////////// // TODO : ▼ Possible not implemented correctly, Verify ▼
-    //TODO ▼ Verify, Perhaps you need one upper level notification type, to associate this event to the machine and raise the machine event also... ▼
-    private void service_StatusChangeError(object sender, Exception ex)
-    {
-      MySQLService service = (MySQLService)sender;
-      ShowTooltip(true, Resources.BalloonTitleFailedStatusChange, string.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, Environment.NewLine + ex.Message + Environment.NewLine + Resources.AskRestartApplication), 1500);
-      MySQLSourceTrace.WriteToLog("Critical Error when trying to update the service status - " + ex.Message + " " + ex.InnerException, SourceLevels.Critical);
-    }
-
-    private void service_StatusChanged(object sender, ServiceStatus args)
-    {
-      MySQLService service = (MySQLService)sender;
-      service.MenuGroup.Update();
-      notifyIcon.ContextMenuStrip.Refresh();
-    }
-
-    private void machinesList_CompleteMachineConnectionError(Machine machine, MySQLService service, Exception ex)
-    {
-      //TODO ▲ Verify this handles the machine case, apart from what the service case does. ▲
-      //throw new NotImplementedException();
-    }
-
-    //////////////////// ////////////////////////////////////// // TODO : ▲ Possible not implemented correctly, Verify ▲
 
     /// <summary>
     /// Event delegate method fired when the <see cref="mySQLInstancesList"/> list changes.
@@ -966,9 +609,9 @@ namespace MySql.Notifier
       args.Instance.MenuGroup.Update();
       notifyIcon.ContextMenuStrip.Refresh();
 
-      if (args.OldInstanceStatus != MySqlWorkbenchConnection.ConnectionStatusType.Unknown && args.Instance.MonitorAndNotifyStatus)
+      if (args.OldInstanceStatus != MySqlWorkbenchConnection.ConnectionStatusType.Unknown && args.Instance.MonitorAndNotifyStatus && Settings.Default.NotifyOfStatusChange)
       {
-        ShowTooltip(false, Resources.BalloonTitleTextInstanceStatus, string.Format(Resources.BalloonTextInstanceStatus, args.Instance.HostIdentifier, args.NewInstanceStatusText), 1500);
+        ShowTooltip(false, Resources.BalloonTitleTextInstanceStatus, string.Format(Resources.BalloonTextInstanceStatus, args.Instance.HostIdentifier, args.NewInstanceStatusText));
       }
 
       if (args.Instance.UpdateTrayIconOnStatusChange)
@@ -977,20 +620,243 @@ namespace MySql.Notifier
       }
     }
 
-    /// <summary>
-    /// Event delegate method fired when an error is thrown while testing a MySQL Instance's status witin the <see cref="mySQLInstancesList"/>.
-    /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="args">Event arguments.</param>
-    private void MySQLInstanceConnectionStatusTestErrorThrown(object sender, InstanceConnectionStatusTestErrorThrownArgs args)
+    private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
     {
-      ShowTooltip(true, Resources.ErrorTitle, string.Format(Resources.BalloonTextFailedStatusCheck, args.Instance.HostIdentifier, args.ErrorException.Message), 1500);
+      if (e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
+      {
+        MethodInfo mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
+        mi.Invoke(notifyIcon, null);
+      }
+    }
+
+    private void optionsItem_Click(object sender, EventArgs e)
+    {
+      var usecolorfulIcons = Properties.Settings.Default.UseColorfulStatusIcons;
+      OptionsDialog dialog = new OptionsDialog();
+      dialog.ShowDialog();
+
+      //// If there was a change in the setting for the icons then refresh Icon
+      if (usecolorfulIcons != Properties.Settings.Default.UseColorfulStatusIcons)
+      {
+        RefreshNotifierIcon();
+      }
+    }
+
+    private void ReBuildMenu()
+    {
+      notifyIcon.ContextMenuStrip = new ContextMenuStrip();
+      notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
+      AddStaticMenuItems();
+      UpdateStaticMenuItems();
     }
 
     /// <summary>
-    /// Notifies that the Notifier wants to quit
+    /// Checks if the context menus need to be rebuilt.
     /// </summary>
-    public event EventHandler Exit;
+    /// <param name="itemRemoved">Flag indicating if a service or instance was removed.</param>
+    /// <returns>true if the menu was rebuilt, false otherwise.</returns>
+    private bool RebuildMenuIfNeeded(bool itemRemoved)
+    {
+      bool menuWasRebuilt = false;
+
+      if ((machinesList.ServicesCount + mySQLInstancesList.Count == 0 && itemRemoved) ||
+         (previousServicesAndInstancesQuantity == 0 && !itemRemoved))
+      {
+        ReBuildMenu();
+        previousServicesAndInstancesQuantity = machinesList.ServicesCount + mySQLInstancesList.Count;
+        menuWasRebuilt = true;
+      }
+
+      return menuWasRebuilt;
+    }
+
+    /// <summary>
+    /// Refreshes the Notifier main icon based on current services and instances statuses.
+    /// </summary>
+    private void RefreshNotifierIcon()
+    {
+      notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+    }
+
+    /// <summary>
+    /// Method to handle the change events in the Workbench's server instances file, no changes in UI.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void serversFile_Changed(object sender, FileSystemEventArgs e)
+    {
+      MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
+      MySqlWorkbench.LoadData();
+    }
+
+    private void settingsFile_Changed(object sender, FileSystemEventArgs e)
+    {
+      int settingsUpdateCheck = LoadUpdateCheck();
+
+      // if we have already notified our user then noting more to do
+      if (settingsUpdateCheck == 0 || (settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0) return;
+
+      // if we are supposed to check forupdates but the installer is too old then
+      // notify the user and exit
+      if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
+      {
+        ShowTooltip(false, Resources.SoftwareUpdate, Resources.ScheduledCheckRequiresInstaller11);
+        settingsUpdateCheck = 0;
+      }
+
+      bool hasUpdates = true;
+
+      // let them know we are checking for updates
+      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Checking) != 0)
+      {
+        ShowTooltip(false, Resources.SoftwareUpdate, Resources.CheckingForUpdates);
+        hasUpdates = MySqlInstaller.HasUpdates(10 * 1000);
+        Settings.Default.UpdateCheck = hasUpdates ? (int)SoftwareUpdateStaus.HasUpdates : 0;
+        settingsUpdateCheck = Settings.Default.UpdateCheck;
+        Settings.Default.Save();
+      }
+
+      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0)
+        ShowTooltip(false, Resources.SoftwareUpdate, Resources.HasUpdatesLaunchInstaller);
+
+      // set that we have notified our user
+      Settings.Default.UpdateCheck |= (int)SoftwareUpdateStaus.Notified;
+      Settings.Default.Save();
+
+      RefreshNotifierIcon();
+    }
+
+    /// <summary>
+    /// Adds or removes a context menu item that represents the parent of the MySQL instances menu items.
+    /// </summary>
+    private void SetupMySQLInstancesMainMenuItem()
+    {
+      int index = MySQLInstanceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, Resources.MySQLInstances);
+      if (index < 0 && mySQLInstancesList.Count > 0)
+      {
+        index = MySQLInstanceMenuGroup.FindMenuItemWithinMenuStrip(notifyIcon.ContextMenuStrip, Resources.Actions);
+        if (index < 0)
+        {
+          index = 0;
+        }
+
+        //// Hide the separator just above this new menu item.
+        if (index > 0 && notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
+        {
+          notifyIcon.ContextMenuStrip.Items[index - 1].Visible = false;
+        }
+
+        ToolStripMenuItem instancesMainMenuItem = new ToolStripMenuItem(Resources.MySQLInstances);
+        Font boldFont = new Font(instancesMainMenuItem.Font, FontStyle.Bold);
+        instancesMainMenuItem.Font = boldFont;
+        instancesMainMenuItem.BackColor = SystemColors.MenuText;
+        instancesMainMenuItem.ForeColor = SystemColors.Menu;
+        notifyIcon.ContextMenuStrip.Items.Insert(index, instancesMainMenuItem);
+        notifyIcon.ContextMenuStrip.Refresh();
+      }
+      else if (index >= 0 && mySQLInstancesList.Count == 0)
+      {
+        //// Show the separator just above this new menu item if it's hidden.
+        if (notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
+        {
+          notifyIcon.ContextMenuStrip.Items[index - 1].Visible = true;
+        }
+
+        notifyIcon.ContextMenuStrip.Items.RemoveAt(index);
+        notifyIcon.ContextMenuStrip.Refresh();
+      }
+    }
+
+    /// <summary>
+    /// Generic routine to help with showing tooltips
+    /// </summary>
+    /// <param name="error">Flag indicating if the message displayed is an error message.</param>
+    /// <param name="title">Balloon notification title.</param>
+    /// <param name="text">Balloon notification text.</param>
+    /// <param name="delay">Time during which the balloon is displayed to users, defaulted to 1.5 seconds.</param>
+    private void ShowTooltip(bool error, string title, string text, int delay = 1500)
+    {
+      notifyIcon.BalloonTipIcon = error ? ToolTipIcon.Error : ToolTipIcon.Info;
+      notifyIcon.BalloonTipTitle = title;
+      notifyIcon.BalloonTipText = text;
+      notifyIcon.ShowBalloonTip(delay);
+    }
+
+    private void StartWatcherForFile(string filePath, FileSystemEventHandler method)
+    {
+      FileSystemWatcher watcher = new FileSystemWatcher();
+      watcher.Path = Path.GetDirectoryName(filePath);
+      watcher.Filter = Path.GetFileName(filePath);
+      watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Attributes;
+      watcher.Changed += new FileSystemEventHandler(method);
+      watcher.EnableRaisingEvents = true;
+    }
+
+    /// <summary>
+    /// Starts the global timer that fires connection status checks.
+    /// </summary>
+    public void StartGlobalTimer()
+    {
+      if (_globalTimer == null)
+      {
+        _globalTimer = new System.Timers.Timer();
+        _globalTimer.AutoReset = true;
+        _globalTimer.Elapsed += UpdateMachinesAndInstancesConnectionTimeouts;
+        _globalTimer.Interval = 1000;
+      }
+
+      if (machinesList.Machines.Count(machine => !machine.IsLocal) + mySQLInstancesList.Count(instance => instance.MonitorAndNotifyStatus) == 0)
+      {
+        _globalTimer.Stop();
+      }
+      else if (!_globalTimer.Enabled)
+      {
+        _globalTimer.Start();
+      }
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the instance monitoring timer's interval elapses.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void UpdateMachinesAndInstancesConnectionTimeouts(object sender, System.Timers.ElapsedEventArgs e)
+    {
+      machinesList.UpdateMachinesConnectionTimeouts();
+      mySQLInstancesList.UpdateInstancesConnectionTimeouts();
+    }
+
+    /// <summary>
+    /// Creates a FileSystemWatcher for the specified file
+    /// </summary>
+    /// <param name="filePath">File to add the file system watcher</param>
+    /// <param name="method">Action method</param>
+    private void UpdateListToRemoveDeletedServices()
+    {
+      foreach (Machine machine in machinesList.Machines)
+      {
+        if (machine.Services.Count == 0) continue;
+
+        List<MySQLService> removingServices = machine.Services.FindAll(s => !s.ServiceInstanceExists);
+
+        foreach (MySQLService service in removingServices)
+        {
+          machine.Services.Remove(service);
+        }
+      }
+
+      Settings.Default.Save();
+    }
+
+    private void UpdateStaticMenuItems()
+    {
+      bool hasUpdates = (Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0;
+      if (hasUpdatesSeparator != null) hasUpdatesSeparator.Visible = hasUpdates;
+      if (installAvailablelUpdatesMenuItem != null) installAvailablelUpdatesMenuItem.Visible = hasUpdates;
+      if (ignoreAvailableUpdateMenuItem != null) ignoreAvailableUpdateMenuItem.Visible = hasUpdates;
+      if (launchInstallerMenuItem != null) launchInstallerMenuItem.Enabled = MySqlInstaller.IsInstalled;
+      if (launchWorkbenchUtilitiesMenuItem != null) launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySQLUtilitiesInstalled();
+    }
   }
 
   public enum ServiceListChangeType

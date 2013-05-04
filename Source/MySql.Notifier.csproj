@@ -115,7 +115,7 @@
     <Reference Include="Accessibility">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="MySql.Data">
+    <Reference Include="MySql.Data, Version=6.5.4.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>Lib\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="MySQL.Utility, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
@@ -187,7 +187,6 @@
     <Compile Include="MySQLInstancesList.cs" />
     <Compile Include="MySQLSecurity.cs" />
     <Compile Include="NotifierSettings.cs" />
-    <Compile Include="ServiceStatus.cs" />
     <Compile Include="MySQLServicesList.cs" />
     <Compile Include="ServiceMenuGroup.cs" />
     <Compile Include="MySQLService.cs" />

@@ -40,11 +40,6 @@ namespace MySql.Notifier
     private bool _instancesRefreshing;
 
     /// <summary>
-    /// The timer that fires the instance monitoring changes.
-    /// </summary>
-    private System.Timers.Timer _instancesTimer;
-
-    /// <summary>
     /// Dictionary of instance keys and their corresponding instance monitoring timeout values.
     /// </summary>
     private Dictionary<string, double> _instanceMonitoringTimeouts;
@@ -160,7 +155,6 @@ namespace MySql.Notifier
       item.InstanceConnectionStatusTestErrorThrown += SingleInstanceConnectionStatusTestErrorThrown;
       item.CheckInstanceStatus(false);
       Settings.Default.Save();
-      StartInstanceMonitoring();
       OnInstancesListChanged(item, ListChangedType.ItemAdded);
     }
 
@@ -170,7 +164,6 @@ namespace MySql.Notifier
     public void Clear()
     {
       InstancesList.Clear();
-      StartInstanceMonitoring();
       OnInstancesListChanged(null, ListChangedType.Reset);
     }
 
@@ -234,7 +227,6 @@ namespace MySql.Notifier
       item.PropertyChanged += SingleInstancePropertyChanged;
       item.InstanceConnectionStatusTestErrorThrown += SingleInstanceConnectionStatusTestErrorThrown;
       Settings.Default.Save();
-      StartInstanceMonitoring();
       OnInstancesListChanged(item, ListChangedType.ItemAdded);
     }
 
@@ -295,7 +287,6 @@ namespace MySql.Notifier
       MySQLInstance instance = InstancesList[index];
       InstancesList.RemoveAt(index);
       Settings.Default.Save();
-      StartInstanceMonitoring();
       OnInstancesListChanged(instance, ListChangedType.ItemDeleted);
     }
 
@@ -367,30 +358,23 @@ namespace MySql.Notifier
         }
       }
 
-      StartInstanceMonitoring();
       _instancesRefreshing = false;
     }
 
     /// <summary>
-    /// Starts the timer that fires the instance monitoring changes.
+    /// Updates instances connection timeouts.
     /// </summary>
-    public void StartInstanceMonitoring()
+    public void UpdateInstancesConnectionTimeouts()
     {
-      if (_instancesTimer == null)
+      if (_instancesRefreshing)
       {
-        _instancesTimer = new System.Timers.Timer();
-        _instancesTimer.AutoReset = true;
-        _instancesTimer.Elapsed += UpdateInstancesMonitoringStatus;
-        _instancesTimer.Interval = 1000;
+        return;
       }
 
-      if (InstancesList.Count(instance => instance.MonitorAndNotifyStatus) == 0)
+      var monitoredInstances = InstancesList.Where(instance => instance.MonitorAndNotifyStatus);
+      foreach (var instance in monitoredInstances)
       {
-        _instancesTimer.Stop();
-      }
-      else if (!_instancesTimer.Enabled)
-      {
-        _instancesTimer.Start();
+        instance.SecondsToMonitorInstance--;
       }
     }
 
@@ -399,7 +383,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance that caused the list change.</param>
     /// <param name="listChange">Type of change done to the list.</param>
-    private void OnInstancesListChanged(MySQLInstance instance, ListChangedType listChange)
+    protected virtual void OnInstancesListChanged(MySQLInstance instance, ListChangedType listChange)
     {
       if (InstancesListChanged != null)
       {
@@ -412,7 +396,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance with a changed status.</param>
     /// <param name="oldInstanceStatus">Old instance status.</param>
-    private void OnInstanceStatusChanged(MySQLInstance instance, MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
+    protected virtual void OnInstanceStatusChanged(MySQLInstance instance, MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
     {
       if (InstanceStatusChanged != null)
       {
@@ -425,7 +409,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance with a changed status.</param>
     /// <param name="ex">Exception thrown by a connection status test.</param>
-    private void OnInstanceConnectionStatusTestErrorThrown(MySQLInstance instance, Exception ex)
+    protected virtual void OnInstanceConnectionStatusTestErrorThrown(MySQLInstance instance, Exception ex)
     {
       if (InstanceConnectionStatusTestErrorThrown != null)
       {
@@ -444,7 +428,6 @@ namespace MySql.Notifier
       switch (args.PropertyName)
       {
         case "MonitorAndNotifyStatus":
-          StartInstanceMonitoring();
           OnInstancesListChanged(instance, ListChangedType.ItemChanged);
           break;
 
@@ -472,29 +455,6 @@ namespace MySql.Notifier
     private void SingleInstanceConnectionStatusTestErrorThrown(object sender, InstanceConnectionStatusTestErrorThrownArgs e)
     {
       OnInstanceConnectionStatusTestErrorThrown(e.Instance, e.ErrorException);
-    }
-
-    /// <summary>
-    /// Event delegate method fired when the instance monitoring timer's interval elapses.
-    /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="e">Event arguments.</param>
-    private void UpdateInstancesMonitoringStatus(object sender, System.Timers.ElapsedEventArgs e)
-    {
-      if (_instancesRefreshing)
-      {
-        return;
-      }
-
-      foreach (var instance in InstancesList)
-      {
-        if (!instance.MonitorAndNotifyStatus)
-        {
-          continue;
-        }
-
-        instance.SecondsToMonitorInstance--;
-      }
     }
   }
 
