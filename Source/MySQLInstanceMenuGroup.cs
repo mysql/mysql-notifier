@@ -256,30 +256,38 @@ namespace MySql.Notifier
     /// </summary>
     public void Update()
     {
-      InstanceMenuItem.Text = BoundInstance.HostIdentifier + " - " + BoundInstance.ConnectionStatusText;
-      switch (BoundInstance.ConnectionStatus)
+      ToolStrip menu = InstanceMenuItem.GetCurrentParent();
+      if (menu != null && menu.InvokeRequired)
       {
-        case MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections:
-          InstanceMenuItem.Image = Resources.NotifierIconRunning;
-          break;
-
-        case MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections:
-          InstanceMenuItem.Image = Resources.NotifierIconStopped;
-          break;
-
-        case MySqlWorkbenchConnection.ConnectionStatusType.Unknown:
-          InstanceMenuItem.Image = Resources.NotifierIcon;
-          break;
+        menu.Invoke(new MethodInvoker(() => { Update(); }));
       }
-
-      if (SQLEditorMenuItem != null)
+      else
       {
-        SQLEditorMenuItem.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && BoundInstance.WorkbenchConnection != null;
-      }
+        InstanceMenuItem.Text = BoundInstance.HostIdentifier + " - " + BoundInstance.ConnectionStatusText;
+        switch (BoundInstance.ConnectionStatus)
+        {
+          case MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections:
+            InstanceMenuItem.Image = Resources.NotifierIconRunning;
+            break;
 
-      if (ConfigureMenuItem != null)
-      {
-        ConfigureMenuItem.Enabled = BoundInstance.WorkbenchServer != null;
+          case MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections:
+            InstanceMenuItem.Image = Resources.NotifierIconStopped;
+            break;
+
+          case MySqlWorkbenchConnection.ConnectionStatusType.Unknown:
+            InstanceMenuItem.Image = Resources.NotifierIcon;
+            break;
+        }
+
+        if (SQLEditorMenuItem != null)
+        {
+          SQLEditorMenuItem.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && BoundInstance.WorkbenchConnection != null;
+        }
+
+        if (ConfigureMenuItem != null)
+        {
+          ConfigureMenuItem.Enabled = BoundInstance.WorkbenchServer != null;
+        }
       }
     }
 

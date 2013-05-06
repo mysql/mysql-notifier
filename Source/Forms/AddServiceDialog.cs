@@ -120,7 +120,6 @@ namespace MySql.Notifier
 
     private void MachineSelectionComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
-      bool refreshList = true;
       DialogResult dr = DialogResult.None;
       switch (MachineSelectionComboBox.SelectedIndex)
       {
@@ -128,7 +127,6 @@ namespace MySql.Notifier
           MachineLocationType = Machine.LocationType.Local;
           if (newMachine != null && newMachine.IsLocal)
           {
-            refreshList = false;
             break;
           }
 
@@ -143,11 +141,11 @@ namespace MySql.Notifier
             if (dr == DialogResult.Cancel)
             {
               MachineSelectionComboBox.SelectedIndex = 0;
-              break;
             }
             else
             {
               newMachine = windowsConnectionDialog.newMachine;
+              newMachine.LoadServicesParameters();
               int index = -1;
               for (int machineIndex = 3; machineIndex < MachineSelectionComboBox.Items.Count && index < 0; machineIndex++)
               {
@@ -161,7 +159,7 @@ namespace MySql.Notifier
               if (index == -1)
               {
                 MachineSelectionComboBox.Items.Add(newMachine);
-                MachineSelectionComboBox.SelectedIndex = (MachineSelectionComboBox.Items.Count - 1);
+                MachineSelectionComboBox.SelectedIndex = MachineSelectionComboBox.Items.Count - 1;
               }
               else
               {
@@ -169,28 +167,28 @@ namespace MySql.Notifier
               }
             }
           }
-          break;
+          return;
 
         case 2:
           if (newMachine.IsLocal)
           {
-            refreshList = false;
             MachineSelectionComboBox.SelectedIndex = 0;
-            break;
+            return;
           }
 
+          int mIndex = -1;
           for (int machineIndex = 3; machineIndex < MachineSelectionComboBox.Items.Count; machineIndex++)
           {
             string machineName = MachineSelectionComboBox.Items[machineIndex].ToString();
             if (machineName == newMachine.Name)
             {
-              refreshList = false;
+              mIndex = machineIndex;
               break;
             }
-
-            MachineSelectionComboBox.SelectedIndex = machineIndex >= MachineSelectionComboBox.Items.Count ? 0 : machineIndex;
           }
-          break;
+
+          MachineSelectionComboBox.SelectedIndex = mIndex < 0 ? 0 : mIndex;
+          return;
 
         default:
           Cursor.Current = Cursors.WaitCursor;
@@ -208,7 +206,8 @@ namespace MySql.Notifier
 
       SetMachineAutoTestConnectionControlsAvailability();
       ServicesListView.Enabled = newMachine.IsOnline;
-      if (refreshList)
+      Machine servicesMachine = ServicesListView.Tag as Machine;
+      if (servicesMachine != newMachine)
       {
         RefreshList();
       }
@@ -216,6 +215,9 @@ namespace MySql.Notifier
 
     private void RefreshList()
     {
+      //// Store the machine used to browse services so we can compare it with the current value in newMachine to know if we need to call RefreshList.
+      ServicesListView.Tag = newMachine;
+
       ServicesListView.Items.Clear();
       if (newMachine == null || !newMachine.IsOnline)
       {
@@ -233,7 +235,7 @@ namespace MySql.Notifier
       List<ManagementObject> services = new List<ManagementObject>();
       if (newMachine != null && MachineLocationType == Machine.LocationType.Remote)
       {
-        var machineServicesCollection = newMachine.GetWMIServices(true);
+        ManagementObjectCollection machineServicesCollection = newMachine.GetWMIServices(true);
         if (machineServicesCollection != null)
         {
           foreach (ManagementObject mo in machineServicesCollection)

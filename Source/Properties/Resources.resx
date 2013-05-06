@@ -230,7 +230,7 @@
     <value>Service {0} changed status from {1} to {2}...</value>
     <comment>Text of the Balloon Notification</comment>
   </data>
-  <data name="BalloonTitleTextServiceStatus" xml:space="preserve">
+  <data name="BalloonTitleServiceStatus" xml:space="preserve">
     <value>Service Status Changed</value>
     <comment>Title of the Balloon Notification</comment>
   </data>
@@ -238,7 +238,7 @@
     <value>New service added to monitored list: {0}</value>
     <comment>Text of the Balloon Notification</comment>
   </data>
-  <data name="BalloonTitleTextServiceList" xml:space="preserve">
+  <data name="BalloonTitleServiceList" xml:space="preserve">
     <value>Services List Changed</value>
     <comment>Title of the Balloon Notification</comment>
   </data>
@@ -365,7 +365,7 @@
   <data name="BalloonTextInstanceStatus" xml:space="preserve">
     <value>MySQL Instance {0} changed status to {1}...</value>
   </data>
-  <data name="BalloonTitleTextInstanceStatus" xml:space="preserve">
+  <data name="BalloonTitleInstanceStatus" xml:space="preserve">
     <value>MySQL Instance Status Changed</value>
   </data>
   <data name="ConnectionAlreadyInInstancesDetail" xml:space="preserve">
@@ -421,7 +421,13 @@
   <data name="BalloonTextMachineRemoved" xml:space="preserve">
     <value>The machine {0} has been removed from the monitoring list.</value>
   </data>
-  <data name="BalloonTitleTextMachinesList" xml:space="preserve">
+  <data name="BalloonTitleMachinesList" xml:space="preserve">
     <value>Machines List Changed</value>
+  </data>
+  <data name="BalloonTextMachineStatus" xml:space="preserve">
+    <value>Machine {0} changed connection status to {1}...</value>
+  </data>
+  <data name="BalloonTitleMachineStatus" xml:space="preserve">
+    <value>Machine Status Changed</value>
   </data>
 </root>

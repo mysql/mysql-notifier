@@ -137,6 +137,7 @@ namespace MySql.Notifier
       ConnectionProblem = ConnectionProblemType.None;
       MenuGroup = null;
       User = string.Empty;
+      OldConnectionStatus = ConnectionStatusType.Unknown;
       Password = string.Empty;
       SecondsToAutoTestConnection = AutoTestConnectionIntervalInSeconds;
       Services = new List<MySQLService>();
@@ -403,6 +404,11 @@ namespace MySql.Notifier
         _connectionStatus = value;
         if (oldConnectionStatus != _connectionStatus)
         {
+          if (oldConnectionStatus != ConnectionStatusType.Connecting && oldConnectionStatus != ConnectionStatusType.Unknown)
+          {
+            OldConnectionStatus = oldConnectionStatus;
+          }
+
           OnMachineStatusChanged(oldConnectionStatus);
         }
       }
@@ -471,6 +477,12 @@ namespace MySql.Notifier
         }
       }
     }
+
+    /// <summary>
+    /// Gets the previous connection status of the machine.
+    /// </summary>
+    [XmlIgnore]
+    public ConnectionStatusType OldConnectionStatus { get; private set; }
 
     /// <summary>
     /// Gets or sets the password as an encrypted string for security purposes.
@@ -682,11 +694,22 @@ namespace MySql.Notifier
 
       try
       {
+        string serviceDisplayName;
         WMIManagementScope.Connect();
         WqlObjectQuery query = string.IsNullOrEmpty(serviceName) ? new WqlObjectQuery("Select * From Win32_Service")
         : new WqlObjectQuery(string.Format("Select * From Win32_Service Where Name = \"{0}\"", serviceName));
         ManagementObjectSearcher searcher = new ManagementObjectSearcher(WMIManagementScope, query);
         wmiServicesCollection = searcher.Get();
+        if (wmiServicesCollection != null)
+        {
+          //// Verify if we can access the services within the services collection.
+          foreach (var mo in wmiServicesCollection)
+          {
+            serviceDisplayName = mo["DisplayName"].ToString();
+            break;
+          }
+        }
+
         ConnectionProblem = ConnectionProblemType.None;
       }
       catch (UnauthorizedAccessException uaEx)
@@ -708,6 +731,8 @@ namespace MySql.Notifier
         {
           InfoDialog.ShowErrorDialog(ConnectionProblemShortDescription, ConnectionProblemLongDescription, null, (ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.HostUnavailableExtendedMessage : null));
         }
+
+        return null;
       }
 
       return wmiServicesCollection;
@@ -720,16 +745,18 @@ namespace MySql.Notifier
     {
       service.Host = this;
       service.SetServiceParameters();
+      service.StatusChanged -= OnServiceStatusChanged;
+      service.StatusChangeError -= OnServiceStatusChangeError;
 
-      if (service.ServiceInstanceExists)
+      if (IsOnline && !service.ServiceInstanceExists)
+      {
+        RemoveService(service);
+      }
+      else
       {
         service.StatusChanged += OnServiceStatusChanged;
         service.StatusChangeError += OnServiceStatusChangeError;
         OnServiceListChanged(service, ChangeType.Add);
-      }
-      else if (Services != null)
-      {
-        Services.Remove(service);
       }
     }
 
@@ -904,15 +931,23 @@ namespace MySql.Notifier
     /// </summary>
     public void UpdateMenuGroup()
     {
-      MenuGroup.Text = string.Format("{0} ({1})", Name, ConnectionStatus.ToString());
-      if (ConnectionStatus == ConnectionStatusType.Unavailable)
+      ToolStrip menu = MenuGroup.GetCurrentParent();
+      if (menu != null && menu.InvokeRequired)
       {
-        ToolStripMenuItem reconnectMenu = new ToolStripMenuItem("Reconnect", Resources.refresh, ReconnectMenu_Click);
-        MenuGroup.DropDownItems.Add(reconnectMenu);
+        menu.Invoke(new MethodInvoker(() => { UpdateMenuGroup(); }));
       }
       else
       {
-        MenuGroup.DropDownItems.Clear();
+        MenuGroup.Text = string.Format("{0} ({1})", Name, ConnectionStatus.ToString());
+        if (ConnectionStatus == ConnectionStatusType.Unavailable && MenuGroup.DropDownItems.Count == 0)
+        {
+          ToolStripMenuItem reconnectMenu = new ToolStripMenuItem("Reconnect", Resources.refresh, ReconnectMenu_Click);
+          MenuGroup.DropDownItems.Add(reconnectMenu);
+        }
+        else if (ConnectionStatus == ConnectionStatusType.Online && MenuGroup.DropDownItems.Count > 0)
+        {
+          MenuGroup.DropDownItems.Clear();
+        }
       }
     }
 
@@ -965,6 +1000,7 @@ namespace MySql.Notifier
         MachineStatusChanged(this, oldConnectionStatus);
       }
 
+      LoadServicesParameters();
       SetupWMIEvents();
     }
 
@@ -1027,8 +1063,20 @@ namespace MySql.Notifier
     /// <param name="e"></param>
     private void ReconnectMenu_Click(object sender, EventArgs e)
     {
-      TestConnection(false, true);
-      UpdateMenuGroup();
+      if (MenuGroup == null)
+      {
+        return;
+      }
+
+      ToolStrip menu = MenuGroup.GetCurrentParent();
+      if (menu != null && menu.InvokeRequired)
+      {
+        menu.Invoke(new MethodInvoker(() => { ReconnectMenu_Click(sender, e); }));
+      }
+      else
+      {
+        TestConnection(false, true);
+      }
     }
 
     /// <summary>

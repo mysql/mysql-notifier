@@ -71,7 +71,7 @@ namespace MySql.Notifier
       RefreshNotifierIcon();
       notifyIcon.MouseClick += notifyIcon_MouseClick;
       notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-      notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleTextServiceStatus;
+      notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleServiceStatus;
 
       //// Setup instances list
       mySQLInstancesList = new MySQLInstancesList();
@@ -434,7 +434,7 @@ namespace MySql.Notifier
 
         case ChangeType.Remove:
           machine.RemoveMenuGroup(notifyIcon.ContextMenuStrip);
-          ShowTooltip(false, Resources.BalloonTitleTextMachinesList, string.Format(Resources.BalloonTextMachineRemoved, machine.Name));
+          ShowTooltip(false, Resources.BalloonTitleMachinesList, string.Format(Resources.BalloonTextMachineRemoved, machine.Name));
           break;
       }
     }
@@ -455,14 +455,14 @@ namespace MySql.Notifier
           service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
           if (changeType == ChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
           {
-            ShowTooltip(false, Resources.BalloonTitleTextServiceList, string.Format(Resources.BalloonTextServiceList, service.DisplayName));
+            ShowTooltip(false, Resources.BalloonTitleServiceList, string.Format(Resources.BalloonTextServiceList, service.DisplayName));
           }
 
           break;
 
         case ChangeType.Remove:
           service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);
-          ShowTooltip(false, Resources.BalloonTitleTextServiceList, String.Format(Resources.BalloonTextServiceRemoved, service.ServiceName));
+          ShowTooltip(false, Resources.BalloonTitleServiceList, String.Format(Resources.BalloonTextServiceRemoved, service.ServiceName));
           break;
       }
 
@@ -478,7 +478,7 @@ namespace MySql.Notifier
     {
       if (service.NotifyOnStatusChange && Settings.Default.NotifyOfStatusChange)
       {
-        ShowTooltip(false, Resources.BalloonTitleTextServiceStatus, string.Format(Resources.BalloonTextServiceStatus, service.DisplayName, service.PreviousStatus.ToString(), service.Status.ToString()));
+        ShowTooltip(false, Resources.BalloonTitleServiceStatus, string.Format(Resources.BalloonTextServiceStatus, service.DisplayName, service.PreviousStatus.ToString(), service.Status.ToString()));
       }
 
       if (service.UpdateTrayIconOnStatusChange)
@@ -513,6 +513,10 @@ namespace MySql.Notifier
       }
 
       machine.UpdateMenuGroup();
+      if (machine.OldConnectionStatus != machine.ConnectionStatus && (machine.ConnectionStatus == Machine.ConnectionStatusType.Online || machine.ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
+      {
+        ShowTooltip(false, Resources.BalloonTitleMachineStatus, string.Format(Resources.BalloonTextMachineStatus, machine.Name, machine.ConnectionStatus.ToString()));
+      }
     }
 
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
@@ -611,7 +615,7 @@ namespace MySql.Notifier
 
       if (args.OldInstanceStatus != MySqlWorkbenchConnection.ConnectionStatusType.Unknown && args.Instance.MonitorAndNotifyStatus && Settings.Default.NotifyOfStatusChange)
       {
-        ShowTooltip(false, Resources.BalloonTitleTextInstanceStatus, string.Format(Resources.BalloonTextInstanceStatus, args.Instance.HostIdentifier, args.NewInstanceStatusText));
+        ShowTooltip(false, Resources.BalloonTitleInstanceStatus, string.Format(Resources.BalloonTextInstanceStatus, args.Instance.HostIdentifier, args.NewInstanceStatusText));
       }
 
       if (args.Instance.UpdateTrayIconOnStatusChange)

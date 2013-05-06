@@ -173,6 +173,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Machine {0} changed connection status to {1}....
+        /// </summary>
+        internal static string BalloonTextMachineStatus {
+            get {
+                return ResourceManager.GetString("BalloonTextMachineStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New service added to monitored list: {0}.
         /// </summary>
         internal static string BalloonTextServiceList {
@@ -211,36 +220,45 @@ namespace MySql.Notifier.Properties {
         /// <summary>
         ///   Looks up a localized string similar to MySQL Instance Status Changed.
         /// </summary>
-        internal static string BalloonTitleTextInstanceStatus {
+        internal static string BalloonTitleInstanceStatus {
             get {
-                return ResourceManager.GetString("BalloonTitleTextInstanceStatus", resourceCulture);
+                return ResourceManager.GetString("BalloonTitleInstanceStatus", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Machines List Changed.
         /// </summary>
-        internal static string BalloonTitleTextMachinesList {
+        internal static string BalloonTitleMachinesList {
             get {
-                return ResourceManager.GetString("BalloonTitleTextMachinesList", resourceCulture);
+                return ResourceManager.GetString("BalloonTitleMachinesList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Machine Status Changed.
+        /// </summary>
+        internal static string BalloonTitleMachineStatus {
+            get {
+                return ResourceManager.GetString("BalloonTitleMachineStatus", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Services List Changed.
         /// </summary>
-        internal static string BalloonTitleTextServiceList {
+        internal static string BalloonTitleServiceList {
             get {
-                return ResourceManager.GetString("BalloonTitleTextServiceList", resourceCulture);
+                return ResourceManager.GetString("BalloonTitleServiceList", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Service Status Changed.
         /// </summary>
-        internal static string BalloonTitleTextServiceStatus {
+        internal static string BalloonTitleServiceStatus {
             get {
-                return ResourceManager.GetString("BalloonTitleTextServiceStatus", resourceCulture);
+                return ResourceManager.GetString("BalloonTitleServiceStatus", resourceCulture);
             }
         }
         

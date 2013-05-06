@@ -351,9 +351,15 @@ namespace MySql.Notifier
       {
         if (dialog.ShowDialog() == DialogResult.OK)
         {
-          newMachine = machinesList.GetMachineByHostName(dialog.newMachine.Name);
-          if (dialog.ServicesToAdd != null && dialog.ServicesToAdd.Count > 0)
+          if (dialog.newMachine != null && dialog.ServicesToAdd != null && dialog.ServicesToAdd.Count > 0)
           {
+            newMachine = machinesList.GetMachineByHostName(dialog.newMachine.Name);
+            if (newMachine == null)
+            {
+              machinesList.ChangeMachine(dialog.newMachine, ChangeType.Add);
+              newMachine = dialog.newMachine;
+            }
+
             foreach (MySQLService service in dialog.ServicesToAdd)
             {
               if (!service.Host.IsLocal && newMachine.ContainsService(service))
