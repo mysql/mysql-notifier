@@ -153,7 +153,7 @@ namespace MySql.Notifier
     public Machine(string name, string user, string password)
       : this()
     {
-      Name = MySqlWorkbenchConnection.IsHostLocal(name) ? name : name.ToUpper();
+      _name = MySqlWorkbenchConnection.IsHostLocal(name) ? name : name.ToUpper();
       User = user.ToUpper();
       Password = MySQLSecurity.EncryptPassword(password);
     }
