@@ -684,9 +684,6 @@ namespace MySql.Notifier
       }
       else
       {
-        // else no error
-        // TODO Check if this ▼ call replaces exactly the managed call --> winService.Refresh() of type ServiceController.Refresh();
-        //_managementObject = ReturnServiceInstance();
         WorkCompleted = true;
       }
     }

@@ -31,15 +31,11 @@ namespace MySql.Notifier
 
   public partial class AddServiceDialog : MachineAwareForm
   {
-    private string lastFilter;
-    private string lastTextFilter;
     private int sortColumn;
     private bool machineValuesChanged;
 
     public AddServiceDialog(MachinesList machineslist, Machine machine)
     {
-      lastFilter = string.Empty;
-      lastTextFilter = string.Empty;
       sortColumn = -1;
       machineValuesChanged = false;
 
@@ -69,7 +65,7 @@ namespace MySql.Notifier
         Settings.Default.Save();
         machineValuesChanged = false;
       }
-      
+
       Cursor.Current = Cursors.Default;
     }
 
@@ -224,14 +220,9 @@ namespace MySql.Notifier
         return;
       }
 
-      string currentFilter = FilterCheckBox.Checked ? Settings.Default.AutoAddPattern.Trim() : null;
-
-      //TODO: Restore filtert persistance ▼
-      //if (currentFilter == lastFilter && txtFilter.Text == lastTextFilter) return;
+      string currentFilter = FilterCheckBox.Checked ? Settings.Default.AutoAddPattern.Trim() : FilterTextBox.Text.ToLower();
 
       ServicesListView.BeginUpdate();
-      lastFilter = currentFilter;
-      lastTextFilter = FilterTextBox.Text.ToLower();
       List<ManagementObject> services = new List<ManagementObject>();
       if (newMachine != null && MachineLocationType == Machine.LocationType.Remote)
       {
@@ -250,9 +241,9 @@ namespace MySql.Notifier
       }
 
       services = services.OrderBy(x => x.Properties["DisplayName"].Value).ToList();
-      if (!string.IsNullOrEmpty(lastTextFilter))
+      if (!string.IsNullOrEmpty(currentFilter))
       {
-        services = services.Where(f => f.Properties["DisplayName"].Value.ToString().ToLower().Contains(lastTextFilter)).ToList();
+        services = services.Where(f => f.Properties["DisplayName"].Value.ToString().ToLower().Contains(currentFilter)).ToList();
       }
 
       foreach (ManagementObject item in services)

@@ -173,7 +173,6 @@ namespace MySql.Notifier
 
       foreach (Machine machine in Machines)
       {
-        //TODO: Check machine connectivity or deny all services here for X time.
         machine.MachineStatusChanged += OnMachineStatusChanged;
         machine.ServiceListChanged += OnMachineServiceListChanged;
         machine.ServiceStatusChanged += OnMachineServiceStatusChanged;
