@@ -272,6 +272,24 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Localhost or 127.0.0.1 are invalid host names for a remote computer..
+        /// </summary>
+        internal static string CannotAddLocalhostMessage {
+            get {
+                return ResourceManager.GetString("CannotAddLocalhostMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid host.
+        /// </summary>
+        internal static string CannotAddLocalhostTitle {
+            get {
+                return ResourceManager.GetString("CannotAddLocalhostTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap CheckForUpdatesIcon {

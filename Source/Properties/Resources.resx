@@ -430,4 +430,10 @@
   <data name="BalloonTitleMachineStatus" xml:space="preserve">
     <value>Machine Status Changed</value>
   </data>
+  <data name="CannotAddLocalhostMessage" xml:space="preserve">
+    <value>Localhost or 127.0.0.1 are invalid host names for a remote computer.</value>
+  </data>
+  <data name="CannotAddLocalhostTitle" xml:space="preserve">
+    <value>Invalid host</value>
+  </data>
 </root>
