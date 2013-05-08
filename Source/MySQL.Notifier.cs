@@ -24,7 +24,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Management;
 using System.Reflection;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
@@ -265,7 +264,7 @@ namespace MySql.Notifier
 
     private void checkUpdatesItem_Click(object sender, EventArgs e)
     {
-      if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || Convert.ToDouble(MySqlInstaller.GetInstallerVersion().Substring(0,3)) < 1.1)
+      if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || Convert.ToDouble(MySqlInstaller.GetInstallerVersion().Substring(0, 3)) < 1.1)
       {
         InfoDialog.ShowErrorDialog(Resources.MissingMySQLInstaller, string.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine));
         return;
@@ -539,7 +538,7 @@ namespace MySql.Notifier
       //// Attempt migration only if services were found
       if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
       {
-        if (machinesList.Machines.Count == 0 || machinesList.GetMachineByHostName("localhost") == null)
+        if (machinesList.Machines == null || machinesList.Machines.Count == 0 || machinesList.GetMachineByHostName("localhost") == null)
         {
           machinesList.ChangeMachine(new Machine(), ChangeType.Add);
         }
@@ -557,6 +556,7 @@ namespace MySql.Notifier
         Settings.Default.Save();
       }
     }
+
     /// <summary>
     /// Event delegate method fired when an error is thrown while testing a MySQL Instance's status witin the <see cref="mySQLInstancesList"/>.
     /// </summary>
