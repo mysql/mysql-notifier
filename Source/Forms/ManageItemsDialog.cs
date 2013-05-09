@@ -46,7 +46,7 @@ namespace MySql.Notifier
       InitializeComponent();
       InstancesList = instancesList;
       machinesList = machineslist;
-      RefreshServicesAndInstancesListViews(MonitoredItemType.Service);
+      RefreshServicesAndInstancesListViews();
     }
 
     /// <summary>
@@ -94,13 +94,55 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Event delegate method fired when the <see cref="CloseButton"/> button is clicked.
+    /// Adds an instance to the list of instances.
     /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="e">Event arguments.</param>
-    private void CloseButton_Click(object sender, EventArgs e)
+    /// <param name="instance">Instance to add.</param>
+    /// <param name="setPage">Flag indicating if the Instances tab must be focused.</param>
+    private void AddInstance(MySQLInstance instance, bool setPage)
     {
-      Settings.Default.Save();
+      ListViewItem newItem = new ListViewItem(instance.HostIdentifier);
+      newItem.Tag = instance;
+      newItem.SubItems.Add(instance.WorkbenchConnection.DriverType.ToString());
+      newItem.SubItems.Add(instance.ConnectionStatusText);
+      MonitoredInstancesListView.Items.Add(newItem);
+
+      if (setPage)
+      {
+        ItemsTabControl.SelectedIndex = 1;
+        newItem.Selected = true;
+      }
+    }
+
+    /// <summary>
+    /// Adds a service to the list of services.
+    /// </summary>
+    /// <param name="service">Service to add.</param>
+    /// <param name="machine">Machine containing the service.</param>
+    /// <param name="setPage">Flag indicating if the Services tab must be focused.</param>
+    private void AddService(MySQLService service, Machine machine, bool setPage)
+    {
+      if (service == null)
+      {
+        return;
+      }
+
+      if (service.Host == null)
+      {
+        service.Host = machine;
+        service.SetServiceParameters();
+      }
+
+      ListViewItem newItem = new ListViewItem(service.DisplayName);
+      newItem.Tag = service;
+      newItem.SubItems.Add(machine.Name);
+      newItem.SubItems.Add(service.Status.ToString());
+      MonitoredServicesListView.Items.Add(newItem);
+
+      if (setPage)
+      {
+        ItemsTabControl.SelectedIndex = 0;
+        newItem.Selected = true;
+      }
     }
 
     /// <summary>
@@ -120,14 +162,14 @@ namespace MySql.Notifier
         MySQLService selectedService = _selectedItem as MySQLService;
         Machine machine = machinesList.GetMachineByHostName(selectedService.Host.Name);
         machine.ChangeService(selectedService, ChangeType.Remove);
-        RefreshServicesAndInstancesListViews(MonitoredItemType.Service);
+        MonitoredServicesListView.Items.RemoveAt(MonitoredServicesListView.SelectedIndices[0]);
       }
       else if (_selectedItem is MySQLInstance)
       {
         MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
         if (InstancesList.Remove(selectedInstance))
         {
-          RefreshServicesAndInstancesListViews(MonitoredItemType.MySqlInstance);
+          MonitoredInstancesListView.Items.RemoveAt(MonitoredInstancesListView.SelectedIndices[0]);
         }
       }
     }
@@ -227,6 +269,7 @@ namespace MySql.Notifier
           if (selectedConnection != null)
           {
             bool connectionAlreadyInInstance = false;
+            MySQLInstance newInstance = null;
 
             //// If the selected connection exists for an already monitored instance but it is not its main connection, replace the main connection with this one.
             foreach (var instance in InstancesList)
@@ -235,16 +278,28 @@ namespace MySql.Notifier
               {
                 instance.WorkbenchConnection = selectedConnection;
                 connectionAlreadyInInstance = true;
+                foreach (ListViewItem lvi in MonitoredInstancesListView.Items)
+                {
+                  MySQLInstance existingInstance = lvi.Tag as MySQLInstance;
+                  if (existingInstance == instance)
+                  {
+                    lvi.Text = instance.HostIdentifier;
+                    lvi.SubItems[0].Text = instance.WorkbenchConnection.DriverType.ToString();
+                    lvi.SubItems[1].Text = instance.ConnectionStatusText;
+                    break;
+                  }
+                }
                 break;
               }
             }
 
             if (!connectionAlreadyInInstance)
             {
-              InstancesList.Add(new MySQLInstance(selectedConnection));
+              newInstance = new MySQLInstance(selectedConnection);
+              InstancesList.Add(newInstance);
+              AddInstance(newInstance, true);
+              Settings.Default.Save();
             }
-
-            RefreshServicesAndInstancesListViews(MonitoredItemType.MySqlInstance);
           }
         }
       }
@@ -273,14 +328,11 @@ namespace MySql.Notifier
         selectedInstance.MonitorAndNotifyStatus = NotifyOnStatusChangeCheckBox.Checked;
       }
     }
-
     /// <summary>
     /// Refreshes the contents of the services and instances list view controls.
     /// </summary>
-    private void RefreshServicesAndInstancesListViews(MonitoredItemType itemType)
+    private void RefreshServicesAndInstancesListViews()
     {
-      int pageIndex = itemType == MonitoredItemType.None ? ItemsTabControl.SelectedIndex : (int)itemType;
-
       //// Set cursor to waiting, stop painting of list views to avoid flickering and clear their items.
       Cursor.Current = Cursors.WaitCursor;
       MonitoredServicesListView.BeginUpdate();
@@ -293,32 +345,18 @@ namespace MySql.Notifier
       {
         foreach (MySQLService service in machine.Services)
         {
-          if (service.Host == null)
-          {
-            service.Host = machine;
-            service.SetServiceParameters();
-          }
-
-          ListViewItem newItem = new ListViewItem(service.DisplayName);
-          newItem.Tag = service;
-          newItem.SubItems.Add(machine.Name);
-          newItem.SubItems.Add(service.Status.ToString());
-          MonitoredServicesListView.Items.Add(newItem);
+          AddService(service, machine, false);
         }
       }
-
+        
       //// Add monitored instances.
       foreach (var instance in InstancesList)
       {
-        ListViewItem newItem = new ListViewItem(instance.HostIdentifier);
-        newItem.Tag = instance;
-        newItem.SubItems.Add(instance.WorkbenchConnection.DriverType.ToString());
-        newItem.SubItems.Add(instance.ConnectionStatusText);
-        MonitoredInstancesListView.Items.Add(newItem);
+        AddInstance(instance, false);
       }
 
       //// Select automatically the first itemText or disable controls if no items exist.
-      ListView pageListView = pageIndex == 0 ? MonitoredServicesListView : MonitoredInstancesListView;
+      ListView pageListView = ItemsTabControl.SelectedIndex == 0 ? MonitoredServicesListView : MonitoredInstancesListView;
       if (pageListView.Items.Count > 0)
       {
         pageListView.Items[0].Selected = true;
@@ -328,15 +366,10 @@ namespace MySql.Notifier
         pageListView.SelectedItems.Clear();
       }
 
-      //// Set tab page focus
-      if (pageIndex != ItemsTabControl.SelectedIndex)
-      {
-        ItemsTabControl.SelectedIndex = pageIndex;
-      }
-
-      //// Revert cursor back to normal and paint changes in list.
       MonitoredServicesListView.EndUpdate();
       MonitoredInstancesListView.EndUpdate();
+
+      //// Revert cursor back to normal and paint changes in list.
       Cursor.Current = Cursors.Default;
     }
 
@@ -347,12 +380,13 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void ServiceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-      using (AddServiceDialog dialog = new AddServiceDialog(machinesList, newMachine))
+      using (AddServiceDialog dialog = new AddServiceDialog(machinesList))
       {
         if (dialog.ShowDialog() == DialogResult.OK)
         {
           if (dialog.newMachine != null && dialog.ServicesToAdd != null && dialog.ServicesToAdd.Count > 0)
           {
+            bool addedService = false;
             newMachine = machinesList.GetMachineByHostName(dialog.newMachine.Name);
             if (newMachine == null)
             {
@@ -368,12 +402,16 @@ namespace MySql.Notifier
               }
               else
               {
+                addedService = true;
                 newMachine.ChangeService(service, ChangeType.Add);
+                AddService(service, newMachine, true);
               }
             }
 
-            Settings.Default.Save();
-            RefreshServicesAndInstancesListViews(MonitoredItemType.Service);
+            if (addedService)
+            {
+              Settings.Default.Save();
+            }
           }
         }
       }

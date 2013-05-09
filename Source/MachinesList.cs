@@ -173,10 +173,6 @@ namespace MySql.Notifier
 
       foreach (Machine machine in Machines)
       {
-        machine.MachineStatusChanged += OnMachineStatusChanged;
-        machine.ServiceListChanged += OnMachineServiceListChanged;
-        machine.ServiceStatusChanged += OnMachineServiceStatusChanged;
-        machine.ServiceStatusChangeError += OnMachineServiceStatusChangeError;
         OnMachineListChanged(machine, ChangeType.Add);
         machine.LoadServicesParameters();
       }
@@ -245,6 +241,19 @@ namespace MySql.Notifier
       if (MachineListChanged != null)
       {
         MachineListChanged(machine, changeType);
+      }
+
+      machine.MachineStatusChanged -= OnMachineStatusChanged;
+      machine.ServiceListChanged -= OnMachineServiceListChanged;
+      machine.ServiceStatusChanged -= OnMachineServiceStatusChanged;
+      machine.ServiceStatusChangeError -= OnMachineServiceStatusChangeError;
+
+      if (changeType != ChangeType.Remove)
+      {
+        machine.MachineStatusChanged += OnMachineStatusChanged;
+        machine.ServiceListChanged += OnMachineServiceListChanged;
+        machine.ServiceStatusChanged += OnMachineServiceStatusChanged;
+        machine.ServiceStatusChangeError += OnMachineServiceStatusChangeError;
       }
     }
 

@@ -21,6 +21,7 @@ namespace MySql.Notifier
 {
   using System;
   using System.Drawing;
+  using System.Linq;
   using System.Windows.Forms;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
@@ -31,8 +32,29 @@ namespace MySql.Notifier
   /// </summary>
   public class ServiceMenuGroup
   {
+    #region Fields
+
+    private MySQLService boundService;
+
+    private ToolStripMenuItem configureMenu;
+
+    private ToolStripMenuItem editorMenu;    
+
+    private ToolStripMenuItem restartMenu;
+
+    private ToolStripSeparator separator;
+
+    private ToolStripMenuItem startMenu;
+
+    private ToolStripMenuItem statusMenu;
+
+    private ToolStripMenuItem stopMenu;
+
+    #endregion Fields
+
     public ServiceMenuGroup(MySQLService mySQLBoundService)
     {
+      MenuItemsQuantity = 0;
       boundService = mySQLBoundService;
 
       statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.DisplayName, boundService.Status));
@@ -66,14 +88,14 @@ namespace MySql.Notifier
       Update();
     }
 
-    private ToolStripMenuItem statusMenu;
-    private ToolStripMenuItem startMenu;
-    private ToolStripMenuItem stopMenu;
-    private ToolStripMenuItem restartMenu;
-    private ToolStripMenuItem configureMenu;
-    private ToolStripMenuItem editorMenu;
-    private ToolStripSeparator separator;
-    private MySQLService boundService;
+    private delegate void menuRefreshDelegate(ContextMenuStrip menu);
+
+    public string BoundServiceName
+    {
+      get { return boundService.ServiceName; }
+    }
+
+    public int MenuItemsQuantity { get; private set; }
 
     /// <summary>
     /// Finds the menu item's index within a context menu strip corresponding to the menu item with the given text.
@@ -95,296 +117,6 @@ namespace MySql.Notifier
       }
 
       return index;
-    }
-
-    private void CreateEditorMenus()
-    {
-      editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
-      editorMenu.Enabled = false;
-
-      if (boundService.WorkbenchConnections == null) return;
-
-      // if there are 0 or 1 connections then the single menu will suffice
-      if (boundService.WorkbenchConnections.Count <= 1)
-      {
-        editorMenu.Click += new EventHandler(workbenchConnection_Clicked);
-        return;
-      }
-
-      // we have more than 1 connection so we create a submenu
-      foreach (MySqlWorkbenchConnection c in boundService.WorkbenchConnections)
-      {
-        ToolStripMenuItem menu = new ToolStripMenuItem(c.Name);
-        menu.Click += new EventHandler(workbenchConnection_Clicked);
-        editorMenu.DropDownItems.Add(menu);
-      }
-    }
-
-    private void workbenchConnection_Clicked(object sender, EventArgs e)
-    {
-      try
-      {
-        if (boundService.WorkbenchConnections.Count == 0)
-          MySqlWorkbench.LaunchSQLEditor(null);
-        else if (!editorMenu.HasDropDownItems)
-          MySqlWorkbench.LaunchSQLEditor(boundService.WorkbenchConnections[0].Name);
-        else
-        {
-          for (int x = 0; x < editorMenu.DropDownItems.Count; x++)
-            if (sender == editorMenu.DropDownItems[x])
-              MySqlWorkbench.LaunchSQLEditor(boundService.WorkbenchConnections[x].Name);
-        }
-      }
-      catch (Exception ex)
-      {
-        InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
-      }
-    }
-
-    private void configureInstanceItem_Click(object sender, EventArgs e)
-    {
-      try
-      {
-        MySqlWorkbenchServer server = MySqlWorkbench.Servers.FindByServiceName(boundService.ServiceName);
-        MySqlWorkbench.LaunchConfigure(server);
-      }
-      catch (Exception ex)
-      {
-        InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
-      }
-    }
-
-    public string BoundServiceName
-    {
-      get { return boundService.ServiceName; }
-    }
-
-    private void restart_Click(object sender, EventArgs e)
-    {
-      boundService.Restart();
-      if (boundService.WorkCompleted)
-      {
-        Update();
-      }
-    }
-
-    private void stop_Click(object sender, EventArgs e)
-    {
-      boundService.Stop();
-      if (boundService.WorkCompleted)
-      {
-        Update();
-      }
-    }
-
-    private void start_Click(object sender, EventArgs e)
-    {
-      boundService.Start();
-      if (boundService.WorkCompleted)
-      {
-        Update();
-      }
-    }
-
-    /// <summary>
-    /// Adds the contest menu items corresponding to the bound service.
-    /// </summary>
-    /// <param name="menu">The Notifier's context menu.</param>
-    public void AddToContextMenu(ContextMenuStrip menu)
-    {
-      if (menu.InvokeRequired)
-      {
-        menu.Invoke(new MethodInvoker(() => { AddToContextMenu(menu); }));
-      }
-      else
-      {
-        int index = FindMenuItemWithinMenuStrip(menu, boundService.Host.Name) ;
-        if (index < 0)
-        {
-          return;
-        }
-
-        index++;
-        menu.Items.Insert(index++, statusMenu);
-        if (boundService.IsRealMySQLService)
-        {
-          if (configureMenu != null)
-          {
-            menu.Items.Insert(index++, configureMenu);
-          }
-
-          if (editorMenu != null)
-          {
-            menu.Items.Insert(index, editorMenu);
-          }
-        }
-      }
-    }
-
-    /// <summary>
-    /// Removes all menu items related to this service menu group from the main Notifier's context menu.
-    /// </summary>
-    /// <param name="menu">Main Notifier's context menu.</param>
-    public void RemoveFromContextMenu(ContextMenuStrip menu)
-    {
-      string[] menuItems = new string[4];
-      int index = -1;
-
-      if (boundService.IsRealMySQLService && MySqlWorkbench.AllowsExternalConnectionsManagement)
-      {
-        menuItems[0] = "Configure Menu";
-        menuItems[1] = "Editor Menu";
-        menuItems[2] = "Separator";
-        menuItems[3] = statusMenu.Text; // the last itemText we delete is the service name itemText which is the reference for the others
-      }
-      else
-      {
-        menuItems[0] = "Separator";
-        menuItems[1] = statusMenu.Text;
-      }
-
-      index = FindMenuItemWithinMenuStrip(menu, statusMenu.Text);
-      if (index <= 0)
-      {
-        return;
-      }
-
-      foreach (var item in menuItems)
-      {
-        if (string.IsNullOrEmpty(item))
-        {
-          continue;
-        }
-
-        int plusItem = !item.Equals(statusMenu.Text) ? 1 : 0;
-        menu.Items.RemoveAt(index + plusItem);
-      }
-
-      menu.Refresh();
-    }
-
-    /// <summary>
-    /// Enables and disables menus based on the current Service Status
-    /// </summary>
-    /// <param name="boundServiceName">Service Name</param>
-    /// <param name="boundServiceStatus">Service Status</param>
-    public void Update()
-    {
-      statusMenu.Text = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
-      Image image = null;
-      switch (boundService.Status)
-      {
-        case MySQLServiceStatus.ContinuePending:
-        case MySQLServiceStatus.Paused:
-        case MySQLServiceStatus.PausePending:
-        case MySQLServiceStatus.StartPending:
-        case MySQLServiceStatus.StopPending:
-          image = Resources.NotifierIconStarting;
-          break;
-
-        case MySQLServiceStatus.Stopped:
-          image = Resources.NotifierIconStopped;
-          break;
-
-        case MySQLServiceStatus.Running:
-          image = Resources.NotifierIconRunning;
-          break;
-      }
-      statusMenu.Image = image;
-
-      startMenu.Enabled = boundService.Status == MySQLServiceStatus.Stopped;
-      stopMenu.Enabled = boundService.Status != MySQLServiceStatus.Stopped;
-      restartMenu.Enabled = stopMenu.Enabled;
-      if (MySqlWorkbench.AllowsExternalConnectionsManagement && boundService.IsRealMySQLService)
-      {
-        if (editorMenu != null) editorMenu.Enabled = true;
-        if (configureMenu != null) configureMenu.Enabled = true;
-      }
-    }
-
-    private void UpdateItems(ContextMenuStrip menu)
-    {
-      int index = -1;
-      for (int i = 0; i < menu.Items.Count; i++)
-      {
-        if (menu.Items[i].Text.Equals(statusMenu.Text))
-        {
-          index = i;
-          break;
-        }
-      }
-
-      if (index >= 0 && index <= menu.Items.Count)
-      {
-        menu.Items.RemoveAt(index + 2);
-        menu.Refresh();
-      }
-      editorMenu.Enabled = MySqlWorkbench.IsInstalled;
-      menu.Items.Insert(index + 2, editorMenu);
-    }
-
-    public void RefreshMenu(ContextMenuStrip menu)
-    {
-      if (boundService.IsRealMySQLService)
-      {
-        boundService.FindMatchingWBConnections();
-        CreateEditorMenus();
-
-        if (menu.InvokeRequired)
-        {
-          menuRefreshDelegate md = new menuRefreshDelegate(UpdateItems);
-          menu.Invoke(md, menu);
-        }
-        else
-        {
-          UpdateItems(menu);
-        }
-      }
-    }
-
-    private delegate void menuRefreshDelegate(ContextMenuStrip menu);
-
-    public void RefreshRoot(ContextMenuStrip menu, MySQLServiceStatus previousStatus)
-    {
-      var newStatusText = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
-      var previousStatusText = String.Format("{0} - {1}", boundService.DisplayName, previousStatus);
-
-      for (int i = 0; i < menu.Items.Count; i++)
-      {
-        if (menu.Items[i].Text.Equals(previousStatusText))
-        {
-          menu.Items[i].Text = newStatusText;
-
-          Image image = null;
-          switch (boundService.Status)
-          {
-            case MySQLServiceStatus.ContinuePending:
-            case MySQLServiceStatus.Paused:
-            case MySQLServiceStatus.PausePending:
-            case MySQLServiceStatus.StartPending:
-            case MySQLServiceStatus.StopPending:
-              image = Resources.NotifierIconStarting;
-              break;
-
-            case MySQLServiceStatus.Stopped:
-              image = Resources.NotifierIconStopped;
-              break;
-
-            case MySQLServiceStatus.Running:
-              image = Resources.NotifierIconRunning;
-              break;
-          }
-
-          menu.Items[i].Image = image;
-          ToolStripMenuItem menuItem = (ToolStripMenuItem)menu.Items[i];
-          menuItem.DropDownItems[0].Enabled = boundService.Status == MySQLServiceStatus.Stopped;
-          menuItem.DropDownItems[1].Enabled = boundService.Status != MySQLServiceStatus.Stopped;
-          menuItem.DropDownItems[2].Enabled = menuItem.DropDownItems[1].Enabled;
-          break;
-        }
-      }
     }
 
     /// <summary>
@@ -469,6 +201,310 @@ namespace MySql.Notifier
     public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, EventHandler eventHandler)
     {
       return ToolStripMenuItemWithHandler(displayText, null, eventHandler);
+    }
+
+    /// <summary>
+    /// Adds the contest menu items corresponding to the bound service.
+    /// </summary>
+    /// <param name="menu">The Notifier's context menu.</param>
+    public void AddToContextMenu(ContextMenuStrip menu)
+    {
+      if (menu.InvokeRequired)
+      {
+        menu.Invoke(new MethodInvoker(() => { AddToContextMenu(menu); }));
+      }
+      else
+      {
+        int index = FindMenuItemWithinMenuStrip(menu, boundService.Host.Name);
+        int servicesMenusCount = boundService.Host.Services != null ? boundService.Host.Services.Sum(s => s != boundService && s.MenuGroup != null ? s.MenuGroup.MenuItemsQuantity : 0) : 0;
+        index += servicesMenusCount;
+        if (index < 0)
+        {
+          return;
+        }
+
+        //// Show the separator just above this new menu item if needed.
+        if (index > 0 && menu.Items[index] is ToolStripSeparator)
+        {
+          menu.Items[index].Visible = true;
+        }
+
+        index++;
+        menu.Items.Insert(index, statusMenu);
+        MenuItemsQuantity++;
+        if (boundService.IsRealMySQLService)
+        {
+          if (configureMenu != null)
+          {
+            menu.Items.Insert(++index, configureMenu);
+            MenuItemsQuantity++;
+          }
+
+          if (editorMenu != null)
+          {
+            menu.Items.Insert(++index, editorMenu);
+            MenuItemsQuantity++;
+          }
+        }
+
+        menu.Items.Insert(++index, separator);
+        separator.Visible = menu.Items[index + 1].BackColor != SystemColors.MenuText;
+        MenuItemsQuantity++;
+      }
+    }
+
+    public void RefreshMenu(ContextMenuStrip menu)
+    {
+      if (boundService.IsRealMySQLService)
+      {
+        boundService.FindMatchingWBConnections();
+        CreateEditorMenus();
+
+        if (menu.InvokeRequired)
+        {
+          menuRefreshDelegate md = new menuRefreshDelegate(UpdateItems);
+          menu.Invoke(md, menu);
+        }
+        else
+        {
+          UpdateItems(menu);
+        }
+      }
+    }
+
+    public void RefreshRoot(ContextMenuStrip menu, MySQLServiceStatus previousStatus)
+    {
+      var newStatusText = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
+      var previousStatusText = String.Format("{0} - {1}", boundService.DisplayName, previousStatus);
+
+      for (int i = 0; i < menu.Items.Count; i++)
+      {
+        if (menu.Items[i].Text.Equals(previousStatusText))
+        {
+          menu.Items[i].Text = newStatusText;
+
+          Image image = null;
+          switch (boundService.Status)
+          {
+            case MySQLServiceStatus.ContinuePending:
+            case MySQLServiceStatus.Paused:
+            case MySQLServiceStatus.PausePending:
+            case MySQLServiceStatus.StartPending:
+            case MySQLServiceStatus.StopPending:
+              image = Resources.NotifierIconStarting;
+              break;
+
+            case MySQLServiceStatus.Stopped:
+              image = Resources.NotifierIconStopped;
+              break;
+
+            case MySQLServiceStatus.Running:
+              image = Resources.NotifierIconRunning;
+              break;
+          }
+
+          menu.Items[i].Image = image;
+          ToolStripMenuItem menuItem = (ToolStripMenuItem)menu.Items[i];
+          menuItem.DropDownItems[0].Enabled = boundService.Status == MySQLServiceStatus.Stopped;
+          menuItem.DropDownItems[1].Enabled = boundService.Status != MySQLServiceStatus.Stopped;
+          menuItem.DropDownItems[2].Enabled = menuItem.DropDownItems[1].Enabled;
+          break;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Removes all menu items related to this service menu group from the main Notifier's context menu.
+    /// </summary>
+    /// <param name="menu">Main Notifier's context menu.</param>
+    public void RemoveFromContextMenu(ContextMenuStrip menu)
+    {
+      string[] menuItems = new string[4];
+      int index = -1;
+
+      if (boundService.IsRealMySQLService && MySqlWorkbench.AllowsExternalConnectionsManagement)
+      {
+        menuItems[0] = "Configure Menu";
+        menuItems[1] = "Editor Menu";
+        menuItems[2] = "Separator";
+        menuItems[3] = statusMenu.Text; // the last itemText we delete is the service name itemText which is the reference for the others
+      }
+      else
+      {
+        menuItems[0] = "Separator";
+        menuItems[1] = statusMenu.Text;
+      }
+
+      index = FindMenuItemWithinMenuStrip(menu, statusMenu.Text);
+      if (index <= 0)
+      {
+        return;
+      }
+
+      //// Hide the separator just above this new menu item if needed.
+      if (index > 0 && menu.Items[index - 1] is ToolStripSeparator)
+      {
+        menu.Items[index - 1].Visible = menu.Items[index + 1].BackColor != SystemColors.MenuText;
+      }
+
+      foreach (var item in menuItems)
+      {
+        if (string.IsNullOrEmpty(item))
+        {
+          continue;
+        }
+
+        int plusItem = !item.Equals(statusMenu.Text) ? 1 : 0;
+        menu.Items.RemoveAt(index + plusItem);
+      }
+
+      menu.Refresh();
+    }
+
+    /// <summary>
+    /// Enables and disables menus based on the current Service Status
+    /// </summary>
+    /// <param name="boundServiceName">Service Name</param>
+    /// <param name="boundServiceStatus">Service Status</param>
+    public void Update()
+    {
+      statusMenu.Text = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
+      Image image = null;
+      switch (boundService.Status)
+      {
+        case MySQLServiceStatus.ContinuePending:
+        case MySQLServiceStatus.Paused:
+        case MySQLServiceStatus.PausePending:
+        case MySQLServiceStatus.StartPending:
+        case MySQLServiceStatus.StopPending:
+          image = Resources.NotifierIconStarting;
+          break;
+
+        case MySQLServiceStatus.Stopped:
+          image = Resources.NotifierIconStopped;
+          break;
+
+        case MySQLServiceStatus.Running:
+          image = Resources.NotifierIconRunning;
+          break;
+      }
+      statusMenu.Image = image;
+
+      startMenu.Enabled = boundService.Status == MySQLServiceStatus.Stopped;
+      stopMenu.Enabled = boundService.Status != MySQLServiceStatus.Stopped;
+      restartMenu.Enabled = stopMenu.Enabled;
+      if (MySqlWorkbench.AllowsExternalConnectionsManagement && boundService.IsRealMySQLService)
+      {
+        if (editorMenu != null) editorMenu.Enabled = true;
+        if (configureMenu != null) configureMenu.Enabled = true;
+      }
+    }
+
+    private void configureInstanceItem_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        MySqlWorkbenchServer server = MySqlWorkbench.Servers.FindByServiceName(boundService.ServiceName);
+        MySqlWorkbench.LaunchConfigure(server);
+      }
+      catch (Exception ex)
+      {
+        InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
+        MySQLSourceTrace.WriteAppErrorToLog(ex);
+      }
+    }
+
+    private void CreateEditorMenus()
+    {
+      editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
+      editorMenu.Enabled = false;
+
+      if (boundService.WorkbenchConnections == null) return;
+
+      // if there are 0 or 1 connections then the single menu will suffice
+      if (boundService.WorkbenchConnections.Count <= 1)
+      {
+        editorMenu.Click += new EventHandler(workbenchConnection_Clicked);
+        return;
+      }
+
+      // we have more than 1 connection so we create a submenu
+      foreach (MySqlWorkbenchConnection c in boundService.WorkbenchConnections)
+      {
+        ToolStripMenuItem menu = new ToolStripMenuItem(c.Name);
+        menu.Click += new EventHandler(workbenchConnection_Clicked);
+        editorMenu.DropDownItems.Add(menu);
+      }
+    }
+
+    private void restart_Click(object sender, EventArgs e)
+    {
+      boundService.Restart();
+      if (boundService.WorkCompleted)
+      {
+        Update();
+      }
+    }
+
+    private void start_Click(object sender, EventArgs e)
+    {
+      boundService.Start();
+      if (boundService.WorkCompleted)
+      {
+        Update();
+      }
+    }
+
+    private void stop_Click(object sender, EventArgs e)
+    {
+      boundService.Stop();
+      if (boundService.WorkCompleted)
+      {
+        Update();
+      }
+    }
+
+    private void UpdateItems(ContextMenuStrip menu)
+    {
+      int index = -1;
+      for (int i = 0; i < menu.Items.Count; i++)
+      {
+        if (menu.Items[i].Text.Equals(statusMenu.Text))
+        {
+          index = i;
+          break;
+        }
+      }
+
+      if (index >= 0 && index <= menu.Items.Count)
+      {
+        menu.Items.RemoveAt(index + 2);
+        menu.Refresh();
+      }
+      editorMenu.Enabled = MySqlWorkbench.IsInstalled;
+      menu.Items.Insert(index + 2, editorMenu);
+    }
+
+    private void workbenchConnection_Clicked(object sender, EventArgs e)
+    {
+      try
+      {
+        if (boundService.WorkbenchConnections.Count == 0)
+          MySqlWorkbench.LaunchSQLEditor(null);
+        else if (!editorMenu.HasDropDownItems)
+          MySqlWorkbench.LaunchSQLEditor(boundService.WorkbenchConnections[0].Name);
+        else
+        {
+          for (int x = 0; x < editorMenu.DropDownItems.Count; x++)
+            if (sender == editorMenu.DropDownItems[x])
+              MySqlWorkbench.LaunchSQLEditor(boundService.WorkbenchConnections[x].Name);
+        }
+      }
+      catch (Exception ex)
+      {
+        InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
+        MySQLSourceTrace.WriteAppErrorToLog(ex);
+      }
     }
   }
 }

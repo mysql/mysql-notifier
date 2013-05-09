@@ -795,12 +795,19 @@ namespace MySql.Notifier
     /// <summary>
     /// Load Calculated, Machine dependant StartupParameters
     /// </summary>
-    public void LoadServiceParameters(MySQLService service)
+    /// <param name="service">Service to initialize.</param>
+    /// <param name="initialLoad">Flag indicating if the method is called when the machine initializes services.</param>
+    public void LoadServiceParameters(MySQLService service, bool initialLoad = false)
     {
       service.Host = this;
       service.SetServiceParameters();
       service.StatusChanged -= OnServiceStatusChanged;
       service.StatusChangeError -= OnServiceStatusChangeError;
+
+      if (!initialLoad)
+      {
+        return;
+      }
 
       if (IsOnline && !service.ServiceInstanceExists)
       {
@@ -817,12 +824,14 @@ namespace MySql.Notifier
     /// <summary>
     /// Load Calculated, Machine dependant StartupParameters
     /// </summary>
-    public void LoadServiceParameters(string serviceName)
+    /// <param name="serviceName">Name of the service to initialize.</param>
+    /// <param name="initialLoad">Flag indicating if the method is called when the machine initializes services.</param>
+    public void LoadServiceParameters(string serviceName, bool initialLoad = false)
     {
       MySQLService service = GetServiceByName(serviceName);
       if (service != null)
       {
-        LoadServiceParameters(service);
+        LoadServiceParameters(service, initialLoad);
       }
     }
 
@@ -837,7 +846,7 @@ namespace MySql.Notifier
         var serviceNamesList = Services.ConvertAll<string>(service => service.ServiceName);
         foreach (string serviceName in serviceNamesList)
         {
-          LoadServiceParameters(serviceName);
+          LoadServiceParameters(serviceName, true);
         }
       }
 
@@ -978,7 +987,7 @@ namespace MySql.Notifier
     /// <returns>Machine name.</returns>
     public override string ToString()
     {
-      return Name;
+      return IsLocal ? "Local" : Name;
     }
 
     /// <summary>
@@ -1145,8 +1154,8 @@ namespace MySql.Notifier
         Services.Remove(service);
       }
 
-      Settings.Default.Save();
       OnServiceListChanged(service, ChangeType.Remove);
+      Settings.Default.Save();
     }
 
     /// <summary>

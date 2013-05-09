@@ -34,17 +34,16 @@ namespace MySql.Notifier
     private int sortColumn;
     private bool machineValuesChanged;
 
-    public AddServiceDialog(MachinesList machineslist, Machine machine)
+    public AddServiceDialog(MachinesList machineslist)
     {
       sortColumn = -1;
       machineValuesChanged = false;
-      newMachine = machine ?? newMachine;
       machinesList = machineslist;
 
       InitializeComponent();
-      MachineSelectionComboBox.SelectedIndex = 0;
       ServicesListView.ColumnClick += new ColumnClickEventHandler(ServicesListView_ColumnClick);
       InsertMachinesIntoComboBox();
+      MachineSelectionComboBox.SelectedIndex = 0;
     }
 
     public Machine.LocationType MachineLocationType { get; set; }
@@ -84,12 +83,18 @@ namespace MySql.Notifier
 
     private void InsertMachinesIntoComboBox()
     {
-      if (machinesList == null) return;
-      if (machinesList.Machines == null) return;
+      if (machinesList == null || machinesList.Machines == null)
+      {
+        return;
+      }
 
       foreach (Machine machine in machinesList.Machines)
       {
-        if (machine.Name != "localhost")
+        if (machine.IsLocal)
+        {
+          MachineSelectionComboBox.Items[0] = machine;
+        }
+        else
         {
           MachineSelectionComboBox.Items.Add(machine);
         }
@@ -121,12 +126,15 @@ namespace MySql.Notifier
       {
         case 0:
           MachineLocationType = Machine.LocationType.Local;
-          if (newMachine != null && newMachine.IsLocal)
+          if (MachineSelectionComboBox.SelectedItem is Machine)
           {
-            break;
+            newMachine = MachineSelectionComboBox.SelectedItem as Machine;
           }
-
-          newMachine = new Machine();
+          else
+          {
+            newMachine = new Machine();
+            MachineSelectionComboBox.Items[0] = newMachine;
+          }
           break;
 
         case 1:

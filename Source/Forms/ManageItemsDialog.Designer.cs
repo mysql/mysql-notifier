@@ -106,7 +106,6 @@ namespace MySql.Notifier
       this.CloseButton.TabIndex = 15;
       this.CloseButton.Text = "Close";
       this.CloseButton.UseVisualStyleBackColor = true;
-      this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
       // 
       // panel1
       // 
@@ -378,6 +377,7 @@ namespace MySql.Notifier
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+      this.CancelButton = this.CloseButton;
       this.ClientSize = new System.Drawing.Size(596, 501);
       this.Controls.Add(this.panel2);
       this.Controls.Add(this.panel1);
