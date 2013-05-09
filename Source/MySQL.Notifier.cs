@@ -512,7 +512,9 @@ namespace MySql.Notifier
       }
 
       machine.UpdateMenuGroup();
-      if (machine.OldConnectionStatus != machine.ConnectionStatus && (machine.ConnectionStatus == Machine.ConnectionStatusType.Online || machine.ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
+      if (machine.OldConnectionStatus != machine.ConnectionStatus
+          && machine.OldConnectionStatus != Machine.ConnectionStatusType.Unknown
+          && (machine.ConnectionStatus == Machine.ConnectionStatusType.Online || machine.ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
       {
         ShowTooltip(false, Resources.BalloonTitleMachineStatus, string.Format(Resources.BalloonTextMachineStatus, machine.Name, machine.ConnectionStatus.ToString()));
       }
@@ -520,8 +522,28 @@ namespace MySql.Notifier
 
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
     {
-      ManageItemsDialog dialog = new ManageItemsDialog(mySQLInstancesList, machinesList);
-      dialog.ShowDialog();
+      //// Stop the global timer and cancel any background machine connection tests while the user opens the dialog to manage machines, services or instances.
+      _globalTimer.Stop();
+      if (machinesList.Machines != null)
+      {
+        foreach (Machine machine in machinesList.Machines)
+        {
+          machine.CancelAsynchronousConnectionTest();
+        }
+      }
+
+      foreach (MySQLInstance instance in mySQLInstancesList)
+      {
+        instance.CancelAsynchronousStatusCheck();
+      }
+
+      using (ManageItemsDialog dialog = new ManageItemsDialog(mySQLInstancesList, machinesList))
+      {
+        dialog.ShowDialog();
+      }
+
+      //// Resume the global timer.
+      _globalTimer.Start();
 
       //// Update icon
       RefreshNotifierIcon();
@@ -837,19 +859,26 @@ namespace MySql.Notifier
     /// <param name="method">Action method</param>
     private void UpdateListToRemoveDeletedServices()
     {
+      bool servicesRemoved = false;
       foreach (Machine machine in machinesList.Machines)
       {
-        if (machine.Services.Count == 0) continue;
+        if (machine.Services == null || machine.Services.Count == 0)
+        {
+          continue;
+        }
 
         List<MySQLService> removingServices = machine.Services.FindAll(s => !s.ServiceInstanceExists);
-
         foreach (MySQLService service in removingServices)
         {
-          machine.Services.Remove(service);
+          machine.ChangeService(service, ChangeType.Remove);
+          servicesRemoved = true;
         }
       }
 
-      Settings.Default.Save();
+      if (servicesRemoved)
+      {
+        Settings.Default.Save();
+      }
     }
 
     private void UpdateStaticMenuItems()

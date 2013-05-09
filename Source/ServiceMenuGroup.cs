@@ -207,12 +207,12 @@ namespace MySql.Notifier
         }
 
         index++;
-        menu.Items.Insert(index, statusMenu);
+        menu.Items.Insert(index++, statusMenu);
         if (boundService.IsRealMySQLService)
         {
           if (configureMenu != null)
           {
-            menu.Items.Insert(index, configureMenu);
+            menu.Items.Insert(index++, configureMenu);
           }
 
           if (editorMenu != null)

@@ -38,12 +38,12 @@ namespace MySql.Notifier
     {
       sortColumn = -1;
       machineValuesChanged = false;
+      newMachine = machine ?? newMachine;
+      machinesList = machineslist;
 
       InitializeComponent();
       MachineSelectionComboBox.SelectedIndex = 0;
       ServicesListView.ColumnClick += new ColumnClickEventHandler(ServicesListView_ColumnClick);
-      newMachine = machine ?? newMachine;
-      machinesList = machineslist;
       InsertMachinesIntoComboBox();
     }
 

@@ -52,6 +52,11 @@ namespace MySql.Notifier
     #region Fields
 
     /// <summary>
+    /// Flag indicating if the asynchronous status check was cancelled.
+    /// </summary>
+    private bool _instanceStatusCheckCancelled;
+
+    /// <summary>
     /// Flag indicating if this instance is being monitored and status changes notified to users.
     /// </summary>
     private bool _monitorAndNotifyStatus;
@@ -96,6 +101,11 @@ namespace MySql.Notifier
     /// </summary>
     private string _workbenchConnectionId;
 
+    /// <summary>
+    /// Background worker that performs an asynchronous connection test.
+    /// </summary>
+    private BackgroundWorker _worker;
+
     #endregion Fields
 
     /// <summary>
@@ -103,6 +113,7 @@ namespace MySql.Notifier
     /// </summary>
     public MySQLInstance()
     {
+      _instanceStatusCheckCancelled = false;
       _workbenchConnectionId = string.Empty;
       _monitoringInterval = DEFAULT_MONITORING_INTERVAL;
       _monitoringIntervalUnitOfMeasure = DEFAULT_MONITORING_UOM;
@@ -111,7 +122,8 @@ namespace MySql.Notifier
       _oldInstanceStatus = MySqlWorkbenchConnection.ConnectionStatusType.Unknown;
       _updateTrayIconOnStatusChange = true;
       _workbenchConnection = null;
-      ConnectionTestInProgress = false;
+      _worker = null;
+      InstanceStatusCheckInProgress = false;
       MenuGroup = null;
       SecondsToMonitorInstance = MonitoringIntervalInSeconds;
     }
@@ -186,12 +198,6 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Gets a value indicating whether a connection test is still ongoing.
-    /// </summary>
-    [XmlIgnore]
-    public bool ConnectionTestInProgress { get; private set; }
-
-    /// <summary>
     /// Gets or sets the name of the host of this MySQL instance.
     /// </summary>
     [XmlAttribute(AttributeName = "HostName")]
@@ -208,6 +214,12 @@ namespace MySql.Notifier
         return WorkbenchConnection != null ? WorkbenchConnection.HostIdentifier : string.Empty;
       }
     }
+
+    /// <summary>
+    /// Gets a value indicating whether a connection test is still ongoing.
+    /// </summary>
+    [XmlIgnore]
+    public bool InstanceStatusCheckInProgress { get; private set; }
 
     /// <summary>
     /// Gets the group of ToolStripMenuItem controls for each of the corresponding instance's context menu items.
@@ -451,27 +463,38 @@ namespace MySql.Notifier
     #endregion Properties
 
     /// <summary>
+    /// Cancels the asynchronous status check.
+    /// </summary>
+    /// <returns>true if the background connection test was cancelled, false otherwise</returns>
+    public bool CancelAsynchronousStatusCheck()
+    {
+      if (_worker != null && InstanceStatusCheckInProgress)
+      {
+        _instanceStatusCheckCancelled = true;
+        _worker.CancelAsync();
+      }
+
+      return _instanceStatusCheckCancelled;
+    }
+
+    /// <summary>
     /// Checks if this instance can connect to its corresponding MySQL Server instance with its Workbench connection.
     /// </summary>
     /// <param name="asynchronous">Flag indicating if the status check is run asynchronously or synchronously.</param>
     public void CheckInstanceStatus(bool asynchronous)
     {
-      if (WorkbenchConnection == null || ConnectionTestInProgress)
+      if (WorkbenchConnection == null || InstanceStatusCheckInProgress)
       {
         return;
       }
 
-      ConnectionTestInProgress = true;
+      InstanceStatusCheckInProgress = true;
       _oldInstanceStatus = ConnectionStatus;
 
       if (asynchronous)
       {
-        BackgroundWorker worker = new BackgroundWorker();
-        worker.WorkerSupportsCancellation = false;
-        worker.WorkerReportsProgress = false;
-        worker.DoWork += new DoWorkEventHandler(CheckInstanceStatusWorkerDoWork);
-        worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(CheckInstanceStatusWorkerCompleted);
-        worker.RunWorkerAsync();
+        SetupInstanceStatusCheckBackgroundWorker();
+        _worker.RunWorkerAsync();
       }
       else
       {
@@ -490,46 +513,6 @@ namespace MySql.Notifier
       if (MenuGroup == null)
       {
         MenuGroup = new MySQLInstanceMenuGroup(this);
-      }
-    }
-
-    /// <summary>
-    /// Delegate method that reports the asynchronous operation to test the instance's connection status has completed.
-    /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="e">Event arguments.</param>
-    private void CheckInstanceStatusWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-    {
-      if (ConnectionStatus != _oldInstanceStatus)
-      {
-        OnInstanceStatusChanged(_oldInstanceStatus);
-      }
-
-      ConnectionTestInProgress = false;
-    }
-
-    /// <summary>
-    /// Delegate method that asynchronously tests the instance's connection status.
-    /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="e">Event arguments.</param>
-    private void CheckInstanceStatusWorkerDoWork(object sender, DoWorkEventArgs e)
-    {
-      Exception ex;
-      WorkbenchConnection.TestConnection(out ex);
-      if (ex != null && ex is MySqlException)
-      {
-        MySqlException mySqlEx = ex as MySqlException;
-        switch (mySqlEx.Number)
-        {
-          case 1042:
-            //// Unable to connect to any of the specified MySQL hosts.
-            break;
-
-          default:
-            OnInstanceStatusTestErrorThrown(ex);
-            break;
-        }
       }
     }
 
@@ -566,6 +549,75 @@ namespace MySql.Notifier
       if (PropertyChanged != null)
       {
         PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+      }
+    }
+
+    /// <summary>
+    /// Delegate method that reports the asynchronous operation to test the instance's connection status has completed.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void CheckInstanceStatusWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+    {
+      if (!e.Cancelled && ConnectionStatus != _oldInstanceStatus)
+      {
+        OnInstanceStatusChanged(_oldInstanceStatus);
+      }
+
+      InstanceStatusCheckInProgress = false;
+    }
+
+    /// <summary>
+    /// Delegate method that asynchronously tests the instance's connection status.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void CheckInstanceStatusWorkerDoWork(object sender, DoWorkEventArgs e)
+    {
+      Exception ex;
+      WorkbenchConnection.TestConnection(out ex);
+      if (_instanceStatusCheckCancelled)
+      {
+        return;
+      }
+
+      if (ex != null && ex is MySqlException)
+      {
+        MySqlException mySqlEx = ex as MySqlException;
+        int errorNumber = mySqlEx.Number > 0 ? mySqlEx.Number : (mySqlEx.InnerException != null && mySqlEx.InnerException is MySqlException ? (mySqlEx.InnerException as MySqlException).Number : 0);
+        switch (errorNumber)
+        {
+          case 1042:
+            //// Unable to connect to any of the specified MySQL hosts.
+            break;
+
+          case 1045:
+            //// Authentication to host {0} for user {1} using method {2} failed with message: Access denied for user '{1}'@'{0}' (using password: NO)"}
+            break;
+
+          case 0:
+            //// No error number
+            break;
+
+          default:
+            OnInstanceStatusTestErrorThrown(ex);
+            break;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Initializes the background worker used to check instance status asynchronously.
+    /// </summary>
+    private void SetupInstanceStatusCheckBackgroundWorker()
+    {
+      if (_worker == null)
+      {
+        _worker = new BackgroundWorker();
+        _worker.WorkerSupportsCancellation = true;
+        _worker.WorkerReportsProgress = false;
+        _worker.DoWork += new DoWorkEventHandler(CheckInstanceStatusWorkerDoWork);
+        _worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(CheckInstanceStatusWorkerCompleted);
       }
     }
   }

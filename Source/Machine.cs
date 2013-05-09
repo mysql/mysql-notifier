@@ -71,12 +71,12 @@ namespace MySql.Notifier
     /// <summary>
     /// The interval to the next automatic connection test to see if a machine connection status changed.
     /// </summary>
-    public uint _autoTestConnectionInterval;
+    private uint _autoTestConnectionInterval;
 
     /// <summary>
     /// The unit of measure used for this machine auotmatic connection test.
     /// </summary>
-    public TimeUtilities.IntervalUnitOfMeasure _autoTestConnectionIntervalUnitOfMeasure;
+    private TimeUtilities.IntervalUnitOfMeasure _autoTestConnectionIntervalUnitOfMeasure;
 
     /// <summary>
     /// The current status of this machine.
@@ -84,9 +84,9 @@ namespace MySql.Notifier
     private ConnectionStatusType _connectionStatus;
 
     /// <summary>
-    /// Flag indicating whether a connection test is still ongoing.
+    /// Flag indicating if the asynchronous connection test was cancelled.
     /// </summary>
-    private bool _connectionTestInProgress;
+    private bool _connectionTestCancelled;
 
     /// <summary>
     /// The host name for this machine.
@@ -118,6 +118,11 @@ namespace MySql.Notifier
     /// </summary>
     private ManagementEventWatcher _wmiServiceStatusChangeWatcher;
 
+    /// <summary>
+    /// Background worker that performs an asynchronous connection test.
+    /// </summary>
+    private BackgroundWorker _worker;
+
     #endregion Fields
 
     /// <summary>
@@ -128,12 +133,14 @@ namespace MySql.Notifier
       _autoTestConnectionInterval = DEFAULT_AUTO_TEST_CONNECTION_INTERVAL;
       _autoTestConnectionIntervalUnitOfMeasure = DEFAULT_AUTO_TEST_CONNECTION_UOM;
       _name = MySqlWorkbenchConnection.DEFAULT_HOSTNAME;
-      _connectionStatus = IsLocal ? ConnectionStatusType.Online : ConnectionStatusType.Unknown;
+      _connectionStatus = ConnectionStatusType.Unknown;
+      _connectionTestCancelled = false;
       _wmiConnectionOptions = null;
       _wmiManagementScope = null;
       _wmiServiceDeletionWatcher = null;
       _wmiServiceStatusChangeWatcher = null;
-      _connectionTestInProgress = false;
+      _worker = null;
+      ConnectionTestInProgress = false;
       ConnectionProblem = ConnectionProblemType.None;
       MenuGroup = null;
       User = string.Empty;
@@ -154,6 +161,7 @@ namespace MySql.Notifier
       : this()
     {
       _name = MySqlWorkbenchConnection.IsHostLocal(name) ? name : name.ToUpper();
+      _connectionStatus = IsLocal ? ConnectionStatusType.Online : ConnectionStatusType.Unknown;
       User = user.ToUpper();
       Password = MySQLSecurity.EncryptPassword(password);
     }
@@ -344,6 +352,12 @@ namespace MySql.Notifier
     public ConnectionProblemType ConnectionProblem { get; private set; }
 
     /// <summary>
+    /// Gets a value indicating whether a connection test is still ongoing.
+    /// </summary>
+    [XmlIgnore]
+    public bool ConnectionTestInProgress { get; private set; }
+
+    /// <summary>
     /// Gets a long description about the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWMIServices"/> method.
     /// </summary>
     [XmlIgnore]
@@ -395,7 +409,7 @@ namespace MySql.Notifier
     {
       get
       {
-        return _connectionStatus;
+        return IsLocal ? ConnectionStatusType.Online : _connectionStatus;
       }
 
       private set
@@ -434,7 +448,7 @@ namespace MySql.Notifier
     {
       get
       {
-        return ConnectionStatus == ConnectionStatusType.Online;
+        return IsLocal || ConnectionStatus == ConnectionStatusType.Online;
       }
     }
 
@@ -602,6 +616,21 @@ namespace MySql.Notifier
     #endregion Properties
 
     /// <summary>
+    /// Cancels the asynchronous connection test.
+    /// </summary>
+    /// <returns>true if the background connection test was cancelled, false otherwise</returns>
+    public bool CancelAsynchronousConnectionTest()
+    {
+      if (_worker != null && ConnectionTestInProgress)
+      {
+        _connectionTestCancelled = true;
+        _worker.CancelAsync();
+      }
+
+      return _connectionTestCancelled;
+    }
+
+    /// <summary>
     /// Adds or Delete a Service for current machine
     /// </summary>
     /// <param name="service">MySQLService instance</param>
@@ -696,10 +725,22 @@ namespace MySql.Notifier
       {
         string serviceDisplayName;
         WMIManagementScope.Connect();
+        if (_connectionTestCancelled)
+        {
+          _connectionTestCancelled = false;
+          return null;
+        }
+
         WqlObjectQuery query = string.IsNullOrEmpty(serviceName) ? new WqlObjectQuery("Select * From Win32_Service")
         : new WqlObjectQuery(string.Format("Select * From Win32_Service Where Name = \"{0}\"", serviceName));
         ManagementObjectSearcher searcher = new ManagementObjectSearcher(WMIManagementScope, query);
         wmiServicesCollection = searcher.Get();
+        if (_connectionTestCancelled)
+        {
+          _connectionTestCancelled = false;
+          return null;
+        }
+
         if (wmiServicesCollection != null)
         {
           //// Verify if we can access the services within the services collection.
@@ -708,6 +749,12 @@ namespace MySql.Notifier
             serviceDisplayName = mo["DisplayName"].ToString();
             break;
           }
+        }
+
+        if (_connectionTestCancelled)
+        {
+          _connectionTestCancelled = false;
+          return null;
         }
 
         ConnectionProblem = ConnectionProblemType.None;
@@ -729,7 +776,14 @@ namespace MySql.Notifier
         MySQLSourceTrace.WriteAppErrorToLog(connectionException);
         if (displayMessageOnError)
         {
-          InfoDialog.ShowErrorDialog(ConnectionProblemShortDescription, ConnectionProblemLongDescription, null, (ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.HostUnavailableExtendedMessage : null));
+          InfoDialog.ShowErrorDialog(
+            ConnectionProblemShortDescription,
+            ConnectionProblemLongDescription,
+            null,
+            ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.HostUnavailableExtendedMessage : null,
+            true,
+            InfoDialog.DefaultButtonType.AcceptButton,
+            30);
         }
 
         return null;
@@ -871,20 +925,16 @@ namespace MySql.Notifier
     /// <param name="asynchronous">Flag indicating if the status check is run asynchronously or synchronously.</param>
     public void TestConnection(bool displayMessageOnError, bool asynchronous)
     {
-      if (_connectionTestInProgress)
+      if (ConnectionTestInProgress)
       {
         return;
       }
 
-      _connectionTestInProgress = true;
+      ConnectionTestInProgress = true;
       if (asynchronous)
       {
-        BackgroundWorker worker = new BackgroundWorker();
-        worker.WorkerSupportsCancellation = false;
-        worker.WorkerReportsProgress = false;
-        worker.DoWork += new DoWorkEventHandler(TestConnectionWorkerDoWork);
-        worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(TestConnectionWorkerCompleted);
-        worker.RunWorkerAsync(displayMessageOnError);
+        SetupConnectionTestBackgroundWorker();
+        _worker.RunWorkerAsync(displayMessageOnError);
       }
       else
       {
@@ -902,7 +952,12 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void TestConnectionWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      _connectionTestInProgress = false;
+      ConnectionTestInProgress = false;
+      if (e.Cancelled)
+      {
+        _connectionStatus = OldConnectionStatus;
+        ConnectionProblem = ConnectionProblemType.None;
+      }
     }
 
     /// <summary>
@@ -1075,7 +1130,7 @@ namespace MySql.Notifier
       }
       else
       {
-        TestConnection(false, true);
+        TestConnection(true, true);
       }
     }
 
@@ -1138,6 +1193,21 @@ namespace MySql.Notifier
       catch (Exception ex)
       {
         MySQLSourceTrace.WriteAppErrorToLog(ex);
+      }
+    }
+
+    /// <summary>
+    /// Initializes the background worker used to test connections asynchronously.
+    /// </summary>
+    private void SetupConnectionTestBackgroundWorker()
+    {
+      if (_worker == null)
+      {
+        _worker = new BackgroundWorker();
+        _worker.WorkerSupportsCancellation = true;
+        _worker.WorkerReportsProgress = false;
+        _worker.DoWork += new DoWorkEventHandler(TestConnectionWorkerDoWork);
+        _worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(TestConnectionWorkerCompleted);
       }
     }
 
