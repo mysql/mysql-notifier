@@ -343,16 +343,10 @@ namespace MySql.Notifier
     public void SetServiceParameters()
     {
       GetServiceInstance();
-      if (!ServiceInstanceExists)
-      {
-        return;
-      }
-
       try
       {
-        DisplayName = ServiceManagementObject.Properties["DisplayName"].Value.ToString();
         FindMatchingWBConnections();
-        SetStatus(ServiceManagementObject.Properties["State"].Value.ToString());
+        SetStatus(ServiceManagementObject == null ? Status.ToString() : ServiceManagementObject.Properties["State"].Value.ToString());
         MenuGroup = new ServiceMenuGroup(this);
       }
       catch (InvalidOperationException ioEx)
