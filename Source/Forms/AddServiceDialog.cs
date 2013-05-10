@@ -31,9 +31,8 @@ namespace MySql.Notifier
 
   public partial class AddServiceDialog : MachineAwareForm
   {
-    private int sortColumn;
     private bool machineValuesChanged;
-
+    private int sortColumn;
     public AddServiceDialog(MachinesList machineslist)
     {
       sortColumn = -1;
@@ -49,6 +48,23 @@ namespace MySql.Notifier
     public Machine.LocationType MachineLocationType { get; set; }
 
     public List<MySQLService> ServicesToAdd { get; set; }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="DeleteButton"/> is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void DeleteButton_Click(object sender, EventArgs e)
+    {
+      DialogResult dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.DeleteMachineConfirmationTitle, Resources.DeleteMachineConfirmationText, null, null, true, InfoDialog.DefaultButtonType.CancelButton, 30);
+      if (dr == DialogResult.Yes)
+      {
+        machinesList.ChangeMachine(newMachine, ChangeType.RemoveByUser);
+        int removedMachineIndex = MachineSelectionComboBox.SelectedIndex;
+        MachineSelectionComboBox.SelectedIndex = 0;
+        MachineSelectionComboBox.Items.RemoveAt(removedMachineIndex);
+      }
+    }
 
     private void DialogOKButton_Click(object sender, EventArgs e)
     {
@@ -66,6 +82,25 @@ namespace MySql.Notifier
       }
 
       Cursor.Current = Cursors.Default;
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="EditButton"/> is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void EditButton_Click(object sender, EventArgs e)
+    {
+      using (var windowsConnectionDialog = new WindowsConnectionDialog(machinesList, newMachine))
+      {
+        DialogResult dr = windowsConnectionDialog.ShowDialog();
+        if (dr != DialogResult.Cancel)
+        {
+          newMachine.CopyMachineData(windowsConnectionDialog.newMachine);
+          machinesList.ChangeMachine(newMachine, ChangeType.Updated);
+          RefreshList();
+        }
+      }
     }
 
     private void FilterCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -101,27 +136,16 @@ namespace MySql.Notifier
       }
     }
 
-    private void MachineAutoTestConnectionIntervalNumericUpDown_ValueChanged(object sender, EventArgs e)
-    {
-      if (newMachine != null)
-      {
-        newMachine.AutoTestConnectionInterval = (uint)MachineAutoTestConnectionIntervalNumericUpDown.Value;
-        machineValuesChanged = true;
-      }
-    }
-
-    private void MachineAutoTestConnectionIntervalUOMComboBox_SelectedIndexChanged(object sender, EventArgs e)
-    {
-      if (newMachine != null)
-      {
-        newMachine.AutoTestConnectionIntervalUnitOfMeasure = (TimeUtilities.IntervalUnitOfMeasure)MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndex;
-        machineValuesChanged = true;
-      }
-    }
-
+    /// <summary>
+    /// Event delegate method fired when the <see cref="MachineSelectionComboBox"/> selected index changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
     private void MachineSelectionComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
       DialogResult dr = DialogResult.None;
+      EditButton.Enabled = MachineSelectionComboBox.SelectedIndex > 2;
+      DeleteButton.Enabled = MachineSelectionComboBox.SelectedIndex > 2;
       switch (MachineSelectionComboBox.SelectedIndex)
       {
         case 0:
@@ -139,7 +163,7 @@ namespace MySql.Notifier
 
         case 1:
           MachineLocationType = Machine.LocationType.Remote;
-          using (var windowsConnectionDialog = new WindowsConnectionDialog(machinesList, newMachine))
+          using (var windowsConnectionDialog = new WindowsConnectionDialog(machinesList, null))
           {
             dr = windowsConnectionDialog.ShowDialog();
             if (dr == DialogResult.Cancel)
@@ -208,7 +232,6 @@ namespace MySql.Notifier
           break;
       }
 
-      SetMachineAutoTestConnectionControlsAvailability();
       ServicesListView.Enabled = newMachine.IsOnline;
       Machine servicesMachine = ServicesListView.Tag as Machine;
       if (servicesMachine != newMachine)
@@ -217,6 +240,9 @@ namespace MySql.Notifier
       }
     }
 
+    /// <summary>
+    /// Regenerates the contents of the services list view.
+    /// </summary>
     private void RefreshList()
     {
       //// Store the machine used to browse services so we can compare it with the current value in newMachine to know if we need to call RefreshList.
@@ -283,21 +309,6 @@ namespace MySql.Notifier
 
       ServicesListView.Sort();
       ServicesListView.ListViewItemSorter = new ListViewItemComparer(e.Column, ServicesListView.Sorting);
-    }
-
-    private void SetMachineAutoTestConnectionControlsAvailability()
-    {
-      MachineAutoTestConnectionIntervalNumericUpDown.Value = MachineSelectionComboBox.SelectedIndex > 2 ? newMachine.AutoTestConnectionInterval : 0;
-      MachineAutoTestConnectionIntervalNumericUpDown.Enabled = MachineSelectionComboBox.SelectedIndex > 2;
-      MachineAutoTestConnectionIntervalUOMComboBox.Enabled = MachineSelectionComboBox.SelectedIndex > 2;
-      if (MachineSelectionComboBox.SelectedIndex > 2)
-      {
-        MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndex = (int)newMachine.AutoTestConnectionIntervalUnitOfMeasure;
-      }
-      else
-      {
-        MachineAutoTestConnectionIntervalUOMComboBox.Text = string.Empty;
-      }
     }
 
     private void timerForFiltering_Tick(object sender, EventArgs e)

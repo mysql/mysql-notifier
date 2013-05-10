@@ -53,9 +53,8 @@ namespace MySql.Notifier
       this.DialogOKButton = new System.Windows.Forms.Button();
       this.DialogCancelButton = new System.Windows.Forms.Button();
       this.panel1 = new System.Windows.Forms.Panel();
-      this.MachineAutoTestConnectionIntervalUOMComboBox = new System.Windows.Forms.ComboBox();
-      this.MachineAutoTestConnectionLabel = new System.Windows.Forms.Label();
-      this.MachineAutoTestConnectionIntervalNumericUpDown = new System.Windows.Forms.NumericUpDown();
+      this.DeleteButton = new System.Windows.Forms.Button();
+      this.EditButton = new System.Windows.Forms.Button();
       this.FilterTextBox = new System.Windows.Forms.TextBox();
       this.FilterLabel = new System.Windows.Forms.Label();
       this.WindowsServiceInstructionsLabel = new System.Windows.Forms.Label();
@@ -71,7 +70,6 @@ namespace MySql.Notifier
       this.timerForFiltering = new System.Windows.Forms.Timer(this.components);
       this.panel2.SuspendLayout();
       this.panel1.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.MachineAutoTestConnectionIntervalNumericUpDown)).BeginInit();
       this.SuspendLayout();
       // 
       // panel2
@@ -82,14 +80,14 @@ namespace MySql.Notifier
       this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
       this.panel2.Location = new System.Drawing.Point(0, 492);
       this.panel2.Name = "panel2";
-      this.panel2.Size = new System.Drawing.Size(488, 50);
+      this.panel2.Size = new System.Drawing.Size(529, 50);
       this.panel2.TabIndex = 1;
       // 
       // DialogOKButton
       // 
       this.DialogOKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogOKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.DialogOKButton.Location = new System.Drawing.Point(319, 15);
+      this.DialogOKButton.Location = new System.Drawing.Point(360, 15);
       this.DialogOKButton.Name = "DialogOKButton";
       this.DialogOKButton.Size = new System.Drawing.Size(75, 23);
       this.DialogOKButton.TabIndex = 0;
@@ -101,7 +99,7 @@ namespace MySql.Notifier
       // 
       this.DialogCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.DialogCancelButton.Location = new System.Drawing.Point(400, 15);
+      this.DialogCancelButton.Location = new System.Drawing.Point(441, 15);
       this.DialogCancelButton.Name = "DialogCancelButton";
       this.DialogCancelButton.Size = new System.Drawing.Size(75, 23);
       this.DialogCancelButton.TabIndex = 1;
@@ -112,9 +110,8 @@ namespace MySql.Notifier
       // 
       this.panel1.AutoSize = true;
       this.panel1.BackColor = System.Drawing.Color.White;
-      this.panel1.Controls.Add(this.MachineAutoTestConnectionIntervalUOMComboBox);
-      this.panel1.Controls.Add(this.MachineAutoTestConnectionLabel);
-      this.panel1.Controls.Add(this.MachineAutoTestConnectionIntervalNumericUpDown);
+      this.panel1.Controls.Add(this.DeleteButton);
+      this.panel1.Controls.Add(this.EditButton);
       this.panel1.Controls.Add(this.FilterTextBox);
       this.panel1.Controls.Add(this.FilterLabel);
       this.panel1.Controls.Add(this.WindowsServiceInstructionsLabel);
@@ -128,72 +125,56 @@ namespace MySql.Notifier
       this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panel1.Location = new System.Drawing.Point(0, 0);
       this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(488, 542);
+      this.panel1.Size = new System.Drawing.Size(529, 542);
       this.panel1.TabIndex = 0;
       // 
-      // MachineAutoTestConnectionIntervalUOMComboBox
+      // DeleteButton
       // 
-      this.MachineAutoTestConnectionIntervalUOMComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.MachineAutoTestConnectionIntervalUOMComboBox.Items.AddRange(new object[] {
-            "seconds",
-            "minutes",
-            "hours",
-            "days"});
-      this.MachineAutoTestConnectionIntervalUOMComboBox.Location = new System.Drawing.Point(308, 105);
-      this.MachineAutoTestConnectionIntervalUOMComboBox.Name = "MachineAutoTestConnectionIntervalUOMComboBox";
-      this.MachineAutoTestConnectionIntervalUOMComboBox.Size = new System.Drawing.Size(112, 21);
-      this.MachineAutoTestConnectionIntervalUOMComboBox.TabIndex = 6;
-      this.MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndexChanged += new System.EventHandler(this.MachineAutoTestConnectionIntervalUOMComboBox_SelectedIndexChanged);
+      this.DeleteButton.Location = new System.Drawing.Point(441, 82);
+      this.DeleteButton.Name = "DeleteButton";
+      this.DeleteButton.Size = new System.Drawing.Size(75, 23);
+      this.DeleteButton.TabIndex = 5;
+      this.DeleteButton.Text = "Delete";
+      this.DeleteButton.UseVisualStyleBackColor = true;
+      this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
       // 
-      // MachineAutoTestConnectionLabel
+      // EditButton
       // 
-      this.MachineAutoTestConnectionLabel.AutoSize = true;
-      this.MachineAutoTestConnectionLabel.Location = new System.Drawing.Point(22, 108);
-      this.MachineAutoTestConnectionLabel.Name = "MachineAutoTestConnectionLabel";
-      this.MachineAutoTestConnectionLabel.Size = new System.Drawing.Size(214, 13);
-      this.MachineAutoTestConnectionLabel.TabIndex = 4;
-      this.MachineAutoTestConnectionLabel.Text = "Check computer connection status every";
-      // 
-      // MachineAutoTestConnectionIntervalNumericUpDown
-      // 
-      this.MachineAutoTestConnectionIntervalNumericUpDown.Location = new System.Drawing.Point(251, 106);
-      this.MachineAutoTestConnectionIntervalNumericUpDown.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-      this.MachineAutoTestConnectionIntervalNumericUpDown.Name = "MachineAutoTestConnectionIntervalNumericUpDown";
-      this.MachineAutoTestConnectionIntervalNumericUpDown.Size = new System.Drawing.Size(51, 22);
-      this.MachineAutoTestConnectionIntervalNumericUpDown.TabIndex = 5;
-      this.MachineAutoTestConnectionIntervalNumericUpDown.ValueChanged += new System.EventHandler(this.MachineAutoTestConnectionIntervalNumericUpDown_ValueChanged);
+      this.EditButton.Location = new System.Drawing.Point(360, 82);
+      this.EditButton.Name = "EditButton";
+      this.EditButton.Size = new System.Drawing.Size(75, 23);
+      this.EditButton.TabIndex = 4;
+      this.EditButton.Text = "Edit";
+      this.EditButton.UseVisualStyleBackColor = true;
+      this.EditButton.Click += new System.EventHandler(this.EditButton_Click);
       // 
       // FilterTextBox
       // 
       this.FilterTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.FilterTextBox.Location = new System.Drawing.Point(64, 213);
+      this.FilterTextBox.Location = new System.Drawing.Point(64, 186);
       this.FilterTextBox.Name = "FilterTextBox";
-      this.FilterTextBox.Size = new System.Drawing.Size(130, 22);
-      this.FilterTextBox.TabIndex = 10;
+      this.FilterTextBox.Size = new System.Drawing.Size(171, 22);
+      this.FilterTextBox.TabIndex = 9;
       this.FilterTextBox.TextChanged += new System.EventHandler(this.FilterTextBox_TextChanged);
       // 
       // FilterLabel
       // 
       this.FilterLabel.AutoSize = true;
-      this.FilterLabel.Location = new System.Drawing.Point(22, 218);
+      this.FilterLabel.Location = new System.Drawing.Point(22, 191);
       this.FilterLabel.Name = "FilterLabel";
       this.FilterLabel.Size = new System.Drawing.Size(36, 13);
-      this.FilterLabel.TabIndex = 9;
+      this.FilterLabel.TabIndex = 8;
       this.FilterLabel.Text = "Filter:";
       // 
       // WindowsServiceInstructionsLabel
       // 
       this.WindowsServiceInstructionsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.WindowsServiceInstructionsLabel.Location = new System.Drawing.Point(22, 176);
+      this.WindowsServiceInstructionsLabel.Location = new System.Drawing.Point(22, 156);
       this.WindowsServiceInstructionsLabel.Name = "WindowsServiceInstructionsLabel";
-      this.WindowsServiceInstructionsLabel.Size = new System.Drawing.Size(454, 34);
-      this.WindowsServiceInstructionsLabel.TabIndex = 8;
+      this.WindowsServiceInstructionsLabel.Size = new System.Drawing.Size(495, 17);
+      this.WindowsServiceInstructionsLabel.TabIndex = 7;
       this.WindowsServiceInstructionsLabel.Text = "Select the service you want to monitor. You can filter the list by typing into th" +
     "e filter control.";
       // 
@@ -203,7 +184,7 @@ namespace MySql.Notifier
             | System.Windows.Forms.AnchorStyles.Right)));
       this.MachineInstructionsLabel.Location = new System.Drawing.Point(20, 46);
       this.MachineInstructionsLabel.Name = "MachineInstructionsLabel";
-      this.MachineInstructionsLabel.Size = new System.Drawing.Size(455, 29);
+      this.MachineInstructionsLabel.Size = new System.Drawing.Size(496, 29);
       this.MachineInstructionsLabel.TabIndex = 1;
       this.MachineInstructionsLabel.Text = "Select the machine you want to monitor services on. The machines need to be on yo" +
     "ur local network. ";
@@ -221,10 +202,10 @@ namespace MySql.Notifier
       // 
       this.FilterCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.FilterCheckBox.AutoSize = true;
-      this.FilterCheckBox.Location = new System.Drawing.Point(212, 218);
+      this.FilterCheckBox.Location = new System.Drawing.Point(253, 191);
       this.FilterCheckBox.Name = "FilterCheckBox";
       this.FilterCheckBox.Size = new System.Drawing.Size(264, 17);
-      this.FilterCheckBox.TabIndex = 11;
+      this.FilterCheckBox.TabIndex = 10;
       this.FilterCheckBox.Text = "Only show services that match auto-add filter?\r\n";
       this.FilterCheckBox.UseVisualStyleBackColor = true;
       this.FilterCheckBox.CheckedChanged += new System.EventHandler(this.FilterCheckBox_CheckedChanged);
@@ -238,36 +219,36 @@ namespace MySql.Notifier
             this.columnHeader1,
             this.columnHeader3});
       this.ServicesListView.FullRowSelect = true;
-      this.ServicesListView.Location = new System.Drawing.Point(23, 244);
+      this.ServicesListView.Location = new System.Drawing.Point(23, 214);
       this.ServicesListView.Name = "ServicesListView";
-      this.ServicesListView.Size = new System.Drawing.Size(452, 222);
-      this.ServicesListView.TabIndex = 12;
+      this.ServicesListView.Size = new System.Drawing.Size(493, 251);
+      this.ServicesListView.TabIndex = 11;
       this.ServicesListView.UseCompatibleStateImageBehavior = false;
       this.ServicesListView.View = System.Windows.Forms.View.Details;
       // 
       // columnHeader1
       // 
       this.columnHeader1.Text = "Display Name";
-      this.columnHeader1.Width = 337;
+      this.columnHeader1.Width = 367;
       // 
       // columnHeader3
       // 
       this.columnHeader3.Text = "Status";
-      this.columnHeader3.Width = 85;
+      this.columnHeader3.Width = 105;
       // 
       // WindowsServiceHyperTitleLabel
       // 
       this.WindowsServiceHyperTitleLabel.AutoSize = true;
-      this.WindowsServiceHyperTitleLabel.Location = new System.Drawing.Point(22, 154);
+      this.WindowsServiceHyperTitleLabel.Location = new System.Drawing.Point(22, 134);
       this.WindowsServiceHyperTitleLabel.Name = "WindowsServiceHyperTitleLabel";
       this.WindowsServiceHyperTitleLabel.Size = new System.Drawing.Size(148, 13);
-      this.WindowsServiceHyperTitleLabel.TabIndex = 7;
+      this.WindowsServiceHyperTitleLabel.TabIndex = 6;
       this.WindowsServiceHyperTitleLabel.Text = "Choose a Windows Service:";
       // 
       // ComputerLabel
       // 
       this.ComputerLabel.AutoSize = true;
-      this.ComputerLabel.Location = new System.Drawing.Point(61, 81);
+      this.ComputerLabel.Location = new System.Drawing.Point(22, 85);
       this.ComputerLabel.Name = "ComputerLabel";
       this.ComputerLabel.Size = new System.Drawing.Size(61, 13);
       this.ComputerLabel.TabIndex = 2;
@@ -279,11 +260,11 @@ namespace MySql.Notifier
       this.MachineSelectionComboBox.FormattingEnabled = true;
       this.MachineSelectionComboBox.Items.AddRange(new object[] {
             "Local",
-            "Remote...",
+            "Add Remote...",
             "————————————————————————"});
-      this.MachineSelectionComboBox.Location = new System.Drawing.Point(128, 78);
+      this.MachineSelectionComboBox.Location = new System.Drawing.Point(89, 82);
       this.MachineSelectionComboBox.Name = "MachineSelectionComboBox";
-      this.MachineSelectionComboBox.Size = new System.Drawing.Size(292, 21);
+      this.MachineSelectionComboBox.Size = new System.Drawing.Size(265, 21);
       this.MachineSelectionComboBox.TabIndex = 3;
       this.MachineSelectionComboBox.SelectedIndexChanged += new System.EventHandler(this.MachineSelectionComboBox_SelectedIndexChanged);
       // 
@@ -298,7 +279,7 @@ namespace MySql.Notifier
       this.BackColor = System.Drawing.SystemColors.Menu;
       this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
       this.CancelButton = this.DialogCancelButton;
-      this.ClientSize = new System.Drawing.Size(488, 542);
+      this.ClientSize = new System.Drawing.Size(529, 542);
       this.Controls.Add(this.panel2);
       this.Controls.Add(this.panel1);
       this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -312,7 +293,6 @@ namespace MySql.Notifier
       this.panel2.ResumeLayout(false);
       this.panel1.ResumeLayout(false);
       this.panel1.PerformLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.MachineAutoTestConnectionIntervalNumericUpDown)).EndInit();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -337,8 +317,7 @@ namespace MySql.Notifier
     private System.Windows.Forms.Label ComputerLabel;
     private System.Windows.Forms.ComboBox MachineSelectionComboBox;
     private System.Windows.Forms.Timer timerForFiltering;
-    private System.Windows.Forms.ComboBox MachineAutoTestConnectionIntervalUOMComboBox;
-    private System.Windows.Forms.Label MachineAutoTestConnectionLabel;
-    private System.Windows.Forms.NumericUpDown MachineAutoTestConnectionIntervalNumericUpDown;
+    private System.Windows.Forms.Button DeleteButton;
+    private System.Windows.Forms.Button EditButton;
   }
 }

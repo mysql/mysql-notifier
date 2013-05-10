@@ -164,6 +164,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The machine {0} has been added to the monitoring list..
+        /// </summary>
+        internal static string BalloonTextMachineAdded {
+            get {
+                return ResourceManager.GetString("BalloonTextMachineAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The machine {0} has been removed from the monitoring list..
         /// </summary>
         internal static string BalloonTextMachineRemoved {
@@ -391,6 +400,33 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to delete the selected machine and all its monitored services?.
+        /// </summary>
+        internal static string DeleteMachineConfirmationText {
+            get {
+                return ResourceManager.GetString("DeleteMachineConfirmationText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Machine.
+        /// </summary>
+        internal static string DeleteMachineConfirmationTitle {
+            get {
+                return ResourceManager.GetString("DeleteMachineConfirmationTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit Remote Machine.
+        /// </summary>
+        internal static string EditMachineText {
+            get {
+                return ResourceManager.GetString("EditMachineText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
         internal static string ErrorTitle {
@@ -523,7 +559,7 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The machine you&apos;re attempting to add already exist on the list, do you want to overwrite the credentials?.
+        ///   Looks up a localized string similar to The machine you&apos;re attempting to add already exists on the list of machines monitoring services..
         /// </summary>
         internal static string MachineAlreadyExistMessage {
             get {
@@ -532,7 +568,7 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Machine already exist.
+        ///   Looks up a localized string similar to Machine already exists.
         /// </summary>
         internal static string MachineAlreadyExistTitle {
             get {
@@ -857,6 +893,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Selected service is already in the list of monitored services..
+        /// </summary>
+        internal static string ServiceAlreadyInListWarningText {
+            get {
+                return ResourceManager.GetString("ServiceAlreadyInListWarningText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Loading application settings failed.  The application will continue to run but may not behave as you would expect..
         /// </summary>
         internal static string SettingsFileFailedToLoad {
@@ -945,6 +990,15 @@ namespace MySql.Notifier.Properties {
         internal static string UnSupportedWBXMLVersion {
             get {
                 return ResourceManager.GetString("UnSupportedWBXMLVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning.
+        /// </summary>
+        internal static string WarningText {
+            get {
+                return ResourceManager.GetString("WarningText", resourceCulture);
             }
         }
         

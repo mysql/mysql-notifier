@@ -160,9 +160,10 @@ namespace MySql.Notifier
       if (_selectedItem is MySQLService)
       {
         MySQLService selectedService = _selectedItem as MySQLService;
-        Machine machine = machinesList.GetMachineByHostName(selectedService.Host.Name);
-        machine.ChangeService(selectedService, ChangeType.Remove);
+        Machine machine = machinesList.GetMachineById(selectedService.Host.MachineId);
+        machine.ChangeService(selectedService, ChangeType.RemoveByUser);
         MonitoredServicesListView.Items.RemoveAt(MonitoredServicesListView.SelectedIndices[0]);
+        Settings.Default.Save();
       }
       else if (_selectedItem is MySQLInstance)
       {
@@ -387,23 +388,23 @@ namespace MySql.Notifier
           if (dialog.newMachine != null && dialog.ServicesToAdd != null && dialog.ServicesToAdd.Count > 0)
           {
             bool addedService = false;
-            newMachine = machinesList.GetMachineByHostName(dialog.newMachine.Name);
+            newMachine = machinesList.GetMachineById(dialog.newMachine.MachineId);
             if (newMachine == null)
             {
-              machinesList.ChangeMachine(dialog.newMachine, ChangeType.Add);
+              machinesList.ChangeMachine(dialog.newMachine, ChangeType.AddByUser);
               newMachine = dialog.newMachine;
             }
 
             foreach (MySQLService service in dialog.ServicesToAdd)
             {
-              if (!service.Host.IsLocal && newMachine.ContainsService(service))
+              if (newMachine.ContainsService(service))
               {
-                InfoDialog.ShowWarningDialog("Warning", "Selected Service is already in the Monitor List");
+                InfoDialog.ShowWarningDialog(Resources.WarningText, Resources.ServiceAlreadyInListWarningText);
               }
               else
               {
                 addedService = true;
-                newMachine.ChangeService(service, ChangeType.Add);
+                newMachine.ChangeService(service, ChangeType.AddByUser);
                 AddService(service, newMachine, true);
               }
             }

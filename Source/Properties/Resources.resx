@@ -413,10 +413,10 @@
    * Windows Firewall is not configured for WMI communication</value>
   </data>
   <data name="MachineAlreadyExistMessage" xml:space="preserve">
-    <value>The machine you're attempting to add already exist on the list, do you want to overwrite the credentials?</value>
+    <value>The machine you're attempting to add already exists on the list of machines monitoring services.</value>
   </data>
   <data name="MachineAlreadyExistTitle" xml:space="preserve">
-    <value>Machine already exist</value>
+    <value>Machine already exists</value>
   </data>
   <data name="BalloonTextMachineRemoved" xml:space="preserve">
     <value>The machine {0} has been removed from the monitoring list.</value>
@@ -435,5 +435,23 @@
   </data>
   <data name="CannotAddLocalhostTitle" xml:space="preserve">
     <value>Invalid host</value>
+  </data>
+  <data name="EditMachineText" xml:space="preserve">
+    <value>Edit Remote Machine</value>
+  </data>
+  <data name="BalloonTextMachineAdded" xml:space="preserve">
+    <value>The machine {0} has been added to the monitoring list.</value>
+  </data>
+  <data name="DeleteMachineConfirmationText" xml:space="preserve">
+    <value>Are you sure you want to delete the selected machine and all its monitored services?</value>
+  </data>
+  <data name="DeleteMachineConfirmationTitle" xml:space="preserve">
+    <value>Delete Machine</value>
+  </data>
+  <data name="ServiceAlreadyInListWarningText" xml:space="preserve">
+    <value>Selected service is already in the list of monitored services.</value>
+  </data>
+  <data name="WarningText" xml:space="preserve">
+    <value>Warning</value>
   </data>
 </root>

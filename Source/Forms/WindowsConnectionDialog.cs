@@ -29,25 +29,14 @@ namespace MySql.Notifier
   public partial class WindowsConnectionDialog : MachineAwareForm
   {
     /// <summary>
-    /// Regular Expresion for a valid Host/User name.
-    /// </summary>
-    private const string VALID_NAME_REGEX = @"^[\w\.\-_]{1,64}$";
-
-    /// <summary>
     /// Regular Expresion for a valid computer's IP address.
     /// </summary>
     private const string VALID_IP_REGEX = @"^([01]?[\d][\d]?|2[0-4][\d]|25[0-5])(\.([01]?[\d][\d]?|2[0-4][\d]|25[0-5])){3}$";
 
     /// <summary>
-    /// Returns true when the user entries seem valid credentials to perform a connection test.
+    /// Regular Expresion for a valid Host/User name.
     /// </summary>
-    private bool EntriesAreValid
-    {
-      get
-      {
-        return !(hostErrorSign.Visible || userErrorSign.Visible || String.IsNullOrEmpty(HostTextBox.Text) || String.IsNullOrEmpty(UserTextBox.Text) || String.IsNullOrEmpty(PasswordTextBox.Text));
-      }
-    }
+    private const string VALID_NAME_REGEX = @"^[\w\.\-_]{1,64}$";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WindowsConnectionDialog"/> class.
@@ -60,17 +49,36 @@ namespace MySql.Notifier
     /// <summary>
     /// Initializes a new instance of the <see cref="WindowsConnectionDialog"/> class.
     /// </summary>
-    public WindowsConnectionDialog(MachinesList machineslist, Machine CurrentMachine)
+    /// <param name="machineslist">List of the machines already being added to monitor services.</param>
+    /// <param name="currentMachine">Current machine for editing purposes.</param>
+    public WindowsConnectionDialog(MachinesList machineslist, Machine currentMachine)
       : this()
     {
-      if (CurrentMachine != null)
+      Text = currentMachine == null ? Text : Resources.EditMachineText;
+      if (currentMachine != null)
       {
-        newMachine = CurrentMachine;
-        Text = (string.IsNullOrEmpty(CurrentMachine.Name) || CurrentMachine.IsLocal) ? Text : "Edit Machine";
-        HostTextBox.Text = (string.IsNullOrEmpty(CurrentMachine.Name) || CurrentMachine.IsLocal) ? String.Empty : CurrentMachine.Name;
-        UserTextBox.Text = CurrentMachine.User ?? String.Empty;
-        PasswordTextBox.Text = CurrentMachine.UnprotectedPassword ?? String.Empty;
+        newMachine = currentMachine;
+        HostTextBox.Text = currentMachine.Name;
+        UserTextBox.Text = currentMachine.User;
+        PasswordTextBox.Text = currentMachine.UnprotectedPassword;
+        MachineAutoTestConnectionLabel.Visible = true;
+        MachineAutoTestConnectionIntervalNumericUpDown.Visible = true;
+        MachineAutoTestConnectionIntervalNumericUpDown.Value = newMachine.AutoTestConnectionInterval;
+        MachineAutoTestConnectionIntervalUOMComboBox.Visible = true;
+        MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndex = (int)newMachine.AutoTestConnectionIntervalUnitOfMeasure;
+        Height = 265;
+        EditMode = true;
       }
+      else
+      {
+        newMachine = new Machine();
+        MachineAutoTestConnectionLabel.Visible = false;
+        MachineAutoTestConnectionIntervalNumericUpDown.Visible = false;
+        MachineAutoTestConnectionIntervalUOMComboBox.Visible = false;
+        Height = 235;
+        EditMode = false;
+      }
+
       if (machineslist != null)
       {
         if (machineslist.Machines != null)
@@ -78,6 +86,91 @@ namespace MySql.Notifier
           machinesList = machineslist;
         }
       }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the dialog is in edit mode VS add mode.
+    /// </summary>
+    public bool EditMode { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the user entries seem valid credentials to perform a connection test.
+    /// </summary>
+    public bool EntriesAreValid
+    {
+      get
+      {
+        return !(hostErrorSign.Visible || userErrorSign.Visible || string.IsNullOrEmpty(HostTextBox.Text) || string.IsNullOrEmpty(UserTextBox.Text) || string.IsNullOrEmpty(PasswordTextBox.Text));
+      }
+    }
+
+    /// <summary>
+    /// Handles the click event for both TestConnectionButton and DialogOKButton
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void Button_Click(object sender, EventArgs e)
+    {
+      Cursor = Cursors.WaitCursor;
+      DialogOKButton.Enabled = TestConnectionButton.Enabled = false;
+      newMachine.Name = HostTextBox.Text.Trim();
+      newMachine.User = UserTextBox.Text.Trim();
+      newMachine.Password = MySQLSecurity.EncryptPassword(PasswordTextBox.Text);
+      if (TestConnectionAndPermissionsSet(sender.Equals(TestConnectionButton)))
+      {
+        if (sender.Equals(TestConnectionButton))
+        {
+          InfoDialog.ShowSuccessDialog(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage);
+          DialogOKButton.Enabled = TestConnectionButton.Enabled = EntriesAreValid;
+          DialogOKButton.Focus();
+        }
+        else
+        {
+          DialogOKButton.DialogResult = this.DialogResult = DialogResult.OK;
+        }
+      }
+
+      Cursor = Cursors.Default;
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="MachineAutoTestConnectionIntervalNumericUpDown"/> value changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void MachineAutoTestConnectionIntervalNumericUpDown_ValueChanged(object sender, EventArgs e)
+    {
+      newMachine.AutoTestConnectionInterval = (uint)MachineAutoTestConnectionIntervalNumericUpDown.Value;
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="MachineAutoTestConnectionIntervalUOMComboBox"/> selected index changes.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void MachineAutoTestConnectionIntervalUOMComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+      newMachine.AutoTestConnectionIntervalUnitOfMeasure = (TimeUtilities.IntervalUnitOfMeasure)MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndex;
+    }
+
+    /// <summary>
+    /// Performs a connection test to the remote host as well as validating the right permissions are set for the credentials provided by the user.
+    /// </summary>
+    /// <param name="forceTest">Indicates whether the test is performed regardless of the current status of the machine.</param>
+    /// <returns>True if no problems were found during the test.</returns>
+    private bool TestConnectionAndPermissionsSet(bool forceTest)
+    {
+      if (!EntriesAreValid)
+      {
+        return false;
+      }
+
+      if (forceTest || !newMachine.IsOnline)
+      {
+        newMachine.TestConnection(true, false);
+      }
+
+      return newMachine.IsOnline;
     }
 
     /// <summary>
@@ -92,24 +185,28 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Performs entry validation when the user stopped writing for long enough to let the tick event occur.
-    /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="e">Event arguments.</param>
-    private void timerTextChanged_Tick(object sender, EventArgs e)
-    {
-      ValidateEntries();
-      timerTextChanged.Stop();
-    }
-
-    /// <summary>
     /// Calls the ValidateEntries entries immediately.
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
     private void TextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
     {
-      ValidateEntries();
+      timerTextChanged_Tick(timerTextChanged, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Performs entry validation when the user stopped writing for long enough to let the tick event occur.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void timerTextChanged_Tick(object sender, EventArgs e)
+    {
+      bool validate = timerTextChanged.Enabled;
+      timerTextChanged.Stop();
+      if (validate)
+      {
+        ValidateEntries();
+      }
     }
 
     /// <summary>
@@ -120,18 +217,27 @@ namespace MySql.Notifier
       //// Validate Host name
       if (!string.IsNullOrEmpty(HostTextBox.Text))
       {
-        string hostname = HostTextBox.Text.ToLowerInvariant();
-        //// Host name is invalid if is a local machine
-        bool hostNameIsNotRemote = (hostname == MySqlWorkbenchConnection.DEFAULT_HOSTNAME || hostname == MySqlWorkbenchConnection.LOCAL_IP || hostname == ".");
-        //// Host name is also invalid if has non allowed characters or if is not a proper formated IP address.
-        bool hostNameIsInvalid = hostNameIsNotRemote ? hostNameIsNotRemote : !(Regex.IsMatch(HostTextBox.Text, VALID_NAME_REGEX) || Regex.IsMatch(HostTextBox.Text, VALID_IP_REGEX));
-
-        hostErrorSign.Visible = hostNameIsInvalid;
-
-        if (hostNameIsNotRemote)
+        bool validName = true;
+        string hostname = HostTextBox.Text.Trim();
+        if (hostname.ToLowerInvariant() == MySqlWorkbenchConnection.DEFAULT_HOSTNAME || hostname == MySqlWorkbenchConnection.LOCAL_IP || hostname == ".")
         {
+          //// Host name is invalid if is a local machine
+          validName = false;
           InfoDialog.ShowErrorDialog(Resources.CannotAddLocalhostTitle, Resources.CannotAddLocalhostMessage);
         }
+        else if (!EditMode && machinesList.HasMachineWithName(hostname))
+        {
+          //// Host name already exists on the list of added remote machines
+          validName = false;
+          InfoDialog.ShowErrorDialog(Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage);
+        }
+        else
+        {
+          //// Host name is also invalid if has non allowed characters or if is not a proper formated IP address.
+          validName = Regex.IsMatch(hostname, VALID_NAME_REGEX) || Regex.IsMatch(hostname, VALID_IP_REGEX);
+        }
+
+        hostErrorSign.Visible = !validName;
       }
 
       //// Username is invalid if if has non allowed characters.
@@ -139,61 +245,6 @@ namespace MySql.Notifier
 
       //// Enable TestConnectionButton and DialogOKButton if entries seem valid.
       DialogOKButton.Enabled = TestConnectionButton.Enabled = EntriesAreValid;
-    }
-
-    /// <summary>
-    /// Handles the click event for both TestConnectionButton and DialogOKButton
-    /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="e">Event arguments.</param>
-    private void Button_Click(object sender, EventArgs e)
-    {
-      Cursor = Cursors.WaitCursor;
-      DialogOKButton.Enabled = TestConnectionButton.Enabled = false;
-      if (TestConnectionAndPermissionsSet(sender.Equals(TestConnectionButton)))
-      {
-        if (sender.Equals(TestConnectionButton))
-        {
-          InfoDialog.ShowSuccessDialog(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage);
-          DialogOKButton.Enabled = TestConnectionButton.Enabled = EntriesAreValid;
-          DialogOKButton.Focus();
-        }
-        else
-        {
-          DialogOKButton.DialogResult = this.DialogResult = DialogResult.OK;
-        }
-      }
-      Cursor = Cursors.Default;
-    }
-
-    /// <summary>
-    /// Performs a connection test to the remote host as well as validating the right permissions are set for the credentials provided by the user.
-    /// </summary>
-    /// <param name="OnlyTest">Indicates whether the user is testing for connectivity or wanting to work with the provided credentials and close the dialog.</param>
-    /// <returns>True if no problems were found during the test.</returns>
-    private bool TestConnectionAndPermissionsSet(bool OnlyTest)
-    {
-      if (!EntriesAreValid)
-      {
-        return false;
-      }
-
-      newMachine = new Machine(HostTextBox.Text, UserTextBox.Text, PasswordTextBox.Text);
-      newMachine.TestConnection(true, false);
-
-      if (!OnlyTest && machinesList.GetMachineByHostName(newMachine.Name) != null)
-      {
-        if (InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage) == DialogResult.Yes)
-        {
-          newMachine = machinesList.OverwriteMachine(newMachine);
-        }
-        else
-        {
-          return false;
-        }
-      }
-
-      return newMachine.IsOnline;
     }
   }
 }

@@ -423,17 +423,26 @@ namespace MySql.Notifier
     /// <param name="changeType">List change type.</param>
     private void machinesList_MachineListChanged(Machine machine, ChangeType changeType)
     {
-      RebuildMenuIfNeeded(changeType == ChangeType.Remove);
+      RebuildMenuIfNeeded(changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser);
       switch (changeType)
       {
-        case ChangeType.Add:
+        case ChangeType.AddByUser:
+        case ChangeType.AddByLoad:
         case ChangeType.AutoAdd:
           machine.SetupMenuGroup(notifyIcon.ContextMenuStrip);
+          if (changeType == ChangeType.AutoAdd)
+          {
+            ShowTooltip(false, Resources.BalloonTitleMachinesList, string.Format(Resources.BalloonTextMachineAdded, machine.Name));
+          }
           break;
 
-        case ChangeType.Remove:
+        case ChangeType.RemoveByUser:
+        case ChangeType.RemoveByEvent:
           machine.RemoveMenuGroup(notifyIcon.ContextMenuStrip);
-          ShowTooltip(false, Resources.BalloonTitleMachinesList, string.Format(Resources.BalloonTextMachineRemoved, machine.Name));
+          if (changeType == ChangeType.RemoveByEvent)
+          {
+            ShowTooltip(false, Resources.BalloonTitleMachinesList, string.Format(Resources.BalloonTextMachineRemoved, machine.Name));
+          }
           break;
       }
     }
@@ -446,10 +455,11 @@ namespace MySql.Notifier
     /// <param name="changeType">List change type.</param>
     private void machinesList_MachineServiceListChanged(Machine machine, MySQLService service, ChangeType changeType)
     {
-      RebuildMenuIfNeeded(changeType == ChangeType.Remove);
+      RebuildMenuIfNeeded(changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser);
       switch (changeType)
       {
-        case ChangeType.Add:
+        case ChangeType.AddByLoad:
+        case ChangeType.AddByUser:
         case ChangeType.AutoAdd:
           service.MenuGroup.AddToContextMenu(notifyIcon.ContextMenuStrip);
           if (changeType == ChangeType.AutoAdd && Settings.Default.NotifyOfAutoServiceAddition)
@@ -459,13 +469,26 @@ namespace MySql.Notifier
 
           break;
 
-        case ChangeType.Remove:
+        case ChangeType.RemoveByUser:
+        case ChangeType.RemoveByEvent:
           service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);
-          ShowTooltip(false, Resources.BalloonTitleServiceList, String.Format(Resources.BalloonTextServiceRemoved, service.ServiceName));
+          if (changeType == ChangeType.RemoveByEvent)
+          {
+            ShowTooltip(false, Resources.BalloonTitleServiceList, String.Format(Resources.BalloonTextServiceRemoved, service.ServiceName));
+          }
+          break;
+
+        case ChangeType.Updated:
+          if (service.MenuGroup != null)
+          {
+            service.MenuGroup.Update();
+          }
           break;
       }
 
+      //// Update icon and tooltip
       RefreshNotifierIcon();
+      SetNotifyIconToolTip();
     }
 
     /// <summary>
@@ -544,9 +567,6 @@ namespace MySql.Notifier
 
       //// Resume the global timer.
       _globalTimer.Start();
-
-      //// Update icon
-      RefreshNotifierIcon();
     }
 
     /// <summary>
@@ -560,12 +580,12 @@ namespace MySql.Notifier
       //// Attempt migration only if services were found
       if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
       {
-        if (machinesList.Machines == null || machinesList.Machines.Count == 0 || machinesList.GetMachineByHostName("localhost") == null)
+        if (machinesList.Machines == null || machinesList.Machines.Count == 0 || !machinesList.Machines.Exists(m => m.IsLocal))
         {
-          machinesList.ChangeMachine(new Machine(), ChangeType.Add);
+          machinesList.ChangeMachine(new Machine(), ChangeType.AutoAdd);
         }
 
-        Machine machine = machinesList.GetMachineByHostName("localhost");
+        Machine machine = machinesList.Machines.Find(m => m.IsLocal);
 
         //// Copy services from old schema to the Local machine.
         foreach (MySQLService service in mySQLServicesList.Services)
@@ -623,6 +643,8 @@ namespace MySql.Notifier
           RefreshNotifierIcon();
           break;
       }
+
+      SetNotifyIconToolTip();
     }
 
     /// <summary>
@@ -870,7 +892,7 @@ namespace MySql.Notifier
         List<MySQLService> removingServices = machine.Services.FindAll(s => !s.ServiceInstanceExists);
         foreach (MySQLService service in removingServices)
         {
-          machine.ChangeService(service, ChangeType.Remove);
+          machine.ChangeService(service, ChangeType.RemoveByEvent);
           servicesRemoved = true;
         }
       }

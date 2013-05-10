@@ -56,6 +56,9 @@ namespace MySql.Notifier
       this.TestConnectionButton = new System.Windows.Forms.Button();
       this.DialogCancelButton = new System.Windows.Forms.Button();
       this.ContentAreaPanel = new System.Windows.Forms.Panel();
+      this.MachineAutoTestConnectionIntervalUOMComboBox = new System.Windows.Forms.ComboBox();
+      this.MachineAutoTestConnectionLabel = new System.Windows.Forms.Label();
+      this.MachineAutoTestConnectionIntervalNumericUpDown = new System.Windows.Forms.NumericUpDown();
       this.userErrorSign = new System.Windows.Forms.PictureBox();
       this.hostErrorSign = new System.Windows.Forms.PictureBox();
       this.HostTextBox = new System.Windows.Forms.TextBox();
@@ -68,6 +71,7 @@ namespace MySql.Notifier
       this.PasswordLabel = new System.Windows.Forms.Label();
       this.CommandAreaPanel.SuspendLayout();
       this.ContentAreaPanel.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.MachineAutoTestConnectionIntervalNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.userErrorSign)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.hostErrorSign)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.LogoPictureBox)).BeginInit();
@@ -83,7 +87,7 @@ namespace MySql.Notifier
       this.DialogOKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogOKButton.Enabled = false;
       this.DialogOKButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogOKButton.Location = new System.Drawing.Point(256, 14);
+      this.DialogOKButton.Location = new System.Drawing.Point(258, 14);
       this.DialogOKButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.DialogOKButton.Name = "DialogOKButton";
       this.DialogOKButton.Size = new System.Drawing.Size(78, 23);
@@ -100,9 +104,9 @@ namespace MySql.Notifier
       this.CommandAreaPanel.Controls.Add(this.DialogOKButton);
       this.CommandAreaPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
       this.CommandAreaPanel.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 157);
+      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 187);
       this.CommandAreaPanel.Name = "CommandAreaPanel";
-      this.CommandAreaPanel.Size = new System.Drawing.Size(425, 50);
+      this.CommandAreaPanel.Size = new System.Drawing.Size(427, 50);
       this.CommandAreaPanel.TabIndex = 1;
       // 
       // TestConnectionButton
@@ -123,7 +127,7 @@ namespace MySql.Notifier
       this.DialogCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
       this.DialogCancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogCancelButton.Location = new System.Drawing.Point(337, 14);
+      this.DialogCancelButton.Location = new System.Drawing.Point(339, 14);
       this.DialogCancelButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.DialogCancelButton.Name = "DialogCancelButton";
       this.DialogCancelButton.Size = new System.Drawing.Size(78, 23);
@@ -133,6 +137,9 @@ namespace MySql.Notifier
       // 
       // ContentAreaPanel
       // 
+      this.ContentAreaPanel.Controls.Add(this.MachineAutoTestConnectionIntervalUOMComboBox);
+      this.ContentAreaPanel.Controls.Add(this.MachineAutoTestConnectionLabel);
+      this.ContentAreaPanel.Controls.Add(this.MachineAutoTestConnectionIntervalNumericUpDown);
       this.ContentAreaPanel.Controls.Add(this.userErrorSign);
       this.ContentAreaPanel.Controls.Add(this.hostErrorSign);
       this.ContentAreaPanel.Controls.Add(this.HostTextBox);
@@ -146,13 +153,52 @@ namespace MySql.Notifier
       this.ContentAreaPanel.Dock = System.Windows.Forms.DockStyle.Fill;
       this.ContentAreaPanel.Location = new System.Drawing.Point(0, 0);
       this.ContentAreaPanel.Name = "ContentAreaPanel";
-      this.ContentAreaPanel.Size = new System.Drawing.Size(425, 207);
+      this.ContentAreaPanel.Size = new System.Drawing.Size(427, 237);
       this.ContentAreaPanel.TabIndex = 0;
+      // 
+      // MachineAutoTestConnectionIntervalUOMComboBox
+      // 
+      this.MachineAutoTestConnectionIntervalUOMComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.MachineAutoTestConnectionIntervalUOMComboBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.MachineAutoTestConnectionIntervalUOMComboBox.Items.AddRange(new object[] {
+            "seconds",
+            "minutes",
+            "hours",
+            "days"});
+      this.MachineAutoTestConnectionIntervalUOMComboBox.Location = new System.Drawing.Point(307, 147);
+      this.MachineAutoTestConnectionIntervalUOMComboBox.Name = "MachineAutoTestConnectionIntervalUOMComboBox";
+      this.MachineAutoTestConnectionIntervalUOMComboBox.Size = new System.Drawing.Size(88, 23);
+      this.MachineAutoTestConnectionIntervalUOMComboBox.TabIndex = 9;
+      this.MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndexChanged += new System.EventHandler(this.MachineAutoTestConnectionIntervalUOMComboBox_SelectedIndexChanged);
+      // 
+      // MachineAutoTestConnectionLabel
+      // 
+      this.MachineAutoTestConnectionLabel.AutoSize = true;
+      this.MachineAutoTestConnectionLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.MachineAutoTestConnectionLabel.Location = new System.Drawing.Point(17, 150);
+      this.MachineAutoTestConnectionLabel.Name = "MachineAutoTestConnectionLabel";
+      this.MachineAutoTestConnectionLabel.Size = new System.Drawing.Size(223, 15);
+      this.MachineAutoTestConnectionLabel.TabIndex = 7;
+      this.MachineAutoTestConnectionLabel.Text = "Check computer connection status every";
+      // 
+      // MachineAutoTestConnectionIntervalNumericUpDown
+      // 
+      this.MachineAutoTestConnectionIntervalNumericUpDown.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.MachineAutoTestConnectionIntervalNumericUpDown.Location = new System.Drawing.Point(246, 147);
+      this.MachineAutoTestConnectionIntervalNumericUpDown.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+      this.MachineAutoTestConnectionIntervalNumericUpDown.Name = "MachineAutoTestConnectionIntervalNumericUpDown";
+      this.MachineAutoTestConnectionIntervalNumericUpDown.Size = new System.Drawing.Size(51, 23);
+      this.MachineAutoTestConnectionIntervalNumericUpDown.TabIndex = 8;
+      this.MachineAutoTestConnectionIntervalNumericUpDown.ValueChanged += new System.EventHandler(this.MachineAutoTestConnectionIntervalNumericUpDown_ValueChanged);
       // 
       // userErrorSign
       // 
       this.userErrorSign.Image = global::MySql.Notifier.Properties.Resources.InstallAvailableUpdatesIcon;
-      this.userErrorSign.Location = new System.Drawing.Point(397, 83);
+      this.userErrorSign.Location = new System.Drawing.Point(401, 83);
       this.userErrorSign.Name = "userErrorSign";
       this.userErrorSign.Size = new System.Drawing.Size(16, 16);
       this.userErrorSign.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -163,7 +209,7 @@ namespace MySql.Notifier
       // hostErrorSign
       // 
       this.hostErrorSign.Image = global::MySql.Notifier.Properties.Resources.InstallAvailableUpdatesIcon;
-      this.hostErrorSign.Location = new System.Drawing.Point(397, 52);
+      this.hostErrorSign.Location = new System.Drawing.Point(401, 52);
       this.hostErrorSign.Name = "hostErrorSign";
       this.hostErrorSign.Size = new System.Drawing.Size(16, 16);
       this.hostErrorSign.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -174,7 +220,7 @@ namespace MySql.Notifier
       // HostTextBox
       // 
       this.HostTextBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.HostTextBox.Location = new System.Drawing.Point(166, 49);
+      this.HostTextBox.Location = new System.Drawing.Point(170, 49);
       this.HostTextBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.HostTextBox.Name = "HostTextBox";
       this.HostTextBox.Size = new System.Drawing.Size(225, 23);
@@ -185,7 +231,7 @@ namespace MySql.Notifier
       // UserTextBox
       // 
       this.UserTextBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.UserTextBox.Location = new System.Drawing.Point(166, 80);
+      this.UserTextBox.Location = new System.Drawing.Point(170, 80);
       this.UserTextBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.UserTextBox.Name = "UserTextBox";
       this.UserTextBox.Size = new System.Drawing.Size(225, 23);
@@ -196,10 +242,10 @@ namespace MySql.Notifier
       // LogoPictureBox
       // 
       this.LogoPictureBox.Image = global::MySql.Notifier.Properties.Resources.ApplicationLogo;
-      this.LogoPictureBox.Location = new System.Drawing.Point(19, 49);
+      this.LogoPictureBox.Location = new System.Drawing.Point(20, 49);
       this.LogoPictureBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.LogoPictureBox.Name = "LogoPictureBox";
-      this.LogoPictureBox.Size = new System.Drawing.Size(60, 60);
+      this.LogoPictureBox.Size = new System.Drawing.Size(64, 64);
       this.LogoPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
       this.LogoPictureBox.TabIndex = 31;
       this.LogoPictureBox.TabStop = false;
@@ -208,7 +254,7 @@ namespace MySql.Notifier
       // 
       this.HypertitleLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.HypertitleLabel.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.HypertitleLabel.Location = new System.Drawing.Point(92, 9);
+      this.HypertitleLabel.Location = new System.Drawing.Point(72, 9);
       this.HypertitleLabel.Name = "HypertitleLabel";
       this.HypertitleLabel.Size = new System.Drawing.Size(303, 30);
       this.HypertitleLabel.TabIndex = 0;
@@ -218,7 +264,7 @@ namespace MySql.Notifier
       // PasswordTextBox
       // 
       this.PasswordTextBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.PasswordTextBox.Location = new System.Drawing.Point(166, 111);
+      this.PasswordTextBox.Location = new System.Drawing.Point(170, 111);
       this.PasswordTextBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.PasswordTextBox.Name = "PasswordTextBox";
       this.PasswordTextBox.Size = new System.Drawing.Size(225, 23);
@@ -232,7 +278,7 @@ namespace MySql.Notifier
       this.HostLabel.AutoSize = true;
       this.HostLabel.BackColor = System.Drawing.Color.Transparent;
       this.HostLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.HostLabel.Location = new System.Drawing.Point(92, 52);
+      this.HostLabel.Location = new System.Drawing.Point(96, 52);
       this.HostLabel.Name = "HostLabel";
       this.HostLabel.Size = new System.Drawing.Size(68, 15);
       this.HostLabel.TabIndex = 1;
@@ -243,7 +289,7 @@ namespace MySql.Notifier
       this.UserLabel.AutoSize = true;
       this.UserLabel.BackColor = System.Drawing.Color.Transparent;
       this.UserLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.UserLabel.Location = new System.Drawing.Point(94, 83);
+      this.UserLabel.Location = new System.Drawing.Point(98, 83);
       this.UserLabel.Name = "UserLabel";
       this.UserLabel.Size = new System.Drawing.Size(66, 15);
       this.UserLabel.TabIndex = 3;
@@ -254,7 +300,7 @@ namespace MySql.Notifier
       this.PasswordLabel.AutoSize = true;
       this.PasswordLabel.BackColor = System.Drawing.Color.Transparent;
       this.PasswordLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.PasswordLabel.Location = new System.Drawing.Point(100, 114);
+      this.PasswordLabel.Location = new System.Drawing.Point(104, 114);
       this.PasswordLabel.Name = "PasswordLabel";
       this.PasswordLabel.Size = new System.Drawing.Size(60, 15);
       this.PasswordLabel.TabIndex = 5;
@@ -266,7 +312,7 @@ namespace MySql.Notifier
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
       this.AutoValidate = System.Windows.Forms.AutoValidate.EnablePreventFocusChange;
       this.BackColor = System.Drawing.SystemColors.Window;
-      this.ClientSize = new System.Drawing.Size(425, 207);
+      this.ClientSize = new System.Drawing.Size(427, 237);
       this.Controls.Add(this.CommandAreaPanel);
       this.Controls.Add(this.ContentAreaPanel);
       this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
@@ -280,6 +326,7 @@ namespace MySql.Notifier
       this.CommandAreaPanel.ResumeLayout(false);
       this.ContentAreaPanel.ResumeLayout(false);
       this.ContentAreaPanel.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.MachineAutoTestConnectionIntervalNumericUpDown)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.userErrorSign)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.hostErrorSign)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.LogoPictureBox)).EndInit();
@@ -305,5 +352,8 @@ namespace MySql.Notifier
     private System.Windows.Forms.Timer timerTextChanged;
     private System.Windows.Forms.PictureBox userErrorSign;
     private System.Windows.Forms.PictureBox hostErrorSign;
+    private System.Windows.Forms.ComboBox MachineAutoTestConnectionIntervalUOMComboBox;
+    private System.Windows.Forms.Label MachineAutoTestConnectionLabel;
+    private System.Windows.Forms.NumericUpDown MachineAutoTestConnectionIntervalNumericUpDown;
   }
 }

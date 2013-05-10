@@ -186,7 +186,7 @@ namespace MySql.Notifier
     {
       get
       {
-        return ServiceManagementObject != null;
+        return !Host.IsOnline || ServiceManagementObject != null;
       }
     }
 

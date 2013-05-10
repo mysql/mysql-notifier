@@ -111,22 +111,25 @@ namespace MySql.Notifier
       switch (changeType)
       {
         case ChangeType.AutoAdd:
-        case ChangeType.Add:
+        case ChangeType.AddByLoad:
+        case ChangeType.AddByUser:
           //// Verify if this is the first machine that would be added to the list, in that case, initialize the list.
           if (Machines == null)
           {
             Machines = new List<Machine>();
           }
 
-          //// If Machine already exists we don'_statusChangeTimer need to do anything else here;
-          if (MachineIsOnTheList(machine.Name))
+          //// If Machine already exists we don't need to do anything else here;
+          if (HasMachineWithId(machine.MachineId))
           {
             return;
           }
+
           Machines.Add(machine);
           break;
 
-        case ChangeType.Remove:
+        case ChangeType.RemoveByUser:
+        case ChangeType.RemoveByEvent:
           if (machine.Services.Count == 0)
           {
             Machines.Remove(machine);
@@ -147,13 +150,43 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Gets the machine corresponding to the given host name.
+    /// Gets the machine corresponding to the given machine ID.
     /// </summary>
-    /// <param name="name">Host name of the machine.</param>
-    /// <returns>The machine matching the given host name.</returns>
-    public Machine GetMachineByHostName(string name)
+    /// <param name="id">Id of the machine to find.</param>
+    /// <returns>The machine matching the given ID.</returns>
+    public Machine GetMachineById(string id)
     {
-      return Machines.Find(m => string.Compare(m.Name, name, true) == 0);
+      return Machines == null || Machines.Count == 0 ? null : Machines.Find(m => m.MachineId == id);
+    }
+
+    /// <summary>
+    /// Gets the machine corresponding to the given machine name.
+    /// </summary>
+    /// <param name="machineName">Name of the machine to find.</param>
+    /// <returns>The machine matching the given name.</returns>
+    public Machine GetMachineByName(string machineName)
+    {
+      return Machines == null || Machines.Count == 0 ? null : Machines.Find(m => string.Compare(m.Name, machineName, true) == 0);
+    }
+
+    /// <summary>
+    /// Checks if a machine with the given ID exists in the list of machines.
+    /// </summary>
+    /// <param name="machineId">ID of the machine to search in the list of machines.</param>
+    /// <returns>true if a machine with the given ID exists in the list, false otherwise.</returns>
+    public bool HasMachineWithId(string machineId)
+    {
+      return GetMachineById(machineId) != null;
+    }
+
+    /// <summary>
+    /// Checks if a machine with the given name exists in the list of machines.
+    /// </summary>
+    /// <param name="machineName">Name of the machine to search in the list of machines.</param>
+    /// <returns>true if a machine with the given name exists in the list, false otherwise.</returns>
+    public bool HasMachineWithName(string machineName)
+    {
+      return GetMachineByName(machineName) != null;
     }
 
     /// <summary>
@@ -173,7 +206,7 @@ namespace MySql.Notifier
 
       foreach (Machine machine in Machines)
       {
-        OnMachineListChanged(machine, ChangeType.Add);
+        OnMachineListChanged(machine, ChangeType.AddByLoad);
         machine.LoadServicesParameters();
       }
     }
@@ -187,23 +220,6 @@ namespace MySql.Notifier
       {
         machine.SecondsToAutoTestConnection--;
       }
-    }
-
-    /// <summary>
-    /// Overwrites the credentials of a machine in the machines list with the ones in the given machine as long as the machine names match.
-    /// </summary>
-    /// <param name="newMachine">Machine with new credentials.</param>
-    /// <returns>Machine with overwritten credentials if found with the same name.</returns>
-    internal Machine OverwriteMachine(Machine newMachine)
-    {
-      Machine existingMachine = GetMachineByHostName(newMachine.Name);
-      if (existingMachine != null)
-      {
-        existingMachine.OverwriteCredentials(newMachine.User, newMachine.UnprotectedPassword);
-        Settings.Default.Save();
-      }
-
-      return existingMachine;
     }
 
     /// <summary>
@@ -238,22 +254,26 @@ namespace MySql.Notifier
     /// <param name="changeType"></param>
     protected virtual void OnMachineListChanged(Machine machine, ChangeType changeType)
     {
-      if (MachineListChanged != null)
-      {
-        MachineListChanged(machine, changeType);
-      }
-
       machine.MachineStatusChanged -= OnMachineStatusChanged;
       machine.ServiceListChanged -= OnMachineServiceListChanged;
       machine.ServiceStatusChanged -= OnMachineServiceStatusChanged;
       machine.ServiceStatusChangeError -= OnMachineServiceStatusChangeError;
 
-      if (changeType != ChangeType.Remove)
+      if (changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser)
+      {
+        machine.RemoveAllServices();
+      }
+      else
       {
         machine.MachineStatusChanged += OnMachineStatusChanged;
         machine.ServiceListChanged += OnMachineServiceListChanged;
         machine.ServiceStatusChanged += OnMachineServiceStatusChanged;
         machine.ServiceStatusChangeError += OnMachineServiceStatusChangeError;
+      }
+
+      if (MachineListChanged != null)
+      {
+        MachineListChanged(machine, changeType);
       }
     }
 
@@ -343,21 +363,6 @@ namespace MySql.Notifier
       Settings.Default.FirstRun = false;
       Settings.Default.Save();
     }
-
-    /// <summary>
-    /// Checks if a machine with the given name exists in the list of machines.
-    /// </summary>
-    /// <param name="machineName">Name of the machine to search in the list of machines.</param>
-    /// <returns>true if a machine with the given name exists in the list, false otherwise.</returns>
-    private bool MachineIsOnTheList(string machineName)
-    {
-      if (Machines == null || Machines.Count == 0)
-      {
-        return false;
-      }
-
-      return GetMachineByHostName(machineName) != null;
-    }
   }
 
   /// <summary>
@@ -366,18 +371,33 @@ namespace MySql.Notifier
   public enum ChangeType
   {
     /// <summary>
-    /// An element was added to the list.
+    /// An element was added to the list by a user.
     /// </summary>
-    Add,
+    AddByUser,
 
     /// <summary>
-    /// An element has been added to the list automatically in an initial load.
+    /// An element was added to the list during the initial load.
+    /// </summary>
+    AddByLoad,
+
+    /// <summary>
+    /// An element has been added to the list automatically by an Auto-Add or Service Migration operation.
     /// </summary>
     AutoAdd,
 
     /// <summary>
-    /// An element was removed from the list.
+    /// An element was removed from the list by a user.
     /// </summary>
-    Remove
+    RemoveByUser,
+
+    /// <summary>
+    /// An element was removed from the list by an event notification.
+    /// </summary>
+    RemoveByEvent,
+
+    /// <summary>
+    /// An element within the list was updated.
+    /// </summary>
+    Updated
   }
 }
