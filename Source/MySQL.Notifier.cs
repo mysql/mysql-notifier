@@ -79,7 +79,6 @@ namespace MySql.Notifier
       mySQLInstancesList.InstanceConnectionStatusTestErrorThrown += MySQLInstanceConnectionStatusTestErrorThrown;
 
       machinesList = new MachinesList();
-      MigrateOldServices();
       machinesList.MachineListChanged += machinesList_MachineListChanged;
       machinesList.MachineServiceStatusChangeError += machinesList_MachineServiceStatusChangeError;
       machinesList.MachineServiceListChanged += machinesList_MachineServiceListChanged;
@@ -90,7 +89,7 @@ namespace MySql.Notifier
       SetNotifyIconToolTip();
 
       //// This method ▼ populates services with post-load information, we need to execute it after the Popup-Menu has been initialized at RefreshMenuIfNeeded(bool).
-      machinesList.Refresh();
+      machinesList.LoadMachinesServices();
       previousServicesAndInstancesQuantity = machinesList.ServicesCount + mySQLInstancesList.Count;
 
       //// Create watcher for WB files
@@ -118,8 +117,6 @@ namespace MySql.Notifier
           Utility.CreateScheduledTask("MySQLNotifierTask", location + @"MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, false, Utility.GetOsVersion() == Utility.OSVersion.WindowsXp);
         }
       }
-
-      UpdateListToRemoveDeletedServices();
 
       //// Load instances
       mySQLInstancesList.RefreshInstances(true);
@@ -570,36 +567,6 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Merge the old services schema into the new one
-    /// </summary>
-    private void MigrateOldServices()
-    {
-      //// Load old services schema
-      mySQLServicesList = new MySQLServicesList();
-
-      //// Attempt migration only if services were found
-      if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
-      {
-        if (machinesList.Machines == null || machinesList.Machines.Count == 0 || !machinesList.Machines.Exists(m => m.IsLocal))
-        {
-          machinesList.ChangeMachine(new Machine(), ChangeType.AutoAdd);
-        }
-
-        Machine machine = machinesList.Machines.Find(m => m.IsLocal);
-
-        //// Copy services from old schema to the Local machine.
-        foreach (MySQLService service in mySQLServicesList.Services)
-        {
-          machine.ChangeService(service, ChangeType.AutoAdd);
-        }
-
-        //// Clear the old list of services to erase the duplicates on the newer schema
-        mySQLServicesList.Services.Clear();
-        Settings.Default.Save();
-      }
-    }
-
-    /// <summary>
     /// Event delegate method fired when an error is thrown while testing a MySQL Instance's status witin the <see cref="mySQLInstancesList"/>.
     /// </summary>
     /// <param name="sender">Sender object.</param>
@@ -872,35 +839,6 @@ namespace MySql.Notifier
     {
       machinesList.UpdateMachinesConnectionTimeouts();
       mySQLInstancesList.UpdateInstancesConnectionTimeouts();
-    }
-
-    /// <summary>
-    /// Creates a FileSystemWatcher for the specified file
-    /// </summary>
-    /// <param name="filePath">File to add the file system watcher</param>
-    /// <param name="method">Action method</param>
-    private void UpdateListToRemoveDeletedServices()
-    {
-      bool servicesRemoved = false;
-      foreach (Machine machine in machinesList.Machines)
-      {
-        if (machine.Services == null || machine.Services.Count == 0)
-        {
-          continue;
-        }
-
-        List<MySQLService> removingServices = machine.Services.FindAll(s => !s.ServiceInstanceExists);
-        foreach (MySQLService service in removingServices)
-        {
-          machine.ChangeService(service, ChangeType.RemoveByEvent);
-          servicesRemoved = true;
-        }
-      }
-
-      if (servicesRemoved)
-      {
-        Settings.Default.Save();
-      }
     }
 
     private void UpdateStaticMenuItems()

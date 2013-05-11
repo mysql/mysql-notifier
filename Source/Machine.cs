@@ -24,7 +24,6 @@ namespace MySql.Notifier
   using System.ComponentModel;
   using System.Drawing;
   using System.Management;
-  using System.Runtime.InteropServices;
   using System.Windows.Forms;
   using System.Xml.Serialization;
   using MySql.Notifier.Properties;

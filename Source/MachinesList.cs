@@ -24,7 +24,6 @@ namespace MySql.Notifier
   using System.Linq;
   using System.Management;
   using MySql.Notifier.Properties;
-  using MySQL.Utility;
 
   /// <summary>
   /// This class serves as a manager of machines and its services for the Notifier class
@@ -36,6 +35,7 @@ namespace MySql.Notifier
     /// </summary>
     public MachinesList()
     {
+      InitialLoad();
     }
 
     #region Events
@@ -190,20 +190,68 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Refreshes the machines list and subscribes to machine events.
+    /// Performs load operations that had to be done after the settings file was de-serialized.
     /// </summary>
-    public void Refresh()
+    public void InitialLoad()
     {
       if (Machines == null)
       {
         Machines = new List<Machine>();
       }
 
+      MigrateOldServices();
+
       if (Settings.Default.FirstRun)
       {
         AutoAddLocalServices();
       }
+    }
 
+    /// <summary>
+    /// Merge the old services schema into the new one
+    /// </summary>
+    private void MigrateOldServices()
+    {
+      //// Load old services schema
+      MySQLServicesList mySQLServicesList = new MySQLServicesList();
+
+      //// Attempt migration only if services were found
+      if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
+      {
+        Machine machine = GetOrCreateLocalMachine();
+
+        //// Copy services from old schema to the Local machine.
+        foreach (MySQLService service in mySQLServicesList.Services)
+        {
+          machine.ChangeService(service, ChangeType.AutoAdd);
+        }
+
+        //// Clear the old list of services to erase the duplicates on the newer schema
+        mySQLServicesList.Services.Clear();
+        Settings.Default.Save();
+      }
+    }
+
+    /// <summary>
+    /// Gets the localhost machine from the list or creates it if it doesn't already exist.
+    /// </summary>
+    /// <returns></returns>
+    private Machine GetOrCreateLocalMachine()
+    {
+      if (GetMachineByName(MySQL.Utility.MySqlWorkbenchConnection.DEFAULT_HOSTNAME) == null)
+      {
+        ChangeMachine(new Machine(), ChangeType.AutoAdd);
+        Settings.Default.Save();
+      }
+
+      return GetMachineByName(MySQL.Utility.MySqlWorkbenchConnection.DEFAULT_HOSTNAME);
+    }
+
+    /// <summary>
+    /// Refreshes the machines list and subscribes to machine events.
+    /// </summary>
+    public void LoadMachinesServices()
+    {
       foreach (Machine machine in Machines)
       {
         OnMachineListChanged(machine, ChangeType.AddByLoad);
@@ -337,8 +385,9 @@ namespace MySql.Notifier
     private void AutoAddLocalServices()
     {
       //// Verify if MySQL services are present on the local machine
-      Machine machine = new Machine();
+      Machine machine = GetOrCreateLocalMachine();
       var services = new List<ManagementObject>();
+
       foreach (ManagementObject mo in machine.GetWMIServices(false))
       {
         services.Add(mo);
