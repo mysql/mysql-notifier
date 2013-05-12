@@ -163,7 +163,6 @@ namespace MySql.Notifier
         Machine machine = machinesList.GetMachineById(selectedService.Host.MachineId);
         machine.ChangeService(selectedService, ChangeType.RemoveByUser);
         MonitoredServicesListView.Items.RemoveAt(MonitoredServicesListView.SelectedIndices[0]);
-        Settings.Default.Save();
       }
       else if (_selectedItem is MySQLInstance)
       {
@@ -387,7 +386,6 @@ namespace MySql.Notifier
         {
           if (dialog.newMachine != null && dialog.ServicesToAdd != null && dialog.ServicesToAdd.Count > 0)
           {
-            bool addedService = false;
             newMachine = machinesList.GetMachineById(dialog.newMachine.MachineId);
             if (newMachine == null)
             {
@@ -403,15 +401,9 @@ namespace MySql.Notifier
               }
               else
               {
-                addedService = true;
                 newMachine.ChangeService(service, ChangeType.AddByUser);
                 AddService(service, newMachine, true);
               }
-            }
-
-            if (addedService)
-            {
-              Settings.Default.Save();
             }
           }
         }

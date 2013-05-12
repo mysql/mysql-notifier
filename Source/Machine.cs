@@ -831,8 +831,6 @@ namespace MySql.Notifier
         {
           TestConnection(false, true);
         }
-
-        InitialLoadDone = true;
       }
 
       //// Set services StartupParameters and subscribe to service events.
@@ -848,6 +846,8 @@ namespace MySql.Notifier
           }
         }
       }
+
+      InitialLoadDone = true;
     }
 
     /// <summary>
@@ -867,7 +867,7 @@ namespace MySql.Notifier
         ChangeService(service, ChangeType.RemoveByUser);
       }
 
-      Settings.Default.Save();
+      OnServiceListChanged(null, ChangeType.Cleared);
     }
 
     /// <summary>
@@ -1065,11 +1065,6 @@ namespace MySql.Notifier
       if (ServiceListChanged != null)
       {
         ServiceListChanged(this, service, changeType);
-      }
-
-      if (changeType != ChangeType.AddByUser && changeType != ChangeType.RemoveByUser)
-      {
-        Settings.Default.Save();
       }
     }
 

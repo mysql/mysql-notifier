@@ -24,6 +24,7 @@ namespace MySql.Notifier
   using System.Linq;
   using System.Management;
   using MySql.Notifier.Properties;
+  using MySQL.Utility;
 
   /// <summary>
   /// This class serves as a manager of machines and its services for the Notifier class
@@ -35,6 +36,7 @@ namespace MySql.Notifier
     /// </summary>
     public MachinesList()
     {
+      Machines = Settings.Default.MachineList ?? new List<Machine>();
       InitialLoad();
     }
 
@@ -77,18 +79,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets or sets a list of all machines saved in the settings file.
     /// </summary>
-    public List<Machine> Machines
-    {
-      get
-      {
-        return Settings.Default.MachineList;
-      }
-
-      set
-      {
-        Settings.Default.MachineList = value;
-      }
-    }
+    public List<Machine> Machines { get; private set; }
 
     /// <summary>
     /// Gets the number of services monitored from all machines in the machines list.
@@ -113,12 +104,6 @@ namespace MySql.Notifier
         case ChangeType.AutoAdd:
         case ChangeType.AddByLoad:
         case ChangeType.AddByUser:
-          //// Verify if this is the first machine that would be added to the list, in that case, initialize the list.
-          if (Machines == null)
-          {
-            Machines = new List<Machine>();
-          }
-
           //// If Machine already exists we don't need to do anything else here;
           if (HasMachineWithId(machine.MachineId))
           {
@@ -156,7 +141,7 @@ namespace MySql.Notifier
     /// <returns>The machine matching the given ID.</returns>
     public Machine GetMachineById(string id)
     {
-      return Machines == null || Machines.Count == 0 ? null : Machines.Find(m => m.MachineId == id);
+      return Machines.Count == 0 ? null : Machines.Find(m => m.MachineId == id);
     }
 
     /// <summary>
@@ -166,7 +151,7 @@ namespace MySql.Notifier
     /// <returns>The machine matching the given name.</returns>
     public Machine GetMachineByName(string machineName)
     {
-      return Machines == null || Machines.Count == 0 ? null : Machines.Find(m => string.Compare(m.Name, machineName, true) == 0);
+      return Machines.Count == 0 ? null : Machines.Find(m => string.Compare(m.Name, machineName, true) == 0);
     }
 
     /// <summary>
@@ -194,57 +179,12 @@ namespace MySql.Notifier
     /// </summary>
     public void InitialLoad()
     {
-      if (Machines == null)
-      {
-        Machines = new List<Machine>();
-      }
-
       MigrateOldServices();
 
       if (Settings.Default.FirstRun)
       {
         AutoAddLocalServices();
       }
-    }
-
-    /// <summary>
-    /// Merge the old services schema into the new one
-    /// </summary>
-    private void MigrateOldServices()
-    {
-      //// Load old services schema
-      MySQLServicesList mySQLServicesList = new MySQLServicesList();
-
-      //// Attempt migration only if services were found
-      if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
-      {
-        Machine machine = GetOrCreateLocalMachine();
-
-        //// Copy services from old schema to the Local machine.
-        foreach (MySQLService service in mySQLServicesList.Services)
-        {
-          machine.ChangeService(service, ChangeType.AutoAdd);
-        }
-
-        //// Clear the old list of services to erase the duplicates on the newer schema
-        mySQLServicesList.Services.Clear();
-        Settings.Default.Save();
-      }
-    }
-
-    /// <summary>
-    /// Gets the localhost machine from the list or creates it if it doesn't already exist.
-    /// </summary>
-    /// <returns></returns>
-    private Machine GetOrCreateLocalMachine()
-    {
-      if (GetMachineByName(MySQL.Utility.MySqlWorkbenchConnection.DEFAULT_HOSTNAME) == null)
-      {
-        ChangeMachine(new Machine(), ChangeType.AutoAdd);
-        Settings.Default.Save();
-      }
-
-      return GetMachineByName(MySQL.Utility.MySqlWorkbenchConnection.DEFAULT_HOSTNAME);
     }
 
     /// <summary>
@@ -257,6 +197,15 @@ namespace MySql.Notifier
         OnMachineListChanged(machine, ChangeType.AddByLoad);
         machine.LoadServicesParameters();
       }
+    }
+
+    /// <summary>
+    /// Saves the list of machines in the settings.config file.
+    /// </summary>
+    public void SavetoFile()
+    {
+      Settings.Default.MachineList = Machines;
+      Settings.Default.Save();
     }
 
     /// <summary>
@@ -337,6 +286,16 @@ namespace MySql.Notifier
       {
         MachineServiceListChanged(machine, service, changeType);
       }
+
+      switch (changeType)
+      {
+        case ChangeType.AddByUser:
+        case ChangeType.Cleared:
+        case ChangeType.RemoveByUser:
+        case ChangeType.RemoveByEvent:
+          SavetoFile();
+          break;
+      }
     }
 
     /// <summary>
@@ -410,7 +369,49 @@ namespace MySql.Notifier
       }
 
       Settings.Default.FirstRun = false;
-      Settings.Default.Save();
+      SavetoFile();
+    }
+
+    /// <summary>
+    /// Gets the localhost machine from the list or creates it if it doesn't already exist.
+    /// </summary>
+    /// <returns></returns>
+    private Machine GetOrCreateLocalMachine()
+    {
+      Machine localMachine = GetMachineByName(MySqlWorkbenchConnection.DEFAULT_HOSTNAME);
+      if (localMachine == null)
+      {
+        localMachine = new Machine();
+        ChangeMachine(localMachine, ChangeType.AutoAdd);
+        SavetoFile();
+      }
+
+      return localMachine;
+    }
+
+    /// <summary>
+    /// Merge the old services schema into the new one
+    /// </summary>
+    private void MigrateOldServices()
+    {
+      //// Load old services schema
+      MySQLServicesList mySQLServicesList = new MySQLServicesList();
+
+      //// Attempt migration only if services were found
+      if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
+      {
+        Machine machine = GetOrCreateLocalMachine();
+
+        //// Copy services from old schema to the Local machine.
+        foreach (MySQLService service in mySQLServicesList.Services)
+        {
+          machine.ChangeService(service, ChangeType.AutoAdd);
+        }
+
+        //// Clear the old list of services to erase the duplicates on the newer schema
+        mySQLServicesList.Services.Clear();
+        SavetoFile();
+      }
     }
   }
 
@@ -433,6 +434,11 @@ namespace MySql.Notifier
     /// An element has been added to the list automatically by an Auto-Add or Service Migration operation.
     /// </summary>
     AutoAdd,
+
+    /// <summary>
+    /// All elements in the list have been cleared, list became empty.
+    /// </summary>
+    Cleared,
 
     /// <summary>
     /// An element was removed from the list by a user.

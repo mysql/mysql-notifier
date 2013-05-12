@@ -44,7 +44,6 @@ namespace MySql.Notifier
     private ToolStripMenuItem launchWorkbenchUtilitiesMenuItem;
     private MachinesList machinesList;
     private MySQLInstancesList mySQLInstancesList;
-    private MySQLServicesList mySQLServicesList;
     private NotifyIcon notifyIcon;
     private int previousServicesAndInstancesQuantity;
 

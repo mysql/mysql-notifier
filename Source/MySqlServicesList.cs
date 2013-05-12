@@ -24,16 +24,11 @@ namespace MySql.Notifier
 
   public class MySQLServicesList
   {
-    public List<MySQLService> Services { get; set; }
+    public List<MySQLService> Services { get; private set; }
 
     public MySQLServicesList()
     {
-      if (Settings.Default.FirstRun)
-      {
-        return;
-      }
-      //// Load old services definition
-      Services = Settings.Default.ServiceList;
+      Services = Settings.Default.FirstRun ? new List<MySQLService>() : Settings.Default.ServiceList;
     }
   }
 }

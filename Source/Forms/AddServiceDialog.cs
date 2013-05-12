@@ -31,12 +31,10 @@ namespace MySql.Notifier
 
   public partial class AddServiceDialog : MachineAwareForm
   {
-    private bool machineValuesChanged;
     private int sortColumn;
     public AddServiceDialog(MachinesList machineslist)
     {
       sortColumn = -1;
-      machineValuesChanged = false;
       machinesList = machineslist;
 
       InitializeComponent();
@@ -73,12 +71,6 @@ namespace MySql.Notifier
       foreach (ListViewItem lvi in ServicesListView.SelectedItems)
       {
         ServicesToAdd.Add(new MySQLService(lvi.Tag as string, true, true, newMachine));
-      }
-
-      if (machineValuesChanged)
-      {
-        Settings.Default.Save();
-        machineValuesChanged = false;
       }
 
       Cursor.Current = Cursors.Default;
