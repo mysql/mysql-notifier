@@ -707,11 +707,13 @@ namespace MySql.Notifier
     {
       int settingsUpdateCheck = LoadUpdateCheck();
 
-      // if we have already notified our user then noting more to do
-      if (settingsUpdateCheck == 0 || (settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0) return;
+      //// If we have already notified our user then noting more to do
+      if (settingsUpdateCheck == 0 || (settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0)
+      {
+        return;
+      }
 
-      // if we are supposed to check forupdates but the installer is too old then
-      // notify the user and exit
+      //// If we are supposed to check forupdates but the installer is too old then notify the user and exit
       if (String.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
       {
         ShowTooltip(false, Resources.SoftwareUpdate, Resources.ScheduledCheckRequiresInstaller11);
@@ -720,23 +722,24 @@ namespace MySql.Notifier
 
       bool hasUpdates = true;
 
-      // let them know we are checking for updates
+      //// Let them know we are checking for updates
       if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Checking) != 0)
       {
         ShowTooltip(false, Resources.SoftwareUpdate, Resources.CheckingForUpdates);
         hasUpdates = MySqlInstaller.HasUpdates(10 * 1000);
         Settings.Default.UpdateCheck = hasUpdates ? (int)SoftwareUpdateStaus.HasUpdates : 0;
         settingsUpdateCheck = Settings.Default.UpdateCheck;
-        Settings.Default.Save();
       }
 
       if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0)
+      {
         ShowTooltip(false, Resources.SoftwareUpdate, Resources.HasUpdatesLaunchInstaller);
+      }
 
-      // set that we have notified our user
+      //// Set that we have notified our user
       Settings.Default.UpdateCheck |= (int)SoftwareUpdateStaus.Notified;
-      Settings.Default.Save();
 
+      Settings.Default.Save();
       RefreshNotifierIcon();
     }
 

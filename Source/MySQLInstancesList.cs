@@ -52,6 +52,7 @@ namespace MySql.Notifier
     public MySQLInstancesList()
     {
       _instancesRefreshing = false;
+      InstancesList = Settings.Default.MySQLInstancesList;
     }
 
     #region Events
@@ -85,18 +86,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets or sets a list of <see cref="MySQLInstance"/> objects representing instances being monitored.
     /// </summary>
-    public List<MySQLInstance> InstancesList
-    {
-      get
-      {
-        return Settings.Default.MySQLInstancesList;
-      }
-
-      set
-      {
-        Settings.Default.MySQLInstancesList = value;
-      }
-    }
+    public List<MySQLInstance> InstancesList { get; private set; }
 
     #endregion Properties
 
@@ -154,7 +144,7 @@ namespace MySql.Notifier
       item.PropertyChanged += SingleInstancePropertyChanged;
       item.InstanceConnectionStatusTestErrorThrown += SingleInstanceConnectionStatusTestErrorThrown;
       item.CheckInstanceStatus(false);
-      Settings.Default.Save();
+      SaveToFile();
       OnInstancesListChanged(item, ListChangedType.ItemAdded);
     }
 
@@ -226,7 +216,7 @@ namespace MySql.Notifier
       item.InstanceStatusChanged += SingleInstanceStatusChanged;
       item.PropertyChanged += SingleInstancePropertyChanged;
       item.InstanceConnectionStatusTestErrorThrown += SingleInstanceConnectionStatusTestErrorThrown;
-      Settings.Default.Save();
+      SaveToFile();
       OnInstancesListChanged(item, ListChangedType.ItemAdded);
     }
 
@@ -286,7 +276,7 @@ namespace MySql.Notifier
     {
       MySQLInstance instance = InstancesList[index];
       InstancesList.RemoveAt(index);
-      Settings.Default.Save();
+      SaveToFile();
       OnInstancesListChanged(instance, ListChangedType.ItemDeleted);
     }
 
@@ -359,6 +349,15 @@ namespace MySql.Notifier
       }
 
       _instancesRefreshing = false;
+    }
+
+    /// <summary>
+    /// Saves the list of instances in the settings.config file.
+    /// </summary>
+    public void SaveToFile()
+    {
+      Settings.Default.MySQLInstancesList = InstancesList;
+      Settings.Default.Save();
     }
 
     /// <summary>

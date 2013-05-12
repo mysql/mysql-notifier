@@ -298,7 +298,7 @@ namespace MySql.Notifier
               newInstance = new MySQLInstance(selectedConnection);
               InstancesList.Add(newInstance);
               AddInstance(newInstance, true);
-              Settings.Default.Save();
+              InstancesList.SaveToFile();
             }
           }
         }
