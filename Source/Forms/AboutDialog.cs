@@ -36,7 +36,7 @@ namespace MySql.Notifier
     public AboutDialog()
     {
       InitializeComponent();
-      lblVersionSubTitle.Text = String.Format("{0}.{1}.{2}", version[0], version[1], version[2]);
+      NotifierVersionLabel.Text = string.Format("{0} {1}.{2}.{3}", AssemblyInfo.AssemblyTitle, version[0], version[1], version[2]);
     }
 
     private void AboutDialog_Load(object sender, EventArgs e)

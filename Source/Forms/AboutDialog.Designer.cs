@@ -48,42 +48,45 @@ namespace MySql.Notifier
     private void InitializeComponent()
     {
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AboutDialog));
-      this.lblVersionSubTitle = new System.Windows.Forms.Label();
-      this.installerVersion = new System.Windows.Forms.Label();
+      this.NotifierVersionLabel = new System.Windows.Forms.Label();
+      this.InstallerVersionLabel = new System.Windows.Forms.Label();
       this.SuspendLayout();
       // 
-      // lblVersionSubTitle
+      // NotifierVersionLabel
       // 
-      this.lblVersionSubTitle.AutoSize = true;
-      this.lblVersionSubTitle.ForeColor = System.Drawing.Color.Gray;
-      this.lblVersionSubTitle.Location = new System.Drawing.Point(435, 113);
-      this.lblVersionSubTitle.Name = "lblVersionSubTitle";
-      this.lblVersionSubTitle.Size = new System.Drawing.Size(115, 15);
-      this.lblVersionSubTitle.TabIndex = 2;
-      this.lblVersionSubTitle.Text = "MySQL Notifier 1.0.2";
-      this.lblVersionSubTitle.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+      this.NotifierVersionLabel.AutoSize = true;
+      this.NotifierVersionLabel.BackColor = System.Drawing.Color.Transparent;
+      this.NotifierVersionLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.NotifierVersionLabel.ForeColor = System.Drawing.Color.White;
+      this.NotifierVersionLabel.Location = new System.Drawing.Point(105, 117);
+      this.NotifierVersionLabel.Name = "NotifierVersionLabel";
+      this.NotifierVersionLabel.Size = new System.Drawing.Size(114, 13);
+      this.NotifierVersionLabel.TabIndex = 2;
+      this.NotifierVersionLabel.Text = "MySQL Notifier 1.x.x";
+      this.NotifierVersionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
-      // installerVersion
+      // InstallerVersionLabel
       // 
-      this.installerVersion.AutoSize = true;
-      this.installerVersion.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.installerVersion.ForeColor = System.Drawing.Color.Gray;
-      this.installerVersion.Location = new System.Drawing.Point(431, 129);
-      this.installerVersion.Name = "installerVersion";
-      this.installerVersion.Size = new System.Drawing.Size(119, 17);
-      this.installerVersion.TabIndex = 3;
-      this.installerVersion.Text = "MySQL Installer 1.2";
-      this.installerVersion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+      this.InstallerVersionLabel.AutoSize = true;
+      this.InstallerVersionLabel.BackColor = System.Drawing.Color.Transparent;
+      this.InstallerVersionLabel.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.InstallerVersionLabel.ForeColor = System.Drawing.Color.White;
+      this.InstallerVersionLabel.Location = new System.Drawing.Point(105, 133);
+      this.InstallerVersionLabel.Name = "InstallerVersionLabel";
+      this.InstallerVersionLabel.Size = new System.Drawing.Size(106, 13);
+      this.InstallerVersionLabel.TabIndex = 3;
+      this.InstallerVersionLabel.Text = "MySQL Installer 1.3";
+      this.InstallerVersionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
       // 
       // AboutDialog
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
+      this.BackgroundImage = global::MySql.Notifier.Properties.Resources.AboutBackGroundDialog;
       this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-      this.ClientSize = new System.Drawing.Size(561, 273);
-      this.Controls.Add(this.installerVersion);
-      this.Controls.Add(this.lblVersionSubTitle);
+      this.ClientSize = new System.Drawing.Size(560, 322);
+      this.Controls.Add(this.InstallerVersionLabel);
+      this.Controls.Add(this.NotifierVersionLabel);
       this.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
       this.ForeColor = System.Drawing.Color.Transparent;
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -102,8 +105,8 @@ namespace MySql.Notifier
 
     #endregion
 
-    private System.Windows.Forms.Label lblVersionSubTitle;
-    private System.Windows.Forms.Label installerVersion;
+    private System.Windows.Forms.Label NotifierVersionLabel;
+    private System.Windows.Forms.Label InstallerVersionLabel;
 
 
   }
