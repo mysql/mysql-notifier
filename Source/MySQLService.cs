@@ -347,6 +347,7 @@ namespace MySql.Notifier
       {
         FindMatchingWBConnections();
         SetStatus(ServiceManagementObject == null ? Status.ToString() : ServiceManagementObject.Properties["State"].Value.ToString());
+        DisplayName = (String.IsNullOrEmpty(DisplayName) && ServiceManagementObject != null) ? ServiceManagementObject.Properties["DisplayName"].Value.ToString() : DisplayName;
         MenuGroup = new ServiceMenuGroup(this);
       }
       catch (InvalidOperationException ioEx)
