@@ -9,12 +9,20 @@
     <Property Id="ARPURLINFOABOUT" Value="http://www.mysql.com" />
     <Property Id="ARPURLUPDATEINFO" Value="http://dev.mysql.com"/>
 
+    <Upgrade Id="9e9fb57a-62e3-45cf-a896-686e33407606">
+      <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND" Minimum="1.0.0" IncludeMinimum="yes" Maximum="$(var.Version)" IncludeMaximum="no" />
+    </Upgrade>
+
     <Media Id="1" Cabinet="MySqlNotifier.cab" EmbedCab="yes"  CompressionLevel="high"/>
 
     <Condition Message="You must have Administrative rights on this machine to install [ProductName].">
       <![CDATA[ Privileged  ]]>
     </Condition>
 
+    <!-- Do not install if a newer version is already installed. -->
+    <Condition Message="A later version of [ProductName] is already installed. Setup will now exit.">
+      NOT NEWERVERSIONDETECTED OR Installed
+    </Condition>
 
     <!-- First make sure that .NET is installed -->
     <PropertyRef Id="NETFRAMEWORK40CLIENT"/>
@@ -90,13 +98,6 @@
     <WixVariable Id="WixUIBannerBmp" Value="Bitmaps/BannrBmp.bmp"/>
     <WixVariable Id="WixUIDialogBmp" Value="Bitmaps/DlgBmp.bmp"/>
     <Icon Id="Notifier.ico" SourceFile="app_default.ico" />
-
-    <Upgrade Id="9e9fb57a-62e3-45cf-a896-686e33407606">
-      <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND"
-        Minimum="1.0.0" IncludeMinimum="yes"
-        Maximum="3.0.0" IncludeMaximum="no" />
-    </Upgrade>
-
 
     <InstallExecuteSequence>
       <Custom Action="RemoveScheduledTask" Before="RemoveFiles">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>

@@ -10,7 +10,7 @@
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
-    <WixVariables>IsGPL=1</WixVariables>
+    <DefineConstants>IsGPL=1</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <OutputPath>bin\Debug\</OutputPath>
@@ -25,7 +25,9 @@
     <OutputPath>bin\Release\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>IsGPL=1</DefineConstants>
-    <WixVariables />
+    <WixVariables>
+    </WixVariables>
+    <VerboseOutput>False</VerboseOutput>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="MyExitDialog.wxs" />
@@ -74,7 +76,10 @@
       <Output TaskParameter="Value" PropertyName="TargetPath" />
     </CreateProperty>
   </Target>
+  <Target Name="Clean">
+     <RemoveDir Directories="obj\$(Configuration)" />
+  </Target>
   <PropertyGroup>
-    <BuildDependsOn>SetVariables;$(BuildDependsOn)</BuildDependsOn>
+    <BuildDependsOn>Clean;SetVariables;$(BuildDependsOn)</BuildDependsOn>
   </PropertyGroup>
 </Project>
