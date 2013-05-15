@@ -193,9 +193,11 @@ namespace MySql.Notifier
     {
       if (_aboutDialog == null)
       {
-        using (_aboutDialog = new AboutDialog())
+        using (AboutDialog aboutDialog = new AboutDialog())
         {
-          _aboutDialog.ShowDialog();
+          _aboutDialog = aboutDialog;
+          aboutDialog.ShowDialog();
+          _aboutDialog = null;
         }
       }
       else
@@ -575,9 +577,11 @@ namespace MySql.Notifier
           instance.CancelAsynchronousStatusCheck();
         }
 
-        using (_manageItemsDialog = new ManageItemsDialog(mySQLInstancesList, machinesList))
+        using (ManageItemsDialog manageItemsDialog = new ManageItemsDialog(mySQLInstancesList, machinesList))
         {
-          _manageItemsDialog.ShowDialog();
+          _manageItemsDialog = manageItemsDialog;
+          manageItemsDialog.ShowDialog();
+          _manageItemsDialog = null;
         }
 
         //// Resume the global timer.
@@ -672,9 +676,11 @@ namespace MySql.Notifier
       var usecolorfulIcons = Properties.Settings.Default.UseColorfulStatusIcons;
       if (_optionsDialog == null)
       {
-        using (_optionsDialog = new OptionsDialog())
+        using (OptionsDialog optionsDialog = new OptionsDialog())
         {
-          _optionsDialog.ShowDialog();
+          _optionsDialog = optionsDialog;
+          optionsDialog.ShowDialog();
+          _optionsDialog = null;
         }
 
         //// If there was a change in the setting for the icons then refresh Icon

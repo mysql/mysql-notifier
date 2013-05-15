@@ -47,6 +47,7 @@ namespace MySql.Notifier
       InstancesList = instancesList;
       machinesList = machineslist;
       RefreshServicesAndInstancesListViews();
+      SetDialogControlsAvailability();
     }
 
     /// <summary>
