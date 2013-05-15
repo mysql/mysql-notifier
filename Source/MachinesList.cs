@@ -180,11 +180,7 @@ namespace MySql.Notifier
     public void InitialLoad()
     {
       MigrateOldServices();
-
-      if (Settings.Default.FirstRun)
-      {
-        AutoAddLocalServices();
-      }
+      AutoAddLocalServices();
     }
 
     /// <summary>
@@ -343,50 +339,40 @@ namespace MySql.Notifier
     /// </summary>
     private void AutoAddLocalServices()
     {
-      //// Verify if MySQL services are present on the local machine
-      Machine machine = GetOrCreateLocalMachine();
-      var services = new List<ManagementObject>();
-
-      foreach (ManagementObject mo in machine.GetWMIServices(false))
+      if (!Settings.Default.FirstRun)
       {
-        services.Add(mo);
+        return;
       }
 
-      services = services.Where(t => t.Properties["DisplayName"].Value.ToString().ToLower().Contains(Settings.Default.AutoAddPattern)).ToList();
+      //// Verify if MySQL services are present on the local machine
+      Machine localMachine = GetMachineByName(MySqlWorkbenchConnection.DEFAULT_HOSTNAME) ?? new Machine();
+      var localServicesList = localMachine.GetWMIServices(false);
+      var servicesToAddList = new List<ManagementObject>();
+      string autoAddPattern = Settings.Default.AutoAddPattern;
+      foreach (ManagementObject mo in localServicesList)
+      {
+        if (mo != null && mo.Properties["DisplayName"].Value.ToString().ToLower().Contains(autoAddPattern))
+        {
+          servicesToAddList.Add(mo);
+        }
+      }
 
       //// If we found some services we will try to add the local machine to the list...
-      if (services.Count > 0)
+      if (servicesToAddList.Count > 0)
       {
-        ChangeMachine(machine, ChangeType.AutoAdd);
+        ChangeMachine(localMachine, ChangeType.AutoAdd);
 
         //// Try to add the services we found on it.
-        foreach (ManagementObject mo in services)
+        foreach (ManagementObject mo in servicesToAddList)
         {
-          MySQLService service = new MySQLService(mo.Properties["Name"].Value.ToString(), true, true, machine);
+          MySQLService service = new MySQLService(mo.Properties["Name"].Value.ToString(), true, true, localMachine);
           service.SetServiceParameters();
-          machine.ChangeService(service, ChangeType.AutoAdd);
+          localMachine.ChangeService(service, ChangeType.AutoAdd);
         }
       }
 
       Settings.Default.FirstRun = false;
       SavetoFile();
-    }
-
-    /// <summary>
-    /// Gets the localhost machine from the list or creates it if it doesn't already exist.
-    /// </summary>
-    /// <returns></returns>
-    private Machine GetOrCreateLocalMachine()
-    {
-      Machine localMachine = GetMachineByName(MySqlWorkbenchConnection.DEFAULT_HOSTNAME);
-      if (localMachine == null)
-      {
-        localMachine = new Machine();
-        ChangeMachine(localMachine, ChangeType.AutoAdd);
-        SavetoFile();
-      }
-
-      return localMachine;
     }
 
     /// <summary>
@@ -400,12 +386,17 @@ namespace MySql.Notifier
       //// Attempt migration only if services were found
       if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
       {
-        Machine machine = GetOrCreateLocalMachine();
+        Machine localMachine = GetMachineByName(MySqlWorkbenchConnection.DEFAULT_HOSTNAME);
+        if (localMachine == null)
+        {
+          localMachine = new Machine();
+          ChangeMachine(localMachine, ChangeType.AutoAdd);
+        }
 
         //// Copy services from old schema to the Local machine.
         foreach (MySQLService service in mySQLServicesList.Services)
         {
-          machine.ChangeService(service, ChangeType.AutoAdd);
+          localMachine.ChangeService(service, ChangeType.AutoAdd);
         }
 
         //// Clear the old list of services to erase the duplicates on the newer schema
