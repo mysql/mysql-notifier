@@ -142,7 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Forms\BaseForm.cs">
+    <Compile Include="Forms\MachineAwareForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\AboutDialog.cs">
@@ -203,8 +203,8 @@
     <EmbeddedResource Include="Forms\AddServiceDialog.resx">
       <DependentUpon>AddServiceDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\BaseForm.resx">
-      <DependentUpon>BaseForm.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\MachineAwareForm.resx">
+      <DependentUpon>MachineAwareForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ManageItemsDialog.resx">
       <DependentUpon>ManageItemsDialog.cs</DependentUpon>

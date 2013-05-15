@@ -17,21 +17,21 @@
 // 02110-1301  USA
 //
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Windows.Forms;
-using MySql.Notifier.Properties;
-using MySQL.Utility;
-using MySQL.Utility.Forms;
-
 namespace MySql.Notifier
 {
+  using System;
+  using System.Collections.Generic;
+  using System.ComponentModel;
+  using System.Diagnostics;
+  using System.Drawing;
+  using System.IO;
+  using System.Linq;
+  using System.Reflection;
+  using System.Windows.Forms;
+  using MySql.Notifier.Properties;
+  using MySQL.Utility;
+  using MySQL.Utility.Forms;
+
   internal class Notifier
   {
     #region Fields
@@ -46,6 +46,9 @@ namespace MySql.Notifier
     private MySQLInstancesList mySQLInstancesList;
     private NotifyIcon notifyIcon;
     private int previousServicesAndInstancesQuantity;
+    private OptionsDialog _optionsDialog;
+    private ManageItemsDialog _manageItemsDialog;
+    private AboutDialog _aboutDialog;
 
     /// <summary>
     /// The timer that fires the connection status checks.
@@ -59,6 +62,12 @@ namespace MySql.Notifier
     /// </summary>
     public Notifier()
     {
+      //// Fields initializations.
+      _globalTimer = null;
+      _optionsDialog = null;
+      _manageItemsDialog = null;
+      _aboutDialog = null;
+
       //// Static initializations.
       CustomizeInfoDialog();
       InitializeMySQLWorkbenchStaticSettings();
@@ -182,8 +191,17 @@ namespace MySql.Notifier
 
     private void aboutMenu_Click(object sender, EventArgs e)
     {
-      AboutDialog dialog = new AboutDialog();
-      dialog.ShowDialog();
+      if (_aboutDialog == null)
+      {
+        using (_aboutDialog = new AboutDialog())
+        {
+          _aboutDialog.ShowDialog();
+        }
+      }
+      else
+      {
+        _aboutDialog.Activate();
+      }
     }
 
     /// <summary>
@@ -193,32 +211,31 @@ namespace MySql.Notifier
     {
       ContextMenuStrip menu = new ContextMenuStrip();
 
-      ToolStripMenuItem manageServices = new ToolStripMenuItem("Manage Services...");
+      ToolStripMenuItem manageServices = new ToolStripMenuItem(Resources.ManageItemsMenuText);
       manageServices.Click += new EventHandler(manageServicesDialogItem_Click);
       manageServices.Image = Resources.ManageServicesIcon;
-
-      launchInstallerMenuItem = new ToolStripMenuItem("Launch Installer");
+      launchInstallerMenuItem = new ToolStripMenuItem(Resources.LaunchInstallerMenuText);
       launchInstallerMenuItem.Click += new EventHandler(launchInstallerItem_Click);
       launchInstallerMenuItem.Image = Resources.StartInstallerIcon;
 
-      ToolStripMenuItem checkForUpdates = new ToolStripMenuItem("Check for updates");
+      ToolStripMenuItem checkForUpdates = new ToolStripMenuItem(Resources.CheckUpdatesMenuText);
       checkForUpdates.Click += new EventHandler(checkUpdatesItem_Click);
       checkForUpdates.Image = Resources.CheckForUpdatesIcon;
 
       if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
-        launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem("MySQL Utilities Shell");
+        launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem(Resources.UtilitiesShellMenuText);
         launchWorkbenchUtilitiesMenuItem.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
         launchWorkbenchUtilitiesMenuItem.Image = Resources.LaunchUtilities;
       }
 
-      ToolStripMenuItem optionsMenu = new ToolStripMenuItem("Options...");
+      ToolStripMenuItem optionsMenu = new ToolStripMenuItem(Resources.OptionsMenuText);
       optionsMenu.Click += new EventHandler(optionsItem_Click);
 
-      ToolStripMenuItem aboutMenu = new ToolStripMenuItem("About...");
+      ToolStripMenuItem aboutMenu = new ToolStripMenuItem(Resources.AboutMenuText);
       aboutMenu.Click += new EventHandler(aboutMenu_Click);
 
-      ToolStripMenuItem exitMenu = new ToolStripMenuItem("Close MySQL Notifier");
+      ToolStripMenuItem exitMenu = new ToolStripMenuItem(Resources.CloseNotifierMenuText);
       exitMenu.Click += new EventHandler(exitItem_Click);
 
       menu.Items.Add(manageServices);
@@ -541,28 +558,35 @@ namespace MySql.Notifier
 
     private void manageServicesDialogItem_Click(object sender, EventArgs e)
     {
-      //// Stop the global timer and cancel any background machine connection tests while the user opens the dialog to manage machines, services or instances.
-      _globalTimer.Stop();
-      if (machinesList.Machines != null)
+      if (_manageItemsDialog == null)
       {
-        foreach (Machine machine in machinesList.Machines)
+        //// Stop the global timer and cancel any background machine connection tests while the user opens the dialog to manage machines, services or instances.
+        _globalTimer.Stop();
+        if (machinesList.Machines != null)
         {
-          machine.CancelAsynchronousConnectionTest();
+          foreach (Machine machine in machinesList.Machines)
+          {
+            machine.CancelAsynchronousConnectionTest();
+          }
         }
-      }
 
-      foreach (MySQLInstance instance in mySQLInstancesList)
+        foreach (MySQLInstance instance in mySQLInstancesList)
+        {
+          instance.CancelAsynchronousStatusCheck();
+        }
+
+        using (_manageItemsDialog = new ManageItemsDialog(mySQLInstancesList, machinesList))
+        {
+          _manageItemsDialog.ShowDialog();
+        }
+
+        //// Resume the global timer.
+        _globalTimer.Start();
+      }
+      else
       {
-        instance.CancelAsynchronousStatusCheck();
+        _manageItemsDialog.Activate();
       }
-
-      using (ManageItemsDialog dialog = new ManageItemsDialog(mySQLInstancesList, machinesList))
-      {
-        dialog.ShowDialog();
-      }
-
-      //// Resume the global timer.
-      _globalTimer.Start();
     }
 
     /// <summary>
@@ -646,13 +670,22 @@ namespace MySql.Notifier
     private void optionsItem_Click(object sender, EventArgs e)
     {
       var usecolorfulIcons = Properties.Settings.Default.UseColorfulStatusIcons;
-      OptionsDialog dialog = new OptionsDialog();
-      dialog.ShowDialog();
-
-      //// If there was a change in the setting for the icons then refresh Icon
-      if (usecolorfulIcons != Properties.Settings.Default.UseColorfulStatusIcons)
+      if (_optionsDialog == null)
       {
-        RefreshNotifierIcon();
+        using (_optionsDialog = new OptionsDialog())
+        {
+          _optionsDialog.ShowDialog();
+        }
+
+        //// If there was a change in the setting for the icons then refresh Icon
+        if (usecolorfulIcons != Properties.Settings.Default.UseColorfulStatusIcons)
+        {
+          RefreshNotifierIcon();
+        }
+      }
+      else
+      {
+        _optionsDialog.Activate();
       }
     }
 

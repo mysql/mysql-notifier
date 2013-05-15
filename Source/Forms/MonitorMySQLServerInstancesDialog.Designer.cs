@@ -49,7 +49,6 @@ namespace MySql.Notifier
     {
       this.components = new System.ComponentModel.Container();
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MonitorMySQLServerInstancesDialog));
-      this.ContentAreaPanel = new System.Windows.Forms.Panel();
       this.ConnectionNameLabel = new System.Windows.Forms.Label();
       this.ShowMonitoredInstancesCheckBox = new System.Windows.Forms.CheckBox();
       this.FilterTextBox = new System.Windows.Forms.TextBox();
@@ -62,33 +61,49 @@ namespace MySql.Notifier
       this.PortColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.MonitoredColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.ConnectionsContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-      this.RefreshConnectionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.DeleteConnectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.CommandAreaPanel = new System.Windows.Forms.Panel();
+      this.RefreshConnectionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.DialogCancelButton = new System.Windows.Forms.Button();
       this.AddConnectionButton = new System.Windows.Forms.Button();
       this.DialogOKButton = new System.Windows.Forms.Button();
       this.FilterTimer = new System.Windows.Forms.Timer(this.components);
       this.ContentAreaPanel.SuspendLayout();
-      this.ConnectionsContextMenuStrip.SuspendLayout();
       this.CommandAreaPanel.SuspendLayout();
+      this.ConnectionsContextMenuStrip.SuspendLayout();
       this.SuspendLayout();
+      // 
+      // FootnoteAreaPanel
+      // 
+      this.FootnoteAreaPanel.Location = new System.Drawing.Point(0, 292);
+      this.FootnoteAreaPanel.Size = new System.Drawing.Size(634, 0);
       // 
       // ContentAreaPanel
       // 
-      this.ContentAreaPanel.BackColor = System.Drawing.SystemColors.Window;
+      this.ContentAreaPanel.Controls.Add(this.CommandAreaPanel);
       this.ContentAreaPanel.Controls.Add(this.ConnectionNameLabel);
       this.ContentAreaPanel.Controls.Add(this.ShowMonitoredInstancesCheckBox);
       this.ContentAreaPanel.Controls.Add(this.FilterTextBox);
       this.ContentAreaPanel.Controls.Add(this.MySQLConnectionsHelpLabel);
       this.ContentAreaPanel.Controls.Add(this.MySQLConnectionsHyperTitleLabel);
       this.ContentAreaPanel.Controls.Add(this.WorkbenchConnectionsListView);
-      this.ContentAreaPanel.Controls.Add(this.CommandAreaPanel);
-      this.ContentAreaPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.ContentAreaPanel.Location = new System.Drawing.Point(0, 0);
-      this.ContentAreaPanel.Name = "ContentAreaPanel";
-      this.ContentAreaPanel.Size = new System.Drawing.Size(594, 562);
-      this.ContentAreaPanel.TabIndex = 0;
+      this.ContentAreaPanel.Size = new System.Drawing.Size(604, 572);
+      this.ContentAreaPanel.Controls.SetChildIndex(this.WorkbenchConnectionsListView, 0);
+      this.ContentAreaPanel.Controls.SetChildIndex(this.MySQLConnectionsHyperTitleLabel, 0);
+      this.ContentAreaPanel.Controls.SetChildIndex(this.MySQLConnectionsHelpLabel, 0);
+      this.ContentAreaPanel.Controls.SetChildIndex(this.FilterTextBox, 0);
+      this.ContentAreaPanel.Controls.SetChildIndex(this.ShowMonitoredInstancesCheckBox, 0);
+      this.ContentAreaPanel.Controls.SetChildIndex(this.ConnectionNameLabel, 0);
+      this.ContentAreaPanel.Controls.SetChildIndex(this.CommandAreaPanel, 0);
+      // 
+      // CommandAreaPanel
+      // 
+      this.CommandAreaPanel.BackColor = System.Drawing.SystemColors.Control;
+      this.CommandAreaPanel.Controls.Add(this.DialogCancelButton);
+      this.CommandAreaPanel.Controls.Add(this.AddConnectionButton);
+      this.CommandAreaPanel.Controls.Add(this.DialogOKButton);
+      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 527);
+      this.CommandAreaPanel.Size = new System.Drawing.Size(604, 45);
+      this.CommandAreaPanel.TabIndex = 6;
       // 
       // ConnectionNameLabel
       // 
@@ -96,17 +111,17 @@ namespace MySql.Notifier
       this.ConnectionNameLabel.Location = new System.Drawing.Point(25, 109);
       this.ConnectionNameLabel.Name = "ConnectionNameLabel";
       this.ConnectionNameLabel.Size = new System.Drawing.Size(36, 15);
-      this.ConnectionNameLabel.TabIndex = 11;
+      this.ConnectionNameLabel.TabIndex = 2;
       this.ConnectionNameLabel.Text = "Filter:";
       // 
       // ShowMonitoredInstancesCheckBox
       // 
       this.ShowMonitoredInstancesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.ShowMonitoredInstancesCheckBox.AutoSize = true;
-      this.ShowMonitoredInstancesCheckBox.Location = new System.Drawing.Point(283, 108);
+      this.ShowMonitoredInstancesCheckBox.Location = new System.Drawing.Point(293, 108);
       this.ShowMonitoredInstancesCheckBox.Name = "ShowMonitoredInstancesCheckBox";
       this.ShowMonitoredInstancesCheckBox.Size = new System.Drawing.Size(286, 19);
-      this.ShowMonitoredInstancesCheckBox.TabIndex = 10;
+      this.ShowMonitoredInstancesCheckBox.TabIndex = 4;
       this.ShowMonitoredInstancesCheckBox.Text = "Show MySQL instances already being monitored?";
       this.ShowMonitoredInstancesCheckBox.UseVisualStyleBackColor = true;
       this.ShowMonitoredInstancesCheckBox.CheckedChanged += new System.EventHandler(this.ShowMonitoredInstancesCheckBox_CheckedChanged);
@@ -117,8 +132,8 @@ namespace MySql.Notifier
             | System.Windows.Forms.AnchorStyles.Right)));
       this.FilterTextBox.Location = new System.Drawing.Point(67, 106);
       this.FilterTextBox.Name = "FilterTextBox";
-      this.FilterTextBox.Size = new System.Drawing.Size(210, 23);
-      this.FilterTextBox.TabIndex = 9;
+      this.FilterTextBox.Size = new System.Drawing.Size(220, 23);
+      this.FilterTextBox.TabIndex = 3;
       this.FilterTextBox.TextChanged += new System.EventHandler(this.FilterTextBox_TextChanged);
       this.FilterTextBox.Validated += new System.EventHandler(this.FilterTextBox_Validated);
       // 
@@ -128,7 +143,7 @@ namespace MySql.Notifier
             | System.Windows.Forms.AnchorStyles.Right)));
       this.MySQLConnectionsHelpLabel.Location = new System.Drawing.Point(24, 53);
       this.MySQLConnectionsHelpLabel.Name = "MySQLConnectionsHelpLabel";
-      this.MySQLConnectionsHelpLabel.Size = new System.Drawing.Size(545, 38);
+      this.MySQLConnectionsHelpLabel.Size = new System.Drawing.Size(555, 38);
       this.MySQLConnectionsHelpLabel.TabIndex = 1;
       this.MySQLConnectionsHelpLabel.Text = "Select a connection from MySQL Workbench that you want to monitor. You can filter" +
     " the list by typing into the filter control.";
@@ -136,9 +151,11 @@ namespace MySql.Notifier
       // MySQLConnectionsHyperTitleLabel
       // 
       this.MySQLConnectionsHyperTitleLabel.AutoSize = true;
+      this.MySQLConnectionsHyperTitleLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.MySQLConnectionsHyperTitleLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
       this.MySQLConnectionsHyperTitleLabel.Location = new System.Drawing.Point(20, 23);
       this.MySQLConnectionsHyperTitleLabel.Name = "MySQLConnectionsHyperTitleLabel";
-      this.MySQLConnectionsHyperTitleLabel.Size = new System.Drawing.Size(198, 15);
+      this.MySQLConnectionsHyperTitleLabel.Size = new System.Drawing.Size(261, 21);
       this.MySQLConnectionsHyperTitleLabel.TabIndex = 0;
       this.MySQLConnectionsHyperTitleLabel.Text = "Choose a MySQL Server connection:";
       // 
@@ -160,7 +177,7 @@ namespace MySql.Notifier
       this.WorkbenchConnectionsListView.Location = new System.Drawing.Point(25, 135);
       this.WorkbenchConnectionsListView.MultiSelect = false;
       this.WorkbenchConnectionsListView.Name = "WorkbenchConnectionsListView";
-      this.WorkbenchConnectionsListView.Size = new System.Drawing.Size(544, 354);
+      this.WorkbenchConnectionsListView.Size = new System.Drawing.Size(554, 364);
       this.WorkbenchConnectionsListView.Sorting = System.Windows.Forms.SortOrder.Ascending;
       this.WorkbenchConnectionsListView.TabIndex = 5;
       this.WorkbenchConnectionsListView.UseCompatibleStateImageBehavior = false;
@@ -198,16 +215,8 @@ namespace MySql.Notifier
             this.DeleteConnectionToolStripMenuItem,
             this.RefreshConnectionsToolStripMenuItem});
       this.ConnectionsContextMenuStrip.Name = "ConnectionsContextMenuStrip";
-      this.ConnectionsContextMenuStrip.Size = new System.Drawing.Size(184, 70);
+      this.ConnectionsContextMenuStrip.Size = new System.Drawing.Size(184, 48);
       this.ConnectionsContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.ConnectionsContextMenuStrip_Opening);
-      // 
-      // RefreshConnectionsToolStripMenuItem
-      // 
-      this.RefreshConnectionsToolStripMenuItem.Image = global::MySql.Notifier.Properties.Resources.refresh;
-      this.RefreshConnectionsToolStripMenuItem.Name = "RefreshConnectionsToolStripMenuItem";
-      this.RefreshConnectionsToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
-      this.RefreshConnectionsToolStripMenuItem.Text = "Refresh Connections";
-      this.RefreshConnectionsToolStripMenuItem.Click += new System.EventHandler(this.RefreshConnectionsToolStripMenuItem_Click);
       // 
       // DeleteConnectionToolStripMenuItem
       // 
@@ -217,25 +226,20 @@ namespace MySql.Notifier
       this.DeleteConnectionToolStripMenuItem.Text = "Delete Connection";
       this.DeleteConnectionToolStripMenuItem.Click += new System.EventHandler(this.DeleteConnectionToolStripMenuItem_Click);
       // 
-      // CommandAreaPanel
+      // RefreshConnectionsToolStripMenuItem
       // 
-      this.CommandAreaPanel.BackColor = System.Drawing.SystemColors.Menu;
-      this.CommandAreaPanel.Controls.Add(this.DialogCancelButton);
-      this.CommandAreaPanel.Controls.Add(this.AddConnectionButton);
-      this.CommandAreaPanel.Controls.Add(this.DialogOKButton);
-      this.CommandAreaPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-      this.CommandAreaPanel.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 512);
-      this.CommandAreaPanel.Name = "CommandAreaPanel";
-      this.CommandAreaPanel.Size = new System.Drawing.Size(594, 50);
-      this.CommandAreaPanel.TabIndex = 6;
+      this.RefreshConnectionsToolStripMenuItem.Image = global::MySql.Notifier.Properties.Resources.refresh;
+      this.RefreshConnectionsToolStripMenuItem.Name = "RefreshConnectionsToolStripMenuItem";
+      this.RefreshConnectionsToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+      this.RefreshConnectionsToolStripMenuItem.Text = "Refresh Connections";
+      this.RefreshConnectionsToolStripMenuItem.Click += new System.EventHandler(this.RefreshConnectionsToolStripMenuItem_Click);
       // 
       // DialogCancelButton
       // 
       this.DialogCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
       this.DialogCancelButton.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogCancelButton.Location = new System.Drawing.Point(494, 15);
+      this.DialogCancelButton.Location = new System.Drawing.Point(504, 15);
       this.DialogCancelButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.DialogCancelButton.Name = "DialogCancelButton";
       this.DialogCancelButton.Size = new System.Drawing.Size(75, 23);
@@ -260,7 +264,7 @@ namespace MySql.Notifier
       this.DialogOKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
       this.DialogOKButton.Enabled = false;
       this.DialogOKButton.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogOKButton.Location = new System.Drawing.Point(413, 15);
+      this.DialogOKButton.Location = new System.Drawing.Point(423, 15);
       this.DialogOKButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.DialogOKButton.Name = "DialogOKButton";
       this.DialogOKButton.Size = new System.Drawing.Size(75, 23);
@@ -279,30 +283,28 @@ namespace MySql.Notifier
       this.AcceptButton = this.DialogOKButton;
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
       this.CancelButton = this.DialogCancelButton;
-      this.ClientSize = new System.Drawing.Size(594, 562);
-      this.Controls.Add(this.ContentAreaPanel);
+      this.ClientSize = new System.Drawing.Size(604, 572);
+      this.CommandAreaVisible = true;
       this.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
+      this.FootnoteAreaHeight = 0;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-      this.MaximizeBox = false;
-      this.MinimizeBox = false;
       this.MinimumSize = new System.Drawing.Size(610, 600);
       this.Name = "MonitorMySQLServerInstancesDialog";
-      this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
       this.Text = "Monitor MySQL Server Instance";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MonitorMySQLServerInstancesDialog_FormClosing);
       this.Shown += new System.EventHandler(this.MonitorMySQLServerInstancesDialog_Shown);
+      this.Controls.SetChildIndex(this.ContentAreaPanel, 0);
+      this.Controls.SetChildIndex(this.FootnoteAreaPanel, 0);
       this.ContentAreaPanel.ResumeLayout(false);
       this.ContentAreaPanel.PerformLayout();
-      this.ConnectionsContextMenuStrip.ResumeLayout(false);
       this.CommandAreaPanel.ResumeLayout(false);
+      this.ConnectionsContextMenuStrip.ResumeLayout(false);
       this.ResumeLayout(false);
 
     }
 
     #endregion
 
-    private System.Windows.Forms.Panel ContentAreaPanel;
-    private System.Windows.Forms.Panel CommandAreaPanel;
     private System.Windows.Forms.Button DialogCancelButton;
     private System.Windows.Forms.Button DialogOKButton;
     private System.Windows.Forms.ListView WorkbenchConnectionsListView;

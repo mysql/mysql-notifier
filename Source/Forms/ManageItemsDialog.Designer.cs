@@ -49,9 +49,10 @@ namespace MySql.Notifier
     {
       this.components = new System.ComponentModel.Container();
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageItemsDialog));
-      this.panel2 = new System.Windows.Forms.Panel();
+      this.AddButtonContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+      this.ServiceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.MySQLInstanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.CloseButton = new System.Windows.Forms.Button();
-      this.panel1 = new System.Windows.Forms.Panel();
       this.ItemsTabControl = new System.Windows.Forms.TabControl();
       this.MonitoredServicesTabPage = new System.Windows.Forms.TabPage();
       this.MonitoredServicesListView = new System.Windows.Forms.ListView();
@@ -73,67 +74,81 @@ namespace MySql.Notifier
       this.NotifyOnStatusChangeCheckBox = new System.Windows.Forms.CheckBox();
       this.DeleteButton = new System.Windows.Forms.Button();
       this.AddButton = new System.Windows.Forms.Button();
-      this.MonitoredItemsHyperTitleLabel = new System.Windows.Forms.Label();
-      this.AddButtonContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-      this.ServiceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.MySQLInstanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.panel2.SuspendLayout();
-      this.panel1.SuspendLayout();
+      this.MonitoredItemsLabel = new System.Windows.Forms.Label();
+      this.ContentAreaPanel.SuspendLayout();
+      this.CommandAreaPanel.SuspendLayout();
+      this.AddButtonContextMenuStrip.SuspendLayout();
       this.ItemsTabControl.SuspendLayout();
       this.MonitoredServicesTabPage.SuspendLayout();
       this.MonitoredInstancesTabPage.SuspendLayout();
       this.OptionsGroupBox.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.InstanceMonitorIntervalNumericUpDown)).BeginInit();
-      this.AddButtonContextMenuStrip.SuspendLayout();
       this.SuspendLayout();
       // 
-      // panel2
+      // FootnoteAreaPanel
       // 
-      this.panel2.Controls.Add(this.CloseButton);
-      this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-      this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.panel2.Location = new System.Drawing.Point(0, 453);
-      this.panel2.Name = "panel2";
-      this.panel2.Size = new System.Drawing.Size(596, 48);
-      this.panel2.TabIndex = 47;
+      this.FootnoteAreaPanel.Location = new System.Drawing.Point(0, 292);
+      this.FootnoteAreaPanel.Size = new System.Drawing.Size(634, 0);
+      // 
+      // ContentAreaPanel
+      // 
+      this.ContentAreaPanel.Controls.Add(this.ItemsTabControl);
+      this.ContentAreaPanel.Controls.Add(this.AddButton);
+      this.ContentAreaPanel.Controls.Add(this.DescriptionLabel);
+      this.ContentAreaPanel.Controls.Add(this.MonitoredItemsLabel);
+      this.ContentAreaPanel.Controls.Add(this.SubTitleLabel);
+      this.ContentAreaPanel.Controls.Add(this.DeleteButton);
+      this.ContentAreaPanel.Controls.Add(this.OptionsGroupBox);
+      this.ContentAreaPanel.Size = new System.Drawing.Size(596, 501);
+      // 
+      // CommandAreaPanel
+      // 
+      this.CommandAreaPanel.Controls.Add(this.CloseButton);
+      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 456);
+      this.CommandAreaPanel.Size = new System.Drawing.Size(596, 45);
+      // 
+      // AddButtonContextMenuStrip
+      // 
+      this.AddButtonContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ServiceToolStripMenuItem,
+            this.MySQLInstanceToolStripMenuItem});
+      this.AddButtonContextMenuStrip.Name = "contextMenuStrip1";
+      this.AddButtonContextMenuStrip.Size = new System.Drawing.Size(164, 48);
+      // 
+      // ServiceToolStripMenuItem
+      // 
+      this.ServiceToolStripMenuItem.Name = "ServiceToolStripMenuItem";
+      this.ServiceToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+      this.ServiceToolStripMenuItem.Text = "Windows Service";
+      this.ServiceToolStripMenuItem.Click += new System.EventHandler(this.ServiceToolStripMenuItem_Click);
+      // 
+      // MySQLInstanceToolStripMenuItem
+      // 
+      this.MySQLInstanceToolStripMenuItem.Name = "MySQLInstanceToolStripMenuItem";
+      this.MySQLInstanceToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+      this.MySQLInstanceToolStripMenuItem.Text = "MySQL Instance";
+      this.MySQLInstanceToolStripMenuItem.Click += new System.EventHandler(this.MySQLInstanceToolStripMenuItem_Click);
       // 
       // CloseButton
       // 
       this.CloseButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.CloseButton.Location = new System.Drawing.Point(497, 9);
+      this.CloseButton.Location = new System.Drawing.Point(497, 11);
       this.CloseButton.Name = "CloseButton";
-      this.CloseButton.Size = new System.Drawing.Size(87, 27);
-      this.CloseButton.TabIndex = 15;
+      this.CloseButton.Size = new System.Drawing.Size(87, 23);
+      this.CloseButton.TabIndex = 0;
       this.CloseButton.Text = "Close";
       this.CloseButton.UseVisualStyleBackColor = true;
-      // 
-      // panel1
-      // 
-      this.panel1.AutoSize = true;
-      this.panel1.BackColor = System.Drawing.Color.White;
-      this.panel1.Controls.Add(this.ItemsTabControl);
-      this.panel1.Controls.Add(this.DescriptionLabel);
-      this.panel1.Controls.Add(this.SubTitleLabel);
-      this.panel1.Controls.Add(this.OptionsGroupBox);
-      this.panel1.Controls.Add(this.DeleteButton);
-      this.panel1.Controls.Add(this.AddButton);
-      this.panel1.Controls.Add(this.MonitoredItemsHyperTitleLabel);
-      this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.panel1.Location = new System.Drawing.Point(0, 0);
-      this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(596, 501);
-      this.panel1.TabIndex = 48;
       // 
       // ItemsTabControl
       // 
       this.ItemsTabControl.Controls.Add(this.MonitoredServicesTabPage);
       this.ItemsTabControl.Controls.Add(this.MonitoredInstancesTabPage);
-      this.ItemsTabControl.Location = new System.Drawing.Point(33, 122);
+      this.ItemsTabControl.Location = new System.Drawing.Point(33, 131);
       this.ItemsTabControl.Name = "ItemsTabControl";
       this.ItemsTabControl.SelectedIndex = 0;
       this.ItemsTabControl.Size = new System.Drawing.Size(447, 175);
       this.ItemsTabControl.SizeMode = System.Windows.Forms.TabSizeMode.FillToRight;
-      this.ItemsTabControl.TabIndex = 27;
+      this.ItemsTabControl.TabIndex = 3;
       this.ItemsTabControl.SelectedIndexChanged += new System.EventHandler(this.ItemsTabControl_SelectedIndexChanged);
       // 
       // MonitoredServicesTabPage
@@ -162,7 +177,7 @@ namespace MySql.Notifier
       this.MonitoredServicesListView.Name = "MonitoredServicesListView";
       this.MonitoredServicesListView.Size = new System.Drawing.Size(433, 141);
       this.MonitoredServicesListView.Sorting = System.Windows.Forms.SortOrder.Ascending;
-      this.MonitoredServicesListView.TabIndex = 19;
+      this.MonitoredServicesListView.TabIndex = 0;
       this.MonitoredServicesListView.UseCompatibleStateImageBehavior = false;
       this.MonitoredServicesListView.View = System.Windows.Forms.View.Details;
       this.MonitoredServicesListView.SelectedIndexChanged += new System.EventHandler(this.MonitoredServicesListView_SelectedIndexChanged);
@@ -229,20 +244,20 @@ namespace MySql.Notifier
       // 
       // DescriptionLabel
       // 
-      this.DescriptionLabel.Location = new System.Drawing.Point(32, 73);
+      this.DescriptionLabel.Location = new System.Drawing.Point(32, 82);
       this.DescriptionLabel.Name = "DescriptionLabel";
       this.DescriptionLabel.Size = new System.Drawing.Size(448, 37);
-      this.DescriptionLabel.TabIndex = 25;
+      this.DescriptionLabel.TabIndex = 2;
       this.DescriptionLabel.Text = "Local MySQL services will be automatically added. Press Add to monitor other Wind" +
     "ows services or MySQL instances.";
       // 
       // SubTitleLabel
       // 
       this.SubTitleLabel.AutoSize = true;
-      this.SubTitleLabel.Location = new System.Drawing.Point(32, 45);
+      this.SubTitleLabel.Location = new System.Drawing.Point(32, 54);
       this.SubTitleLabel.Name = "SubTitleLabel";
       this.SubTitleLabel.Size = new System.Drawing.Size(217, 15);
-      this.SubTitleLabel.TabIndex = 24;
+      this.SubTitleLabel.TabIndex = 1;
       this.SubTitleLabel.Text = "Windows Services and MySQL Instances";
       // 
       // OptionsGroupBox
@@ -252,10 +267,10 @@ namespace MySql.Notifier
       this.OptionsGroupBox.Controls.Add(this.InstanceMonitorIntervalNumericUpDown);
       this.OptionsGroupBox.Controls.Add(this.UpdateTrayIconCheckBox);
       this.OptionsGroupBox.Controls.Add(this.NotifyOnStatusChangeCheckBox);
-      this.OptionsGroupBox.Location = new System.Drawing.Point(32, 313);
+      this.OptionsGroupBox.Location = new System.Drawing.Point(32, 322);
       this.OptionsGroupBox.Name = "OptionsGroupBox";
       this.OptionsGroupBox.Size = new System.Drawing.Size(448, 108);
-      this.OptionsGroupBox.TabIndex = 23;
+      this.OptionsGroupBox.TabIndex = 4;
       this.OptionsGroupBox.TabStop = false;
       this.OptionsGroupBox.Text = "Options";
       // 
@@ -279,7 +294,7 @@ namespace MySql.Notifier
       this.InstanceMonitorIntervalLabel.Location = new System.Drawing.Point(30, 74);
       this.InstanceMonitorIntervalLabel.Name = "InstanceMonitorIntervalLabel";
       this.InstanceMonitorIntervalLabel.Size = new System.Drawing.Size(203, 15);
-      this.InstanceMonitorIntervalLabel.TabIndex = 3;
+      this.InstanceMonitorIntervalLabel.TabIndex = 2;
       this.InstanceMonitorIntervalLabel.Text = "Monitor MySQL Instance status every";
       // 
       // InstanceMonitorIntervalNumericUpDown
@@ -292,7 +307,7 @@ namespace MySql.Notifier
             0});
       this.InstanceMonitorIntervalNumericUpDown.Name = "InstanceMonitorIntervalNumericUpDown";
       this.InstanceMonitorIntervalNumericUpDown.Size = new System.Drawing.Size(51, 23);
-      this.InstanceMonitorIntervalNumericUpDown.TabIndex = 2;
+      this.InstanceMonitorIntervalNumericUpDown.TabIndex = 3;
       this.InstanceMonitorIntervalNumericUpDown.ValueChanged += new System.EventHandler(this.InstanceMonitorIntervalNumericUpDown_ValueChanged);
       // 
       // UpdateTrayIconCheckBox
@@ -322,117 +337,92 @@ namespace MySql.Notifier
       // DeleteButton
       // 
       this.DeleteButton.Enabled = false;
-      this.DeleteButton.Location = new System.Drawing.Point(497, 179);
+      this.DeleteButton.Location = new System.Drawing.Point(497, 184);
       this.DeleteButton.Name = "DeleteButton";
-      this.DeleteButton.Size = new System.Drawing.Size(87, 27);
-      this.DeleteButton.TabIndex = 22;
+      this.DeleteButton.Size = new System.Drawing.Size(87, 23);
+      this.DeleteButton.TabIndex = 6;
       this.DeleteButton.Text = "Delete";
       this.DeleteButton.UseVisualStyleBackColor = true;
       this.DeleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
       // 
       // AddButton
       // 
-      this.AddButton.Location = new System.Drawing.Point(497, 146);
+      this.AddButton.Location = new System.Drawing.Point(497, 155);
       this.AddButton.Name = "AddButton";
-      this.AddButton.Size = new System.Drawing.Size(87, 27);
-      this.AddButton.TabIndex = 21;
+      this.AddButton.Size = new System.Drawing.Size(87, 23);
+      this.AddButton.TabIndex = 5;
       this.AddButton.Text = "Add...";
       this.AddButton.UseVisualStyleBackColor = true;
       this.AddButton.Click += new System.EventHandler(this.AddButton_Click);
       // 
-      // MonitoredItemsHyperTitleLabel
+      // MonitoredItemsLabel
       // 
-      this.MonitoredItemsHyperTitleLabel.AutoSize = true;
-      this.MonitoredItemsHyperTitleLabel.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.MonitoredItemsHyperTitleLabel.Location = new System.Drawing.Point(12, 18);
-      this.MonitoredItemsHyperTitleLabel.Name = "MonitoredItemsHyperTitleLabel";
-      this.MonitoredItemsHyperTitleLabel.Size = new System.Drawing.Size(141, 15);
-      this.MonitoredItemsHyperTitleLabel.TabIndex = 20;
-      this.MonitoredItemsHyperTitleLabel.Text = "Manage Monitored Items";
-      // 
-      // AddButtonContextMenuStrip
-      // 
-      this.AddButtonContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ServiceToolStripMenuItem,
-            this.MySQLInstanceToolStripMenuItem});
-      this.AddButtonContextMenuStrip.Name = "contextMenuStrip1";
-      this.AddButtonContextMenuStrip.Size = new System.Drawing.Size(164, 48);
-      // 
-      // ServiceToolStripMenuItem
-      // 
-      this.ServiceToolStripMenuItem.Name = "ServiceToolStripMenuItem";
-      this.ServiceToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
-      this.ServiceToolStripMenuItem.Text = "Windows Service";
-      this.ServiceToolStripMenuItem.Click += new System.EventHandler(this.ServiceToolStripMenuItem_Click);
-      // 
-      // MySQLInstanceToolStripMenuItem
-      // 
-      this.MySQLInstanceToolStripMenuItem.Name = "MySQLInstanceToolStripMenuItem";
-      this.MySQLInstanceToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
-      this.MySQLInstanceToolStripMenuItem.Text = "MySQL Instance";
-      this.MySQLInstanceToolStripMenuItem.Click += new System.EventHandler(this.MySQLInstanceToolStripMenuItem_Click);
+      this.MonitoredItemsLabel.AutoSize = true;
+      this.MonitoredItemsLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.MonitoredItemsLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
+      this.MonitoredItemsLabel.Location = new System.Drawing.Point(12, 27);
+      this.MonitoredItemsLabel.Name = "MonitoredItemsLabel";
+      this.MonitoredItemsLabel.Size = new System.Drawing.Size(185, 21);
+      this.MonitoredItemsLabel.TabIndex = 0;
+      this.MonitoredItemsLabel.Text = "Manage Monitored Items";
       // 
       // ManageItemsDialog
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-      this.CancelButton = this.CloseButton;
       this.ClientSize = new System.Drawing.Size(596, 501);
-      this.Controls.Add(this.panel2);
-      this.Controls.Add(this.panel1);
+      this.CommandAreaVisible = true;
       this.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+      this.FootnoteAreaHeight = 0;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-      this.MaximizeBox = false;
-      this.MinimizeBox = false;
       this.Name = "ManageItemsDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Manage Items";
-      this.panel2.ResumeLayout(false);
-      this.panel1.ResumeLayout(false);
-      this.panel1.PerformLayout();
+      this.Controls.SetChildIndex(this.ContentAreaPanel, 0);
+      this.Controls.SetChildIndex(this.FootnoteAreaPanel, 0);
+      this.Controls.SetChildIndex(this.CommandAreaPanel, 0);
+      this.ContentAreaPanel.ResumeLayout(false);
+      this.ContentAreaPanel.PerformLayout();
+      this.CommandAreaPanel.ResumeLayout(false);
+      this.AddButtonContextMenuStrip.ResumeLayout(false);
       this.ItemsTabControl.ResumeLayout(false);
       this.MonitoredServicesTabPage.ResumeLayout(false);
       this.MonitoredInstancesTabPage.ResumeLayout(false);
       this.OptionsGroupBox.ResumeLayout(false);
       this.OptionsGroupBox.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this.InstanceMonitorIntervalNumericUpDown)).EndInit();
-      this.AddButtonContextMenuStrip.ResumeLayout(false);
       this.ResumeLayout(false);
-      this.PerformLayout();
 
     }
 
     #endregion
 
-    private System.Windows.Forms.Panel panel2;
-    private System.Windows.Forms.Button CloseButton;
-    private System.Windows.Forms.Panel panel1;
-    private System.Windows.Forms.GroupBox OptionsGroupBox;
-    private System.Windows.Forms.CheckBox UpdateTrayIconCheckBox;
-    private System.Windows.Forms.CheckBox NotifyOnStatusChangeCheckBox;
-    private System.Windows.Forms.Button DeleteButton;
-    private System.Windows.Forms.Button AddButton;
-    private System.Windows.Forms.ListView MonitoredServicesListView;
-    private System.Windows.Forms.ColumnHeader ServiceNameColumnHeader;
-    private System.Windows.Forms.ColumnHeader ServiceStatusColumnHeader;
     private System.Windows.Forms.ContextMenuStrip AddButtonContextMenuStrip;
     private System.Windows.Forms.ToolStripMenuItem ServiceToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem MySQLInstanceToolStripMenuItem;
-    private System.Windows.Forms.Label DescriptionLabel;
-    private System.Windows.Forms.Label SubTitleLabel;
-    private System.Windows.Forms.Label MonitoredItemsHyperTitleLabel;
-    private System.Windows.Forms.ColumnHeader ServiceMachineColumnHeader;
-    private System.Windows.Forms.Label InstanceMonitorIntervalLabel;
-    private System.Windows.Forms.NumericUpDown InstanceMonitorIntervalNumericUpDown;
-    private System.Windows.Forms.ComboBox InstanceMonitorIntervalUOMComboBox;
     private System.Windows.Forms.TabControl ItemsTabControl;
     private System.Windows.Forms.TabPage MonitoredServicesTabPage;
+    private System.Windows.Forms.ListView MonitoredServicesListView;
+    private System.Windows.Forms.ColumnHeader ServiceNameColumnHeader;
+    private System.Windows.Forms.ColumnHeader ServiceMachineColumnHeader;
+    private System.Windows.Forms.ColumnHeader ServiceStatusColumnHeader;
     private System.Windows.Forms.TabPage MonitoredInstancesTabPage;
     private System.Windows.Forms.ListView MonitoredInstancesListView;
     private System.Windows.Forms.ColumnHeader InstanceNameColumnHeader;
     private System.Windows.Forms.ColumnHeader InstanceDriverColumnHeader;
     private System.Windows.Forms.ColumnHeader InstanceStatusColumnHeader;
+    private System.Windows.Forms.Button AddButton;
+    private System.Windows.Forms.Label DescriptionLabel;
+    private System.Windows.Forms.Label MonitoredItemsLabel;
+    private System.Windows.Forms.Label SubTitleLabel;
+    private System.Windows.Forms.Button DeleteButton;
+    private System.Windows.Forms.GroupBox OptionsGroupBox;
+    private System.Windows.Forms.ComboBox InstanceMonitorIntervalUOMComboBox;
+    private System.Windows.Forms.Label InstanceMonitorIntervalLabel;
+    private System.Windows.Forms.NumericUpDown InstanceMonitorIntervalNumericUpDown;
+    private System.Windows.Forms.CheckBox UpdateTrayIconCheckBox;
+    private System.Windows.Forms.CheckBox NotifyOnStatusChangeCheckBox;
+    private System.Windows.Forms.Button CloseButton;
   }
 }

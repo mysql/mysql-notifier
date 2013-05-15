@@ -49,10 +49,9 @@ namespace MySql.Notifier
     {
       this.components = new System.ComponentModel.Container();
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddServiceDialog));
-      this.panel2 = new System.Windows.Forms.Panel();
+      this.timerForFiltering = new System.Windows.Forms.Timer(this.components);
       this.DialogOKButton = new System.Windows.Forms.Button();
       this.DialogCancelButton = new System.Windows.Forms.Button();
-      this.panel1 = new System.Windows.Forms.Panel();
       this.DeleteButton = new System.Windows.Forms.Button();
       this.EditButton = new System.Windows.Forms.Button();
       this.FilterTextBox = new System.Windows.Forms.TextBox();
@@ -67,27 +66,49 @@ namespace MySql.Notifier
       this.WindowsServiceHyperTitleLabel = new System.Windows.Forms.Label();
       this.ComputerLabel = new System.Windows.Forms.Label();
       this.MachineSelectionComboBox = new System.Windows.Forms.ComboBox();
-      this.timerForFiltering = new System.Windows.Forms.Timer(this.components);
-      this.panel2.SuspendLayout();
-      this.panel1.SuspendLayout();
+      this.ContentAreaPanel.SuspendLayout();
+      this.CommandAreaPanel.SuspendLayout();
       this.SuspendLayout();
       // 
-      // panel2
+      // FootnoteAreaPanel
       // 
-      this.panel2.Controls.Add(this.DialogOKButton);
-      this.panel2.Controls.Add(this.DialogCancelButton);
-      this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-      this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.panel2.Location = new System.Drawing.Point(0, 492);
-      this.panel2.Name = "panel2";
-      this.panel2.Size = new System.Drawing.Size(529, 50);
-      this.panel2.TabIndex = 1;
+      this.FootnoteAreaPanel.BackColor = System.Drawing.SystemColors.Menu;
+      this.FootnoteAreaPanel.Location = new System.Drawing.Point(0, 292);
+      this.FootnoteAreaPanel.Size = new System.Drawing.Size(634, 0);
+      // 
+      // ContentAreaPanel
+      // 
+      this.ContentAreaPanel.Controls.Add(this.DeleteButton);
+      this.ContentAreaPanel.Controls.Add(this.EditButton);
+      this.ContentAreaPanel.Controls.Add(this.FilterTextBox);
+      this.ContentAreaPanel.Controls.Add(this.FilterLabel);
+      this.ContentAreaPanel.Controls.Add(this.WindowsServiceInstructionsLabel);
+      this.ContentAreaPanel.Controls.Add(this.MachineInstructionsLabel);
+      this.ContentAreaPanel.Controls.Add(this.MachineHyperTitleLabel);
+      this.ContentAreaPanel.Controls.Add(this.FilterCheckBox);
+      this.ContentAreaPanel.Controls.Add(this.ServicesListView);
+      this.ContentAreaPanel.Controls.Add(this.WindowsServiceHyperTitleLabel);
+      this.ContentAreaPanel.Controls.Add(this.ComputerLabel);
+      this.ContentAreaPanel.Controls.Add(this.MachineSelectionComboBox);
+      this.ContentAreaPanel.Size = new System.Drawing.Size(529, 542);
+      // 
+      // CommandAreaPanel
+      // 
+      this.CommandAreaPanel.Controls.Add(this.DialogOKButton);
+      this.CommandAreaPanel.Controls.Add(this.DialogCancelButton);
+      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 497);
+      this.CommandAreaPanel.Size = new System.Drawing.Size(529, 45);
+      // 
+      // timerForFiltering
+      // 
+      this.timerForFiltering.Interval = 600;
+      this.timerForFiltering.Tick += new System.EventHandler(this.timerForFiltering_Tick);
       // 
       // DialogOKButton
       // 
       this.DialogOKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogOKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.DialogOKButton.Location = new System.Drawing.Point(360, 15);
+      this.DialogOKButton.Location = new System.Drawing.Point(360, 11);
       this.DialogOKButton.Name = "DialogOKButton";
       this.DialogOKButton.Size = new System.Drawing.Size(75, 23);
       this.DialogOKButton.TabIndex = 0;
@@ -99,38 +120,17 @@ namespace MySql.Notifier
       // 
       this.DialogCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.DialogCancelButton.Location = new System.Drawing.Point(441, 15);
+      this.DialogCancelButton.Location = new System.Drawing.Point(441, 11);
       this.DialogCancelButton.Name = "DialogCancelButton";
       this.DialogCancelButton.Size = new System.Drawing.Size(75, 23);
       this.DialogCancelButton.TabIndex = 1;
       this.DialogCancelButton.Text = "Cancel";
       this.DialogCancelButton.UseVisualStyleBackColor = true;
       // 
-      // panel1
-      // 
-      this.panel1.AutoSize = true;
-      this.panel1.BackColor = System.Drawing.Color.White;
-      this.panel1.Controls.Add(this.DeleteButton);
-      this.panel1.Controls.Add(this.EditButton);
-      this.panel1.Controls.Add(this.FilterTextBox);
-      this.panel1.Controls.Add(this.FilterLabel);
-      this.panel1.Controls.Add(this.WindowsServiceInstructionsLabel);
-      this.panel1.Controls.Add(this.MachineInstructionsLabel);
-      this.panel1.Controls.Add(this.MachineHyperTitleLabel);
-      this.panel1.Controls.Add(this.FilterCheckBox);
-      this.panel1.Controls.Add(this.ServicesListView);
-      this.panel1.Controls.Add(this.WindowsServiceHyperTitleLabel);
-      this.panel1.Controls.Add(this.ComputerLabel);
-      this.panel1.Controls.Add(this.MachineSelectionComboBox);
-      this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.panel1.Location = new System.Drawing.Point(0, 0);
-      this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(529, 542);
-      this.panel1.TabIndex = 0;
-      // 
       // DeleteButton
       // 
-      this.DeleteButton.Location = new System.Drawing.Point(441, 82);
+      this.DeleteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.DeleteButton.Location = new System.Drawing.Point(441, 89);
       this.DeleteButton.Name = "DeleteButton";
       this.DeleteButton.Size = new System.Drawing.Size(75, 23);
       this.DeleteButton.TabIndex = 5;
@@ -140,7 +140,8 @@ namespace MySql.Notifier
       // 
       // EditButton
       // 
-      this.EditButton.Location = new System.Drawing.Point(360, 82);
+      this.EditButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.EditButton.Location = new System.Drawing.Point(360, 89);
       this.EditButton.Name = "EditButton";
       this.EditButton.Size = new System.Drawing.Size(75, 23);
       this.EditButton.TabIndex = 4;
@@ -152,7 +153,7 @@ namespace MySql.Notifier
       // 
       this.FilterTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.FilterTextBox.Location = new System.Drawing.Point(64, 186);
+      this.FilterTextBox.Location = new System.Drawing.Point(64, 193);
       this.FilterTextBox.Name = "FilterTextBox";
       this.FilterTextBox.Size = new System.Drawing.Size(171, 22);
       this.FilterTextBox.TabIndex = 9;
@@ -161,7 +162,7 @@ namespace MySql.Notifier
       // FilterLabel
       // 
       this.FilterLabel.AutoSize = true;
-      this.FilterLabel.Location = new System.Drawing.Point(22, 191);
+      this.FilterLabel.Location = new System.Drawing.Point(22, 198);
       this.FilterLabel.Name = "FilterLabel";
       this.FilterLabel.Size = new System.Drawing.Size(36, 13);
       this.FilterLabel.TabIndex = 8;
@@ -171,7 +172,7 @@ namespace MySql.Notifier
       // 
       this.WindowsServiceInstructionsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.WindowsServiceInstructionsLabel.Location = new System.Drawing.Point(22, 156);
+      this.WindowsServiceInstructionsLabel.Location = new System.Drawing.Point(22, 163);
       this.WindowsServiceInstructionsLabel.Name = "WindowsServiceInstructionsLabel";
       this.WindowsServiceInstructionsLabel.Size = new System.Drawing.Size(495, 17);
       this.WindowsServiceInstructionsLabel.TabIndex = 7;
@@ -182,7 +183,7 @@ namespace MySql.Notifier
       // 
       this.MachineInstructionsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.MachineInstructionsLabel.Location = new System.Drawing.Point(20, 46);
+      this.MachineInstructionsLabel.Location = new System.Drawing.Point(20, 53);
       this.MachineInstructionsLabel.Name = "MachineInstructionsLabel";
       this.MachineInstructionsLabel.Size = new System.Drawing.Size(496, 29);
       this.MachineInstructionsLabel.TabIndex = 1;
@@ -192,9 +193,11 @@ namespace MySql.Notifier
       // MachineHyperTitleLabel
       // 
       this.MachineHyperTitleLabel.AutoSize = true;
-      this.MachineHyperTitleLabel.Location = new System.Drawing.Point(20, 24);
+      this.MachineHyperTitleLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.MachineHyperTitleLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
+      this.MachineHyperTitleLabel.Location = new System.Drawing.Point(19, 26);
       this.MachineHyperTitleLabel.Name = "MachineHyperTitleLabel";
-      this.MachineHyperTitleLabel.Size = new System.Drawing.Size(105, 13);
+      this.MachineHyperTitleLabel.Size = new System.Drawing.Size(140, 21);
       this.MachineHyperTitleLabel.TabIndex = 0;
       this.MachineHyperTitleLabel.Text = "Choose a Machine:";
       // 
@@ -202,7 +205,7 @@ namespace MySql.Notifier
       // 
       this.FilterCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.FilterCheckBox.AutoSize = true;
-      this.FilterCheckBox.Location = new System.Drawing.Point(253, 191);
+      this.FilterCheckBox.Location = new System.Drawing.Point(253, 198);
       this.FilterCheckBox.Name = "FilterCheckBox";
       this.FilterCheckBox.Size = new System.Drawing.Size(264, 17);
       this.FilterCheckBox.TabIndex = 10;
@@ -219,9 +222,9 @@ namespace MySql.Notifier
             this.columnHeader1,
             this.columnHeader3});
       this.ServicesListView.FullRowSelect = true;
-      this.ServicesListView.Location = new System.Drawing.Point(23, 214);
+      this.ServicesListView.Location = new System.Drawing.Point(23, 221);
       this.ServicesListView.Name = "ServicesListView";
-      this.ServicesListView.Size = new System.Drawing.Size(493, 251);
+      this.ServicesListView.Size = new System.Drawing.Size(493, 250);
       this.ServicesListView.TabIndex = 11;
       this.ServicesListView.UseCompatibleStateImageBehavior = false;
       this.ServicesListView.View = System.Windows.Forms.View.Details;
@@ -239,16 +242,18 @@ namespace MySql.Notifier
       // WindowsServiceHyperTitleLabel
       // 
       this.WindowsServiceHyperTitleLabel.AutoSize = true;
-      this.WindowsServiceHyperTitleLabel.Location = new System.Drawing.Point(22, 134);
+      this.WindowsServiceHyperTitleLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.WindowsServiceHyperTitleLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
+      this.WindowsServiceHyperTitleLabel.Location = new System.Drawing.Point(21, 137);
       this.WindowsServiceHyperTitleLabel.Name = "WindowsServiceHyperTitleLabel";
-      this.WindowsServiceHyperTitleLabel.Size = new System.Drawing.Size(148, 13);
+      this.WindowsServiceHyperTitleLabel.Size = new System.Drawing.Size(200, 21);
       this.WindowsServiceHyperTitleLabel.TabIndex = 6;
       this.WindowsServiceHyperTitleLabel.Text = "Choose a Windows Service:";
       // 
       // ComputerLabel
       // 
       this.ComputerLabel.AutoSize = true;
-      this.ComputerLabel.Location = new System.Drawing.Point(22, 85);
+      this.ComputerLabel.Location = new System.Drawing.Point(22, 92);
       this.ComputerLabel.Name = "ComputerLabel";
       this.ComputerLabel.Size = new System.Drawing.Size(61, 13);
       this.ComputerLabel.TabIndex = 2;
@@ -256,54 +261,50 @@ namespace MySql.Notifier
       // 
       // MachineSelectionComboBox
       // 
+      this.MachineSelectionComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.MachineSelectionComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
       this.MachineSelectionComboBox.FormattingEnabled = true;
       this.MachineSelectionComboBox.Items.AddRange(new object[] {
             "Local",
             "Add Remote...",
             "————————————————————————"});
-      this.MachineSelectionComboBox.Location = new System.Drawing.Point(89, 82);
+      this.MachineSelectionComboBox.Location = new System.Drawing.Point(89, 89);
       this.MachineSelectionComboBox.Name = "MachineSelectionComboBox";
       this.MachineSelectionComboBox.Size = new System.Drawing.Size(265, 21);
       this.MachineSelectionComboBox.TabIndex = 3;
       this.MachineSelectionComboBox.SelectedIndexChanged += new System.EventHandler(this.MachineSelectionComboBox_SelectedIndexChanged);
       // 
-      // timerForFiltering
-      // 
-      this.timerForFiltering.Interval = 600;
-      this.timerForFiltering.Tick += new System.EventHandler(this.timerForFiltering_Tick);
-      // 
       // AddServiceDialog
       // 
+      this.AcceptButton = this.DialogOKButton;
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-      this.BackColor = System.Drawing.SystemColors.Menu;
+      this.BackColor = System.Drawing.SystemColors.Control;
       this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
       this.CancelButton = this.DialogCancelButton;
       this.ClientSize = new System.Drawing.Size(529, 542);
-      this.Controls.Add(this.panel2);
-      this.Controls.Add(this.panel1);
+      this.CommandAreaVisible = true;
       this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.FootnoteAreaColor = System.Drawing.SystemColors.Menu;
+      this.FootnoteAreaHeight = 0;
+      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-      this.MaximizeBox = false;
-      this.MinimizeBox = false;
       this.MinimumSize = new System.Drawing.Size(504, 450);
       this.Name = "AddServiceDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Add Service";
-      this.panel2.ResumeLayout(false);
-      this.panel1.ResumeLayout(false);
-      this.panel1.PerformLayout();
+      this.ContentAreaPanel.ResumeLayout(false);
+      this.ContentAreaPanel.PerformLayout();
+      this.CommandAreaPanel.ResumeLayout(false);
       this.ResumeLayout(false);
-      this.PerformLayout();
 
     }
 
     #endregion
 
-    private System.Windows.Forms.Panel panel2;
-    private System.Windows.Forms.Button DialogOKButton;
-    private System.Windows.Forms.Button DialogCancelButton;
-    private System.Windows.Forms.Panel panel1;
+    private System.Windows.Forms.Timer timerForFiltering;
+    private System.Windows.Forms.Button DeleteButton;
+    private System.Windows.Forms.Button EditButton;
     private System.Windows.Forms.TextBox FilterTextBox;
     private System.Windows.Forms.Label FilterLabel;
     private System.Windows.Forms.Label WindowsServiceInstructionsLabel;
@@ -316,8 +317,7 @@ namespace MySql.Notifier
     private System.Windows.Forms.Label WindowsServiceHyperTitleLabel;
     private System.Windows.Forms.Label ComputerLabel;
     private System.Windows.Forms.ComboBox MachineSelectionComboBox;
-    private System.Windows.Forms.Timer timerForFiltering;
-    private System.Windows.Forms.Button DeleteButton;
-    private System.Windows.Forms.Button EditButton;
+    private System.Windows.Forms.Button DialogOKButton;
+    private System.Windows.Forms.Button DialogCancelButton;
   }
 }

@@ -17,48 +17,50 @@
 // 02110-1301  USA
 //
 
-using System;
-using System.Windows.Forms;
-using MySql.Notifier.Properties;
-using MySQL.Utility;
-
 namespace MySql.Notifier
 {
-  public partial class OptionsDialog : BaseForm
+  using System;
+  using System.Windows.Forms;
+  using MySql.Notifier.Properties;
+  using MySQL.Utility;
+  using MySQL.Utility.Forms;
+
+  public partial class OptionsDialog : AutoStyleableBaseDialog
   {
+    /// <summary>
+    /// Contains options for users to customize the Notifier's behavior.
+    /// </summary>
     internal OptionsDialog()
     {
       InitializeComponent();
 
-      notifyOfAutoAdd.Checked = Settings.Default.NotifyOfAutoServiceAddition;
-      notifyOfStatusChange.Checked = Settings.Default.NotifyOfStatusChange;
-      chkRunAtStartup.Checked = Utility.GetRunAtStartUp(Application.ProductName);
-      chkAutoCheckUpdates.Checked = Settings.Default.AutoCheckForUpdates;
-      numCheckUpdatesWeeks.Value = Settings.Default.CheckForUpdatesFrequency;
-      chkEnabledAutoAddServices.Checked = Settings.Default.AutoAddServicesToMonitor;
-      autoAddRegex.Text = Settings.Default.AutoAddPattern;
-      chkUseColorfulIcons.Checked = Settings.Default.UseColorfulStatusIcons;
-
-      //// Disable checks to monitor when service is hosted at non-windows remote machine.
+      NotifyOfAutoAddCheckBox.Checked = Settings.Default.NotifyOfAutoServiceAddition;
+      NotifyOfStatusChangeCheckBox.Checked = Settings.Default.NotifyOfStatusChange;
+      RunAtStartupCheckBox.Checked = Utility.GetRunAtStartUp(Application.ProductName);
+      AutoCheckUpdatesCheckBox.Checked = Settings.Default.AutoCheckForUpdates;
+      CheckUpdatesWeeksNumericUpDown.Value = Settings.Default.CheckForUpdatesFrequency;
+      AutoAddServicesCheckBox.Checked = Settings.Default.AutoAddServicesToMonitor;
+      AutoAddRegexTextBox.Text = Settings.Default.AutoAddPattern;
+      UseColorfulIconsCheckBox.Checked = Settings.Default.UseColorfulStatusIcons;
     }
 
-    private void btnOK_Click(object sender, EventArgs e)
+    private void DialogApplyButton_Click(object sender, EventArgs e)
     {
-      var updateTask = chkAutoCheckUpdates.Checked != Settings.Default.AutoCheckForUpdates ? true : false;
-      var deleteTask = !chkAutoCheckUpdates.Checked && Settings.Default.AutoCheckForUpdates ? true : false;
-      var deleteIfPrevious = chkAutoCheckUpdates.Checked && !Settings.Default.AutoCheckForUpdates ? false : true;
+      var updateTask = AutoCheckUpdatesCheckBox.Checked != Settings.Default.AutoCheckForUpdates ? true : false;
+      var deleteTask = !AutoCheckUpdatesCheckBox.Checked && Settings.Default.AutoCheckForUpdates ? true : false;
+      var deleteIfPrevious = AutoCheckUpdatesCheckBox.Checked && !Settings.Default.AutoCheckForUpdates ? false : true;
 
-      if (Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(this.numCheckUpdatesWeeks.Value)) updateTask = true;
+      if (Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(this.CheckUpdatesWeeksNumericUpDown.Value)) updateTask = true;
 
-      Settings.Default.NotifyOfAutoServiceAddition = notifyOfAutoAdd.Checked;
-      Settings.Default.NotifyOfStatusChange = notifyOfStatusChange.Checked;
-      Settings.Default.AutoCheckForUpdates = chkAutoCheckUpdates.Checked;
-      Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(this.numCheckUpdatesWeeks.Value);
-      Settings.Default.AutoAddServicesToMonitor = chkEnabledAutoAddServices.Checked;
-      Settings.Default.AutoAddPattern = autoAddRegex.Text.Trim();
-      Settings.Default.UseColorfulStatusIcons = chkUseColorfulIcons.Checked;
+      Settings.Default.NotifyOfAutoServiceAddition = NotifyOfAutoAddCheckBox.Checked;
+      Settings.Default.NotifyOfStatusChange = NotifyOfStatusChangeCheckBox.Checked;
+      Settings.Default.AutoCheckForUpdates = AutoCheckUpdatesCheckBox.Checked;
+      Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(this.CheckUpdatesWeeksNumericUpDown.Value);
+      Settings.Default.AutoAddServicesToMonitor = AutoAddServicesCheckBox.Checked;
+      Settings.Default.AutoAddPattern = AutoAddRegexTextBox.Text.Trim();
+      Settings.Default.UseColorfulStatusIcons = UseColorfulIconsCheckBox.Checked;
       Settings.Default.Save();
-      Utility.SetRunAtStartUp(Application.ProductName, chkRunAtStartup.Checked);
+      Utility.SetRunAtStartUp(Application.ProductName, RunAtStartupCheckBox.Checked);
 
       if (updateTask)
       {
@@ -74,14 +76,14 @@ namespace MySql.Notifier
       }
     }
 
-    private void chkAutoCheckUpdates_CheckedChanged(object sender, EventArgs e)
+    private void AutoCheckUpdatesCheckBox_CheckedChanged(object sender, EventArgs e)
     {
-      this.numCheckUpdatesWeeks.Enabled = this.chkAutoCheckUpdates.Checked;
+      this.CheckUpdatesWeeksNumericUpDown.Enabled = this.AutoCheckUpdatesCheckBox.Checked;
     }
 
-    private void chkEnabledAutoAddServices_CheckedChanged(object sender, EventArgs e)
+    private void AutoAddServicesCheckBox_CheckedChanged(object sender, EventArgs e)
     {
-      autoAddRegex.Enabled = chkEnabledAutoAddServices.Checked;
+      AutoAddRegexTextBox.Enabled = AutoAddServicesCheckBox.Checked;
     }
   }
 }

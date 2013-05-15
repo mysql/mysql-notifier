@@ -48,235 +48,228 @@ namespace MySql.Notifier
     private void InitializeComponent()
     {
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OptionsDialog));
-      this.panel2 = new System.Windows.Forms.Panel();
-      this.btnCancel = new System.Windows.Forms.Button();
-      this.btnOK = new System.Windows.Forms.Button();
-      this.panel1 = new System.Windows.Forms.Panel();
-      this.chkUseColorfulIcons = new System.Windows.Forms.CheckBox();
-      this.lblSubTitle2 = new System.Windows.Forms.Label();
-      this.notifyOfStatusChange = new System.Windows.Forms.CheckBox();
-      this.notifyOfAutoAdd = new System.Windows.Forms.CheckBox();
-      this.autoAddRegex = new System.Windows.Forms.TextBox();
-      this.chkEnabledAutoAddServices = new System.Windows.Forms.CheckBox();
+      this.DialogCancelButton = new System.Windows.Forms.Button();
+      this.DialogApplyButton = new System.Windows.Forms.Button();
+      this.UseColorfulIconsCheckBox = new System.Windows.Forms.CheckBox();
+      this.NotificationsOptionsLabel = new System.Windows.Forms.Label();
+      this.NotifyOfStatusChangeCheckBox = new System.Windows.Forms.CheckBox();
+      this.NotifyOfAutoAddCheckBox = new System.Windows.Forms.CheckBox();
+      this.AutoAddRegexTextBox = new System.Windows.Forms.TextBox();
+      this.AutoAddServicesCheckBox = new System.Windows.Forms.CheckBox();
       this.lblWeeks = new System.Windows.Forms.Label();
-      this.numCheckUpdatesWeeks = new System.Windows.Forms.NumericUpDown();
-      this.chkAutoCheckUpdates = new System.Windows.Forms.CheckBox();
-      this.chkRunAtStartup = new System.Windows.Forms.CheckBox();
-      this.lblSubTitle1 = new System.Windows.Forms.Label();
-      this.lblHyperTitle = new System.Windows.Forms.Label();
-      this.panel2.SuspendLayout();
-      this.panel1.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.numCheckUpdatesWeeks)).BeginInit();
+      this.CheckUpdatesWeeksNumericUpDown = new System.Windows.Forms.NumericUpDown();
+      this.AutoCheckUpdatesCheckBox = new System.Windows.Forms.CheckBox();
+      this.RunAtStartupCheckBox = new System.Windows.Forms.CheckBox();
+      this.GeneralOptionsLabel = new System.Windows.Forms.Label();
+      this.TitleLabel = new System.Windows.Forms.Label();
+      this.ContentAreaPanel.SuspendLayout();
+      this.CommandAreaPanel.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.CheckUpdatesWeeksNumericUpDown)).BeginInit();
       this.SuspendLayout();
       // 
-      // panel2
+      // FootnoteAreaPanel
       // 
-      this.panel2.Controls.Add(this.btnCancel);
-      this.panel2.Controls.Add(this.btnOK);
-      this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-      this.panel2.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.panel2.Location = new System.Drawing.Point(0, 406);
-      this.panel2.Name = "panel2";
-      this.panel2.Size = new System.Drawing.Size(422, 46);
-      this.panel2.TabIndex = 5;
+      this.FootnoteAreaPanel.Location = new System.Drawing.Point(0, 292);
+      this.FootnoteAreaPanel.Size = new System.Drawing.Size(634, 0);
       // 
-      // btnCancel
+      // ContentAreaPanel
       // 
-      this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.btnCancel.Location = new System.Drawing.Point(325, 10);
-      this.btnCancel.Name = "btnCancel";
-      this.btnCancel.Size = new System.Drawing.Size(87, 27);
-      this.btnCancel.TabIndex = 5;
-      this.btnCancel.Text = "Cancel";
-      this.btnCancel.UseVisualStyleBackColor = true;
+      this.ContentAreaPanel.Controls.Add(this.UseColorfulIconsCheckBox);
+      this.ContentAreaPanel.Controls.Add(this.TitleLabel);
+      this.ContentAreaPanel.Controls.Add(this.NotificationsOptionsLabel);
+      this.ContentAreaPanel.Controls.Add(this.GeneralOptionsLabel);
+      this.ContentAreaPanel.Controls.Add(this.NotifyOfStatusChangeCheckBox);
+      this.ContentAreaPanel.Controls.Add(this.RunAtStartupCheckBox);
+      this.ContentAreaPanel.Controls.Add(this.NotifyOfAutoAddCheckBox);
+      this.ContentAreaPanel.Controls.Add(this.AutoCheckUpdatesCheckBox);
+      this.ContentAreaPanel.Controls.Add(this.AutoAddRegexTextBox);
+      this.ContentAreaPanel.Controls.Add(this.CheckUpdatesWeeksNumericUpDown);
+      this.ContentAreaPanel.Controls.Add(this.AutoAddServicesCheckBox);
+      this.ContentAreaPanel.Controls.Add(this.lblWeeks);
+      this.ContentAreaPanel.Size = new System.Drawing.Size(422, 452);
       // 
-      // btnOK
+      // CommandAreaPanel
       // 
-      this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.btnOK.Location = new System.Drawing.Point(231, 10);
-      this.btnOK.Name = "btnOK";
-      this.btnOK.Size = new System.Drawing.Size(87, 27);
-      this.btnOK.TabIndex = 4;
-      this.btnOK.Text = "Apply";
-      this.btnOK.UseVisualStyleBackColor = true;
-      this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
+      this.CommandAreaPanel.Controls.Add(this.DialogCancelButton);
+      this.CommandAreaPanel.Controls.Add(this.DialogApplyButton);
+      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 407);
+      this.CommandAreaPanel.Size = new System.Drawing.Size(422, 45);
       // 
-      // panel1
+      // DialogCancelButton
       // 
-      this.panel1.AutoSize = true;
-      this.panel1.BackColor = System.Drawing.Color.White;
-      this.panel1.Controls.Add(this.chkUseColorfulIcons);
-      this.panel1.Controls.Add(this.lblSubTitle2);
-      this.panel1.Controls.Add(this.notifyOfStatusChange);
-      this.panel1.Controls.Add(this.notifyOfAutoAdd);
-      this.panel1.Controls.Add(this.autoAddRegex);
-      this.panel1.Controls.Add(this.chkEnabledAutoAddServices);
-      this.panel1.Controls.Add(this.lblWeeks);
-      this.panel1.Controls.Add(this.numCheckUpdatesWeeks);
-      this.panel1.Controls.Add(this.chkAutoCheckUpdates);
-      this.panel1.Controls.Add(this.chkRunAtStartup);
-      this.panel1.Controls.Add(this.lblSubTitle1);
-      this.panel1.Controls.Add(this.lblHyperTitle);
-      this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.panel1.Location = new System.Drawing.Point(0, 0);
-      this.panel1.Name = "panel1";
-      this.panel1.Size = new System.Drawing.Size(422, 452);
-      this.panel1.TabIndex = 6;
+      this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+      this.DialogCancelButton.Location = new System.Drawing.Point(331, 10);
+      this.DialogCancelButton.Name = "DialogCancelButton";
+      this.DialogCancelButton.Size = new System.Drawing.Size(78, 23);
+      this.DialogCancelButton.TabIndex = 1;
+      this.DialogCancelButton.Text = "Cancel";
+      this.DialogCancelButton.UseVisualStyleBackColor = true;
       // 
-      // chkUseColorfulIcons
+      // DialogApplyButton
       // 
-      this.chkUseColorfulIcons.AutoSize = true;
-      this.chkUseColorfulIcons.Location = new System.Drawing.Point(21, 102);
-      this.chkUseColorfulIcons.Name = "chkUseColorfulIcons";
-      this.chkUseColorfulIcons.Size = new System.Drawing.Size(154, 19);
-      this.chkUseColorfulIcons.TabIndex = 62;
-      this.chkUseColorfulIcons.Text = "Use colorful status icons";
-      this.chkUseColorfulIcons.UseVisualStyleBackColor = true;
+      this.DialogApplyButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+      this.DialogApplyButton.Location = new System.Drawing.Point(247, 11);
+      this.DialogApplyButton.Name = "DialogApplyButton";
+      this.DialogApplyButton.Size = new System.Drawing.Size(78, 23);
+      this.DialogApplyButton.TabIndex = 0;
+      this.DialogApplyButton.Text = "Apply";
+      this.DialogApplyButton.UseVisualStyleBackColor = true;
+      this.DialogApplyButton.Click += new System.EventHandler(this.DialogApplyButton_Click);
       // 
-      // lblSubTitle2
+      // UseColorfulIconsCheckBox
       // 
-      this.lblSubTitle2.AutoSize = true;
-      this.lblSubTitle2.Location = new System.Drawing.Point(17, 288);
-      this.lblSubTitle2.Name = "lblSubTitle2";
-      this.lblSubTitle2.Size = new System.Drawing.Size(120, 15);
-      this.lblSubTitle2.TabIndex = 61;
-      this.lblSubTitle2.Text = "Notifications Options";
+      this.UseColorfulIconsCheckBox.AutoSize = true;
+      this.UseColorfulIconsCheckBox.Location = new System.Drawing.Point(31, 101);
+      this.UseColorfulIconsCheckBox.Name = "UseColorfulIconsCheckBox";
+      this.UseColorfulIconsCheckBox.Size = new System.Drawing.Size(154, 19);
+      this.UseColorfulIconsCheckBox.TabIndex = 2;
+      this.UseColorfulIconsCheckBox.Text = "Use colorful status icons";
+      this.UseColorfulIconsCheckBox.UseVisualStyleBackColor = true;
       // 
-      // notifyOfStatusChange
+      // NotificationsOptionsLabel
       // 
-      this.notifyOfStatusChange.AutoSize = true;
-      this.notifyOfStatusChange.Location = new System.Drawing.Point(21, 359);
-      this.notifyOfStatusChange.Name = "notifyOfStatusChange";
-      this.notifyOfStatusChange.Size = new System.Drawing.Size(304, 19);
-      this.notifyOfStatusChange.TabIndex = 60;
-      this.notifyOfStatusChange.Text = "Notify me when a service or instance changes status.";
-      this.notifyOfStatusChange.UseVisualStyleBackColor = true;
+      this.NotificationsOptionsLabel.AutoSize = true;
+      this.NotificationsOptionsLabel.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.NotificationsOptionsLabel.Location = new System.Drawing.Point(27, 287);
+      this.NotificationsOptionsLabel.Name = "NotificationsOptionsLabel";
+      this.NotificationsOptionsLabel.Size = new System.Drawing.Size(138, 19);
+      this.NotificationsOptionsLabel.TabIndex = 9;
+      this.NotificationsOptionsLabel.Text = "Notifications Options";
       // 
-      // notifyOfAutoAdd
+      // NotifyOfStatusChangeCheckBox
       // 
-      this.notifyOfAutoAdd.AutoSize = true;
-      this.notifyOfAutoAdd.Location = new System.Drawing.Point(21, 325);
-      this.notifyOfAutoAdd.Name = "notifyOfAutoAdd";
-      this.notifyOfAutoAdd.Size = new System.Drawing.Size(284, 19);
-      this.notifyOfAutoAdd.TabIndex = 59;
-      this.notifyOfAutoAdd.Text = "Notify me when a service is automatically added.";
-      this.notifyOfAutoAdd.UseVisualStyleBackColor = true;
+      this.NotifyOfStatusChangeCheckBox.AutoSize = true;
+      this.NotifyOfStatusChangeCheckBox.Location = new System.Drawing.Point(31, 358);
+      this.NotifyOfStatusChangeCheckBox.Name = "NotifyOfStatusChangeCheckBox";
+      this.NotifyOfStatusChangeCheckBox.Size = new System.Drawing.Size(304, 19);
+      this.NotifyOfStatusChangeCheckBox.TabIndex = 11;
+      this.NotifyOfStatusChangeCheckBox.Text = "Notify me when a service or instance changes status.";
+      this.NotifyOfStatusChangeCheckBox.UseVisualStyleBackColor = true;
       // 
-      // autoAddRegex
+      // NotifyOfAutoAddCheckBox
       // 
-      this.autoAddRegex.Location = new System.Drawing.Point(49, 238);
-      this.autoAddRegex.Name = "autoAddRegex";
-      this.autoAddRegex.Size = new System.Drawing.Size(300, 23);
-      this.autoAddRegex.TabIndex = 58;
+      this.NotifyOfAutoAddCheckBox.AutoSize = true;
+      this.NotifyOfAutoAddCheckBox.Location = new System.Drawing.Point(31, 324);
+      this.NotifyOfAutoAddCheckBox.Name = "NotifyOfAutoAddCheckBox";
+      this.NotifyOfAutoAddCheckBox.Size = new System.Drawing.Size(284, 19);
+      this.NotifyOfAutoAddCheckBox.TabIndex = 10;
+      this.NotifyOfAutoAddCheckBox.Text = "Notify me when a service is automatically added.";
+      this.NotifyOfAutoAddCheckBox.UseVisualStyleBackColor = true;
       // 
-      // chkEnabledAutoAddServices
+      // AutoAddRegexTextBox
       // 
-      this.chkEnabledAutoAddServices.AutoSize = true;
-      this.chkEnabledAutoAddServices.Location = new System.Drawing.Point(21, 212);
-      this.chkEnabledAutoAddServices.Name = "chkEnabledAutoAddServices";
-      this.chkEnabledAutoAddServices.Size = new System.Drawing.Size(316, 19);
-      this.chkEnabledAutoAddServices.TabIndex = 57;
-      this.chkEnabledAutoAddServices.Text = "Automatically add new services that match this pattern\r\n";
-      this.chkEnabledAutoAddServices.UseVisualStyleBackColor = true;
-      this.chkEnabledAutoAddServices.CheckedChanged += new System.EventHandler(this.chkEnabledAutoAddServices_CheckedChanged);
+      this.AutoAddRegexTextBox.Location = new System.Drawing.Point(59, 237);
+      this.AutoAddRegexTextBox.Name = "AutoAddRegexTextBox";
+      this.AutoAddRegexTextBox.Size = new System.Drawing.Size(300, 23);
+      this.AutoAddRegexTextBox.TabIndex = 8;
+      // 
+      // AutoAddServicesCheckBox
+      // 
+      this.AutoAddServicesCheckBox.AutoSize = true;
+      this.AutoAddServicesCheckBox.Location = new System.Drawing.Point(31, 211);
+      this.AutoAddServicesCheckBox.Name = "AutoAddServicesCheckBox";
+      this.AutoAddServicesCheckBox.Size = new System.Drawing.Size(316, 19);
+      this.AutoAddServicesCheckBox.TabIndex = 7;
+      this.AutoAddServicesCheckBox.Text = "Automatically add new services that match this pattern\r\n";
+      this.AutoAddServicesCheckBox.UseVisualStyleBackColor = true;
+      this.AutoAddServicesCheckBox.CheckedChanged += new System.EventHandler(this.AutoAddServicesCheckBox_CheckedChanged);
       // 
       // lblWeeks
       // 
       this.lblWeeks.AutoSize = true;
-      this.lblWeeks.Location = new System.Drawing.Point(328, 174);
+      this.lblWeeks.Location = new System.Drawing.Point(338, 173);
       this.lblWeeks.Name = "lblWeeks";
       this.lblWeeks.Size = new System.Drawing.Size(41, 15);
-      this.lblWeeks.TabIndex = 56;
+      this.lblWeeks.TabIndex = 6;
       this.lblWeeks.Text = "Weeks";
       // 
-      // numCheckUpdatesWeeks
+      // CheckUpdatesWeeksNumericUpDown
       // 
-      this.numCheckUpdatesWeeks.Location = new System.Drawing.Point(268, 171);
-      this.numCheckUpdatesWeeks.Name = "numCheckUpdatesWeeks";
-      this.numCheckUpdatesWeeks.Size = new System.Drawing.Size(52, 23);
-      this.numCheckUpdatesWeeks.TabIndex = 55;
+      this.CheckUpdatesWeeksNumericUpDown.Location = new System.Drawing.Point(278, 170);
+      this.CheckUpdatesWeeksNumericUpDown.Name = "CheckUpdatesWeeksNumericUpDown";
+      this.CheckUpdatesWeeksNumericUpDown.Size = new System.Drawing.Size(52, 23);
+      this.CheckUpdatesWeeksNumericUpDown.TabIndex = 5;
       // 
-      // chkAutoCheckUpdates
+      // AutoCheckUpdatesCheckBox
       // 
-      this.chkAutoCheckUpdates.AutoSize = true;
-      this.chkAutoCheckUpdates.Location = new System.Drawing.Point(21, 173);
-      this.chkAutoCheckUpdates.Name = "chkAutoCheckUpdates";
-      this.chkAutoCheckUpdates.Size = new System.Drawing.Size(233, 19);
-      this.chkAutoCheckUpdates.TabIndex = 54;
-      this.chkAutoCheckUpdates.Text = "Automatically Check For Updates Every";
-      this.chkAutoCheckUpdates.UseVisualStyleBackColor = true;
-      this.chkAutoCheckUpdates.CheckedChanged += new System.EventHandler(this.chkAutoCheckUpdates_CheckedChanged);
+      this.AutoCheckUpdatesCheckBox.AutoSize = true;
+      this.AutoCheckUpdatesCheckBox.Location = new System.Drawing.Point(31, 172);
+      this.AutoCheckUpdatesCheckBox.Name = "AutoCheckUpdatesCheckBox";
+      this.AutoCheckUpdatesCheckBox.Size = new System.Drawing.Size(233, 19);
+      this.AutoCheckUpdatesCheckBox.TabIndex = 4;
+      this.AutoCheckUpdatesCheckBox.Text = "Automatically Check For Updates Every";
+      this.AutoCheckUpdatesCheckBox.UseVisualStyleBackColor = true;
+      this.AutoCheckUpdatesCheckBox.CheckedChanged += new System.EventHandler(this.AutoCheckUpdatesCheckBox_CheckedChanged);
       // 
-      // chkRunAtStartup
+      // RunAtStartupCheckBox
       // 
-      this.chkRunAtStartup.AutoSize = true;
-      this.chkRunAtStartup.Location = new System.Drawing.Point(21, 137);
-      this.chkRunAtStartup.Name = "chkRunAtStartup";
-      this.chkRunAtStartup.Size = new System.Drawing.Size(153, 19);
-      this.chkRunAtStartup.TabIndex = 53;
-      this.chkRunAtStartup.Text = "Run at Windows Startup";
-      this.chkRunAtStartup.UseVisualStyleBackColor = true;
+      this.RunAtStartupCheckBox.AutoSize = true;
+      this.RunAtStartupCheckBox.Location = new System.Drawing.Point(31, 136);
+      this.RunAtStartupCheckBox.Name = "RunAtStartupCheckBox";
+      this.RunAtStartupCheckBox.Size = new System.Drawing.Size(153, 19);
+      this.RunAtStartupCheckBox.TabIndex = 3;
+      this.RunAtStartupCheckBox.Text = "Run at Windows Startup";
+      this.RunAtStartupCheckBox.UseVisualStyleBackColor = true;
       // 
-      // lblSubTitle1
+      // GeneralOptionsLabel
       // 
-      this.lblSubTitle1.AutoSize = true;
-      this.lblSubTitle1.Location = new System.Drawing.Point(17, 65);
-      this.lblSubTitle1.Name = "lblSubTitle1";
-      this.lblSubTitle1.Size = new System.Drawing.Size(92, 15);
-      this.lblSubTitle1.TabIndex = 52;
-      this.lblSubTitle1.Text = "General Options";
+      this.GeneralOptionsLabel.AutoSize = true;
+      this.GeneralOptionsLabel.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.GeneralOptionsLabel.Location = new System.Drawing.Point(27, 64);
+      this.GeneralOptionsLabel.Name = "GeneralOptionsLabel";
+      this.GeneralOptionsLabel.Size = new System.Drawing.Size(109, 19);
+      this.GeneralOptionsLabel.TabIndex = 1;
+      this.GeneralOptionsLabel.Text = "General Options";
       // 
-      // lblHyperTitle
+      // TitleLabel
       // 
-      this.lblHyperTitle.AutoSize = true;
-      this.lblHyperTitle.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.lblHyperTitle.Location = new System.Drawing.Point(14, 27);
-      this.lblHyperTitle.Name = "lblHyperTitle";
-      this.lblHyperTitle.Size = new System.Drawing.Size(133, 15);
-      this.lblHyperTitle.TabIndex = 21;
-      this.lblHyperTitle.Text = "MySQL Notifier Options";
+      this.TitleLabel.AutoSize = true;
+      this.TitleLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.TitleLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
+      this.TitleLabel.Location = new System.Drawing.Point(24, 26);
+      this.TitleLabel.Name = "TitleLabel";
+      this.TitleLabel.Size = new System.Drawing.Size(177, 21);
+      this.TitleLabel.TabIndex = 0;
+      this.TitleLabel.Text = "MySQL Notifier Options";
       // 
       // OptionsDialog
       // 
+      this.AcceptButton = this.DialogApplyButton;
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+      this.CancelButton = this.DialogCancelButton;
       this.ClientSize = new System.Drawing.Size(422, 452);
-      this.Controls.Add(this.panel2);
-      this.Controls.Add(this.panel1);
+      this.CommandAreaVisible = true;
       this.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
-      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+      this.FootnoteAreaHeight = 0;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-      this.MaximizeBox = false;
-      this.MinimizeBox = false;
       this.Name = "OptionsDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Options";
-      this.panel2.ResumeLayout(false);
-      this.panel1.ResumeLayout(false);
-      this.panel1.PerformLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.numCheckUpdatesWeeks)).EndInit();
+      this.ContentAreaPanel.ResumeLayout(false);
+      this.ContentAreaPanel.PerformLayout();
+      this.CommandAreaPanel.ResumeLayout(false);
+      ((System.ComponentModel.ISupportInitialize)(this.CheckUpdatesWeeksNumericUpDown)).EndInit();
       this.ResumeLayout(false);
-      this.PerformLayout();
 
     }
 
     #endregion
 
-    private System.Windows.Forms.Panel panel2;
-    private System.Windows.Forms.Button btnCancel;
-    private System.Windows.Forms.Button btnOK;
-    private System.Windows.Forms.Panel panel1;
-    private System.Windows.Forms.Label lblHyperTitle;
-    private System.Windows.Forms.Label lblSubTitle2;
-    private System.Windows.Forms.CheckBox notifyOfStatusChange;
-    private System.Windows.Forms.CheckBox notifyOfAutoAdd;
-    private System.Windows.Forms.TextBox autoAddRegex;
-    private System.Windows.Forms.CheckBox chkEnabledAutoAddServices;
+    private System.Windows.Forms.CheckBox UseColorfulIconsCheckBox;
+    private System.Windows.Forms.Label TitleLabel;
+    private System.Windows.Forms.Label NotificationsOptionsLabel;
+    private System.Windows.Forms.Label GeneralOptionsLabel;
+    private System.Windows.Forms.CheckBox NotifyOfStatusChangeCheckBox;
+    private System.Windows.Forms.CheckBox RunAtStartupCheckBox;
+    private System.Windows.Forms.CheckBox NotifyOfAutoAddCheckBox;
+    private System.Windows.Forms.CheckBox AutoCheckUpdatesCheckBox;
+    private System.Windows.Forms.TextBox AutoAddRegexTextBox;
+    private System.Windows.Forms.NumericUpDown CheckUpdatesWeeksNumericUpDown;
+    private System.Windows.Forms.CheckBox AutoAddServicesCheckBox;
     private System.Windows.Forms.Label lblWeeks;
-    private System.Windows.Forms.NumericUpDown numCheckUpdatesWeeks;
-    private System.Windows.Forms.CheckBox chkAutoCheckUpdates;
-    private System.Windows.Forms.CheckBox chkRunAtStartup;
-    private System.Windows.Forms.Label lblSubTitle1;
-    private System.Windows.Forms.CheckBox chkUseColorfulIcons;
+    private System.Windows.Forms.Button DialogCancelButton;
+    private System.Windows.Forms.Button DialogApplyButton;
+
   }
 }

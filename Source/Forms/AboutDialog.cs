@@ -23,7 +23,7 @@ using System.Windows.Forms;
 
 namespace MySql.Notifier
 {
-  public partial class AboutDialog : BaseForm
+  public partial class AboutDialog : Form
   {
     private string[] version
     {

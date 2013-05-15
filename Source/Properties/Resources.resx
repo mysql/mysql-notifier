@@ -131,9 +131,9 @@
   <data name="SQLEditor" xml:space="preserve">
     <value>SQL Editor...</value>
   </data>
-  <data name="About" xml:space="preserve">
-    <value>About</value>
-    <comment>About submenu (Help)</comment>
+  <data name="AboutMenuText" xml:space="preserve">
+    <value>About...</value>
+    <comment>Sub-Action Menu (Actions)</comment>
   </data>
   <data name="Actions" xml:space="preserve">
     <value>Actions</value>
@@ -143,9 +143,9 @@
     <value>Help</value>
     <comment>Help menu</comment>
   </data>
-  <data name="Options" xml:space="preserve">
+  <data name="OptionsMenuText" xml:space="preserve">
     <value>Options...</value>
-    <comment>Options menu</comment>
+    <comment>Sub-Action Menu (Actions)</comment>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Exit</value>
@@ -191,16 +191,12 @@
     <value>Soft</value>
     <comment>Value stored in Settings for RefreshMethod setting</comment>
   </data>
-  <data name="CheckUpdates" xml:space="preserve">
+  <data name="CheckUpdatesMenuText" xml:space="preserve">
     <value>Check for Updates...</value>
     <comment>Sub-Action Menu (Actions)</comment>
   </data>
-  <data name="LaunchInstaller" xml:space="preserve">
+  <data name="LaunchInstallerMenuText" xml:space="preserve">
     <value>Launch MySQL Installer...</value>
-    <comment>Sub-Action Menu (Actions)</comment>
-  </data>
-  <data name="ManageServices" xml:space="preserve">
-    <value>Manage Service Instances...</value>
     <comment>Sub-Action Menu (Actions)</comment>
   </data>
   <data name="RefreshServices" xml:space="preserve">
@@ -453,5 +449,17 @@
   </data>
   <data name="WarningText" xml:space="preserve">
     <value>Warning</value>
+  </data>
+  <data name="CloseNotifierMenuText" xml:space="preserve">
+    <value>Close MySQL Notifier</value>
+    <comment>Sub-Action Menu (Actions)</comment>
+  </data>
+  <data name="ManageItemsMenuText" xml:space="preserve">
+    <value>Manage Monitored Items...</value>
+    <comment>Sub-Action Menu (Actions)</comment>
+  </data>
+  <data name="UtilitiesShellMenuText" xml:space="preserve">
+    <value>MySQL Utilities Shell</value>
+    <comment>Sub-Action Menu (Actions)</comment>
   </data>
 </root>

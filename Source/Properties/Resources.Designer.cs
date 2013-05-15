@@ -61,21 +61,21 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to About.
-        /// </summary>
-        internal static string About {
-            get {
-                return ResourceManager.GetString("About", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap AboutBackGroundDialog {
             get {
                 object obj = ResourceManager.GetObject("AboutBackGroundDialog", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to About....
+        /// </summary>
+        internal static string AboutMenuText {
+            get {
+                return ResourceManager.GetString("AboutMenuText", resourceCulture);
             }
         }
         
@@ -320,9 +320,18 @@ namespace MySql.Notifier.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Check for Updates....
         /// </summary>
-        internal static string CheckUpdates {
+        internal static string CheckUpdatesMenuText {
             get {
-                return ResourceManager.GetString("CheckUpdates", resourceCulture);
+                return ResourceManager.GetString("CheckUpdatesMenuText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Close MySQL Notifier.
+        /// </summary>
+        internal static string CloseNotifierMenuText {
+            get {
+                return ResourceManager.GetString("CloseNotifierMenuText", resourceCulture);
             }
         }
         
@@ -532,9 +541,9 @@ namespace MySql.Notifier.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Launch MySQL Installer....
         /// </summary>
-        internal static string LaunchInstaller {
+        internal static string LaunchInstallerMenuText {
             get {
-                return ResourceManager.GetString("LaunchInstaller", resourceCulture);
+                return ResourceManager.GetString("LaunchInstallerMenuText", resourceCulture);
             }
         }
         
@@ -577,11 +586,11 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Manage Service Instances....
+        ///   Looks up a localized string similar to Manage Monitored Items....
         /// </summary>
-        internal static string ManageServices {
+        internal static string ManageItemsMenuText {
             get {
-                return ResourceManager.GetString("ManageServices", resourceCulture);
+                return ResourceManager.GetString("ManageItemsMenuText", resourceCulture);
             }
         }
         
@@ -793,9 +802,9 @@ namespace MySql.Notifier.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Options....
         /// </summary>
-        internal static string Options {
+        internal static string OptionsMenuText {
             get {
-                return ResourceManager.GetString("Options", resourceCulture);
+                return ResourceManager.GetString("OptionsMenuText", resourceCulture);
             }
         }
         
@@ -990,6 +999,15 @@ namespace MySql.Notifier.Properties {
         internal static string UnSupportedWBXMLVersion {
             get {
                 return ResourceManager.GetString("UnSupportedWBXMLVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MySQL Utilities Shell.
+        /// </summary>
+        internal static string UtilitiesShellMenuText {
+            get {
+                return ResourceManager.GetString("UtilitiesShellMenuText", resourceCulture);
             }
         }
         

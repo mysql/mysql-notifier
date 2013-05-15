@@ -31,7 +31,7 @@ namespace MySql.Notifier
   /// <summary>
   /// Dialog window showing MySQL Server Instances to select for monitoring.
   /// </summary>
-  public partial class MonitorMySQLServerInstancesDialog : BaseForm
+  public partial class MonitorMySQLServerInstancesDialog : AutoStyleableBaseDialog
   {
     #region Fields
 

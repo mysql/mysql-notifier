@@ -52,10 +52,8 @@ namespace MySql.Notifier
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WindowsConnectionDialog));
       this.timerTextChanged = new System.Windows.Forms.Timer(this.components);
       this.DialogOKButton = new System.Windows.Forms.Button();
-      this.CommandAreaPanel = new System.Windows.Forms.Panel();
       this.TestConnectionButton = new System.Windows.Forms.Button();
       this.DialogCancelButton = new System.Windows.Forms.Button();
-      this.ContentAreaPanel = new System.Windows.Forms.Panel();
       this.MachineAutoTestConnectionIntervalUOMComboBox = new System.Windows.Forms.ComboBox();
       this.MachineAutoTestConnectionLabel = new System.Windows.Forms.Label();
       this.MachineAutoTestConnectionIntervalNumericUpDown = new System.Windows.Forms.NumericUpDown();
@@ -64,18 +62,50 @@ namespace MySql.Notifier
       this.HostTextBox = new System.Windows.Forms.TextBox();
       this.UserTextBox = new System.Windows.Forms.TextBox();
       this.LogoPictureBox = new System.Windows.Forms.PictureBox();
-      this.HypertitleLabel = new System.Windows.Forms.Label();
+      this.TitleLabel = new System.Windows.Forms.Label();
       this.PasswordTextBox = new System.Windows.Forms.TextBox();
       this.HostLabel = new System.Windows.Forms.Label();
       this.UserLabel = new System.Windows.Forms.Label();
       this.PasswordLabel = new System.Windows.Forms.Label();
-      this.CommandAreaPanel.SuspendLayout();
       this.ContentAreaPanel.SuspendLayout();
+      this.CommandAreaPanel.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.MachineAutoTestConnectionIntervalNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.userErrorSign)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.hostErrorSign)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.LogoPictureBox)).BeginInit();
       this.SuspendLayout();
+      // 
+      // FootnoteAreaPanel
+      // 
+      this.FootnoteAreaPanel.BackColor = System.Drawing.SystemColors.Control;
+      this.FootnoteAreaPanel.Location = new System.Drawing.Point(0, 137);
+      this.FootnoteAreaPanel.Size = new System.Drawing.Size(634, 80);
+      // 
+      // ContentAreaPanel
+      // 
+      this.ContentAreaPanel.Controls.Add(this.MachineAutoTestConnectionIntervalUOMComboBox);
+      this.ContentAreaPanel.Controls.Add(this.MachineAutoTestConnectionLabel);
+      this.ContentAreaPanel.Controls.Add(this.MachineAutoTestConnectionIntervalNumericUpDown);
+      this.ContentAreaPanel.Controls.Add(this.userErrorSign);
+      this.ContentAreaPanel.Controls.Add(this.hostErrorSign);
+      this.ContentAreaPanel.Controls.Add(this.HostTextBox);
+      this.ContentAreaPanel.Controls.Add(this.UserTextBox);
+      this.ContentAreaPanel.Controls.Add(this.LogoPictureBox);
+      this.ContentAreaPanel.Controls.Add(this.TitleLabel);
+      this.ContentAreaPanel.Controls.Add(this.PasswordTextBox);
+      this.ContentAreaPanel.Controls.Add(this.HostLabel);
+      this.ContentAreaPanel.Controls.Add(this.UserLabel);
+      this.ContentAreaPanel.Controls.Add(this.PasswordLabel);
+      this.ContentAreaPanel.Size = new System.Drawing.Size(427, 237);
+      // 
+      // CommandAreaPanel
+      // 
+      this.CommandAreaPanel.BackColor = System.Drawing.SystemColors.Control;
+      this.CommandAreaPanel.Controls.Add(this.TestConnectionButton);
+      this.CommandAreaPanel.Controls.Add(this.DialogCancelButton);
+      this.CommandAreaPanel.Controls.Add(this.DialogOKButton);
+      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 192);
+      this.CommandAreaPanel.Size = new System.Drawing.Size(427, 45);
       // 
       // timerTextChanged
       // 
@@ -87,7 +117,7 @@ namespace MySql.Notifier
       this.DialogOKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogOKButton.Enabled = false;
       this.DialogOKButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogOKButton.Location = new System.Drawing.Point(258, 14);
+      this.DialogOKButton.Location = new System.Drawing.Point(253, 11);
       this.DialogOKButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.DialogOKButton.Name = "DialogOKButton";
       this.DialogOKButton.Size = new System.Drawing.Size(78, 23);
@@ -96,25 +126,12 @@ namespace MySql.Notifier
       this.DialogOKButton.UseVisualStyleBackColor = true;
       this.DialogOKButton.Click += new System.EventHandler(this.Button_Click);
       // 
-      // CommandAreaPanel
-      // 
-      this.CommandAreaPanel.BackColor = System.Drawing.SystemColors.Menu;
-      this.CommandAreaPanel.Controls.Add(this.TestConnectionButton);
-      this.CommandAreaPanel.Controls.Add(this.DialogCancelButton);
-      this.CommandAreaPanel.Controls.Add(this.DialogOKButton);
-      this.CommandAreaPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-      this.CommandAreaPanel.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 187);
-      this.CommandAreaPanel.Name = "CommandAreaPanel";
-      this.CommandAreaPanel.Size = new System.Drawing.Size(427, 50);
-      this.CommandAreaPanel.TabIndex = 1;
-      // 
       // TestConnectionButton
       // 
       this.TestConnectionButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.TestConnectionButton.Enabled = false;
       this.TestConnectionButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.TestConnectionButton.Location = new System.Drawing.Point(12, 15);
+      this.TestConnectionButton.Location = new System.Drawing.Point(12, 11);
       this.TestConnectionButton.Name = "TestConnectionButton";
       this.TestConnectionButton.Size = new System.Drawing.Size(128, 23);
       this.TestConnectionButton.TabIndex = 0;
@@ -127,34 +144,13 @@ namespace MySql.Notifier
       this.DialogCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
       this.DialogCancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogCancelButton.Location = new System.Drawing.Point(339, 14);
+      this.DialogCancelButton.Location = new System.Drawing.Point(337, 11);
       this.DialogCancelButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.DialogCancelButton.Name = "DialogCancelButton";
       this.DialogCancelButton.Size = new System.Drawing.Size(78, 23);
       this.DialogCancelButton.TabIndex = 2;
       this.DialogCancelButton.Text = "Cancel";
       this.DialogCancelButton.UseVisualStyleBackColor = true;
-      // 
-      // ContentAreaPanel
-      // 
-      this.ContentAreaPanel.Controls.Add(this.MachineAutoTestConnectionIntervalUOMComboBox);
-      this.ContentAreaPanel.Controls.Add(this.MachineAutoTestConnectionLabel);
-      this.ContentAreaPanel.Controls.Add(this.MachineAutoTestConnectionIntervalNumericUpDown);
-      this.ContentAreaPanel.Controls.Add(this.userErrorSign);
-      this.ContentAreaPanel.Controls.Add(this.hostErrorSign);
-      this.ContentAreaPanel.Controls.Add(this.HostTextBox);
-      this.ContentAreaPanel.Controls.Add(this.UserTextBox);
-      this.ContentAreaPanel.Controls.Add(this.LogoPictureBox);
-      this.ContentAreaPanel.Controls.Add(this.HypertitleLabel);
-      this.ContentAreaPanel.Controls.Add(this.PasswordTextBox);
-      this.ContentAreaPanel.Controls.Add(this.HostLabel);
-      this.ContentAreaPanel.Controls.Add(this.UserLabel);
-      this.ContentAreaPanel.Controls.Add(this.PasswordLabel);
-      this.ContentAreaPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.ContentAreaPanel.Location = new System.Drawing.Point(0, 0);
-      this.ContentAreaPanel.Name = "ContentAreaPanel";
-      this.ContentAreaPanel.Size = new System.Drawing.Size(427, 237);
-      this.ContentAreaPanel.TabIndex = 0;
       // 
       // MachineAutoTestConnectionIntervalUOMComboBox
       // 
@@ -250,16 +246,16 @@ namespace MySql.Notifier
       this.LogoPictureBox.TabIndex = 31;
       this.LogoPictureBox.TabStop = false;
       // 
-      // HypertitleLabel
+      // TitleLabel
       // 
-      this.HypertitleLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.HypertitleLabel.ForeColor = System.Drawing.SystemColors.ControlText;
-      this.HypertitleLabel.Location = new System.Drawing.Point(72, 9);
-      this.HypertitleLabel.Name = "HypertitleLabel";
-      this.HypertitleLabel.Size = new System.Drawing.Size(303, 30);
-      this.HypertitleLabel.TabIndex = 0;
-      this.HypertitleLabel.Text = "Please enter the requested information:";
-      this.HypertitleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+      this.TitleLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.TitleLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
+      this.TitleLabel.Location = new System.Drawing.Point(72, 9);
+      this.TitleLabel.Name = "TitleLabel";
+      this.TitleLabel.Size = new System.Drawing.Size(303, 30);
+      this.TitleLabel.TabIndex = 0;
+      this.TitleLabel.Text = "Please enter the requested information:";
+      this.TitleLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
       // PasswordTextBox
       // 
@@ -313,19 +309,17 @@ namespace MySql.Notifier
       this.AutoValidate = System.Windows.Forms.AutoValidate.EnablePreventFocusChange;
       this.BackColor = System.Drawing.SystemColors.Window;
       this.ClientSize = new System.Drawing.Size(427, 237);
-      this.Controls.Add(this.CommandAreaPanel);
-      this.Controls.Add(this.ContentAreaPanel);
+      this.CommandAreaVisible = true;
       this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+      this.FootnoteAreaHeight = 80;
+      this.FootnoteAreaVisible = false;
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-      this.MaximizeBox = false;
-      this.MinimizeBox = false;
       this.Name = "WindowsConnectionDialog";
-      this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
       this.Text = "Add New Machine";
-      this.CommandAreaPanel.ResumeLayout(false);
       this.ContentAreaPanel.ResumeLayout(false);
       this.ContentAreaPanel.PerformLayout();
+      this.CommandAreaPanel.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.MachineAutoTestConnectionIntervalNumericUpDown)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.userErrorSign)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.hostErrorSign)).EndInit();
@@ -338,16 +332,14 @@ namespace MySql.Notifier
 
     private System.Windows.Forms.Button DialogOKButton;
     private System.Windows.Forms.Button DialogCancelButton;
-    private System.Windows.Forms.Panel ContentAreaPanel;
     private System.Windows.Forms.TextBox HostTextBox;
     private System.Windows.Forms.TextBox UserTextBox;
     private System.Windows.Forms.PictureBox LogoPictureBox;
-    private System.Windows.Forms.Label HypertitleLabel;
+    private System.Windows.Forms.Label TitleLabel;
     private System.Windows.Forms.TextBox PasswordTextBox;
     private System.Windows.Forms.Label HostLabel;
     private System.Windows.Forms.Label UserLabel;
     private System.Windows.Forms.Label PasswordLabel;
-    private System.Windows.Forms.Panel CommandAreaPanel;
     private System.Windows.Forms.Button TestConnectionButton;
     private System.Windows.Forms.Timer timerTextChanged;
     private System.Windows.Forms.PictureBox userErrorSign;
