@@ -2,7 +2,7 @@
 <?define ProductName="MySQL Notifier $(var.Version)"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
-  <Product Name="$(var.ProductName)" Id ="*" Manufacturer="Oracle" Language="1033" Version="$(var.Version)" 
+  <Product Name="$(var.ProductName)" Id ="*" Manufacturer="Oracle" Language="1033" Version="$(var.Version)"
            UpgradeCode="9e9fb57a-62e3-45cf-a896-686e33407606">
     <Package Id="*" InstallerVersion="200" Compressed="yes" InstallScope="perMachine" InstallPrivileges="elevated"/>
 
@@ -47,8 +47,8 @@
               <File Id="README2" Name="README" Source="README-Commercial" DiskId="1"/>
               <File Id="LICENSE" Name="LICENSE" Source="LICENSE" DiskId="1" />
               <?endif?>
-              <RemoveFolder Id="INSTALLDIR" On="uninstall" />              
-            </Component>            
+              <RemoveFolder Id="INSTALLDIR" On="uninstall" />
+            </Component>
           </Directory>
         </Directory>
       </Directory>
@@ -58,17 +58,6 @@
           <Directory Id="ShortCutDir" Name="$(var.ProductName)"/>
         </Directory>
       </Directory>
-
-      <!--<Directory Id="DesktopFolder"  Name="Desktop">
-        <Component Id="DesktopShortcut" Guid="1e9fb57a-62e3-45cf-a896-686e33407608">
-          <RegistryKey Root="HKCU" Key="MySQL AB\MySQLNotifierApp" Action="createAndRemoveOnUninstall">
-            <RegistryValue Name="MySQLNotifierShortCut" Value="1" Type="integer" KeyPath="yes"/>
-          </RegistryKey>
-          <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="MySQL Notifier" ShortName="MySQLNotifier" Icon="Icon.exe" Target="[INSTALLDIR]MySQL.Notifier.exe" Show="normal" WorkingDirectory="INSTALLDIR">
-            <Icon Id="Icon.exe" SourceFile="..\Source\bin\Release\MySQL.Notifier.exe" />
-          </Shortcut>
-        </Component>
-      </Directory>-->
 
     </Directory>
 

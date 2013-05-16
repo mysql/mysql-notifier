@@ -30,7 +30,7 @@ namespace MySql.Notifier
   /// <summary>
   /// List of <see cref="MySQLInstance"/> objects used to monitor MySQL Server instances.
   /// </summary>
-  public class MySQLInstancesList : IList<MySQLInstance>
+  public class MySQLInstancesList : IList<MySQLInstance>, IDisposable
   {
     #region Fields
 
@@ -53,6 +53,37 @@ namespace MySql.Notifier
     {
       _instancesRefreshing = false;
       InstancesList = Settings.Default.MySQLInstancesList;
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="MySQLInstancesList"/> class
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="MySQLInstancesList"/> class
+    /// </summary>
+    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        //// Free managed resources
+        if (InstancesList != null)
+        {
+          foreach (MySQLInstance instance in InstancesList)
+          {
+            if (instance != null)
+            {
+              instance.Dispose();
+            }
+          }
+        }
+      }
     }
 
     #region Events

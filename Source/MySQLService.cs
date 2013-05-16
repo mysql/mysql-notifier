@@ -35,7 +35,7 @@ namespace MySql.Notifier
   using MySQL.Utility.Forms;
 
   [Serializable]
-  public class MySQLService
+  public class MySQLService : IDisposable
   {
     #region Fields
 
@@ -97,6 +97,44 @@ namespace MySql.Notifier
       UpdateTrayIconOnStatusChange = updatesTrayIcon;
       ServiceName = serviceName;
       SetServiceParameters();
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="MySQLService"/> class
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="MySQLService"/> class
+    /// </summary>
+    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        //// Free managed resources
+        if (_statusChangeTimer != null)
+        {
+          _statusChangeTimer.Dispose();
+        }
+
+        if (_managementObject != null)
+        {
+          _managementObject.Dispose();
+        }
+
+        if (MenuGroup != null)
+        {
+          MenuGroup.Dispose();
+        }
+      }
+
+      //// Add class finalizer if unmanaged resources are added to the class
+      //// Free unmanaged resources if there are any
     }
 
     #region Events

@@ -710,6 +710,43 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Releases all resources used by the <see cref="Machine"/> class
+    /// </summary>
+    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        //// Free managed resources
+        if (_wmiServiceDeletionWatcher != null)
+        {
+          _wmiServiceDeletionWatcher.Stop();
+          _wmiServiceDeletionWatcher.Dispose();
+        }
+
+        if (_wmiServiceStatusChangeWatcher != null)
+        {
+          _wmiServiceStatusChangeWatcher.Stop();
+          _wmiServiceStatusChangeWatcher.Dispose();
+        }
+
+        if (Services != null)
+        {
+          foreach (MySQLService service in Services)
+          {
+            if (service != null)
+            {
+              service.Dispose();
+            }
+          }
+        }
+      }
+
+      //// Add class finalizer if unmanaged resources are added to the class
+      //// Free unmanaged resources if there are any
+    }
+
+    /// <summary>
     /// Returns an instance of a service if is already on the list, searching by name
     /// </summary>
     /// <param name="name">MySQLService instance name</param>
@@ -1012,32 +1049,6 @@ namespace MySql.Notifier
       Password = fromMachine.Password;
       AutoTestConnectionInterval = fromMachine.AutoTestConnectionInterval;
       AutoTestConnectionIntervalUnitOfMeasure = fromMachine.AutoTestConnectionIntervalUnitOfMeasure;
-    }
-
-    /// <summary>
-    /// Releases all resources used by the <see cref="Machine"/> class
-    /// </summary>
-    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
-    protected virtual void Dispose(bool disposing)
-    {
-      if (disposing)
-      {
-        //// Free managed resources
-        if (_wmiServiceDeletionWatcher != null)
-        {
-          _wmiServiceDeletionWatcher.Stop();
-          _wmiServiceDeletionWatcher.Dispose();
-        }
-
-        if (_wmiServiceStatusChangeWatcher != null)
-        {
-          _wmiServiceStatusChangeWatcher.Stop();
-          _wmiServiceStatusChangeWatcher.Dispose();
-        }
-      }
-
-      //// Add class finalizer if unmanaged resources are added to the class
-      //// Free unmanaged resources if there are any
     }
 
     /// <summary>

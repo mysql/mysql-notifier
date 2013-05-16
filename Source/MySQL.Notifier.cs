@@ -32,7 +32,7 @@ namespace MySql.Notifier
   using MySQL.Utility;
   using MySQL.Utility.Forms;
 
-  internal class Notifier
+  internal class Notifier : IDisposable
   {
     #region Fields
 
@@ -135,6 +135,66 @@ namespace MySql.Notifier
 
       //// Migrate Notifier connections to the MySQL Workbench connections file if possible.
       MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="MySQL.Notifier"/> class
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="MySQL.Notifier"/> class
+    /// </summary>
+    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        //// Free managed resources
+        if (components != null)
+        {
+          components.Dispose();
+        }
+        if (hasUpdatesSeparator != null)
+        {
+          hasUpdatesSeparator.Dispose();
+        }
+        if (ignoreAvailableUpdateMenuItem != null)
+        {
+          ignoreAvailableUpdateMenuItem.Dispose();
+        }
+        if (installAvailablelUpdatesMenuItem != null)
+        {
+          installAvailablelUpdatesMenuItem.Dispose();
+        }
+        if (launchInstallerMenuItem != null)
+        {
+          launchInstallerMenuItem.Dispose();
+        }
+        if (launchWorkbenchUtilitiesMenuItem != null)
+        {
+          launchWorkbenchUtilitiesMenuItem.Dispose();
+        }
+        if (mySQLInstancesList != null)
+        {
+          mySQLInstancesList.Dispose();
+        }
+        if (machinesList != null)
+        {
+          machinesList.Dispose();
+        }
+        if (notifyIcon != null)
+        {
+          notifyIcon.Dispose();
+        }
+      }
+
+      //// Add class finalizer if unmanaged resources are added to the class
+      //// Free unmanaged resources if there are any
     }
 
     /// <summary>

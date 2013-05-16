@@ -135,6 +135,31 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Releases all resources used by the <see cref="MachinesList"/> class
+    /// </summary>
+    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        //// Free managed resources
+        if (Machines != null)
+        {
+          foreach (Machine machine in Machines)
+          {
+            if (machine != null)
+            {
+              machine.Dispose();
+            }
+          }
+        }
+      }
+
+      //// Add class finalizer if unmanaged resources are added to the class
+      //// Free unmanaged resources if there are any
+    }
+
+    /// <summary>
     /// Gets the machine corresponding to the given machine ID.
     /// </summary>
     /// <param name="id">Id of the machine to find.</param>
@@ -213,31 +238,6 @@ namespace MySql.Notifier
       {
         machine.SecondsToAutoTestConnection--;
       }
-    }
-
-    /// <summary>
-    /// Releases all resources used by the <see cref="MachinesList"/> class
-    /// </summary>
-    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
-    protected virtual void Dispose(bool disposing)
-    {
-      if (disposing)
-      {
-        //// Free managed resources
-        if (Machines != null)
-        {
-          foreach (Machine machine in Machines)
-          {
-            if (machine != null)
-            {
-              machine.Dispose();
-            }
-          }
-        }
-      }
-
-      //// Add class finalizer if unmanaged resources are added to the class
-      //// Free unmanaged resources if there are any
     }
 
     /// <summary>
@@ -393,7 +393,7 @@ namespace MySql.Notifier
           ChangeMachine(localMachine, ChangeType.AutoAdd);
         }
 
-        //// Copy services from old schema to the Local machine.
+        //// Copy services from old schema to the Local machine
         foreach (MySQLService service in mySQLServicesList.Services)
         {
           localMachine.ChangeService(service, ChangeType.AutoAdd);

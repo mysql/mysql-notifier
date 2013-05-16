@@ -17,39 +17,57 @@
 // 02110-1301  USA
 //
 
-using System;
-using System.Security.Principal;
-using System.Windows.Forms;
-
 namespace MySql.Notifier
 {
-    internal class NotifierApplicationContext : ApplicationContext
+  using System;
+  using System.Security.Principal;
+  using System.Windows.Forms;
+
+  internal class NotifierApplicationContext : ApplicationContext, IDisposable
+  {
+    private readonly Notifier notifierApp;
+
+    /// <summary>
+    /// This class should be created and passed into Application.Run( ... )
+    /// </summary>
+    public NotifierApplicationContext()
     {
-        private readonly Notifier notifierApp;
+      WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+      bool hasAdminPrivileges = principal.IsInRole(WindowsBuiltInRole.Administrator);
 
-        /// <summary>
-        /// This class should be created and passed into Application.Run( ... )
-        /// </summary>
-        public NotifierApplicationContext()
-        {
-            WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-            bool hasAdminPrivileges = principal.IsInRole(WindowsBuiltInRole.Administrator);
-
-            this.notifierApp = new Notifier();
-            this.notifierApp.Exit += NotifierApp_Exit;
-        }
-
-        private void NotifierApp_Exit(object sender, EventArgs e)
-        {
-            this.ExitThread();
-        }
-
-        /// <summary>
-        /// If we are presently showing a form, clean it up.
-        /// </summary>
-        protected override void ExitThreadCore()
-        {
-            base.ExitThreadCore();
-        }
+      this.notifierApp = new Notifier();
+      this.notifierApp.Exit += NotifierApp_Exit;
     }
+
+    private void NotifierApp_Exit(object sender, EventArgs e)
+    {
+      Dispose(true);
+      this.ExitThread();
+    }
+
+    /// <summary>
+    /// If we are presently showing a form, clean it up.
+    /// </summary>
+    protected override void ExitThreadCore()
+    {
+      Dispose(true);
+      base.ExitThreadCore();
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="NotifierApplicationContext"/> class
+    /// </summary>
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        //// Free managed resources
+        notifierApp.Dispose();
+        GC.SuppressFinalize(this);
+      }
+
+      //// Add class finalizer if unmanaged resources are added to the class
+      //// Free unmanaged resources if there are any
+    }
+  }
 }

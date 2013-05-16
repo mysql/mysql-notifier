@@ -30,7 +30,7 @@ namespace MySql.Notifier
   /// <summary>
   /// Contains a group of ToolStripMenuItem instances for each of the corresponding MySQLService’s context menu items.
   /// </summary>
-  public class ServiceMenuGroup
+  public class ServiceMenuGroup : IDisposable
   {
     #region Fields
 
@@ -38,7 +38,7 @@ namespace MySql.Notifier
 
     private ToolStripMenuItem configureMenu;
 
-    private ToolStripMenuItem editorMenu;    
+    private ToolStripMenuItem editorMenu;
 
     private ToolStripMenuItem restartMenu;
 
@@ -86,6 +86,64 @@ namespace MySql.Notifier
       statusMenu.DropDownItems.Add(restartMenu);
 
       Update();
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="ServiceMenuGroup"/> class
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="ServiceMenuGroup"/> class
+    /// </summary>
+    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        //// Free managed resources
+        if (configureMenu != null)
+        {
+          configureMenu.Dispose();
+        }
+
+        if (editorMenu != null)
+        {
+          editorMenu.Dispose();
+        }
+
+        if (restartMenu != null)
+        {
+          restartMenu.Dispose();
+        }
+
+        if (separator != null)
+        {
+          separator.Dispose();
+        }
+
+        if (startMenu != null)
+        {
+          startMenu.Dispose();
+        }
+
+        if (statusMenu != null)
+        {
+          statusMenu.Dispose();
+        }
+
+        if (stopMenu != null)
+        {
+          stopMenu.Dispose();
+        }
+      }
+
+      //// Add class finalizer if unmanaged resources are added to the class
+      //// Free unmanaged resources if there are any
     }
 
     private delegate void menuRefreshDelegate(ContextMenuStrip menu);

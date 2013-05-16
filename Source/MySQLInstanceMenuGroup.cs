@@ -22,7 +22,6 @@ namespace MySql.Notifier
   using System;
   using System.Drawing;
   using System.Linq;
-  using System.ServiceProcess;
   using System.Windows.Forms;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
@@ -31,7 +30,7 @@ namespace MySql.Notifier
   /// <summary>
   /// Contains a group of ToolStripMenuItem controls for each of the corresponding MySQLInstance’s context menu items.
   /// </summary>
-  public class MySQLInstanceMenuGroup
+  public class MySQLInstanceMenuGroup : IDisposable
   {
     /// <summary>
     /// Initializes a new instance of the <see cref="MySQLInstanceMenuGroup"/> class.
@@ -56,6 +55,48 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Releases all resources used by the <see cref="MySQLInstanceMenuGroup"/> class
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="MySQLInstanceMenuGroup"/> class
+    /// </summary>
+    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        //// Free managed resources
+        if (ConfigureMenuItem != null)
+        {
+          ConfigureMenuItem.Dispose();
+        }
+
+        if (InstanceMenuItem != null)
+        {
+          InstanceMenuItem.Dispose();
+        }
+        if (SQLEditorMenuItem != null)
+        {
+          SQLEditorMenuItem.Dispose();
+        }
+
+        if (Separator != null)
+        {
+          Separator.Dispose();
+        }
+      }
+
+      //// Add class finalizer if unmanaged resources are added to the class
+      //// Free unmanaged resources if there are any
+    }
+
+    /// <summary>
     /// Delegate to refresh the context menus.
     /// </summary>
     /// <param name="menu"></param>
@@ -69,7 +110,7 @@ namespace MySql.Notifier
     public MySQLInstance BoundInstance { get; private set; }
 
     /// <summary>
-    /// Gets the Configure Instance menu itemText that opens the instance's configuration page in MySQL Workbench. 
+    /// Gets the Configure Instance menu itemText that opens the instance's configuration page in MySQL Workbench.
     /// </summary>
     public ToolStripMenuItem ConfigureMenuItem { get; private set; }
 

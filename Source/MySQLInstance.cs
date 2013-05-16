@@ -33,7 +33,7 @@ namespace MySql.Notifier
   /// A MySQL Server instance that can be reached through a <see cref="MySqlWorkbenchConnection"/>.
   /// </summary>
   [Serializable]
-  public class MySQLInstance : INotifyPropertyChanged
+  public class MySQLInstance : INotifyPropertyChanged, IDisposable
   {
     #region Constants
 
@@ -136,6 +136,31 @@ namespace MySql.Notifier
       : this()
     {
       WorkbenchConnection = workbenchConnection;
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="MySQLInstance"/> class
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="Machine"/> class
+    /// </summary>
+    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      //// Free managed resources
+      if (_worker != null && _worker.IsBusy)
+      {
+        _worker.CancelAsync();
+      }
+
+      //// Add class finalizer if unmanaged resources are added to the class
+      //// Free unmanaged resources if there are any
     }
 
     #region Events
@@ -397,12 +422,12 @@ namespace MySql.Notifier
     /// </summary>
     [XmlIgnore]
     public MySqlWorkbenchConnection WorkbenchConnection
-    { 
+    {
       get
       {
         return _workbenchConnection;
       }
-      
+
       set
       {
         _workbenchConnection = value;
