@@ -52,6 +52,10 @@ namespace MySql.Notifier
 
     #endregion Fields
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ServiceMenuGroup"/> class.
+    /// </summary>
+    /// <param name="mySQLBoundService">The service this menu group is bound to.</param>
     public ServiceMenuGroup(MySQLService mySQLBoundService)
     {
       MenuItemsQuantity = 0;
@@ -86,64 +90,6 @@ namespace MySql.Notifier
       statusMenu.DropDownItems.Add(restartMenu);
 
       Update();
-    }
-
-    /// <summary>
-    /// Releases all resources used by the <see cref="ServiceMenuGroup"/> class
-    /// </summary>
-    public void Dispose()
-    {
-      Dispose(true);
-      GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Releases all resources used by the <see cref="ServiceMenuGroup"/> class
-    /// </summary>
-    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
-    protected virtual void Dispose(bool disposing)
-    {
-      if (disposing)
-      {
-        //// Free managed resources
-        if (configureMenu != null)
-        {
-          configureMenu.Dispose();
-        }
-
-        if (editorMenu != null)
-        {
-          editorMenu.Dispose();
-        }
-
-        if (restartMenu != null)
-        {
-          restartMenu.Dispose();
-        }
-
-        if (separator != null)
-        {
-          separator.Dispose();
-        }
-
-        if (startMenu != null)
-        {
-          startMenu.Dispose();
-        }
-
-        if (statusMenu != null)
-        {
-          statusMenu.Dispose();
-        }
-
-        if (stopMenu != null)
-        {
-          stopMenu.Dispose();
-        }
-      }
-
-      //// Add class finalizer if unmanaged resources are added to the class
-      //// Free unmanaged resources if there are any
     }
 
     private delegate void menuRefreshDelegate(ContextMenuStrip menu);
@@ -262,7 +208,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Adds the contest menu items corresponding to the bound service.
+    /// Adds the context menu items corresponding to the bound service.
     /// </summary>
     /// <param name="menu">The Notifier's context menu.</param>
     public void AddToContextMenu(ContextMenuStrip menu)
@@ -311,63 +257,43 @@ namespace MySql.Notifier
       }
     }
 
+    /// <summary>
+    /// Releases all resources used by the <see cref="ServiceMenuGroup"/> class
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Refreshes the menu items of this menu group.
+    /// </summary>
+    /// <param name="menu">The Notifier's context menu.</param>
     public void RefreshMenu(ContextMenuStrip menu)
     {
-      if (boundService.IsRealMySQLService)
+      if (menu.InvokeRequired)
       {
+        menu.Invoke(new MethodInvoker(() => { RefreshMenu(menu); }));
+      }
+      else
+      {
+        if (!boundService.IsRealMySQLService)
+        {
+          return;
+        }
+
         boundService.FindMatchingWBConnections();
         CreateEditorMenus();
 
-        if (menu.InvokeRequired)
+        int index = FindMenuItemWithinMenuStrip(menu, statusMenu.Text);
+        if (index >= 0)
         {
-          menuRefreshDelegate md = new menuRefreshDelegate(UpdateItems);
-          menu.Invoke(md, menu);
+          menu.Items.RemoveAt(index + 2);
+          menu.Refresh();
         }
-        else
-        {
-          UpdateItems(menu);
-        }
-      }
-    }
 
-    public void RefreshRoot(ContextMenuStrip menu, MySQLServiceStatus previousStatus)
-    {
-      var newStatusText = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
-      var previousStatusText = String.Format("{0} - {1}", boundService.DisplayName, previousStatus);
-
-      for (int i = 0; i < menu.Items.Count; i++)
-      {
-        if (menu.Items[i].Text.Equals(previousStatusText))
-        {
-          menu.Items[i].Text = newStatusText;
-
-          Image image = null;
-          switch (boundService.Status)
-          {
-            case MySQLServiceStatus.ContinuePending:
-            case MySQLServiceStatus.Paused:
-            case MySQLServiceStatus.PausePending:
-            case MySQLServiceStatus.StartPending:
-            case MySQLServiceStatus.StopPending:
-              image = Resources.NotifierIconStarting;
-              break;
-
-            case MySQLServiceStatus.Stopped:
-              image = Resources.NotifierIconStopped;
-              break;
-
-            case MySQLServiceStatus.Running:
-              image = Resources.NotifierIconRunning;
-              break;
-          }
-
-          menu.Items[i].Image = image;
-          ToolStripMenuItem menuItem = (ToolStripMenuItem)menu.Items[i];
-          menuItem.DropDownItems[0].Enabled = boundService.Status == MySQLServiceStatus.Stopped;
-          menuItem.DropDownItems[1].Enabled = boundService.Status != MySQLServiceStatus.Stopped;
-          menuItem.DropDownItems[2].Enabled = menuItem.DropDownItems[1].Enabled;
-          break;
-        }
+        menu.Items.Insert(index + 2, editorMenu);
       }
     }
 
@@ -446,16 +372,70 @@ namespace MySql.Notifier
           image = Resources.NotifierIconRunning;
           break;
       }
-      statusMenu.Image = image;
 
+      statusMenu.Image = image;
       startMenu.Enabled = boundService.Status == MySQLServiceStatus.Stopped;
       stopMenu.Enabled = boundService.Status != MySQLServiceStatus.Stopped;
       restartMenu.Enabled = stopMenu.Enabled;
-      if (MySqlWorkbench.AllowsExternalConnectionsManagement && boundService.IsRealMySQLService)
+
+      if (editorMenu != null)
       {
-        if (editorMenu != null) editorMenu.Enabled = true;
-        if (configureMenu != null) configureMenu.Enabled = true;
+        editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && boundService.WorkbenchConnections != null && boundService.WorkbenchConnections.Count > 0;
       }
+
+      if (configureMenu != null)
+      {
+        configureMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement;
+      }
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="ServiceMenuGroup"/> class
+    /// </summary>
+    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        //// Free managed resources
+        if (configureMenu != null)
+        {
+          configureMenu.Dispose();
+        }
+
+        if (editorMenu != null)
+        {
+          editorMenu.Dispose();
+        }
+
+        if (restartMenu != null)
+        {
+          restartMenu.Dispose();
+        }
+
+        if (separator != null)
+        {
+          separator.Dispose();
+        }
+
+        if (startMenu != null)
+        {
+          startMenu.Dispose();
+        }
+
+        if (statusMenu != null)
+        {
+          statusMenu.Dispose();
+        }
+
+        if (stopMenu != null)
+        {
+          stopMenu.Dispose();
+        }
+      }
+
+      //// Add class finalizer if unmanaged resources are added to the class
+      //// Free unmanaged resources if there are any
     }
 
     private void configureInstanceItem_Click(object sender, EventArgs e)
@@ -472,21 +452,29 @@ namespace MySql.Notifier
       }
     }
 
+    /// <summary>
+    /// Creates the SQL Editor menu item and its drop-down items for the related MySQL Workbench connections.
+    /// </summary>
     private void CreateEditorMenus()
     {
       editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
-      editorMenu.Enabled = false;
+      editorMenu.Click -= new EventHandler(workbenchConnection_Clicked);
 
-      if (boundService.WorkbenchConnections == null) return;
+      //// If there are no connections then we disable the SQL Editor menu.
+      editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && boundService.WorkbenchConnections != null && boundService.WorkbenchConnections.Count > 0;
+      if (!editorMenu.Enabled)
+      {
+        return;
+      }
 
-      // if there are 0 or 1 connections then the single menu will suffice
-      if (boundService.WorkbenchConnections.Count <= 1)
+      //// If there is only 1 connection then we open Workbench directly from the SQL Editor menu.
+      if (boundService.WorkbenchConnections.Count == 1)
       {
         editorMenu.Click += new EventHandler(workbenchConnection_Clicked);
         return;
       }
 
-      // we have more than 1 connection so we create a submenu
+      //// We have more than 1 connection so we create a submenu
       foreach (MySqlWorkbenchConnection c in boundService.WorkbenchConnections)
       {
         ToolStripMenuItem menu = new ToolStripMenuItem(c.Name);
@@ -520,27 +508,6 @@ namespace MySql.Notifier
       {
         Update();
       }
-    }
-
-    private void UpdateItems(ContextMenuStrip menu)
-    {
-      int index = -1;
-      for (int i = 0; i < menu.Items.Count; i++)
-      {
-        if (menu.Items[i].Text.Equals(statusMenu.Text))
-        {
-          index = i;
-          break;
-        }
-      }
-
-      if (index >= 0 && index <= menu.Items.Count)
-      {
-        menu.Items.RemoveAt(index + 2);
-        menu.Refresh();
-      }
-      editorMenu.Enabled = MySqlWorkbench.IsInstalled;
-      menu.Items.Insert(index + 2, editorMenu);
     }
 
     private void workbenchConnection_Clicked(object sender, EventArgs e)
