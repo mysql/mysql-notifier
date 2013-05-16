@@ -1060,8 +1060,12 @@ namespace MySql.Notifier
         MachineStatusChanged(this, oldConnectionStatus);
       }
 
-      LoadServicesParameters();
-      SetupWMIEvents();
+      if (OldConnectionStatus != ConnectionStatus
+          && (ConnectionStatus == Machine.ConnectionStatusType.Online || ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
+      {
+        LoadServicesParameters();
+        SetupWMIEvents();
+      }
     }
 
     /// <summary>
