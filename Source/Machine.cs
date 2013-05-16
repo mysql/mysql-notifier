@@ -669,13 +669,10 @@ namespace MySql.Notifier
           }
           break;
 
+        case ChangeType.Cleared:
         case ChangeType.RemoveByUser:
         case ChangeType.RemoveByEvent:
-          if (GetServiceByName(service.ServiceName) != null)
-          {
-            Services.Remove(service);
-          }
-
+          Services.Remove(service);
           OnServiceListChanged(service, changeType);
           break;
 
@@ -890,21 +887,24 @@ namespace MySql.Notifier
     /// <summary>
     /// Removes all monitored services from the machine.
     /// </summary>
-    public void RemoveAllServices()
+    /// <returns>Number of removed services.</returns>
+    public int RemoveAllServices()
     {
+      int removedServicesQuantity = 0;
       if (Services == null || Services.Count == 0)
       {
-        return;
+        return removedServicesQuantity;
       }
 
       var serviceNamesList = Services.ConvertAll<string>(service => service.ServiceName);
       foreach (string serviceName in serviceNamesList)
       {
         MySQLService service = GetServiceByName(serviceName);
-        ChangeService(service, ChangeType.RemoveByUser);
+        ChangeService(service, ChangeType.Cleared);
+        removedServicesQuantity++;
       }
 
-      OnServiceListChanged(null, ChangeType.Cleared);
+      return removedServicesQuantity;
     }
 
     /// <summary>
@@ -920,13 +920,11 @@ namespace MySql.Notifier
 
       MenuGroup.DropDownItems.Clear();
       int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(menu, MenuGroup.Text);
-      if (index <= 0)
+      if (index >= 0)
       {
-        return;
+        menu.Items.RemoveAt(index);
+        menu.Refresh();
       }
-
-      menu.Items.RemoveAt(index);
-      menu.Refresh();
     }
 
     /// <summary>

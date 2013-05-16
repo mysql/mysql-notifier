@@ -544,6 +544,7 @@ namespace MySql.Notifier
 
           break;
 
+        case ChangeType.Cleared:
         case ChangeType.RemoveByUser:
         case ChangeType.RemoveByEvent:
           service.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);

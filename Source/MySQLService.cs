@@ -300,7 +300,7 @@ namespace MySql.Notifier
     /// </summary>
     public void FindMatchingWBConnections()
     {
-      if (!Host.IsLocal)
+      if (!Host.IsLocal || ServiceManagementObject == null)
       {
         return;
       }

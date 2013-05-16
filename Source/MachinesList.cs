@@ -213,10 +213,15 @@ namespace MySql.Notifier
     /// </summary>
     public void LoadMachinesServices()
     {
-      foreach (Machine machine in Machines)
+      var machineIdsList = Machines.ConvertAll<string>(machine => machine.MachineId);
+      foreach (string machineId in machineIdsList)
       {
-        OnMachineListChanged(machine, ChangeType.AddByLoad);
-        machine.LoadServicesParameters();
+        Machine machine = GetMachineById(machineId);
+        if (machine != null)
+        {
+          OnMachineListChanged(machine, ChangeType.AddByLoad);
+          machine.LoadServicesParameters();
+        }
       }
     }
 
@@ -254,7 +259,11 @@ namespace MySql.Notifier
 
       if (changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser)
       {
-        machine.RemoveAllServices();
+        int removedServicesQuantity = machine.RemoveAllServices();
+        if (removedServicesQuantity > 0)
+        {
+          SavetoFile();
+        }
       }
       else
       {
@@ -283,10 +292,17 @@ namespace MySql.Notifier
         MachineServiceListChanged(machine, service, changeType);
       }
 
+      if (changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser)
+      {
+        if (machine.Services.Count == 0)
+        {
+          ChangeMachine(machine, ChangeType.RemoveByEvent);
+        }
+      }
+
       switch (changeType)
       {
         case ChangeType.AddByUser:
-        case ChangeType.Cleared:
         case ChangeType.RemoveByUser:
         case ChangeType.RemoveByEvent:
           SavetoFile();
