@@ -52,7 +52,7 @@ namespace MySql.Notifier
     public MySQLInstancesList()
     {
       _instancesRefreshing = false;
-      InstancesList = Settings.Default.MySQLInstancesList;
+      InstancesList = Settings.Default.MySQLInstancesList ?? new List<MySQLInstance>();
     }
 
     /// <summary>
@@ -321,9 +321,8 @@ namespace MySql.Notifier
     {
       //// Initial list creation (empty actually).
       _instancesRefreshing = true;
-      if (InstancesList == null)
+      if (InstancesList.Count == 0)
       {
-        InstancesList = new List<MySQLInstance>();
         return;
       }
 

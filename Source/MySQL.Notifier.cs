@@ -407,26 +407,32 @@ namespace MySql.Notifier
     /// <returns>A bitmap of the updated tray icon.</returns>
     private Bitmap GetIconForNotifier()
     {
+      if (machinesList == null || mySQLInstancesList == null)
+      {
+        return Properties.Resources.NotifierIcon;
+      }
+
       bool hasUpdates = (Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0;
       bool useColorfulIcon = Settings.Default.UseColorfulStatusIcons;
 
-      var updateIconServicesList = Settings.Default.ServiceList == null ? new List<MySQLService>() : Settings.Default.ServiceList.Where(t => t.UpdateTrayIconOnStatusChange);
-      var updateIconInstancesList = Settings.Default.MySQLInstancesList == null ? new List<MySQLInstance>() : Settings.Default.MySQLInstancesList.Where(instance => instance.UpdateTrayIconOnStatusChange);
+      //// Create a list of instances and of services where the UpdateTrayIconOnStatusChange is true.
+      var updateIconServicesList = machinesList.Machines.SelectMany(machine => machine.Services).Where(service => service.UpdateTrayIconOnStatusChange);
+      var updateIconInstancesList = mySQLInstancesList.InstancesList.Where(instance => instance.UpdateTrayIconOnStatusChange);
 
       //// Stopped or update+stopped notifier icon.
-      if (updateIconServicesList.Where(t => t.Status == MySQLServiceStatus.Stopped).Count() + updateIconInstancesList.Where(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections).Count() > 0)
+      if (updateIconServicesList.Count(t => t.Status == MySQLServiceStatus.Stopped || t.Status == MySQLServiceStatus.Unavailable) + updateIconInstancesList.Count(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections) > 0)
       {
         return useColorfulIcon ? (hasUpdates ? Properties.Resources.NotifierIconStoppedAlertStrong : Properties.Resources.NotifierIconStoppedStrong) : (hasUpdates ? Properties.Resources.NotifierIconStoppedAlert : Properties.Resources.NotifierIconStopped);
       }
 
       //// Starting or update+starting notifier icon.
-      if (updateIconServicesList.Where(t => t.Status == MySQLServiceStatus.StartPending).Count() > 0)
+      if (updateIconServicesList.Count(t => t.Status == MySQLServiceStatus.StartPending) > 0)
       {
         return useColorfulIcon ? (hasUpdates ? Properties.Resources.NotifierIconStartingAlertStrong : Properties.Resources.NotifierIconStartingStrong) : (hasUpdates ? Properties.Resources.NotifierIconStartingAlert : Properties.Resources.NotifierIconStarting);
       }
 
       //// Running or update+running notifier icon.
-      if (updateIconServicesList.Where(t => t.Status == MySQLServiceStatus.Running).Count() + updateIconInstancesList.Where(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections).Count() > 0)
+      if (updateIconServicesList.Count(t => t.Status == MySQLServiceStatus.Running) + updateIconInstancesList.Count(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections) > 0)
       {
         return hasUpdates ? Properties.Resources.NotifierIconRunningAlert : Properties.Resources.NotifierIconRunning;
       }
