@@ -27,6 +27,7 @@ namespace MySql.Notifier
   using System.IO;
   using System.Linq;
   using System.Reflection;
+  using System.Threading;
   using System.Windows.Forms;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
@@ -34,6 +35,11 @@ namespace MySql.Notifier
 
   internal class Notifier : IDisposable
   {
+    /// <summary>
+    /// Default connections file load retry wait interval in milliseconds.
+    /// </summary>
+    private const int DEFAULT_FILE_LOAD_RETRY_WAIT = 333;
+
     #region Fields
 
     private System.ComponentModel.IContainer components;
@@ -360,10 +366,32 @@ namespace MySql.Notifier
     /// <param name="e"></param>
     private void connectionsFile_Changed(object sender, FileSystemEventArgs e)
     {
-      MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
-      MySqlWorkbench.LoadData();
-      mySQLInstancesList.RefreshInstances(false);
+      bool workbenchConnectionsLoadSuccessful = false;
+      Exception loadException = null;
+      for (int retryCount = 0; retryCount < 3 && !workbenchConnectionsLoadSuccessful; retryCount++)
+      {
+        try
+        {
+          MySqlWorkbench.LoadData();
+          workbenchConnectionsLoadSuccessful = true;
+          loadException = null;
+        }
+        catch (Exception ex)
+        {
+          loadException = ex;
+          Debug.WriteLine(ex.Message);
+          Thread.Sleep(DEFAULT_FILE_LOAD_RETRY_WAIT);
+        }
+      }
 
+      if (loadException != null)
+      {
+        InfoDialog.ShowErrorDialog(Resources.ConnectionsFileLoadingErrorTitle, Resources.ConnectionsFileLoadingErrorDetail, null, Resources.ConnectionsFileLoadingErrorMoreInfo, true, InfoDialog.DefaultButtonType.AcceptButton, 30);
+        MySQLSourceTrace.WriteAppErrorToLog(loadException);
+        return;
+      }
+
+      mySQLInstancesList.RefreshInstances(false);
       foreach (Machine machine in machinesList.Machines)
       {
         foreach (var item in machine.Services)

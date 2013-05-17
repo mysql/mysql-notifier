@@ -462,4 +462,14 @@
     <value>MySQL Utilities Shell</value>
     <comment>Sub-Action Menu (Actions)</comment>
   </data>
+  <data name="ConnectionsFileLoadingErrorDetail" xml:space="preserve">
+    <value>There was an error trying to load the connections file.</value>
+  </data>
+  <data name="ConnectionsFileLoadingErrorMoreInfo" xml:space="preserve">
+    <value>One reason for this is that it may be in use by another process.
+Please make sure the connections.xml file is not open by another program.</value>
+  </data>
+  <data name="ConnectionsFileLoadingErrorTitle" xml:space="preserve">
+    <value>Error when loading database connections file</value>
+  </data>
 </root>

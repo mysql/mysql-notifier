@@ -370,6 +370,7 @@ namespace MySql.Notifier
         }
         else
         {
+          instance.ResetRelatedWorkbenchConnections();
           instance.MenuGroup.RecreateSQLEditorMenus();
           if (_instanceMonitoringTimeouts.ContainsKey(instance.WorkbenchConnectionId))
           {

@@ -531,6 +531,14 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Resets the list of related workbench connections in <see cref="RelatedConnections"/> to be computed again.
+    /// </summary>
+    public void ResetRelatedWorkbenchConnections()
+    {
+      _relatedConnections = null;
+    }
+
+    /// <summary>
     /// Initializes the instance's menu group.
     /// </summary>
     public void SetupMenuGroup()

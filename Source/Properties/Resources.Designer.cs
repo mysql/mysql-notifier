@@ -372,6 +372,34 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There was an error trying to load the connections file..
+        /// </summary>
+        internal static string ConnectionsFileLoadingErrorDetail {
+            get {
+                return ResourceManager.GetString("ConnectionsFileLoadingErrorDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to One reason for this is that it may be in use by another process.
+        ///Please make sure the connections.xml file is not open by another program..
+        /// </summary>
+        internal static string ConnectionsFileLoadingErrorMoreInfo {
+            get {
+                return ResourceManager.GetString("ConnectionsFileLoadingErrorMoreInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error when loading database connections file.
+        /// </summary>
+        internal static string ConnectionsFileLoadingErrorTitle {
+            get {
+                return ResourceManager.GetString("ConnectionsFileLoadingErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You are able to monitor services in this remote machine..
         /// </summary>
         internal static string ConnectionSuccessfulMessage {
