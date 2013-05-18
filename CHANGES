@@ -1,1 +1,4 @@
-----
+1.1.2
+Fixed code to enable the SQL Editor menu when MySQL Workbench is installed and it supports opening the SQL Editor from the command line and the bound
+service contains Workbench connections, otherwise disable it. The SQL Editor menu opens Workbench directly if only 1 connection exists and the menu is
+disabled if there are none. (Bug #14332402 - CLICKING "SQL EDITOR" DOESN'T ACTUALLY OPEN SQL EDITOR IN WB)
