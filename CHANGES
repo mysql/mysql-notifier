@@ -1,4 +1,9 @@
 1.1.2
-Fixed code to enable the SQL Editor menu when MySQL Workbench is installed and it supports opening the SQL Editor from the command line and the bound
-service contains Workbench connections, otherwise disable it. The SQL Editor menu opens Workbench directly if only 1 connection exists and the menu is
-disabled if there are none. (Bug #14332402 - CLICKING "SQL EDITOR" DOESN'T ACTUALLY OPEN SQL EDITOR IN WB)
+- From now on if you have the AutoAddServicesToMonitor option checked and you add a new service which Name matches the filter ("mysql") in a monitored 
+  machine (localhost is monitored by default) it will be automatically added to the list of monitored services.
+  (MySql bug #67617, Bug #15887501 - MYSQL NOTIFIER AUTOFILTER NOT AUTO FINDING RUNNING SERVICES)
+  (Bug#16660623 - NOTIFIER IS NOT LISTING THE JUST INSTALLED SERVER INSTANCE.)
+  (Bug#14345177 - NEW SERVICE IS NOT ADDED TO NOTIFIER)
+- Fixed code to enable the SQL Editor menu when MySQL Workbench is installed and it supports opening the SQL Editor from the command line and the bound
+  service contains Workbench connections, otherwise disable it. The SQL Editor menu opens Workbench directly if only 1 connection exists and the menu is
+  disabled if there are none. (Bug #14332402 - CLICKING "SQL EDITOR" DOESN'T ACTUALLY OPEN SQL EDITOR IN WB)

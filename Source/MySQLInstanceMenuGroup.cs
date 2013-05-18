@@ -206,44 +206,52 @@ namespace MySql.Notifier
     /// </summary>
     public void RecreateSQLEditorMenus()
     {
-      if (!MySqlWorkbench.AllowsExternalConnectionsManagement)
+      var notifierMenu = InstanceMenuItem.GetCurrentParent();
+      if (notifierMenu != null && notifierMenu.InvokeRequired)
       {
-        return;
-      }
-
-      if (SQLEditorMenuItem == null)
-      {
-        SQLEditorMenuItem = new ToolStripMenuItem(Resources.SQLEditor);
+        notifierMenu.Invoke(new MethodInvoker(() => { RecreateSQLEditorMenus(); }));
       }
       else
       {
-        SQLEditorMenuItem.DropDownItems.Clear();
-      }
-
-      //// If there are 0 or 1 connections then the single menu will suffice.
-      if (BoundInstance.RelatedConnections.Count <= 1)
-      {
-        SQLEditorMenuItem.Enabled = true;
-        SQLEditorMenuItem.Click += new EventHandler(SQLEditorMenuItem_Click);
-        return;
-      }
-      else
-      {
-        SQLEditorMenuItem.Enabled = false;
-      }
-
-      //// We have more than 1 connection so we create a submenu.
-      foreach (var conn in BoundInstance.RelatedConnections)
-      {
-        ToolStripMenuItem menu = new ToolStripMenuItem(conn.Name);
-        if (conn == BoundInstance.WorkbenchConnection)
+        if (!MySqlWorkbench.AllowsExternalConnectionsManagement)
         {
-          Font boldFont = new Font(menu.Font, FontStyle.Bold);
-          menu.Font = boldFont;
+          return;
         }
 
-        menu.Click += new EventHandler(SQLEditorMenuItem_Click);
-        SQLEditorMenuItem.DropDownItems.Add(menu);
+        if (SQLEditorMenuItem == null)
+        {
+          SQLEditorMenuItem = new ToolStripMenuItem(Resources.SQLEditor);
+        }
+        else
+        {
+          SQLEditorMenuItem.DropDownItems.Clear();
+        }
+
+        //// If there are 0 or 1 connections then the single menu will suffice.
+        if (BoundInstance.RelatedConnections.Count <= 1)
+        {
+          SQLEditorMenuItem.Enabled = true;
+          SQLEditorMenuItem.Click += new EventHandler(SQLEditorMenuItem_Click);
+          return;
+        }
+        else
+        {
+          SQLEditorMenuItem.Enabled = false;
+        }
+
+        //// We have more than 1 connection so we create a submenu.
+        foreach (var conn in BoundInstance.RelatedConnections)
+        {
+          ToolStripMenuItem menu = new ToolStripMenuItem(conn.Name);
+          if (conn == BoundInstance.WorkbenchConnection)
+          {
+            Font boldFont = new Font(menu.Font, FontStyle.Bold);
+            menu.Font = boldFont;
+          }
+
+          menu.Click += new EventHandler(SQLEditorMenuItem_Click);
+          SQLEditorMenuItem.DropDownItems.Add(menu);
+        }
       }
     }
 
