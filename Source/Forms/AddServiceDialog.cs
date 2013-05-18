@@ -148,7 +148,7 @@ namespace MySql.Notifier
           }
           else
           {
-            newMachine = new Machine();
+            newMachine = machinesList.LocalMachine;
             MachineSelectionComboBox.Items[0] = newMachine;
           }
           break;
@@ -165,7 +165,7 @@ namespace MySql.Notifier
             else
             {
               newMachine = windowsConnectionDialog.newMachine;
-              newMachine.LoadServicesParameters();
+              newMachine.LoadServicesParameters(false);
               int index = -1;
               for (int machineIndex = 3; machineIndex < MachineSelectionComboBox.Items.Count && index < 0; machineIndex++)
               {
@@ -254,7 +254,7 @@ namespace MySql.Notifier
       {
         ManagementObjectCollection machineServicesCollection = newMachine.GetWMIServices(true);
         if (machineServicesCollection != null)
-        {
+        {        
           foreach (ManagementObject mo in machineServicesCollection)
           {
             services.Add(mo);
@@ -269,7 +269,7 @@ namespace MySql.Notifier
       services = services.OrderBy(x => x.Properties["DisplayName"].Value).ToList();
       if (!string.IsNullOrEmpty(currentFilter))
       {
-        services = services.Where(f => f.Properties["DisplayName"].Value.ToString().ToLower().Contains(currentFilter)).ToList();
+        services = services.Where(f => f.Properties["DisplayName"].Value.ToString().ToLowerInvariant().Contains(currentFilter)).ToList();
       }
 
       foreach (ManagementObject item in services)

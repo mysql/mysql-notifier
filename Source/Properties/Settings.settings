@@ -12,7 +12,7 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="AutoAddPattern" Provider="MySql.Notifier.NotifierSettings" Type="System.String" Scope="User">
-      <Value Profile="(Default)">.*mysqld.*</Value>
+      <Value Profile="(Default)">mysql</Value>
     </Setting>
     <Setting Name="NotifyOfStatusChange" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

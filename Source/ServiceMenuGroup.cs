@@ -352,40 +352,48 @@ namespace MySql.Notifier
     /// <param name="boundServiceStatus">Service Status</param>
     public void Update()
     {
-      statusMenu.Text = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
-      Image image = null;
-      switch (boundService.Status)
+      var notifierMenu = statusMenu.GetCurrentParent();
+      if (notifierMenu != null && notifierMenu.InvokeRequired)
       {
-        case MySQLServiceStatus.ContinuePending:
-        case MySQLServiceStatus.Paused:
-        case MySQLServiceStatus.PausePending:
-        case MySQLServiceStatus.StartPending:
-        case MySQLServiceStatus.StopPending:
-          image = Resources.NotifierIconStarting;
-          break;
-
-        case MySQLServiceStatus.Stopped:
-          image = Resources.NotifierIconStopped;
-          break;
-
-        case MySQLServiceStatus.Running:
-          image = Resources.NotifierIconRunning;
-          break;
+        notifierMenu.Invoke(new MethodInvoker(() => { Update(); }));
       }
-
-      statusMenu.Image = image;
-      startMenu.Enabled = boundService.Status == MySQLServiceStatus.Stopped;
-      stopMenu.Enabled = boundService.Status != MySQLServiceStatus.Stopped;
-      restartMenu.Enabled = stopMenu.Enabled;
-
-      if (editorMenu != null)
+      else
       {
-        editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && boundService.WorkbenchConnections != null && boundService.WorkbenchConnections.Count > 0;
-      }
+        statusMenu.Text = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
+        Image image = null;
+        switch (boundService.Status)
+        {
+          case MySQLServiceStatus.ContinuePending:
+          case MySQLServiceStatus.Paused:
+          case MySQLServiceStatus.PausePending:
+          case MySQLServiceStatus.StartPending:
+          case MySQLServiceStatus.StopPending:
+            image = Resources.NotifierIconStarting;
+            break;
 
-      if (configureMenu != null)
-      {
-        configureMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement;
+          case MySQLServiceStatus.Stopped:
+            image = Resources.NotifierIconStopped;
+            break;
+
+          case MySQLServiceStatus.Running:
+            image = Resources.NotifierIconRunning;
+            break;
+        }
+
+        statusMenu.Image = image;
+        startMenu.Enabled = boundService.Status == MySQLServiceStatus.Stopped;
+        stopMenu.Enabled = boundService.Status != MySQLServiceStatus.Stopped;
+        restartMenu.Enabled = stopMenu.Enabled;
+
+        if (editorMenu != null)
+        {
+          editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && boundService.WorkbenchConnections != null && boundService.WorkbenchConnections.Count > 0;
+        }
+
+        if (configureMenu != null)
+        {
+          configureMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement;
+        }
       }
     }
 

@@ -76,6 +76,7 @@ namespace MySql.Notifier
 
       try
       {
+        UpdateSettingsFile();
         var applicationContext = new NotifierApplicationContext();
         Application.Run(applicationContext);
       }
@@ -86,6 +87,16 @@ namespace MySql.Notifier
       }
 
       SingleInstance.Stop();
+    }
+
+    private static void UpdateSettingsFile()
+    {
+      if (Settings.Default.AutoAddPattern == ".*mysqld.*")
+      {
+        Settings.Default.AutoAddPattern = "mysql";
+      }
+
+      Settings.Default.Save();
     }
 
     private static void CheckForUpdates(string arg)

@@ -108,6 +108,11 @@ namespace MySql.Notifier
     private ManagementScope _wmiManagementScope;
 
     /// <summary>
+    /// WMI watcher for creation of services related to this machine.
+    /// </summary>
+    private ManagementEventWatcher _wmiServiceCreationWatcher;
+
+    /// <summary>
     /// WMI watcher for deletion of services related to this machine.
     /// </summary>
     private ManagementEventWatcher _wmiServiceDeletionWatcher;
@@ -715,6 +720,12 @@ namespace MySql.Notifier
       if (disposing)
       {
         //// Free managed resources
+        if (_wmiServiceCreationWatcher != null)
+        {
+          _wmiServiceCreationWatcher.Stop();
+          _wmiServiceCreationWatcher.Dispose();
+        }
+
         if (_wmiServiceDeletionWatcher != null)
         {
           _wmiServiceDeletionWatcher.Stop();
@@ -856,13 +867,19 @@ namespace MySql.Notifier
     /// <summary>
     /// Load Calculated, Machine dependant StartupParameters
     /// </summary>
-    public void LoadServicesParameters()
+    /// <param name="setupWMIEventsOnly">When true will suscribe WMI event watchers only and will skip further operations with services.</param>
+    public void LoadServicesParameters(bool setupWMIEventsOnly)
     {
       if (!InitialLoadDone)
       {
-        //// Test connection status
-        if (ConnectionStatus != ConnectionStatusType.Online)
+        if (IsLocal && setupWMIEventsOnly)
         {
+          SetupWMIEvents();
+          return;
+        }
+        else if (ConnectionStatus != ConnectionStatusType.Online)
+        {
+          //// Test connection status
           TestConnection(false, true);
         }
       }
@@ -1063,7 +1080,7 @@ namespace MySql.Notifier
       if (OldConnectionStatus != ConnectionStatus
           && (ConnectionStatus == Machine.ConnectionStatusType.Online || ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
       {
-        LoadServicesParameters();
+        LoadServicesParameters(false);
         SetupWMIEvents();
       }
     }
@@ -1131,6 +1148,31 @@ namespace MySql.Notifier
       if (ServiceStatusChangeError != null)
       {
         ServiceStatusChangeError(this, service, ex);
+      }
+    }
+
+    /// <summary>
+    /// Event delegate method that is fired when a WMI service is created.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="args">Event arguments.</param>
+    private void OnWMIServiceCreated(object sender, EventArrivedEventArgs args)
+    {
+      if (!Settings.Default.AutoAddServicesToMonitor) return;
+
+      ManagementBaseObject serviceObject = ((ManagementBaseObject)args.NewEvent["TargetInstance"]);
+      if (serviceObject == null || !serviceObject["Name"].ToString().ToLowerInvariant().Contains(Settings.Default.AutoAddPattern))
+      {
+        return;
+      }
+
+      string serviceName = serviceObject["Name"].ToString().Trim();
+      MySQLService service = GetServiceByName(serviceName);
+      if (service == null)
+      {
+        service = new MySQLService(serviceName, Settings.Default.NotifyOfStatusChange, Settings.Default.NotifyOfStatusChange, this);
+        service.SetServiceParameters();
+        ChangeService(service, ChangeType.AutoAdd);
       }
     }
 
@@ -1227,22 +1269,35 @@ namespace MySql.Notifier
           WMIManagementScope.Connect();
           TimeSpan queryTimeout = TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds);
 
+          if (_wmiServiceCreationWatcher == null)
+          {
+            _wmiServiceCreationWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceCreationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
+            _wmiServiceCreationWatcher.EventArrived += OnWMIServiceCreated;
+            _wmiServiceCreationWatcher.Start();
+          }
+
           if (_wmiServiceDeletionWatcher == null)
           {
-            _wmiServiceDeletionWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceModificationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
+            _wmiServiceDeletionWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceDeletionEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
             _wmiServiceDeletionWatcher.EventArrived += OnWMIServiceDeleted;
             _wmiServiceDeletionWatcher.Start();
           }
 
           if (_wmiServiceStatusChangeWatcher == null)
           {
-            _wmiServiceStatusChangeWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceDeletionEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
+            _wmiServiceStatusChangeWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceModificationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
             _wmiServiceStatusChangeWatcher.EventArrived += OnWMIServiceStatusChanged;
             _wmiServiceStatusChangeWatcher.Start();
           }
         }
         else
         {
+          if (_wmiServiceCreationWatcher != null)
+          {
+            _wmiServiceCreationWatcher.Stop();
+            _wmiServiceCreationWatcher.EventArrived -= OnWMIServiceCreated;
+          }
+
           if (_wmiServiceDeletionWatcher != null)
           {
             _wmiServiceDeletionWatcher.Stop();

@@ -613,6 +613,11 @@ namespace MySql.Notifier
         ShowTooltip(false, Resources.BalloonTitleServiceStatus, string.Format(Resources.BalloonTextServiceStatus, service.DisplayName, service.PreviousStatus.ToString(), service.Status.ToString()));
       }
 
+      if (service.MenuGroup != null)
+      {
+        service.MenuGroup.Update();
+      }
+
       if (service.UpdateTrayIconOnStatusChange)
       {
         RefreshNotifierIcon();
