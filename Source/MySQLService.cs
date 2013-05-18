@@ -307,13 +307,21 @@ namespace MySql.Notifier
 
       //// Discover what StartupParameters we were started with for local connections
       MySQLStartupParameters StartupParameters = GetStartupParameters();
-      if (String.IsNullOrEmpty(StartupParameters.HostName)) return;
-      WorkbenchConnections = new List<MySqlWorkbenchConnection>();
+      if (string.IsNullOrEmpty(StartupParameters.HostName) || !IsRealMySQLService)
+      {
+        return;
+      }
 
-      if (!IsRealMySQLService) return;
+      if (WorkbenchConnections == null)
+      {
+        WorkbenchConnections = new List<MySqlWorkbenchConnection>();
+      }
+      else
+      {
+        WorkbenchConnections.Clear();
+      }
 
       var filteredConnections = MySqlWorkbench.WorkbenchConnections.Where(t => !String.IsNullOrEmpty(t.Name) && t.Port == StartupParameters.Port);
-
       if (filteredConnections != null)
       {
         foreach (MySqlWorkbenchConnection c in filteredConnections)
@@ -386,7 +394,10 @@ namespace MySql.Notifier
         FindMatchingWBConnections();
         SetStatus(ServiceManagementObject == null ? Status.ToString() : ServiceManagementObject.Properties["State"].Value.ToString());
         DisplayName = (String.IsNullOrEmpty(DisplayName) && ServiceManagementObject != null) ? ServiceManagementObject.Properties["DisplayName"].Value.ToString() : DisplayName;
-        MenuGroup = new ServiceMenuGroup(this);
+        if (MenuGroup == null)
+        {
+          MenuGroup = new ServiceMenuGroup(this);
+        }
       }
       catch (InvalidOperationException ioEx)
       {

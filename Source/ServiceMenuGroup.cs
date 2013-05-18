@@ -85,10 +85,6 @@ namespace MySql.Notifier
       restartMenu = new ToolStripMenuItem("Restart", Resources.restart);
       restartMenu.Click += new EventHandler(restart_Click);
 
-      statusMenu.DropDownItems.Add(startMenu);
-      statusMenu.DropDownItems.Add(stopMenu);
-      statusMenu.DropDownItems.Add(restartMenu);
-
       Update();
     }
 
@@ -359,6 +355,7 @@ namespace MySql.Notifier
       }
       else
       {
+        bool actionMenusAvailable = boundService.Host.ConnectionStatus == Machine.ConnectionStatusType.Online;
         statusMenu.Text = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
         Image image = null;
         switch (boundService.Status)
@@ -371,6 +368,7 @@ namespace MySql.Notifier
             image = Resources.NotifierIconStarting;
             break;
 
+          case MySQLServiceStatus.Unavailable:
           case MySQLServiceStatus.Stopped:
             image = Resources.NotifierIconStopped;
             break;
@@ -393,6 +391,17 @@ namespace MySql.Notifier
         if (configureMenu != null)
         {
           configureMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement;
+        }
+
+        if (actionMenusAvailable && statusMenu.DropDownItems.Count == 0)
+        {
+          statusMenu.DropDownItems.Add(startMenu);
+          statusMenu.DropDownItems.Add(stopMenu);
+          statusMenu.DropDownItems.Add(restartMenu);
+        }
+        else if (!actionMenusAvailable && statusMenu.DropDownItems.Count > 0)
+        {
+          statusMenu.DropDownItems.Clear();
         }
       }
     }

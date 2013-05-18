@@ -518,36 +518,6 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This message can be displayed for one of the following reasons at the remote machine:
-        ///   * Machine is offline
-        ///   * WMI/DCOM access permissions are insufficient for user attempting to connect
-        ///   * Windows Firewall is not configured for WMI communication.
-        /// </summary>
-        internal static string HostUnavailableExtendedMessage {
-            get {
-                return ResourceManager.GetString("HostUnavailableExtendedMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The host you selected is not available at this moment, it was not possible to establish a WMI connection..
-        /// </summary>
-        internal static string HostUnavailableMessage {
-            get {
-                return ResourceManager.GetString("HostUnavailableMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Host Currently Unavailable.
-        /// </summary>
-        internal static string HostUnavailableTitle {
-            get {
-                return ResourceManager.GetString("HostUnavailableTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap InstallAvailableUpdatesIcon {
@@ -610,6 +580,45 @@ namespace MySql.Notifier.Properties {
         internal static string MachineAlreadyExistTitle {
             get {
                 return ResourceManager.GetString("MachineAlreadyExistTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This message can be displayed for one of the following reasons at the remote machine:
+        ///   * Machine is offline
+        ///   * WMI/DCOM access permissions are insufficient for user attempting to connect
+        ///   * Windows Firewall is not configured for WMI communication.
+        /// </summary>
+        internal static string MachineUnavailableExtendedMessage {
+            get {
+                return ResourceManager.GetString("MachineUnavailableExtendedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The machine you selected is not available at this moment, it was not possible to establish a WMI connection..
+        /// </summary>
+        internal static string MachineUnavailableMessage {
+            get {
+                return ResourceManager.GetString("MachineUnavailableMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Machine Currently Unavailable.
+        /// </summary>
+        internal static string MachineUnavailableTitle {
+            get {
+                return ResourceManager.GetString("MachineUnavailableTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The machine you selected is not available at this moment, do you want to retry a connection to it?.
+        /// </summary>
+        internal static string MachineUnavailableYesNoDetail {
+            get {
+                return ResourceManager.GetString("MachineUnavailableYesNoDetail", resourceCulture);
             }
         }
         

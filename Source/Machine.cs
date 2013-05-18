@@ -371,7 +371,7 @@ namespace MySql.Notifier
             return Resources.AccessDeniedMessage;
 
           case ConnectionProblemType.InsufficientAccessPermissions:
-            return Resources.HostUnavailableMessage;
+            return Resources.MachineUnavailableMessage;
 
           default:
             return string.Empty;
@@ -393,7 +393,7 @@ namespace MySql.Notifier
             return Resources.AccessDeniedTitle;
 
           case ConnectionProblemType.InsufficientAccessPermissions:
-            return Resources.HostUnavailableTitle;
+            return Resources.MachineUnavailableTitle;
 
           default:
             return string.Empty;
@@ -682,6 +682,7 @@ namespace MySql.Notifier
           break;
 
         case ChangeType.Updated:
+          LoadServiceParameters(service);
           OnServiceListChanged(service, changeType);
           break;
       }
@@ -852,7 +853,7 @@ namespace MySql.Notifier
             ConnectionProblemShortDescription,
             ConnectionProblemLongDescription,
             null,
-            ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.HostUnavailableExtendedMessage : null,
+            ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.MachineUnavailableExtendedMessage : null,
             true,
             InfoDialog.DefaultButtonType.AcceptButton,
             30);

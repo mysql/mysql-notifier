@@ -211,16 +211,21 @@ namespace MySql.Notifier
           return;
 
         default:
-          Cursor.Current = Cursors.WaitCursor;
           MachineLocationType = Machine.LocationType.Remote;
           newMachine = (Machine)MachineSelectionComboBox.SelectedItem;
           if (!newMachine.IsOnline)
           {
-            InfoDialog.ShowInformationDialog(Resources.HostUnavailableTitle, Resources.HostUnavailableMessage);
-            ServicesListView.SelectedItems.Clear();
-          }
+            dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.MachineUnavailableTitle, Resources.MachineUnavailableYesNoDetail, null, Resources.MachineUnavailableExtendedMessage, true, InfoDialog.DefaultButtonType.CancelButton, 30);
+            if (dr == DialogResult.Yes)
+            {
+              newMachine.TestConnection(true, false);
+            }
 
-          Cursor.Current = Cursors.Default;
+            if (!newMachine.IsOnline)
+            {
+              ServicesListView.SelectedItems.Clear();
+            }
+          }
           break;
       }
 

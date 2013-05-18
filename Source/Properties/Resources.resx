@@ -396,13 +396,13 @@
   <data name="ConnectionSuccessfulTitle" xml:space="preserve">
     <value>Connection Successful</value>
   </data>
-  <data name="HostUnavailableMessage" xml:space="preserve">
-    <value>The host you selected is not available at this moment, it was not possible to establish a WMI connection.</value>
+  <data name="MachineUnavailableMessage" xml:space="preserve">
+    <value>The machine you selected is not available at this moment, it was not possible to establish a WMI connection.</value>
   </data>
-  <data name="HostUnavailableTitle" xml:space="preserve">
-    <value>Host Currently Unavailable</value>
+  <data name="MachineUnavailableTitle" xml:space="preserve">
+    <value>Machine Currently Unavailable</value>
   </data>
-  <data name="HostUnavailableExtendedMessage" xml:space="preserve">
+  <data name="MachineUnavailableExtendedMessage" xml:space="preserve">
     <value>This message can be displayed for one of the following reasons at the remote machine:
    * Machine is offline
    * WMI/DCOM access permissions are insufficient for user attempting to connect
@@ -471,5 +471,8 @@ Please make sure the connections.xml file is not open by another program.</value
   </data>
   <data name="ConnectionsFileLoadingErrorTitle" xml:space="preserve">
     <value>Error when loading database connections file</value>
+  </data>
+  <data name="MachineUnavailableYesNoDetail" xml:space="preserve">
+    <value>The machine you selected is not available at this moment, do you want to retry a connection to it?</value>
   </data>
 </root>
