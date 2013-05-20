@@ -158,11 +158,11 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Constructor designed for remote machines
+    /// Constructor designed for remote machines.
     /// </summary>
-    /// <param name="name">Host name</param>
-    /// <param name="user">User name</param>
-    /// <param name="password">Password</param>
+    /// <param name="name">Host name.</param>
+    /// <param name="user">User name.</param>
+    /// <param name="password">Password.</param>
     public Machine(string name, string user, string password)
       : this()
     {
