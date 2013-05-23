@@ -414,6 +414,7 @@ namespace MySql.Notifier
     public void SetStatus(string statusString)
     {
       MySQLServiceStatus newStatus;
+      statusString = statusString.Replace(" ", string.Empty);
       bool parsed = MySQLServiceStatus.TryParse(statusString, out newStatus);
       if (parsed)
       {

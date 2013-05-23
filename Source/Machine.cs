@@ -1212,7 +1212,7 @@ namespace MySql.Notifier
       }
 
       string serviceName = serviceObject["Name"].ToString().Trim();
-      string state = serviceObject["State"].ToString().Trim();
+      string state = serviceObject["State"].ToString();
       MySQLService service = GetServiceByName(serviceName);
       if (service != null)
       {
