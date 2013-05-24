@@ -1081,7 +1081,10 @@ namespace MySql.Notifier
       if (OldConnectionStatus != ConnectionStatus
           && (ConnectionStatus == Machine.ConnectionStatusType.Online || ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
       {
-        LoadServicesParameters(false);
+        if (InitialLoadDone)
+        {
+          LoadServicesParameters(false);
+        }
         SetupWMIEvents();
       }
     }
@@ -1122,11 +1125,6 @@ namespace MySql.Notifier
       service.StatusChanged -= OnServiceStatusChanged;
       service.StatusChangeError -= OnServiceStatusChangeError;
 
-      if (InitialLoadDone)
-      {
-        return;
-      }
-
       if (IsOnline && !service.ServiceInstanceExists)
       {
         ChangeService(service, ChangeType.RemoveByEvent);
@@ -1135,7 +1133,10 @@ namespace MySql.Notifier
       {
         service.StatusChanged += OnServiceStatusChanged;
         service.StatusChangeError += OnServiceStatusChangeError;
-        OnServiceListChanged(service, ChangeType.AddByLoad);
+        if (!InitialLoadDone)
+        {
+          OnServiceListChanged(service, ChangeType.AddByLoad);
+        }
       }
     }
 
