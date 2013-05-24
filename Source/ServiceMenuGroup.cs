@@ -76,13 +76,13 @@ namespace MySql.Notifier
       Font subMenuItemFont = new Font(statusMenu.Font, FontStyle.Regular);
       statusMenu.Font = menuItemFont;
 
-      startMenu = new ToolStripMenuItem("Start", Resources.play);
+      startMenu = new ToolStripMenuItem(Resources.StartText, Resources.play);
       startMenu.Click += new EventHandler(start_Click);
 
-      stopMenu = new ToolStripMenuItem("Stop", Resources.stop);
+      stopMenu = new ToolStripMenuItem(Resources.StopText, Resources.stop);
       stopMenu.Click += new EventHandler(stop_Click);
 
-      restartMenu = new ToolStripMenuItem("Restart", Resources.restart);
+      restartMenu = new ToolStripMenuItem(Resources.RestartText, Resources.restart);
       restartMenu.Click += new EventHandler(restart_Click);
 
       Update();
@@ -304,8 +304,8 @@ namespace MySql.Notifier
 
       if (boundService.IsRealMySQLService && MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
-        menuItems[0] = "Configure Menu";
-        menuItems[1] = "Editor Menu";
+        menuItems[0] = Resources.ConfigureInstance;
+        menuItems[1] = Resources.SQLEditor;
         menuItems[2] = "Separator";
         menuItems[3] = statusMenu.Text; // the last itemText we delete is the service name itemText which is the reference for the others
       }
@@ -503,28 +503,16 @@ namespace MySql.Notifier
     private void restart_Click(object sender, EventArgs e)
     {
       boundService.Restart();
-      if (boundService.WorkCompleted)
-      {
-        Update();
-      }
     }
 
     private void start_Click(object sender, EventArgs e)
     {
       boundService.Start();
-      if (boundService.WorkCompleted)
-      {
-        Update();
-      }
     }
 
     private void stop_Click(object sender, EventArgs e)
     {
       boundService.Stop();
-      if (boundService.WorkCompleted)
-      {
-        Update();
-      }
     }
 
     private void workbenchConnection_Clicked(object sender, EventArgs e)

@@ -921,6 +921,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Restart.
+        /// </summary>
+        internal static string RestartText {
+            get {
+                return ResourceManager.GetString("RestartText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Running.
         /// </summary>
         internal static string Running {
@@ -935,6 +944,15 @@ namespace MySql.Notifier.Properties {
         internal static string ScheduledCheckRequiresInstaller11 {
             get {
                 return ResourceManager.GetString("ScheduledCheckRequiresInstaller11", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A WMI error occured while trying to perform a {0} service action. A reason for this is the remote machine became unavailable..
+        /// </summary>
+        internal static string ServiceActionErrorDetail {
+            get {
+                return ResourceManager.GetString("ServiceActionErrorDetail", resourceCulture);
             }
         }
         
@@ -994,6 +1012,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Start.
+        /// </summary>
+        internal static string StartText {
+            get {
+                return ResourceManager.GetString("StartText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap stop {
@@ -1018,6 +1045,15 @@ namespace MySql.Notifier.Properties {
         internal static string StopPending {
             get {
                 return ResourceManager.GetString("StopPending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stop.
+        /// </summary>
+        internal static string StopText {
+            get {
+                return ResourceManager.GetString("StopText", resourceCulture);
             }
         }
         
@@ -1054,6 +1090,24 @@ namespace MySql.Notifier.Properties {
         internal static string WarningText {
             get {
                 return ResourceManager.GetString("WarningText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There was an error subscribing to WMI Events, this may be caused by a security settings misconfiguration on a local or remote machine..
+        /// </summary>
+        internal static string WMIEventsSubscriptionErrorDetail {
+            get {
+                return ResourceManager.GetString("WMIEventsSubscriptionErrorDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error Subscribing to WMI Events.
+        /// </summary>
+        internal static string WMIEventsSubscriptionErrorTitle {
+            get {
+                return ResourceManager.GetString("WMIEventsSubscriptionErrorTitle", resourceCulture);
             }
         }
         

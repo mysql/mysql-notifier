@@ -475,4 +475,22 @@ Please make sure the connections.xml file is not open by another program.</value
   <data name="MachineUnavailableYesNoDetail" xml:space="preserve">
     <value>The machine you selected is not available at this moment, do you want to retry a connection to it?</value>
   </data>
+  <data name="WMIEventsSubscriptionErrorDetail" xml:space="preserve">
+    <value>There was an error subscribing to WMI Events, this may be caused by a security settings misconfiguration on a local or remote machine.</value>
+  </data>
+  <data name="WMIEventsSubscriptionErrorTitle" xml:space="preserve">
+    <value>Error Subscribing to WMI Events</value>
+  </data>
+  <data name="RestartText" xml:space="preserve">
+    <value>Restart</value>
+  </data>
+  <data name="ServiceActionErrorDetail" xml:space="preserve">
+    <value>A WMI error occured while trying to perform a {0} service action. A reason for this is the remote machine became unavailable.</value>
+  </data>
+  <data name="StartText" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="StopText" xml:space="preserve">
+    <value>Stop</value>
+  </data>
 </root>

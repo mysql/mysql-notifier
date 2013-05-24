@@ -1085,6 +1085,7 @@ namespace MySql.Notifier
         {
           LoadServicesParameters(false);
         }
+
         SetupWMIEvents();
       }
     }
@@ -1316,6 +1317,7 @@ namespace MySql.Notifier
       catch (Exception ex)
       {
         MySQLSourceTrace.WriteAppErrorToLog(ex);
+        InfoDialog.ShowErrorDialog(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, null, ex.Message);
       }
     }
 
@@ -1341,8 +1343,42 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void TestConnectionWorkerDoWork(object sender, DoWorkEventArgs e)
     {
+      //// Start with a Connecting... status
       ConnectionStatus = ConnectionStatusType.Connecting;
-      ManagementObjectCollection wmiServicesCollection = GetWMIServices((bool)e.Argument);
+
+      //// Try to see if we can connect to the remote computer and retrieve its services
+      bool displayMessageOnError = (bool)e.Argument;
+      ManagementObjectCollection wmiServicesCollection = GetWMIServices(displayMessageOnError);
+
+      //// If services could be retrieved, try to subscribe to WMI events using a dummy watcher.
+      if (ConnectionProblem == ConnectionProblemType.None)
+      {
+        try
+        {
+          if (!WMIManagementScope.IsConnected)
+          {
+            WMIManagementScope.Connect();
+          }
+
+          TimeSpan queryTimeout = TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds);
+          ManagementEventWatcher dummyWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceModificationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
+          dummyWatcher.Start();
+          dummyWatcher.Stop();
+          dummyWatcher.Dispose();
+        }
+        catch (Exception ex)
+        {
+          ConnectionProblem = ConnectionProblemType.InsufficientAccessPermissions;
+          MySQLSourceTrace.WriteToLog(ConnectionProblemLongDescription, System.Diagnostics.SourceLevels.Information);
+          MySQLSourceTrace.WriteAppErrorToLog(ex);
+          if (displayMessageOnError)
+          {
+            InfoDialog.ShowErrorDialog(ConnectionProblemShortDescription, ConnectionProblemLongDescription, null, Resources.MachineUnavailableExtendedMessage, true, InfoDialog.DefaultButtonType.AcceptButton, 30);
+          }
+        }
+      }
+
+      //// Report the connection status based on the Connection + Services retrieval + WMI events tests
       ConnectionStatus = ConnectionProblem != ConnectionProblemType.None ? ConnectionStatusType.Unavailable : ConnectionStatusType.Online;
     }
   }

@@ -434,7 +434,7 @@ namespace MySql.Notifier
       }
       else
       {
-        StartRemoteService();
+        ExecuteWMIMethod("StartService");
       }
     }
 
@@ -450,7 +450,7 @@ namespace MySql.Notifier
       }
       else
       {
-        StopRemoteService();
+        ExecuteWMIMethod("StopService");
       }
     }
 
@@ -604,7 +604,10 @@ namespace MySql.Notifier
       _isWaitingOnStatusChange = true;
       _statusChangeTimer.Elapsed += new ElapsedEventHandler(statusChangeTimer_ElapsedToStop);
       _statusChangeTimer.Start();
-      StopRemoteService();
+      if (!ExecuteWMIMethod("StopService"))
+      {
+        return;
+      }
 
       while (_isWaitingOnStatusChange)
       {
@@ -623,7 +626,10 @@ namespace MySql.Notifier
       _isWaitingOnStatusChange = true;
       _statusChangeTimer.Elapsed += new ElapsedEventHandler(statusChangeTimer_ElapsedToStart);
       _statusChangeTimer.Start();
-      StartRemoteService();
+      if (!ExecuteWMIMethod("StartService"))
+      {
+        return;
+      }
 
       while (_isWaitingOnStatusChange)
       {
@@ -640,11 +646,45 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Executes WMI command to start the service
+    /// Executes the given WMI method on the service.
     /// </summary>
-    private void StartRemoteService()
+    /// <param name="methodName">WMI method name to execute.</param>
+    /// <returns>true if the method executed successfully, false otherwise.</returns>
+    private bool ExecuteWMIMethod(string methodName)
     {
-      ServiceManagementObject.InvokeMethod("StartService", null, null);
+      if (string.IsNullOrEmpty(methodName))
+      {
+        return false;
+      }
+
+      bool serviceUnavailable = !Host.IsOnline || ServiceManagementObject == null;
+      Exception errorException = null;
+
+      if (!serviceUnavailable)
+      {
+        try
+        {
+          ServiceManagementObject.InvokeMethod(methodName, null, null);
+        }
+        catch (Exception ex)
+        {
+          serviceUnavailable = true;
+          errorException = ex;
+          MySQLSourceTrace.WriteAppErrorToLog(ex);
+        }
+      }
+
+      if (serviceUnavailable)
+      {
+        if (errorException == null)
+        {
+          errorException = new Exception(string.Format(Resources.ServiceActionErrorDetail, methodName));
+        }
+
+        OnStatusChangeError(errorException);
+      }
+
+      return !serviceUnavailable;
     }
 
     /// <summary>
@@ -675,14 +715,6 @@ namespace MySql.Notifier
         _statusChangeTimer.Stop();
         _isWaitingOnStatusChange = false;
       }
-    }
-
-    /// <summary>
-    /// Executes WMI command to stop the service
-    /// </summary>
-    private void StopRemoteService()
-    {
-      ServiceManagementObject.InvokeMethod("StopService", null, null);
     }
 
     /// <summary>
