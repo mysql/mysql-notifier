@@ -54,6 +54,21 @@ namespace MySql.Notifier
     public const string WMI_LOCAL_NAMESPACE = @"root\cimv2";
 
     /// <summary>
+    /// WMI query to retrieve all services.
+    /// </summary>
+    public const string WMI_QUERY_SELECT_ALL = "SELECT * FROM Win32_Service";
+
+    /// <summary>
+    /// WMI query to retrieve all services where their name matches a given filter.
+    /// </summary>
+    public const string WMI_QUERY_SELECT_NAME_CONTAINING = "SELECT * FROM Win32_Service WHERE Name LIKE '%{0}%'";
+
+    /// <summary>
+    /// WMI query to retrieve all services where their display name matches a given filter.
+    /// </summary>
+    public const string WMI_QUERY_SELECT_DISPLAY_NAME_CONTAINING = "SELECT * FROM Win32_Service WHERE DisplayName LIKE '%{0}%'";
+
+    /// <summary>
     /// The where clause part of WMI queries regarding services.
     /// </summary>
     public const string WMI_QUERIES_WHERE_CLAUSE = "TargetInstance isa 'Win32_Service'";
@@ -780,16 +795,17 @@ namespace MySql.Notifier
     /// <returns>A collection of management objects.</returns>
     public ManagementObjectCollection GetWMIServices(bool displayMessageOnError)
     {
-      return GetWMIServices(null, displayMessageOnError);
+      return GetWMIServices(null, false, displayMessageOnError);
     }
 
     /// <summary>
     /// Gets a list of services corresponding to this machine.
     /// </summary>
-    /// <param name="serviceName">Name of specific service to get, if null or empty all services are returned.</param>
+    /// <param name="serviceNameFilter">Text to search within the service name to get services that contain the text, if null or empty all services are returned.</param>
+    /// <param name="useDisplayName">Flag indicating if the display name is used to match the name filter instead of the service name.</param>
     /// <param name="displayMessageOnError">Flag indicating if an error message is displayed to users indicating the connection error.</param>
     /// <returns>A collection of management objects.</returns>
-    public ManagementObjectCollection GetWMIServices(string serviceName, bool displayMessageOnError)
+    public ManagementObjectCollection GetWMIServices(string serviceNameFilter, bool useDisplayName, bool displayMessageOnError)
     {
       ManagementObjectCollection wmiServicesCollection = null;
       Exception connectionException = null;
@@ -797,15 +813,19 @@ namespace MySql.Notifier
       try
       {
         string serviceDisplayName;
-        WMIManagementScope.Connect();
+        if (!WMIManagementScope.IsConnected)
+        {
+          WMIManagementScope.Connect();
+        }
+
         if (_connectionTestCancelled)
         {
           _connectionTestCancelled = false;
           return null;
         }
 
-        WqlObjectQuery query = string.IsNullOrEmpty(serviceName) ? new WqlObjectQuery("Select * From Win32_Service")
-        : new WqlObjectQuery(string.Format("Select * From Win32_Service Where Name = \"{0}\"", serviceName));
+        string filterQuery = useDisplayName ? WMI_QUERY_SELECT_DISPLAY_NAME_CONTAINING : WMI_QUERY_SELECT_NAME_CONTAINING;
+        WqlObjectQuery query = string.IsNullOrEmpty(serviceNameFilter) ? new WqlObjectQuery(WMI_QUERY_SELECT_ALL) : new WqlObjectQuery(string.Format(filterQuery, serviceNameFilter));
         ManagementObjectSearcher searcher = new ManagementObjectSearcher(WMIManagementScope, query);
         wmiServicesCollection = searcher.Get();
         if (_connectionTestCancelled)
@@ -1269,29 +1289,21 @@ namespace MySql.Notifier
       {
         if (ConnectionStatus == ConnectionStatusType.Online)
         {
-          WMIManagementScope.Connect();
+          if (!WMIManagementScope.IsConnected)
+          {
+            WMIManagementScope.Connect();
+          }
+
           TimeSpan queryTimeout = TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds);
-
-          if (_wmiServiceCreationWatcher == null)
-          {
-            _wmiServiceCreationWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceCreationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
-            _wmiServiceCreationWatcher.EventArrived += OnWMIServiceCreated;
-            _wmiServiceCreationWatcher.Start();
-          }
-
-          if (_wmiServiceDeletionWatcher == null)
-          {
-            _wmiServiceDeletionWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceDeletionEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
-            _wmiServiceDeletionWatcher.EventArrived += OnWMIServiceDeleted;
-            _wmiServiceDeletionWatcher.Start();
-          }
-
-          if (_wmiServiceStatusChangeWatcher == null)
-          {
-            _wmiServiceStatusChangeWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceModificationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
-            _wmiServiceStatusChangeWatcher.EventArrived += OnWMIServiceStatusChanged;
-            _wmiServiceStatusChangeWatcher.Start();
-          }
+          _wmiServiceCreationWatcher = _wmiServiceCreationWatcher ?? new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceCreationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
+          _wmiServiceCreationWatcher.EventArrived += OnWMIServiceCreated;
+          _wmiServiceCreationWatcher.Start();
+          _wmiServiceDeletionWatcher = _wmiServiceDeletionWatcher ?? new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceDeletionEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
+          _wmiServiceDeletionWatcher.EventArrived += OnWMIServiceDeleted;
+          _wmiServiceDeletionWatcher.Start();
+          _wmiServiceStatusChangeWatcher = _wmiServiceStatusChangeWatcher ?? new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceModificationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
+          _wmiServiceStatusChangeWatcher.EventArrived += OnWMIServiceStatusChanged;
+          _wmiServiceStatusChangeWatcher.Start();
         }
         else
         {
@@ -1348,11 +1360,12 @@ namespace MySql.Notifier
 
       //// Try to see if we can connect to the remote computer and retrieve its services
       bool displayMessageOnError = (bool)e.Argument;
-      ManagementObjectCollection wmiServicesCollection = GetWMIServices(displayMessageOnError);
+      ManagementObjectCollection wmiServicesCollection = GetWMIServices("eventlog", false, displayMessageOnError);
 
       //// If services could be retrieved, try to subscribe to WMI events using a dummy watcher.
       if (ConnectionProblem == ConnectionProblemType.None)
       {
+        ManagementEventWatcher dummyWatcher = null;
         try
         {
           if (!WMIManagementScope.IsConnected)
@@ -1361,10 +1374,8 @@ namespace MySql.Notifier
           }
 
           TimeSpan queryTimeout = TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds);
-          ManagementEventWatcher dummyWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceModificationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
+          dummyWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceModificationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
           dummyWatcher.Start();
-          dummyWatcher.Stop();
-          dummyWatcher.Dispose();
         }
         catch (Exception ex)
         {
@@ -1374,6 +1385,14 @@ namespace MySql.Notifier
           if (displayMessageOnError)
           {
             InfoDialog.ShowErrorDialog(ConnectionProblemShortDescription, ConnectionProblemLongDescription, null, Resources.MachineUnavailableExtendedMessage, true, InfoDialog.DefaultButtonType.AcceptButton, 30);
+          }
+        }
+        finally
+        {
+          if (dummyWatcher != null)
+          {
+            dummyWatcher.Stop();
+            dummyWatcher.Dispose();
           }
         }
       }

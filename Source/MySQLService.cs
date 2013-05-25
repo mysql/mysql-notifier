@@ -498,7 +498,7 @@ namespace MySql.Notifier
     private void GetServiceInstance()
     {
       _managementObject = null;
-      ManagementObjectCollection retObjectCollection = Host.GetWMIServices(ServiceName, false);
+      ManagementObjectCollection retObjectCollection = Host.GetWMIServices(ServiceName, false, false);
       if (retObjectCollection != null && retObjectCollection.Count > 0)
       {
         foreach (ManagementObject mo in retObjectCollection)

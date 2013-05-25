@@ -552,6 +552,7 @@ namespace MySql.Notifier
           {
             ShowTooltip(false, Resources.BalloonTitleMachinesList, string.Format(Resources.BalloonTextMachineRemoved, machine.Name));
           }
+          machine.Dispose();
           break;
       }
     }
@@ -586,6 +587,7 @@ namespace MySql.Notifier
           {
             ShowTooltip(false, Resources.BalloonTitleServiceList, String.Format(Resources.BalloonTextServiceRemoved, service.ServiceName));
           }
+          service.Dispose();
           break;
 
         case ChangeType.Updated:
@@ -724,6 +726,7 @@ namespace MySql.Notifier
           SetupMySQLInstancesMainMenuItem();
           args.Instance.MenuGroup.RemoveFromContextMenu(notifyIcon.ContextMenuStrip);
           RefreshNotifierIcon();
+          args.Instance.Dispose();
           break;
 
         case ListChangedType.ItemChanged:
