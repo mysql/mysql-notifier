@@ -55,6 +55,9 @@ namespace MySql.Notifier
       : this()
     {
       Text = currentMachine == null ? Text : Resources.EditMachineText;
+      errorToolTip.SetToolTip(hostErrorSign, Resources.HostToolTipText);
+      errorToolTip.SetToolTip(userErrorSign, Resources.UserToolTipText);
+
       if (currentMachine != null)
       {
         newMachine = currentMachine;
@@ -112,22 +115,23 @@ namespace MySql.Notifier
     private void Button_Click(object sender, EventArgs e)
     {
       Cursor = Cursors.WaitCursor;
-      DialogOKButton.Enabled = TestConnectionButton.Enabled = false;
+      DialogOKButton.Enabled = false;
       newMachine.Name = HostTextBox.Text.Trim();
       newMachine.User = UserTextBox.Text.Trim();
       newMachine.Password = MySQLSecurity.EncryptPassword(PasswordTextBox.Text);
-      if (TestConnectionAndPermissionsSet(sender.Equals(TestConnectionButton)))
+      bool editMode = Text.Equals(Resources.EditMachineText);
+      bool testConnection = sender.Equals(TestConnectionButton);
+      bool connectionSuccessful = (testConnection || !editMode) ? TestConnectionAndPermissionsSet(testConnection) : false;
+
+      if (testConnection && connectionSuccessful)
       {
-        if (sender.Equals(TestConnectionButton))
-        {
-          InfoDialog.ShowSuccessDialog(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage);
-          DialogOKButton.Enabled = TestConnectionButton.Enabled = EntriesAreValid;
-          DialogOKButton.Focus();
-        }
-        else
-        {
-          DialogOKButton.DialogResult = this.DialogResult = DialogResult.OK;
-        }
+        InfoDialog.ShowSuccessDialog(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage);
+        DialogOKButton.Enabled = EntriesAreValid;
+        DialogOKButton.Focus();
+      }
+      else if (!testConnection && (connectionSuccessful || editMode))
+      {
+        DialogOKButton.DialogResult = this.DialogResult = DialogResult.OK;
       }
 
       Cursor = Cursors.Default;
@@ -243,8 +247,8 @@ namespace MySql.Notifier
       //// Username is invalid if if has non allowed characters.
       userErrorSign.Visible = !string.IsNullOrEmpty(UserTextBox.Text) && !Regex.IsMatch(UserTextBox.Text, VALID_NAME_REGEX);
 
-      //// Enable TestConnectionButton and DialogOKButton if entries seem valid.
-      DialogOKButton.Enabled = TestConnectionButton.Enabled = EntriesAreValid;
+      //// Enable DialogOKButton if entries seem valid.
+      DialogOKButton.Enabled = EntriesAreValid;
     }
   }
 }

@@ -475,6 +475,12 @@ Please make sure the connections.xml file is not open by another program.</value
   <data name="MachineUnavailableYesNoDetail" xml:space="preserve">
     <value>The machine you selected is not available at this moment, do you want to retry a connection to it?</value>
   </data>
+  <data name="HostToolTipText" xml:space="preserve">
+    <value>A valid host name can only include alphanumeric characters, '.' and '-'. It can also be a valid IP address.</value>
+  </data>
+  <data name="UserToolTipText" xml:space="preserve">
+    <value>A valid user name can only include alphanumeric characters, '.' and '-'.</value>
+  </data>
   <data name="WMIEventsSubscriptionErrorDetail" xml:space="preserve">
     <value>There was an error subscribing to WMI Events, this may be caused by a security settings misconfiguration on a local or remote machine.</value>
   </data>

@@ -275,6 +275,11 @@ namespace MySql.Notifier
       }
       else
       {
+        if (changeType == ChangeType.Updated)
+        {
+          SavetoFile();
+        }
+
         machine.MachineStatusChanged += OnMachineStatusChanged;
         machine.ServiceListChanged += OnMachineServiceListChanged;
         machine.ServiceStatusChanged += OnMachineServiceStatusChanged;

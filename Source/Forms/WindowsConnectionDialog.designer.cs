@@ -67,6 +67,7 @@ namespace MySql.Notifier
       this.HostLabel = new System.Windows.Forms.Label();
       this.UserLabel = new System.Windows.Forms.Label();
       this.PasswordLabel = new System.Windows.Forms.Label();
+      this.errorToolTip = new System.Windows.Forms.ToolTip(this.components);
       this.ContentAreaPanel.SuspendLayout();
       this.CommandAreaPanel.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.MachineAutoTestConnectionIntervalNumericUpDown)).BeginInit();
@@ -129,7 +130,6 @@ namespace MySql.Notifier
       // TestConnectionButton
       // 
       this.TestConnectionButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-      this.TestConnectionButton.Enabled = false;
       this.TestConnectionButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.TestConnectionButton.Location = new System.Drawing.Point(12, 11);
       this.TestConnectionButton.Name = "TestConnectionButton";
@@ -302,6 +302,12 @@ namespace MySql.Notifier
       this.PasswordLabel.TabIndex = 5;
       this.PasswordLabel.Text = "Password:";
       // 
+      // errorToolTip
+      // 
+      this.errorToolTip.AutoPopDelay = 5000;
+      this.errorToolTip.InitialDelay = 300;
+      this.errorToolTip.ReshowDelay = 100;
+      // 
       // WindowsConnectionDialog
       // 
       this.AcceptButton = this.DialogOKButton;
@@ -347,5 +353,6 @@ namespace MySql.Notifier
     private System.Windows.Forms.ComboBox MachineAutoTestConnectionIntervalUOMComboBox;
     private System.Windows.Forms.Label MachineAutoTestConnectionLabel;
     private System.Windows.Forms.NumericUpDown MachineAutoTestConnectionIntervalNumericUpDown;
+    private System.Windows.Forms.ToolTip errorToolTip;
   }
 }
