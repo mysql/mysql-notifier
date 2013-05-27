@@ -392,8 +392,17 @@ namespace MySql.Notifier
       try
       {
         FindMatchingWBConnections();
-        SetStatus(ServiceManagementObject == null ? Status.ToString() : ServiceManagementObject.Properties["State"].Value.ToString());
-        DisplayName = (String.IsNullOrEmpty(DisplayName) && ServiceManagementObject != null) ? ServiceManagementObject.Properties["DisplayName"].Value.ToString() : DisplayName;
+
+        if (ServiceManagementObject != null)
+        {
+          if (Host.IsOnline)
+          {
+            SetStatus(ServiceManagementObject.Properties["State"].Value.ToString());
+          }
+
+          DisplayName = ServiceManagementObject.Properties["DisplayName"].Value.ToString();
+        }
+
         if (MenuGroup == null)
         {
           MenuGroup = new ServiceMenuGroup(this);

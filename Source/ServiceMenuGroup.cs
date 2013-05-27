@@ -355,7 +355,6 @@ namespace MySql.Notifier
       }
       else
       {
-        bool actionMenusAvailable = boundService.Host.ConnectionStatus == Machine.ConnectionStatusType.Online;
         statusMenu.Text = String.Format("{0} - {1}", boundService.DisplayName, boundService.Status);
         Image image = null;
         switch (boundService.Status)
@@ -393,6 +392,7 @@ namespace MySql.Notifier
           configureMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement;
         }
 
+        bool actionMenusAvailable = boundService.Host.IsOnline;
         if (actionMenusAvailable && statusMenu.DropDownItems.Count == 0)
         {
           statusMenu.DropDownItems.Add(startMenu);

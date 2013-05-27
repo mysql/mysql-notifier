@@ -610,7 +610,7 @@ namespace MySql.Notifier
     /// <param name="service">Service whose status changed.</param>
     private void machinesList_MachineServiceStatusChanged(Machine machine, MySQLService service)
     {
-      if (service.NotifyOnStatusChange && Settings.Default.NotifyOfStatusChange)
+      if (service.NotifyOnStatusChange && Settings.Default.NotifyOfStatusChange && service.PreviousStatus != MySQLServiceStatus.Unavailable && service.Status != MySQLServiceStatus.Unavailable)
       {
         ShowTooltip(false, Resources.BalloonTitleServiceStatus, string.Format(Resources.BalloonTextServiceStatus, service.DisplayName, service.PreviousStatus.ToString(), service.Status.ToString()));
       }
@@ -654,7 +654,7 @@ namespace MySql.Notifier
       machine.UpdateMenuGroup();
       if (machine.OldConnectionStatus != machine.ConnectionStatus
           && machine.OldConnectionStatus != Machine.ConnectionStatusType.Unknown
-          && (machine.ConnectionStatus == Machine.ConnectionStatusType.Online || machine.ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
+          && (machine.IsOnline || machine.ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
       {
         ShowTooltip(false, Resources.BalloonTitleMachineStatus, string.Format(Resources.BalloonTextMachineStatus, machine.Name, machine.ConnectionStatus.ToString()));
       }

@@ -1067,7 +1067,7 @@ namespace MySql.Notifier
           ToolStripMenuItem reconnectMenu = new ToolStripMenuItem("Reconnect", Resources.refresh, ReconnectMenu_Click);
           MenuGroup.DropDownItems.Add(reconnectMenu);
         }
-        else if (ConnectionStatus == ConnectionStatusType.Online && MenuGroup.DropDownItems.Count > 0)
+        else if (IsOnline && MenuGroup.DropDownItems.Count > 0)
         {
           MenuGroup.DropDownItems.Clear();
         }
@@ -1098,8 +1098,7 @@ namespace MySql.Notifier
         MachineStatusChanged(this, oldConnectionStatus);
       }
 
-      if (OldConnectionStatus != ConnectionStatus
-          && (ConnectionStatus == Machine.ConnectionStatusType.Online || ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
+      if (OldConnectionStatus != ConnectionStatus && (IsOnline || ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
       {
         if (InitialLoadDone)
         {
@@ -1287,7 +1286,7 @@ namespace MySql.Notifier
     {
       try
       {
-        if (ConnectionStatus == ConnectionStatusType.Online)
+        if (IsOnline)
         {
           if (!WMIManagementScope.IsConnected)
           {
