@@ -683,10 +683,7 @@ namespace MySql.Notifier
             OnServiceListChanged(service, changeType);
           }
 
-          if (changeType != ChangeType.AutoAdd)
-          {
-            LoadServiceParameters(service);
-          }
+          LoadServiceParameters(service);
           break;
 
         case ChangeType.Cleared:

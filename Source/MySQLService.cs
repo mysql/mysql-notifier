@@ -535,6 +535,10 @@ namespace MySql.Notifier
       parameters.HostIPv4 = Utility.GetIPv4ForHostName(parameters.HostName);
 
       RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format(@"SYSTEM\CurrentControlSet\Services\{0}", ServiceName));
+      if (key == null)
+      {
+        return parameters;
+      }
       string imagepath = (string)key.GetValue("ImagePath", null);
       key.Close();
       if (imagepath == null)
