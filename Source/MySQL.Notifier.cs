@@ -243,7 +243,6 @@ namespace MySql.Notifier
     protected virtual void OnExit(EventArgs e)
     {
       notifyIcon.Visible = false;
-      machinesList.Dispose();
       if (_globalTimer != null && _globalTimer.Enabled)
       {
         _globalTimer.Stop();

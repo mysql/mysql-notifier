@@ -25,6 +25,7 @@ namespace MySql.Notifier
 
   internal class NotifierApplicationContext : ApplicationContext, IDisposable
   {
+    private bool disposeDone;
     private readonly Notifier notifierApp;
 
     /// <summary>
@@ -32,6 +33,7 @@ namespace MySql.Notifier
     /// </summary>
     public NotifierApplicationContext()
     {
+      disposeDone = false;
       WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
       bool hasAdminPrivileges = principal.IsInRole(WindowsBuiltInRole.Administrator);
 
@@ -59,6 +61,11 @@ namespace MySql.Notifier
     /// </summary>
     protected override void Dispose(bool disposing)
     {
+      if (disposeDone)
+      {
+        return;
+      }
+
       if (disposing)
       {
         //// Free managed resources
@@ -68,6 +75,7 @@ namespace MySql.Notifier
 
       //// Add class finalizer if unmanaged resources are added to the class
       //// Free unmanaged resources if there are any
+      disposeDone = true;
     }
   }
 }

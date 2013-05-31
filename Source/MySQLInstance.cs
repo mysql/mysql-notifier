@@ -23,6 +23,7 @@ namespace MySql.Notifier
   using System.Collections.Generic;
   using System.ComponentModel;
   using System.Linq;
+  using System.Threading;
   using System.Windows.Forms;
   using System.Xml;
   using System.Xml.Serialization;
@@ -38,9 +39,14 @@ namespace MySql.Notifier
     #region Constants
 
     /// <summary>
+    /// Default waiting time in milliseconds to wait for an async cancellation before disposing an object.
+    /// </summary>
+    public const ushort DEFAULT_CANCEL_ASYNC_WAIT = 30000;
+
+    /// <summary>
     /// Default monitoring interval for a MySQL instance, set to 10.
     /// </summary>
-    public const int DEFAULT_MONITORING_INTERVAL = 10;
+    public const ushort DEFAULT_MONITORING_INTERVAL = 10;
 
     /// <summary>
     /// Default monitoring interval unit of measures, set to minutes by default.
@@ -50,11 +56,6 @@ namespace MySql.Notifier
     #endregion Constants
 
     #region Fields
-
-    /// <summary>
-    /// Flag indicating if the asynchronous status check was cancelled.
-    /// </summary>
-    private bool _instanceStatusCheckCancelled;
 
     /// <summary>
     /// Flag indicating if this instance is being monitored and status changes notified to users.
@@ -113,7 +114,6 @@ namespace MySql.Notifier
     /// </summary>
     public MySQLInstance()
     {
-      _instanceStatusCheckCancelled = false;
       _workbenchConnectionId = string.Empty;
       _monitoringInterval = DEFAULT_MONITORING_INTERVAL;
       _monitoringIntervalUnitOfMeasure = DEFAULT_MONITORING_UOM;
@@ -154,9 +154,22 @@ namespace MySql.Notifier
     protected virtual void Dispose(bool disposing)
     {
       //// Free managed resources
-      if (_worker != null && _worker.IsBusy)
+      if (_worker != null)
       {
-        _worker.CancelAsync();
+        if (_worker.IsBusy)
+        {
+          _worker.CancelAsync();
+          ushort cancelAsyncWait = 0;
+          while (_worker.IsBusy || cancelAsyncWait < DEFAULT_CANCEL_ASYNC_WAIT)
+          {
+            Thread.Sleep(100);
+            cancelAsyncWait += 100;
+          }
+        }
+
+        _worker.DoWork -= CheckInstanceStatusWorkerDoWork;
+        _worker.RunWorkerCompleted -= CheckInstanceStatusWorkerCompleted;
+        _worker.Dispose();
       }
 
       //// Add class finalizer if unmanaged resources are added to the class
@@ -491,15 +504,12 @@ namespace MySql.Notifier
     /// Cancels the asynchronous status check.
     /// </summary>
     /// <returns>true if the background connection test was cancelled, false otherwise</returns>
-    public bool CancelAsynchronousStatusCheck()
+    public void CancelAsynchronousStatusCheck()
     {
-      if (_worker != null && InstanceStatusCheckInProgress)
+      if (_worker != null && _worker.WorkerSupportsCancellation && (InstanceStatusCheckInProgress || _worker.IsBusy))
       {
-        _instanceStatusCheckCancelled = true;
         _worker.CancelAsync();
       }
-
-      return _instanceStatusCheckCancelled;
     }
 
     /// <summary>
@@ -607,10 +617,12 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void CheckInstanceStatusWorkerDoWork(object sender, DoWorkEventArgs e)
     {
+      BackgroundWorker worker = sender as BackgroundWorker;
       Exception ex;
       WorkbenchConnection.TestConnection(out ex);
-      if (_instanceStatusCheckCancelled)
+      if (worker.CancellationPending)
       {
+        e.Cancel = true;
         return;
       }
 
@@ -649,8 +661,8 @@ namespace MySql.Notifier
         _worker = new BackgroundWorker();
         _worker.WorkerSupportsCancellation = true;
         _worker.WorkerReportsProgress = false;
-        _worker.DoWork += new DoWorkEventHandler(CheckInstanceStatusWorkerDoWork);
-        _worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(CheckInstanceStatusWorkerCompleted);
+        _worker.DoWork += CheckInstanceStatusWorkerDoWork;
+        _worker.RunWorkerCompleted += CheckInstanceStatusWorkerCompleted;
       }
     }
   }

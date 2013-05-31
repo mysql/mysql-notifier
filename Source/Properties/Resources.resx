@@ -499,4 +499,10 @@ Please make sure the connections.xml file is not open by another program.</value
   <data name="StopText" xml:space="preserve">
     <value>Stop</value>
   </data>
+  <data name="WMISemiSyncEventsErrorDetail" xml:space="preserve">
+    <value>WMI events can no longer be monitored on the {0} machine because of an error.</value>
+  </data>
+  <data name="WMISemiSyncEventsErrorTitle" xml:space="preserve">
+    <value>WMI Event Error</value>
+  </data>
 </root>

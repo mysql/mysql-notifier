@@ -193,6 +193,7 @@
     <Compile Include="MySQLService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServiceWatcher.cs" />
     <Compile Include="SingleInstance.cs" />
     <Compile Include="MySQL.Notifier.cs" />
     <Compile Include="ApplicationContext.cs" />

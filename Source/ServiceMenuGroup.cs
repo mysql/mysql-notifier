@@ -299,46 +299,53 @@ namespace MySql.Notifier
     /// <param name="menu">Main Notifier's context menu.</param>
     public void RemoveFromContextMenu(ContextMenuStrip menu)
     {
-      string[] menuItems = new string[4];
-      int index = -1;
-
-      if (boundService.IsRealMySQLService && MySqlWorkbench.AllowsExternalConnectionsManagement)
+      if (menu.InvokeRequired)
       {
-        menuItems[0] = Resources.ConfigureInstance;
-        menuItems[1] = Resources.SQLEditor;
-        menuItems[2] = "Separator";
-        menuItems[3] = statusMenu.Text; // the last itemText we delete is the service name itemText which is the reference for the others
+        menu.Invoke(new MethodInvoker(() => { RemoveFromContextMenu(menu); }));
       }
       else
       {
-        menuItems[0] = "Separator";
-        menuItems[1] = statusMenu.Text;
-      }
+        string[] menuItems = new string[4];
+        int index = -1;
 
-      index = FindMenuItemWithinMenuStrip(menu, statusMenu.Text);
-      if (index <= 0)
-      {
-        return;
-      }
-
-      //// Hide the separator just above this new menu item if needed.
-      if (index > 0 && menu.Items[index - 1] is ToolStripSeparator)
-      {
-        menu.Items[index - 1].Visible = menu.Items[index + 1].BackColor != SystemColors.MenuText;
-      }
-
-      foreach (var item in menuItems)
-      {
-        if (string.IsNullOrEmpty(item))
+        if (boundService.IsRealMySQLService && MySqlWorkbench.AllowsExternalConnectionsManagement)
         {
-          continue;
+          menuItems[0] = Resources.ConfigureInstance;
+          menuItems[1] = Resources.SQLEditor;
+          menuItems[2] = "Separator";
+          menuItems[3] = statusMenu.Text; // the last itemText we delete is the service name itemText which is the reference for the others
+        }
+        else
+        {
+          menuItems[0] = "Separator";
+          menuItems[1] = statusMenu.Text;
         }
 
-        int plusItem = !item.Equals(statusMenu.Text) ? 1 : 0;
-        menu.Items.RemoveAt(index + plusItem);
-      }
+        index = FindMenuItemWithinMenuStrip(menu, statusMenu.Text);
+        if (index <= 0)
+        {
+          return;
+        }
 
-      menu.Refresh();
+        //// Hide the separator just above this new menu item if needed.
+        if (index > 0 && menu.Items[index - 1] is ToolStripSeparator)
+        {
+          menu.Items[index - 1].Visible = menu.Items[index + 1].BackColor != SystemColors.MenuText;
+        }
+
+        foreach (var item in menuItems)
+        {
+          if (string.IsNullOrEmpty(item))
+          {
+            continue;
+          }
+
+          int plusItem = !item.Equals(statusMenu.Text) ? 1 : 0;
+          menu.Items.RemoveAt(index + plusItem);
+        }
+
+        menu.Refresh();
+      }
     }
 
     /// <summary>

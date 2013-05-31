@@ -24,6 +24,7 @@ namespace MySql.Notifier
   using System.ComponentModel;
   using System.Drawing;
   using System.Management;
+  using System.Threading;
   using System.Windows.Forms;
   using System.Xml.Serialization;
   using MySql.Notifier.Properties;
@@ -59,19 +60,14 @@ namespace MySql.Notifier
     public const string WMI_QUERY_SELECT_ALL = "SELECT * FROM Win32_Service";
 
     /// <summary>
-    /// WMI query to retrieve all services where their name matches a given filter.
-    /// </summary>
-    public const string WMI_QUERY_SELECT_NAME_CONTAINING = "SELECT * FROM Win32_Service WHERE Name LIKE '%{0}%'";
-
-    /// <summary>
     /// WMI query to retrieve all services where their display name matches a given filter.
     /// </summary>
     public const string WMI_QUERY_SELECT_DISPLAY_NAME_CONTAINING = "SELECT * FROM Win32_Service WHERE DisplayName LIKE '%{0}%'";
 
     /// <summary>
-    /// The where clause part of WMI queries regarding services.
+    /// WMI query to retrieve all services where their name matches a given filter.
     /// </summary>
-    public const string WMI_QUERIES_WHERE_CLAUSE = "TargetInstance isa 'Win32_Service'";
+    public const string WMI_QUERY_SELECT_NAME_CONTAINING = "SELECT * FROM Win32_Service WHERE Name LIKE '%{0}%'";
 
     /// <summary>
     /// Represents the WMI namespace for a remote computer containing a placeholder for the remote machine name.
@@ -123,19 +119,9 @@ namespace MySql.Notifier
     private ManagementScope _wmiManagementScope;
 
     /// <summary>
-    /// WMI watcher for creation of services related to this machine.
+    /// WMI watcher for creation, deletion and status changes of services related to this machine.
     /// </summary>
-    private ManagementEventWatcher _wmiServiceCreationWatcher;
-
-    /// <summary>
-    /// WMI watcher for deletion of services related to this machine.
-    /// </summary>
-    private ManagementEventWatcher _wmiServiceDeletionWatcher;
-
-    /// <summary>
-    /// WMI watcher for change of status in services related to this machine.
-    /// </summary>
-    private ManagementEventWatcher _wmiServiceStatusChangeWatcher;
+    private ServiceWatcher _wmiServicesWatcher;
 
     /// <summary>
     /// Background worker that performs an asynchronous connection test.
@@ -156,8 +142,7 @@ namespace MySql.Notifier
       _connectionTestCancelled = false;
       _wmiConnectionOptions = null;
       _wmiManagementScope = null;
-      _wmiServiceDeletionWatcher = null;
-      _wmiServiceStatusChangeWatcher = null;
+      _wmiServicesWatcher = null;
       _worker = null;
       ConnectionTestInProgress = false;
       ConnectionProblem = ConnectionProblemType.None;
@@ -169,6 +154,7 @@ namespace MySql.Notifier
       Password = string.Empty;
       SecondsToAutoTestConnection = AutoTestConnectionIntervalInSeconds;
       Services = new List<MySQLService>();
+      UseAsynchronousWMI = true;
       WMIQueriesTimeoutInSeconds = 5;
     }
 
@@ -581,6 +567,12 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Gets or sets a value indicating whether asynchronous or synchronous WMI watchers are used by the machine.
+    /// </summary>
+    [XmlIgnore]
+    public bool UseAsynchronousWMI { get; set; }
+
+    /// <summary>
     /// Gets or sets the name of the user to connect to this machine.
     /// </summary>
     [XmlAttribute("User")]
@@ -652,15 +644,13 @@ namespace MySql.Notifier
     /// Cancels the asynchronous connection test.
     /// </summary>
     /// <returns>true if the background connection test was cancelled, false otherwise</returns>
-    public bool CancelAsynchronousConnectionTest()
+    public void CancelAsynchronousConnectionTest()
     {
-      if (_worker != null && ConnectionTestInProgress)
+      if (_worker != null && _worker.WorkerSupportsCancellation && (ConnectionTestInProgress || _worker.IsBusy))
       {
         _connectionTestCancelled = true;
         _worker.CancelAsync();
       }
-
-      return _connectionTestCancelled;
     }
 
     /// <summary>
@@ -733,22 +723,27 @@ namespace MySql.Notifier
       if (disposing)
       {
         //// Free managed resources
-        if (_wmiServiceCreationWatcher != null)
+        if (_wmiServicesWatcher != null)
         {
-          _wmiServiceCreationWatcher.Stop();
-          _wmiServiceCreationWatcher.Dispose();
+          _wmiServicesWatcher.Dispose();
         }
 
-        if (_wmiServiceDeletionWatcher != null)
+        if (_worker != null)
         {
-          _wmiServiceDeletionWatcher.Stop();
-          _wmiServiceDeletionWatcher.Dispose();
-        }
+          if (_worker.IsBusy)
+          {
+            _worker.CancelAsync();
+            ushort cancelAsyncWait = 0;
+            while (_worker.IsBusy || cancelAsyncWait < MySQLInstance.DEFAULT_CANCEL_ASYNC_WAIT)
+            {
+              Thread.Sleep(100);
+              cancelAsyncWait += 100;
+            }
+          }
 
-        if (_wmiServiceStatusChangeWatcher != null)
-        {
-          _wmiServiceStatusChangeWatcher.Stop();
-          _wmiServiceStatusChangeWatcher.Dispose();
+          _worker.DoWork -= TestConnectionWorkerDoWork;
+          _worker.RunWorkerCompleted -= TestConnectionWorkerCompleted;
+          _worker.Dispose();
         }
 
         if (Services != null)
@@ -870,7 +865,7 @@ namespace MySql.Notifier
             ConnectionProblemShortDescription,
             ConnectionProblemLongDescription,
             null,
-            ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.MachineUnavailableExtendedMessage : null,
+            ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + connectionException.Message : null,
             true,
             InfoDialog.DefaultButtonType.AcceptButton,
             30);
@@ -1173,19 +1168,20 @@ namespace MySql.Notifier
     /// <summary>
     /// Event delegate method that is fired when a WMI service is created.
     /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="args">Event arguments.</param>
-    private void OnWMIServiceCreated(object sender, EventArrivedEventArgs args)
+    /// <param name="remoteService">Remote service firing the status changed event.</param>
+    private void OnWMIServiceCreated(ManagementBaseObject remoteService)
     {
-      if (!Settings.Default.AutoAddServicesToMonitor) return;
-
-      ManagementBaseObject serviceObject = ((ManagementBaseObject)args.NewEvent["TargetInstance"]);
-      if (serviceObject == null || !serviceObject["Name"].ToString().ToLowerInvariant().Contains(Settings.Default.AutoAddPattern))
+      if (!Settings.Default.AutoAddServicesToMonitor)
       {
         return;
       }
 
-      string serviceName = serviceObject["Name"].ToString().Trim();
+      if (remoteService == null || !remoteService["Name"].ToString().ToLowerInvariant().Contains(Settings.Default.AutoAddPattern))
+      {
+        return;
+      }
+
+      string serviceName = remoteService["Name"].ToString().Trim();
       MySQLService service = GetServiceByName(serviceName);
       if (service == null)
       {
@@ -1198,17 +1194,15 @@ namespace MySql.Notifier
     /// <summary>
     /// Event delegate method that is fired when a WMI service is deleted.
     /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="args">Event arguments.</param>
-    private void OnWMIServiceDeleted(object sender, EventArrivedEventArgs args)
+    /// <param name="remoteService">Remote service firing the status changed event.</param>
+    private void OnWMIServiceDeleted(ManagementBaseObject remoteService)
     {
-      ManagementBaseObject serviceObject = ((ManagementBaseObject)args.NewEvent["TargetInstance"]);
-      if (serviceObject == null)
+      if (remoteService == null)
       {
         return;
       }
 
-      string serviceName = serviceObject["Name"].ToString().Trim();
+      string serviceName = remoteService["Name"].ToString().Trim();
       MySQLService service = GetServiceByName(serviceName);
       if (service != null)
       {
@@ -1219,18 +1213,16 @@ namespace MySql.Notifier
     /// <summary>
     /// Event delegate method that is fired when a WMI service status changes.
     /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="args">Event arguments.</param>
-    private void OnWMIServiceStatusChanged(object sender, EventArrivedEventArgs args)
+    /// <param name="remoteService">Remote service firing the status changed event.</param>
+    private void OnWMIServiceStatusChanged(ManagementBaseObject remoteService)
     {
-      ManagementBaseObject serviceObject = ((ManagementBaseObject)args.NewEvent["TargetInstance"]);
-      if (serviceObject == null)
+      if (remoteService == null)
       {
         return;
       }
 
-      string serviceName = serviceObject["Name"].ToString().Trim();
-      string state = serviceObject["State"].ToString();
+      string serviceName = remoteService["Name"].ToString().Trim();
+      string state = remoteService["State"].ToString();
       MySQLService service = GetServiceByName(serviceName);
       if (service != null)
       {
@@ -1271,8 +1263,8 @@ namespace MySql.Notifier
         _worker = new BackgroundWorker();
         _worker.WorkerSupportsCancellation = true;
         _worker.WorkerReportsProgress = false;
-        _worker.DoWork += new DoWorkEventHandler(TestConnectionWorkerDoWork);
-        _worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(TestConnectionWorkerCompleted);
+        _worker.DoWork += TestConnectionWorkerDoWork;
+        _worker.RunWorkerCompleted += TestConnectionWorkerCompleted;
       }
     }
 
@@ -1281,51 +1273,22 @@ namespace MySql.Notifier
     /// </summary>
     private void SetupWMIEvents()
     {
-      try
+      _wmiServicesWatcher = _wmiServicesWatcher ?? new ServiceWatcher(true, true, true, UseAsynchronousWMI);
+      _wmiServicesWatcher.WMIQueriesTimeoutInSeconds = WMIQueriesTimeoutInSeconds;
+
+      if (IsOnline)
       {
-        if (IsOnline)
-        {
-          if (!WMIManagementScope.IsConnected)
-          {
-            WMIManagementScope.Connect();
-          }
-
-          TimeSpan queryTimeout = TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds);
-          _wmiServiceCreationWatcher = _wmiServiceCreationWatcher ?? new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceCreationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
-          _wmiServiceCreationWatcher.EventArrived += OnWMIServiceCreated;
-          _wmiServiceCreationWatcher.Start();
-          _wmiServiceDeletionWatcher = _wmiServiceDeletionWatcher ?? new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceDeletionEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
-          _wmiServiceDeletionWatcher.EventArrived += OnWMIServiceDeleted;
-          _wmiServiceDeletionWatcher.Start();
-          _wmiServiceStatusChangeWatcher = _wmiServiceStatusChangeWatcher ?? new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceModificationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
-          _wmiServiceStatusChangeWatcher.EventArrived += OnWMIServiceStatusChanged;
-          _wmiServiceStatusChangeWatcher.Start();
-        }
-        else
-        {
-          if (_wmiServiceCreationWatcher != null)
-          {
-            _wmiServiceCreationWatcher.Stop();
-            _wmiServiceCreationWatcher.EventArrived -= OnWMIServiceCreated;
-          }
-
-          if (_wmiServiceDeletionWatcher != null)
-          {
-            _wmiServiceDeletionWatcher.Stop();
-            _wmiServiceDeletionWatcher.EventArrived -= OnWMIServiceDeleted;
-          }
-
-          if (_wmiServiceStatusChangeWatcher != null)
-          {
-            _wmiServiceStatusChangeWatcher.Stop();
-            _wmiServiceStatusChangeWatcher.EventArrived -= OnWMIServiceStatusChanged;
-          }
-        }
+        _wmiServicesWatcher.ServiceCreated += OnWMIServiceCreated;
+        _wmiServicesWatcher.ServiceDeleted += OnWMIServiceDeleted;
+        _wmiServicesWatcher.ServiceStatusChanged += OnWMIServiceStatusChanged;
+        _wmiServicesWatcher.Start(WMIManagementScope);
       }
-      catch (Exception ex)
+      else
       {
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
-        InfoDialog.ShowErrorDialog(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, null, ex.Message);
+        _wmiServicesWatcher.ServiceCreated -= OnWMIServiceCreated;
+        _wmiServicesWatcher.ServiceDeleted -= OnWMIServiceDeleted;
+        _wmiServicesWatcher.ServiceStatusChanged -= OnWMIServiceStatusChanged;
+        _wmiServicesWatcher.Stop();
       }
     }
 
@@ -1351,17 +1314,30 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void TestConnectionWorkerDoWork(object sender, DoWorkEventArgs e)
     {
+      BackgroundWorker worker = sender as BackgroundWorker;
+
       //// Start with a Connecting... status
       ConnectionStatus = ConnectionStatusType.Connecting;
 
       //// Try to see if we can connect to the remote computer and retrieve its services
       bool displayMessageOnError = (bool)e.Argument;
-      ManagementObjectCollection wmiServicesCollection = GetWMIServices("eventlog", false, displayMessageOnError);
-
-      //// If services could be retrieved, try to subscribe to WMI events using a dummy watcher.
-      if (ConnectionProblem == ConnectionProblemType.None)
+      if (worker.CancellationPending)
       {
-        ManagementEventWatcher dummyWatcher = null;
+        e.Cancel = true;
+        return;
+      }
+
+      ManagementObjectCollection wmiServicesCollection = GetWMIServices("eventlog", false, displayMessageOnError);
+      if (worker.CancellationPending)
+      {
+        e.Cancel = true;
+        return;
+      }
+
+      //// If services could be retrieved, try to subscribe to WMI events using a dummy watcher (ONLY if using asynchronous mode).
+      if (UseAsynchronousWMI && ConnectionProblem == ConnectionProblemType.None)
+      {
+        ServiceWatcher dummyWatcher = null;
         try
         {
           if (!WMIManagementScope.IsConnected)
@@ -1369,9 +1345,15 @@ namespace MySql.Notifier
             WMIManagementScope.Connect();
           }
 
-          TimeSpan queryTimeout = TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds);
-          dummyWatcher = new ManagementEventWatcher(WMIManagementScope, new WqlEventQuery("__InstanceModificationEvent", queryTimeout, WMI_QUERIES_WHERE_CLAUSE));
-          dummyWatcher.Start();
+          if (worker.CancellationPending)
+          {
+            e.Cancel = true;
+            return;
+          }
+
+          dummyWatcher = new ServiceWatcher(false, false, true, UseAsynchronousWMI);
+          dummyWatcher.WMIQueriesTimeoutInSeconds = WMIQueriesTimeoutInSeconds;
+          dummyWatcher.Start(WMIManagementScope);
         }
         catch (Exception ex)
         {
@@ -1380,14 +1362,19 @@ namespace MySql.Notifier
           MySQLSourceTrace.WriteAppErrorToLog(ex);
           if (displayMessageOnError)
           {
-            InfoDialog.ShowErrorDialog(ConnectionProblemShortDescription, ConnectionProblemLongDescription, null, Resources.MachineUnavailableExtendedMessage, true, InfoDialog.DefaultButtonType.AcceptButton, 30);
+            InfoDialog.ShowErrorDialog(
+                ConnectionProblemShortDescription,
+                ConnectionProblemLongDescription,
+                null,
+                Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + ex.Message,
+                true,
+                InfoDialog.DefaultButtonType.AcceptButton, 30);
           }
         }
         finally
         {
           if (dummyWatcher != null)
           {
-            dummyWatcher.Stop();
             dummyWatcher.Dispose();
           }
         }
