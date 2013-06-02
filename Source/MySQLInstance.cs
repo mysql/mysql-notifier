@@ -41,7 +41,12 @@ namespace MySql.Notifier
     /// <summary>
     /// Default waiting time in milliseconds to wait for an async cancellation before disposing an object.
     /// </summary>
-    public const ushort DEFAULT_CANCEL_ASYNC_WAIT = 30000;
+    public const ushort DEFAULT_CANCEL_ASYNC_WAIT = 5000;
+
+    /// <summary>
+    /// Default waiting time in milliseconds for each step of the async cancellation waiting time.
+    /// </summary>
+    public const ushort DEFAULT_CANCEL_ASYNC_STEP = 1000;
 
     /// <summary>
     /// Default monitoring interval for a MySQL instance, set to 10.
@@ -160,10 +165,10 @@ namespace MySql.Notifier
         {
           _worker.CancelAsync();
           ushort cancelAsyncWait = 0;
-          while (_worker.IsBusy || cancelAsyncWait < DEFAULT_CANCEL_ASYNC_WAIT)
+          while (_worker.IsBusy && cancelAsyncWait < DEFAULT_CANCEL_ASYNC_WAIT)
           {
-            Thread.Sleep(100);
-            cancelAsyncWait += 100;
+            Thread.Sleep(DEFAULT_CANCEL_ASYNC_STEP);
+            cancelAsyncWait += DEFAULT_CANCEL_ASYNC_STEP;
           }
         }
 

@@ -45,6 +45,16 @@ namespace MySql.Notifier
     public const ushort DEFAULT_AUTO_TEST_CONNECTION_INTERVAL = 10;
 
     /// <summary>
+    /// Default waiting time in milliseconds to wait for an async cancellation before disposing an object.
+    /// </summary>
+    public const ushort DEFAULT_CANCEL_ASYNC_WAIT = 20000;
+
+    /// <summary>
+    /// Default waiting time in milliseconds for each step of the async cancellation waiting time.
+    /// </summary>
+    public const ushort DEFAULT_CANCEL_ASYNC_STEP = 1000;
+
+    /// <summary>
     /// Default interval unit of measure, set to minutes by default.
     /// </summary>
     public const TimeUtilities.IntervalUnitOfMeasure DEFAULT_AUTO_TEST_CONNECTION_UOM = TimeUtilities.IntervalUnitOfMeasure.Minutes;
@@ -734,10 +744,10 @@ namespace MySql.Notifier
           {
             _worker.CancelAsync();
             ushort cancelAsyncWait = 0;
-            while (_worker.IsBusy || cancelAsyncWait < MySQLInstance.DEFAULT_CANCEL_ASYNC_WAIT)
+            while (_worker.IsBusy && cancelAsyncWait < DEFAULT_CANCEL_ASYNC_WAIT)
             {
-              Thread.Sleep(100);
-              cancelAsyncWait += 100;
+              Thread.Sleep(DEFAULT_CANCEL_ASYNC_STEP);
+              cancelAsyncWait += DEFAULT_CANCEL_ASYNC_STEP;
             }
           }
 
@@ -883,18 +893,10 @@ namespace MySql.Notifier
     /// <param name="setupWMIEventsOnly">When true will suscribe WMI event watchers only and will skip further operations with services.</param>
     public void LoadServicesParameters(bool setupWMIEventsOnly)
     {
-      if (!InitialLoadDone)
+      if (!InitialLoadDone && IsLocal && setupWMIEventsOnly)
       {
-        if (IsLocal && setupWMIEventsOnly)
-        {
-          SetupWMIEvents();
-          return;
-        }
-        else if (ConnectionStatus != ConnectionStatusType.Online)
-        {
-          //// Test connection status
-          TestConnection(false, true);
-        }
+        SetupWMIEvents();
+        return;
       }
 
       //// Set services StartupParameters and subscribe to service events.
@@ -909,6 +911,12 @@ namespace MySql.Notifier
             ChangeService(service, InitialLoadDone ? ChangeType.Updated : ChangeType.AddByLoad);
           }
         }
+      }
+
+      //// Test connection status if this is a remote machine during an initial load only.
+      if (!InitialLoadDone && !IsLocal && ConnectionStatus != ConnectionStatusType.Online)
+      {
+        TestConnection(false, true);
       }
 
       InitialLoadDone = true;
@@ -1017,7 +1025,10 @@ namespace MySql.Notifier
         return;
       }
 
+      //// Start with a Connecting... status
       ConnectionTestInProgress = true;
+      ConnectionStatus = ConnectionStatusType.Connecting;
+
       if (asynchronous)
       {
         SetupConnectionTestBackgroundWorker();
@@ -1305,6 +1316,11 @@ namespace MySql.Notifier
         _connectionStatus = OldConnectionStatus;
         ConnectionProblem = ConnectionProblemType.None;
       }
+      else
+      {
+        //// Report the connection status based on the Connection + Services retrieval + WMI events tests
+        ConnectionStatus = ConnectionProblem != ConnectionProblemType.None ? ConnectionStatusType.Unavailable : ConnectionStatusType.Online;
+      }
     }
 
     /// <summary>
@@ -1314,21 +1330,18 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void TestConnectionWorkerDoWork(object sender, DoWorkEventArgs e)
     {
-      BackgroundWorker worker = sender as BackgroundWorker;
-
-      //// Start with a Connecting... status
-      ConnectionStatus = ConnectionStatusType.Connecting;
+      BackgroundWorker worker = sender is BackgroundWorker ? sender as BackgroundWorker : null;
 
       //// Try to see if we can connect to the remote computer and retrieve its services
       bool displayMessageOnError = (bool)e.Argument;
-      if (worker.CancellationPending)
+      if (worker != null && worker.CancellationPending)
       {
         e.Cancel = true;
         return;
       }
 
       ManagementObjectCollection wmiServicesCollection = GetWMIServices("eventlog", false, displayMessageOnError);
-      if (worker.CancellationPending)
+      if (worker != null && worker.CancellationPending)
       {
         e.Cancel = true;
         return;
@@ -1345,7 +1358,7 @@ namespace MySql.Notifier
             WMIManagementScope.Connect();
           }
 
-          if (worker.CancellationPending)
+          if (worker != null && worker.CancellationPending)
           {
             e.Cancel = true;
             return;
@@ -1379,9 +1392,6 @@ namespace MySql.Notifier
           }
         }
       }
-
-      //// Report the connection status based on the Connection + Services retrieval + WMI events tests
-      ConnectionStatus = ConnectionProblem != ConnectionProblemType.None ? ConnectionStatusType.Unavailable : ConnectionStatusType.Online;
     }
   }
 }
