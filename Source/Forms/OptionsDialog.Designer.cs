@@ -129,10 +129,10 @@ namespace MySql.Notifier
       // NotificationsOptionsLabel
       // 
       this.NotificationsOptionsLabel.AutoSize = true;
-      this.NotificationsOptionsLabel.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.NotificationsOptionsLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.NotificationsOptionsLabel.Location = new System.Drawing.Point(27, 287);
       this.NotificationsOptionsLabel.Name = "NotificationsOptionsLabel";
-      this.NotificationsOptionsLabel.Size = new System.Drawing.Size(138, 19);
+      this.NotificationsOptionsLabel.Size = new System.Drawing.Size(131, 17);
       this.NotificationsOptionsLabel.TabIndex = 9;
       this.NotificationsOptionsLabel.Text = "Notifications Options";
       // 
@@ -214,17 +214,17 @@ namespace MySql.Notifier
       // GeneralOptionsLabel
       // 
       this.GeneralOptionsLabel.AutoSize = true;
-      this.GeneralOptionsLabel.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.GeneralOptionsLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.GeneralOptionsLabel.Location = new System.Drawing.Point(27, 64);
       this.GeneralOptionsLabel.Name = "GeneralOptionsLabel";
-      this.GeneralOptionsLabel.Size = new System.Drawing.Size(109, 19);
+      this.GeneralOptionsLabel.Size = new System.Drawing.Size(103, 17);
       this.GeneralOptionsLabel.TabIndex = 1;
       this.GeneralOptionsLabel.Text = "General Options";
       // 
       // TitleLabel
       // 
       this.TitleLabel.AutoSize = true;
-      this.TitleLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.TitleLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.TitleLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
       this.TitleLabel.Location = new System.Drawing.Point(24, 26);
       this.TitleLabel.Name = "TitleLabel";

@@ -132,7 +132,7 @@ namespace MySql.Notifier
             | System.Windows.Forms.AnchorStyles.Right)));
       this.FilterTextBox.Location = new System.Drawing.Point(67, 106);
       this.FilterTextBox.Name = "FilterTextBox";
-      this.FilterTextBox.Size = new System.Drawing.Size(220, 23);
+      this.FilterTextBox.Size = new System.Drawing.Size(214, 23);
       this.FilterTextBox.TabIndex = 3;
       this.FilterTextBox.TextChanged += new System.EventHandler(this.FilterTextBox_TextChanged);
       this.FilterTextBox.Validated += new System.EventHandler(this.FilterTextBox_Validated);
@@ -151,7 +151,7 @@ namespace MySql.Notifier
       // MySQLConnectionsHyperTitleLabel
       // 
       this.MySQLConnectionsHyperTitleLabel.AutoSize = true;
-      this.MySQLConnectionsHyperTitleLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.MySQLConnectionsHyperTitleLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.MySQLConnectionsHyperTitleLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
       this.MySQLConnectionsHyperTitleLabel.Location = new System.Drawing.Point(20, 23);
       this.MySQLConnectionsHyperTitleLabel.Name = "MySQLConnectionsHyperTitleLabel";

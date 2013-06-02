@@ -58,12 +58,12 @@ namespace MySql.Notifier
       this.FilterLabel = new System.Windows.Forms.Label();
       this.WindowsServiceInstructionsLabel = new System.Windows.Forms.Label();
       this.MachineInstructionsLabel = new System.Windows.Forms.Label();
-      this.MachineHyperTitleLabel = new System.Windows.Forms.Label();
+      this.ChooseMachineLabel = new System.Windows.Forms.Label();
       this.FilterCheckBox = new System.Windows.Forms.CheckBox();
       this.ServicesListView = new System.Windows.Forms.ListView();
       this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-      this.WindowsServiceHyperTitleLabel = new System.Windows.Forms.Label();
+      this.ChooseWindowsServiceLabel = new System.Windows.Forms.Label();
       this.ComputerLabel = new System.Windows.Forms.Label();
       this.MachineSelectionComboBox = new System.Windows.Forms.ComboBox();
       this.ContentAreaPanel.SuspendLayout();
@@ -84,10 +84,10 @@ namespace MySql.Notifier
       this.ContentAreaPanel.Controls.Add(this.FilterLabel);
       this.ContentAreaPanel.Controls.Add(this.WindowsServiceInstructionsLabel);
       this.ContentAreaPanel.Controls.Add(this.MachineInstructionsLabel);
-      this.ContentAreaPanel.Controls.Add(this.MachineHyperTitleLabel);
+      this.ContentAreaPanel.Controls.Add(this.ChooseMachineLabel);
       this.ContentAreaPanel.Controls.Add(this.FilterCheckBox);
       this.ContentAreaPanel.Controls.Add(this.ServicesListView);
-      this.ContentAreaPanel.Controls.Add(this.WindowsServiceHyperTitleLabel);
+      this.ContentAreaPanel.Controls.Add(this.ChooseWindowsServiceLabel);
       this.ContentAreaPanel.Controls.Add(this.ComputerLabel);
       this.ContentAreaPanel.Controls.Add(this.MachineSelectionComboBox);
       this.ContentAreaPanel.Size = new System.Drawing.Size(529, 542);
@@ -190,16 +190,16 @@ namespace MySql.Notifier
       this.MachineInstructionsLabel.Text = "Select the machine you want to monitor services on. The machines need to be on yo" +
     "ur local network. ";
       // 
-      // MachineHyperTitleLabel
+      // ChooseMachineLabel
       // 
-      this.MachineHyperTitleLabel.AutoSize = true;
-      this.MachineHyperTitleLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-      this.MachineHyperTitleLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
-      this.MachineHyperTitleLabel.Location = new System.Drawing.Point(19, 26);
-      this.MachineHyperTitleLabel.Name = "MachineHyperTitleLabel";
-      this.MachineHyperTitleLabel.Size = new System.Drawing.Size(140, 21);
-      this.MachineHyperTitleLabel.TabIndex = 0;
-      this.MachineHyperTitleLabel.Text = "Choose a Machine:";
+      this.ChooseMachineLabel.AutoSize = true;
+      this.ChooseMachineLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.ChooseMachineLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
+      this.ChooseMachineLabel.Location = new System.Drawing.Point(19, 26);
+      this.ChooseMachineLabel.Name = "ChooseMachineLabel";
+      this.ChooseMachineLabel.Size = new System.Drawing.Size(140, 21);
+      this.ChooseMachineLabel.TabIndex = 0;
+      this.ChooseMachineLabel.Text = "Choose a Machine:";
       // 
       // FilterCheckBox
       // 
@@ -239,16 +239,16 @@ namespace MySql.Notifier
       this.columnHeader3.Text = "Status";
       this.columnHeader3.Width = 105;
       // 
-      // WindowsServiceHyperTitleLabel
+      // ChooseWindowsServiceLabel
       // 
-      this.WindowsServiceHyperTitleLabel.AutoSize = true;
-      this.WindowsServiceHyperTitleLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-      this.WindowsServiceHyperTitleLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
-      this.WindowsServiceHyperTitleLabel.Location = new System.Drawing.Point(21, 137);
-      this.WindowsServiceHyperTitleLabel.Name = "WindowsServiceHyperTitleLabel";
-      this.WindowsServiceHyperTitleLabel.Size = new System.Drawing.Size(200, 21);
-      this.WindowsServiceHyperTitleLabel.TabIndex = 6;
-      this.WindowsServiceHyperTitleLabel.Text = "Choose a Windows Service:";
+      this.ChooseWindowsServiceLabel.AutoSize = true;
+      this.ChooseWindowsServiceLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.ChooseWindowsServiceLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
+      this.ChooseWindowsServiceLabel.Location = new System.Drawing.Point(21, 137);
+      this.ChooseWindowsServiceLabel.Name = "ChooseWindowsServiceLabel";
+      this.ChooseWindowsServiceLabel.Size = new System.Drawing.Size(200, 21);
+      this.ChooseWindowsServiceLabel.TabIndex = 6;
+      this.ChooseWindowsServiceLabel.Text = "Choose a Windows Service:";
       // 
       // ComputerLabel
       // 
@@ -309,12 +309,12 @@ namespace MySql.Notifier
     private System.Windows.Forms.Label FilterLabel;
     private System.Windows.Forms.Label WindowsServiceInstructionsLabel;
     private System.Windows.Forms.Label MachineInstructionsLabel;
-    private System.Windows.Forms.Label MachineHyperTitleLabel;
+    private System.Windows.Forms.Label ChooseMachineLabel;
     private System.Windows.Forms.CheckBox FilterCheckBox;
     private System.Windows.Forms.ListView ServicesListView;
     private System.Windows.Forms.ColumnHeader columnHeader1;
     private System.Windows.Forms.ColumnHeader columnHeader3;
-    private System.Windows.Forms.Label WindowsServiceHyperTitleLabel;
+    private System.Windows.Forms.Label ChooseWindowsServiceLabel;
     private System.Windows.Forms.Label ComputerLabel;
     private System.Windows.Forms.ComboBox MachineSelectionComboBox;
     private System.Windows.Forms.Button DialogOKButton;

@@ -282,9 +282,9 @@ namespace MySql.Notifier
             "minutes",
             "hours",
             "days"});
-      this.InstanceMonitorIntervalUOMComboBox.Location = new System.Drawing.Point(296, 71);
+      this.InstanceMonitorIntervalUOMComboBox.Location = new System.Drawing.Point(301, 71);
       this.InstanceMonitorIntervalUOMComboBox.Name = "InstanceMonitorIntervalUOMComboBox";
-      this.InstanceMonitorIntervalUOMComboBox.Size = new System.Drawing.Size(121, 23);
+      this.InstanceMonitorIntervalUOMComboBox.Size = new System.Drawing.Size(116, 23);
       this.InstanceMonitorIntervalUOMComboBox.TabIndex = 4;
       this.InstanceMonitorIntervalUOMComboBox.SelectedIndexChanged += new System.EventHandler(this.InstanceMonitorIntervalUOMComboBox_SelectedIndexChanged);
       // 
@@ -299,7 +299,7 @@ namespace MySql.Notifier
       // 
       // InstanceMonitorIntervalNumericUpDown
       // 
-      this.InstanceMonitorIntervalNumericUpDown.Location = new System.Drawing.Point(239, 72);
+      this.InstanceMonitorIntervalNumericUpDown.Location = new System.Drawing.Point(244, 72);
       this.InstanceMonitorIntervalNumericUpDown.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -358,7 +358,7 @@ namespace MySql.Notifier
       // MonitoredItemsLabel
       // 
       this.MonitoredItemsLabel.AutoSize = true;
-      this.MonitoredItemsLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.MonitoredItemsLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.MonitoredItemsLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
       this.MonitoredItemsLabel.Location = new System.Drawing.Point(12, 27);
       this.MonitoredItemsLabel.Name = "MonitoredItemsLabel";
