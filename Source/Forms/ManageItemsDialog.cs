@@ -329,6 +329,7 @@ namespace MySql.Notifier
         selectedInstance.MonitorAndNotifyStatus = NotifyOnStatusChangeCheckBox.Checked;
       }
     }
+
     /// <summary>
     /// Refreshes the contents of the services and instances list view controls.
     /// </summary>
@@ -349,7 +350,7 @@ namespace MySql.Notifier
           AddService(service, machine, false);
         }
       }
-        
+
       //// Add monitored instances.
       foreach (var instance in InstancesList)
       {
@@ -407,6 +408,10 @@ namespace MySql.Notifier
               }
             }
           }
+        }
+        if (dialog.HasChanges)
+        {
+          RefreshServicesAndInstancesListViews();
         }
       }
     }

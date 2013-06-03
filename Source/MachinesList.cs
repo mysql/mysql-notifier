@@ -119,6 +119,9 @@ namespace MySql.Notifier
           break;
 
         case ChangeType.RemoveByUser:
+          Machines.Remove(machine);
+          break;
+
         case ChangeType.RemoveByEvent:
           if (machine.Services.Count == 0)
           {
@@ -260,11 +263,6 @@ namespace MySql.Notifier
     /// <param name="changeType"></param>
     protected virtual void OnMachineListChanged(Machine machine, ChangeType changeType)
     {
-      machine.MachineStatusChanged -= OnMachineStatusChanged;
-      machine.ServiceListChanged -= OnMachineServiceListChanged;
-      machine.ServiceStatusChanged -= OnMachineServiceStatusChanged;
-      machine.ServiceStatusChangeError -= OnMachineServiceStatusChangeError;
-
       if (changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser)
       {
         int removedServicesQuantity = machine.RemoveAllServices();
@@ -272,6 +270,11 @@ namespace MySql.Notifier
         {
           SavetoFile();
         }
+
+        machine.MachineStatusChanged -= OnMachineStatusChanged;
+        machine.ServiceListChanged -= OnMachineServiceListChanged;
+        machine.ServiceStatusChanged -= OnMachineServiceStatusChanged;
+        machine.ServiceStatusChangeError -= OnMachineServiceStatusChangeError;
       }
       else
       {
@@ -280,6 +283,10 @@ namespace MySql.Notifier
           SavetoFile();
         }
 
+        machine.MachineStatusChanged -= OnMachineStatusChanged;
+        machine.ServiceListChanged -= OnMachineServiceListChanged;
+        machine.ServiceStatusChanged -= OnMachineServiceStatusChanged;
+        machine.ServiceStatusChangeError -= OnMachineServiceStatusChangeError;
         machine.MachineStatusChanged += OnMachineStatusChanged;
         machine.ServiceListChanged += OnMachineServiceListChanged;
         machine.ServiceStatusChanged += OnMachineServiceStatusChanged;

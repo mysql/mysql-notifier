@@ -31,11 +31,13 @@ namespace MySql.Notifier
 
   public partial class AddServiceDialog : MachineAwareForm
   {
+    public bool HasChanges { get; private set; }
     private int sortColumn;
     public AddServiceDialog(MachinesList machineslist)
     {
       sortColumn = -1;
       machinesList = machineslist;
+      HasChanges = false;
 
       InitializeComponent();
       ServicesListView.ColumnClick += new ColumnClickEventHandler(ServicesListView_ColumnClick);
@@ -57,6 +59,7 @@ namespace MySql.Notifier
       DialogResult dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.DeleteMachineConfirmationTitle, Resources.DeleteMachineConfirmationText, null, null, true, InfoDialog.DefaultButtonType.CancelButton, 30);
       if (dr == DialogResult.Yes)
       {
+        HasChanges = true;
         machinesList.ChangeMachine(newMachine, ChangeType.RemoveByUser);
         int removedMachineIndex = MachineSelectionComboBox.SelectedIndex;
         MachineSelectionComboBox.SelectedIndex = 0;
@@ -90,6 +93,7 @@ namespace MySql.Notifier
         DialogResult dr = windowsConnectionDialog.ShowDialog();
         if (dr != DialogResult.Cancel)
         {
+          HasChanges = true;
           newMachine.CopyMachineData(windowsConnectionDialog.newMachine,
           oldUser != windowsConnectionDialog.newMachine.User ||
           MySQLSecurity.DecryptPassword(oldPassword) != windowsConnectionDialog.newMachine.UnprotectedPassword);
