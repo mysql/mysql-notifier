@@ -1,7 +1,7 @@
-MySQL Notifier 1.1.1 Release Notes
+MySQL Notifier 1.1.4 Release Notes
 ------------------------------------
 
-Welcome to the release notes for MySQL Notifier 1.1.1
+Welcome to the release notes for MySQL Notifier 1.1.4
 
 * Monitoring of services in remote Windows computers through WMI (see 'WMI Configuration' below this section for details).
     - Remote services can be started, stopped and restarted (just as local services on MySQL Notifier 1.0).
