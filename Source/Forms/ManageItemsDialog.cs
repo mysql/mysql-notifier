@@ -20,6 +20,7 @@
 namespace MySql.Notifier
 {
   using System;
+  using System.ComponentModel;
   using System.Drawing;
   using System.Windows.Forms;
   using MySql.Notifier.Properties;
@@ -45,6 +46,7 @@ namespace MySql.Notifier
     {
       InitializeComponent();
       InstancesList = instancesList;
+      InstancesListChanged = false;
       machinesList = machineslist;
       RefreshServicesAndInstancesListViews();
       SetDialogControlsAvailability();
@@ -74,7 +76,14 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets an object representing a list of <see cref="MySQLInstance"/> objects used to monitor MySQL Server instances.
     /// </summary>
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public MySQLInstancesList InstancesList { get; private set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the instances list changed.
+    /// </summary>
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public bool InstancesListChanged { get; private set; }
 
     /// <summary>
     /// Event delegate method fired when the <see cref="AddButton"/> button is clicked.
@@ -303,6 +312,8 @@ namespace MySql.Notifier
             }
           }
         }
+
+        InstancesListChanged = monitorInstancesDialog.InstancesListChanged;
       }
     }
 

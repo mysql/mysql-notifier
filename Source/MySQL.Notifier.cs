@@ -55,6 +55,9 @@ namespace MySql.Notifier
     private OptionsDialog _optionsDialog;
     private ManageItemsDialog _manageItemsDialog;
     private AboutDialog _aboutDialog;
+    private FileSystemWatcher _settingsFileWatcher;
+    private FileSystemWatcher _connectionsFileWatcher;
+    private FileSystemWatcher _serversFileWatcher;
 
     /// <summary>
     /// The timer that fires the connection status checks.
@@ -73,6 +76,9 @@ namespace MySql.Notifier
       _optionsDialog = null;
       _manageItemsDialog = null;
       _aboutDialog = null;
+      _serversFileWatcher = null;
+      _connectionsFileWatcher = null;
+      _settingsFileWatcher = null;
 
       //// Static initializations.
       CustomizeInfoDialog();
@@ -113,13 +119,13 @@ namespace MySql.Notifier
         string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", applicationDataFolderPath);
         if (File.Exists(file))
         {
-          StartWatcherForFile(file, connectionsFile_Changed);
+          _connectionsFileWatcher = StartWatcherForFile(file, connectionsFile_Changed);
         }
 
         file = String.Format(@"{0}\MySQL\Workbench\server_instances.xml", applicationDataFolderPath);
         if (File.Exists(file))
         {
-          StartWatcherForFile(file, serversFile_Changed);
+          _serversFileWatcher = StartWatcherForFile(file, serversFile_Changed);
         }
       }
 
@@ -136,7 +142,7 @@ namespace MySql.Notifier
       mySQLInstancesList.RefreshInstances(true);
       StartGlobalTimer();
 
-      StartWatcherForFile(applicationDataFolderPath + @"\Oracle\MySQL Notifier\settings.config", settingsFile_Changed);
+      _settingsFileWatcher = StartWatcherForFile(applicationDataFolderPath + @"\Oracle\MySQL Notifier\settings.config", settingsFile_Changed);
       RefreshNotifierIcon();
 
       //// Migrate Notifier connections to the MySQL Workbench connections file if possible.
@@ -196,6 +202,21 @@ namespace MySql.Notifier
         if (notifyIcon != null)
         {
           notifyIcon.Dispose();
+        }
+
+        if (_connectionsFileWatcher != null)
+        {
+          _connectionsFileWatcher.Dispose();
+        }
+
+        if (_serversFileWatcher != null)
+        {
+          _serversFileWatcher.Dispose();
+        }
+
+        if (_settingsFileWatcher != null)
+        {
+          _settingsFileWatcher.Dispose();
         }
       }
 
@@ -678,15 +699,34 @@ namespace MySql.Notifier
           instance.CancelAsynchronousStatusCheck();
         }
 
+        //// Stop the connections file watcher while users maintain services and instances.
+        if (_connectionsFileWatcher != null)
+        {
+          _connectionsFileWatcher.EnableRaisingEvents = false;
+        }
+
+        bool instancesListChanged = false;
         using (ManageItemsDialog manageItemsDialog = new ManageItemsDialog(mySQLInstancesList, machinesList))
         {
           _manageItemsDialog = manageItemsDialog;
           manageItemsDialog.ShowDialog();
+          instancesListChanged = manageItemsDialog.InstancesListChanged;
           _manageItemsDialog = null;
         }
 
         //// Resume the global timer.
         _globalTimer.Start();
+
+        //// Resume the connections file watcher and refresh manually if a change on instances took place.
+        if (_connectionsFileWatcher != null)
+        {
+          if (instancesListChanged)
+          {
+            connectionsFile_Changed(this, new FileSystemEventArgs(WatcherChangeTypes.Changed, string.Empty, string.Empty));
+          }
+
+          _connectionsFileWatcher.EnableRaisingEvents = true;
+        }
       }
       else
       {
@@ -940,7 +980,7 @@ namespace MySql.Notifier
       notifyIcon.ShowBalloonTip(delay);
     }
 
-    private void StartWatcherForFile(string filePath, FileSystemEventHandler method)
+    private FileSystemWatcher StartWatcherForFile(string filePath, FileSystemEventHandler method)
     {
       FileSystemWatcher watcher = new FileSystemWatcher();
       watcher.Path = Path.GetDirectoryName(filePath);
@@ -948,6 +988,7 @@ namespace MySql.Notifier
       watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Attributes;
       watcher.Changed += new FileSystemEventHandler(method);
       watcher.EnableRaisingEvents = true;
+      return watcher;
     }
 
     /// <summary>

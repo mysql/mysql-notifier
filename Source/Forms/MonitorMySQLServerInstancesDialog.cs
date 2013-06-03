@@ -76,9 +76,17 @@ namespace MySql.Notifier
       {
         MySQLInstancesList = instancesList;
       }
+
+      InstancesListChanged = false;
     }
 
     #region Properties
+
+    /// <summary>
+    /// Gets a value indicating whether the instances list changed.
+    /// </summary>
+    [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public bool InstancesListChanged { get; private set; }
 
     /// <summary>
     /// Gets or sets the file path of the password vault file to be used.
@@ -126,7 +134,8 @@ namespace MySql.Notifier
         DialogResult dr = instanceConnectionDialog.ShowIfWorkbenchNotRunning();
         if (dr == DialogResult.OK)
         {
-          RefreshMySQLInstancesList(true);
+          InstancesListChanged = true;
+          RefreshMySQLInstancesList(false);
         }
       }
     }
@@ -180,7 +189,8 @@ namespace MySql.Notifier
       var workbenchConnection = WorkbenchConnectionsListView.SelectedItems[0].Tag as MySqlWorkbenchConnection;
       if (MySqlWorkbench.Connections.DeleteConnection(workbenchConnection.Id))
       {
-        RefreshMySQLInstancesList(true);
+        InstancesListChanged = true;
+        RefreshMySQLInstancesList(false);
       }
     }
 
@@ -204,6 +214,7 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void FilterTextBox_TextChanged(object sender, EventArgs e)
     {
+      FilterTimer.Stop();
       FilterTimer.Start();
     }
 
@@ -214,7 +225,7 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void FilterTextBox_Validated(object sender, EventArgs e)
     {
-      RefreshMySQLInstancesList(false);
+      FilterTimer_Tick(FilterTimer, EventArgs.Empty);
     }
 
     /// <summary>
@@ -224,8 +235,12 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void FilterTimer_Tick(object sender, EventArgs e)
     {
+      bool filter = FilterTimer.Enabled;
       FilterTimer.Stop();
-      RefreshMySQLInstancesList(false);
+      if (filter)
+      {
+        RefreshMySQLInstancesList(false);
+      }
     }
 
     /// <summary>
@@ -314,16 +329,13 @@ namespace MySql.Notifier
     /// <param name="forceRefresh">Flag indicating if the refresh must be done although filters haven'_statusChangeTimer changed.</param>
     private void RefreshMySQLInstancesList(bool forceRefresh)
     {
-      bool filterChanges = false;
       if (_lastServicesNameFilter != FilterTextBox.Text)
       {
-        filterChanges = true;
         _lastServicesNameFilter = FilterTextBox.Text;
       }
 
       if (_lastShowMonitoredServices != ShowMonitoredInstancesCheckBox.Checked)
       {
-        filterChanges = true;
         _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
       }
 
@@ -332,10 +344,7 @@ namespace MySql.Notifier
         MySqlWorkbench.Connections.Load();
       }
 
-      if (filterChanges || forceRefresh)
-      {
-        RefreshMySQLInstancesList(_lastServicesNameFilter, _lastShowMonitoredServices);
-      }
+      RefreshMySQLInstancesList(_lastServicesNameFilter, _lastShowMonitoredServices);
     }
 
     /// <summary>
