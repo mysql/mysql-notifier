@@ -1081,13 +1081,22 @@ namespace MySql.Notifier
     /// Overwrites this computer's user and password with the given ones.
     /// </summary>
     /// <param name="fromMachine">Machine to copy data from.</param>
-    internal void CopyMachineData(Machine fromMachine)
+    /// <param name="loginHasChanged">Indicates whether or not the login information has changed and services have it updated.</param>
+    internal void CopyMachineData(Machine fromMachine, bool loginHasChanged)
     {
       Name = fromMachine.Name;
       User = fromMachine.User;
       Password = fromMachine.Password;
       AutoTestConnectionInterval = fromMachine.AutoTestConnectionInterval;
       AutoTestConnectionIntervalUnitOfMeasure = fromMachine.AutoTestConnectionIntervalUnitOfMeasure;
+
+      if (loginHasChanged)
+      {
+        foreach (MySQLService service in Services)
+        {
+          service.SetServiceParameters();
+        }
+      }
     }
 
     /// <summary>

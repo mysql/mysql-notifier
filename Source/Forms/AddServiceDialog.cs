@@ -83,12 +83,16 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void EditButton_Click(object sender, EventArgs e)
     {
+      string oldUser = newMachine.User;
+      string oldPassword = newMachine.Password;
       using (var windowsConnectionDialog = new WindowsConnectionDialog(machinesList, newMachine))
       {
         DialogResult dr = windowsConnectionDialog.ShowDialog();
         if (dr != DialogResult.Cancel)
         {
-          newMachine.CopyMachineData(windowsConnectionDialog.newMachine);
+          newMachine.CopyMachineData(windowsConnectionDialog.newMachine,
+          oldUser != windowsConnectionDialog.newMachine.User ||
+          MySQLSecurity.DecryptPassword(oldPassword) != windowsConnectionDialog.newMachine.UnprotectedPassword);
           machinesList.ChangeMachine(newMachine, ChangeType.Updated);
           RefreshList();
         }
@@ -259,7 +263,7 @@ namespace MySql.Notifier
       {
         ManagementObjectCollection machineServicesCollection = newMachine.GetWMIServices(true);
         if (machineServicesCollection != null)
-        {        
+        {
           foreach (ManagementObject mo in machineServicesCollection)
           {
             services.Add(mo);
