@@ -79,8 +79,7 @@ namespace MySql.Notifier
       // FootnoteAreaPanel
       // 
       this.FootnoteAreaPanel.BackColor = System.Drawing.SystemColors.Control;
-      this.FootnoteAreaPanel.Location = new System.Drawing.Point(0, 137);
-      this.FootnoteAreaPanel.Size = new System.Drawing.Size(634, 80);
+      this.FootnoteAreaPanel.Size = new System.Drawing.Size(634, 0);
       // 
       // ContentAreaPanel
       // 
@@ -248,7 +247,7 @@ namespace MySql.Notifier
       // 
       // TitleLabel
       // 
-      this.TitleLabel.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+      this.TitleLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.TitleLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(73)))), ((int)(((byte)(161)))));
       this.TitleLabel.Location = new System.Drawing.Point(72, 9);
       this.TitleLabel.Name = "TitleLabel";
@@ -317,8 +316,7 @@ namespace MySql.Notifier
       this.ClientSize = new System.Drawing.Size(427, 237);
       this.CommandAreaVisible = true;
       this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-      this.FootnoteAreaHeight = 80;
-      this.FootnoteAreaVisible = false;
+      this.FootnoteAreaHeight = 0;
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Name = "WindowsConnectionDialog";

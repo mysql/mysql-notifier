@@ -174,7 +174,11 @@ namespace MySql.Notifier
       item.InstanceStatusChanged += SingleInstanceStatusChanged;
       item.PropertyChanged += SingleInstancePropertyChanged;
       item.InstanceConnectionStatusTestErrorThrown += SingleInstanceConnectionStatusTestErrorThrown;
-      item.CheckInstanceStatus(false);
+      if (item.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.Unknown)
+      {
+        item.CheckInstanceStatus(false);
+      }
+
       SaveToFile();
       OnInstancesListChanged(item, ListChangedType.ItemAdded);
     }
