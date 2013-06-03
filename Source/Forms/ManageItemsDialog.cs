@@ -284,8 +284,13 @@ namespace MySql.Notifier
             //// If the selected connection exists for an already monitored instance but it is not its main connection, replace the main connection with this one.
             foreach (var instance in InstancesList)
             {
-              if (instance.RelatedConnections.Exists(conn => conn.Id == selectedConnection.Id) && instance.WorkbenchConnection.Id != selectedConnection.Id)
+              if (instance.RelatedConnections.Exists(conn => conn.Id == selectedConnection.Id))
               {
+                if (selectedConnection.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.Unknown)
+                {
+                  selectedConnection.TestConnection();
+                }
+
                 instance.WorkbenchConnection = selectedConnection;
                 connectionAlreadyInInstance = true;
                 foreach (ListViewItem lvi in MonitoredInstancesListView.Items)
@@ -294,8 +299,8 @@ namespace MySql.Notifier
                   if (existingInstance == instance)
                   {
                     lvi.Text = instance.HostIdentifier;
-                    lvi.SubItems[0].Text = instance.WorkbenchConnection.DriverType.ToString();
-                    lvi.SubItems[1].Text = instance.ConnectionStatusText;
+                    lvi.SubItems[1].Text = instance.WorkbenchConnection.DriverType.ToString();
+                    lvi.SubItems[2].Text = instance.ConnectionStatusText;
                     break;
                   }
                 }
