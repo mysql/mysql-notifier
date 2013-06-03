@@ -471,7 +471,12 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
+        InfoDialog.ShowErrorDialog(
+          Resources.ErrorTitle,
+          Resources.FailureToLaunchWorkbench,
+          null,
+          ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace,
+          false);
         MySQLSourceTrace.WriteAppErrorToLog(ex);
       }
     }
@@ -539,7 +544,12 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
+        InfoDialog.ShowErrorDialog(
+          Resources.ErrorTitle,
+          Resources.FailureToLaunchWorkbench,
+          null,
+          ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace,
+          false);
         MySQLSourceTrace.WriteAppErrorToLog(ex);
       }
     }

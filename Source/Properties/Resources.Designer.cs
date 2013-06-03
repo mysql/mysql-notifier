@@ -482,7 +482,7 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Workbench failed to launch with the error: {0}.
+        ///   Looks up a localized string similar to Workbench failed to launch with an error (see more information for details)..
         /// </summary>
         internal static string FailureToLaunchWorkbench {
             get {
