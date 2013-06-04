@@ -411,6 +411,12 @@ namespace MySql.Notifier
         return;
       }
 
+      //// If the application is exiting (so the Notifier icon was hidden), then don't continue on refreshing instances.
+      if (!notifyIcon.Visible)
+      {
+        return;
+      }
+
       mySQLInstancesList.RefreshInstances(false);
       foreach (Machine machine in machinesList.Machines)
       {

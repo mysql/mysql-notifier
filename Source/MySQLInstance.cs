@@ -484,7 +484,7 @@ namespace MySql.Notifier
         _workbenchConnectionId = value;
         if (!string.IsNullOrEmpty(_workbenchConnectionId))
         {
-          WorkbenchConnection = MySqlWorkbench.Connections.First(conn => conn.Id == _workbenchConnectionId);
+          WorkbenchConnection = MySqlWorkbench.Connections.FirstOrDefault(conn => conn.Id == _workbenchConnectionId);
         }
 
         OnPropertyChanged("WorkbenchConnectionId");
