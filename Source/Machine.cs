@@ -957,7 +957,7 @@ namespace MySql.Notifier
       }
 
       MenuGroup.DropDownItems.Clear();
-      int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(menu, MenuGroup.Text);
+      int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(menu, MachineId);
       if (index >= 0)
       {
         menu.Items.RemoveAt(index);
@@ -983,6 +983,7 @@ namespace MySql.Notifier
         }
 
         MenuGroup = new ToolStripMenuItem(string.Format("{0} ({1})", Name, ConnectionStatus.ToString()));
+        MenuGroup.Tag = MachineId;
         Font boldFont = new Font(MenuGroup.Font, FontStyle.Bold);
         MenuGroup.Font = boldFont;
         MenuGroup.BackColor = SystemColors.MenuText;

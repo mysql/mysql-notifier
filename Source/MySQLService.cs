@@ -84,6 +84,7 @@ namespace MySql.Notifier
       _managementObject = null;
       MenuGroup = null;
       PreviousStatus = MySQLServiceStatus.Unavailable;
+      ServiceID = Guid.NewGuid().ToString("B");
     }
 
     /// <summary>
@@ -165,6 +166,12 @@ namespace MySql.Notifier
     #endregion Events
 
     #region Properties
+
+    /// <summary>
+    /// Gets a unique service ID.
+    /// </summary>
+    [XmlIgnore]
+    public string ServiceID { get; private set; }
 
     /// <summary>
     /// Gets or sets the display name of the service.

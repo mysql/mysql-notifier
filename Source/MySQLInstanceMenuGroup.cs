@@ -42,6 +42,7 @@ namespace MySql.Notifier
       InstanceMenuItem = new ToolStripMenuItem();
       Font menuItemFont = new Font(InstanceMenuItem.Font, FontStyle.Bold);
       InstanceMenuItem.Font = menuItemFont;
+      InstanceMenuItem.Tag = boundInstance.InstanceID;
 
       if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
@@ -135,15 +136,15 @@ namespace MySql.Notifier
     /// Finds the menu item's index within a context menu strip corresponding to the menu item with the given text.
     /// </summary>
     /// <param name="menu"><see cref="ContextMenuStrip"/> containing the itemText to find.</param>
-    /// <param name="menuItemText">Menu item text.</param>
+    /// <param name="menuItemID">Menu item ID.</param>
     /// <returns>Index of the dound menu itemText, -1 if  not found.</returns>
-    public static int FindMenuItemWithinMenuStrip(ContextMenuStrip menu, string menuItemText)
+    public static int FindMenuItemWithinMenuStrip(ContextMenuStrip menu, string menuItemID)
     {
       int index = -1;
 
       for (int i = 0; i < menu.Items.Count; i++)
       {
-        if (menu.Items[i].Text.Equals(menuItemText))
+        if (menu.Items[i].Tag != null && menu.Items[i].Tag.Equals(menuItemID))
         {
           index = i;
           break;
@@ -198,7 +199,7 @@ namespace MySql.Notifier
     /// <returns>Index of the dound menu itemText, -1 if  not found.</returns>
     public int FindInstanceMenuItemWithinMenuStrip(ContextMenuStrip menu)
     {
-      return FindMenuItemWithinMenuStrip(menu, InstanceMenuItem.Text);
+      return FindMenuItemWithinMenuStrip(menu, BoundInstance.InstanceID);
     }
 
     /// <summary>

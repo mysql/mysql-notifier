@@ -62,6 +62,7 @@ namespace MySql.Notifier
       boundService = mySQLBoundService;
 
       statusMenu = new ToolStripMenuItem(String.Format("{0} - {1}", boundService.DisplayName, boundService.Status));
+      statusMenu.Tag = boundService.ServiceID;
 
       if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
@@ -101,15 +102,15 @@ namespace MySql.Notifier
     /// Finds the menu item's index within a context menu strip corresponding to the menu item with the given text.
     /// </summary>
     /// <param name="menu"><see cref="ContextMenuStrip"/> containing the itemText to find.</param>
-    /// <param name="menuItemText">Menu item text.</param>
+    /// <param name="menuItemID">Menu item ID.</param>
     /// <returns>Index of the dound menu itemText, -1 if  not found.</returns>
-    public static int FindMenuItemWithinMenuStrip(ContextMenuStrip menu, string menuItemText)
+    public static int FindMenuItemWithinMenuStrip(ContextMenuStrip menu, string menuItemID)
     {
       int index = -1;
 
       for (int i = 0; i < menu.Items.Count; i++)
       {
-        if (menu.Items[i].Text.StartsWith(menuItemText))
+        if (menu.Items[i].Tag != null && menu.Items[i].Tag.Equals(menuItemID))
         {
           index = i;
           break;
@@ -215,7 +216,7 @@ namespace MySql.Notifier
       }
       else
       {
-        int index = FindMenuItemWithinMenuStrip(menu, boundService.Host.Name);
+        int index = FindMenuItemWithinMenuStrip(menu, boundService.Host.MachineId);
         int servicesMenusCount = boundService.Host.Services != null ? boundService.Host.Services.Sum(s => s != boundService && s.MenuGroup != null ? s.MenuGroup.MenuItemsQuantity : 0) : 0;
         index += servicesMenusCount;
         if (index < 0)
@@ -282,7 +283,7 @@ namespace MySql.Notifier
         boundService.FindMatchingWBConnections();
         CreateEditorMenus();
 
-        int index = FindMenuItemWithinMenuStrip(menu, statusMenu.Text);
+        int index = FindMenuItemWithinMenuStrip(menu, boundService.ServiceID);
         if (index >= 0)
         {
           menu.Items.RemoveAt(index + 2);
@@ -321,7 +322,7 @@ namespace MySql.Notifier
           menuItems[1] = statusMenu.Text;
         }
 
-        index = FindMenuItemWithinMenuStrip(menu, statusMenu.Text);
+        index = FindMenuItemWithinMenuStrip(menu, boundService.ServiceID);
         if (index <= 0)
         {
           return;

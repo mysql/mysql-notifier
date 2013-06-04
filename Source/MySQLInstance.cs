@@ -131,6 +131,7 @@ namespace MySql.Notifier
       InstanceStatusCheckInProgress = false;
       MenuGroup = null;
       SecondsToMonitorInstance = MonitoringIntervalInSeconds;
+      InstanceID = Guid.NewGuid().ToString("B");
     }
 
     /// <summary>
@@ -215,6 +216,12 @@ namespace MySql.Notifier
     #endregion Events
 
     #region Properties
+
+    /// <summary>
+    /// Gets a unique instance ID.
+    /// </summary>
+    [XmlIgnore]
+    public string InstanceID { get; private set; }
 
     /// <summary>
     /// Gets the status of this isntance's connection.

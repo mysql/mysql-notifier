@@ -341,6 +341,7 @@ namespace MySql.Notifier
       if (machinesList.ServicesCount + mySQLInstancesList.Count > 0)
       {
         ToolStripMenuItem actionsMenu = new ToolStripMenuItem(Resources.Actions, null);
+        actionsMenu.Tag = Resources.Actions;
         actionsMenu.DropDown = menu;
         notifyIcon.ContextMenuStrip.Items.Add(actionsMenu);
       }
@@ -951,6 +952,7 @@ namespace MySql.Notifier
         }
 
         ToolStripMenuItem instancesMainMenuItem = new ToolStripMenuItem(Resources.MySQLInstances);
+        instancesMainMenuItem.Tag = Resources.MySQLInstances;
         Font boldFont = new Font(instancesMainMenuItem.Font, FontStyle.Bold);
         instancesMainMenuItem.Font = boldFont;
         instancesMainMenuItem.BackColor = SystemColors.MenuText;
