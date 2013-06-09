@@ -66,9 +66,9 @@ namespace MySql.Notifier
       {
         if (Settings.Default.AutoCheckForUpdates)
         {
-          if (!String.IsNullOrEmpty(Utility.GetInstallLocation("MySQL Notifier")))
+          if (!String.IsNullOrEmpty(Utility.GetInstallLocation(Application.ProductName)))
           {
-            Utility.CreateScheduledTask("MySQLNotifierTask", Utility.GetInstallLocation("MySQL Notifier") + "MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, deleteIfPrevious, Utility.GetOsVersion() == Utility.OSVersion.WindowsXp);
+            Utility.CreateScheduledTask("MySQLNotifierTask", Utility.GetInstallLocation(Application.ProductName) + "MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, deleteIfPrevious, Utility.GetOsVersion() == Utility.OSVersion.WindowsXp);
           }
         }
         if (deleteTask)
