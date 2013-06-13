@@ -98,6 +98,7 @@ namespace MySql.Notifier
       // DialogCancelButton
       // 
       this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+      this.DialogCancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.DialogCancelButton.Location = new System.Drawing.Point(331, 10);
       this.DialogCancelButton.Name = "DialogCancelButton";
       this.DialogCancelButton.Size = new System.Drawing.Size(78, 23);
@@ -108,6 +109,7 @@ namespace MySql.Notifier
       // DialogApplyButton
       // 
       this.DialogApplyButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+      this.DialogApplyButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.DialogApplyButton.Location = new System.Drawing.Point(247, 11);
       this.DialogApplyButton.Name = "DialogApplyButton";
       this.DialogApplyButton.Size = new System.Drawing.Size(78, 23);
@@ -119,6 +121,7 @@ namespace MySql.Notifier
       // UseColorfulIconsCheckBox
       // 
       this.UseColorfulIconsCheckBox.AutoSize = true;
+      this.UseColorfulIconsCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.UseColorfulIconsCheckBox.Location = new System.Drawing.Point(31, 101);
       this.UseColorfulIconsCheckBox.Name = "UseColorfulIconsCheckBox";
       this.UseColorfulIconsCheckBox.Size = new System.Drawing.Size(154, 19);
@@ -139,6 +142,7 @@ namespace MySql.Notifier
       // NotifyOfStatusChangeCheckBox
       // 
       this.NotifyOfStatusChangeCheckBox.AutoSize = true;
+      this.NotifyOfStatusChangeCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.NotifyOfStatusChangeCheckBox.Location = new System.Drawing.Point(31, 358);
       this.NotifyOfStatusChangeCheckBox.Name = "NotifyOfStatusChangeCheckBox";
       this.NotifyOfStatusChangeCheckBox.Size = new System.Drawing.Size(304, 19);
@@ -149,6 +153,7 @@ namespace MySql.Notifier
       // NotifyOfAutoAddCheckBox
       // 
       this.NotifyOfAutoAddCheckBox.AutoSize = true;
+      this.NotifyOfAutoAddCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.NotifyOfAutoAddCheckBox.Location = new System.Drawing.Point(31, 324);
       this.NotifyOfAutoAddCheckBox.Name = "NotifyOfAutoAddCheckBox";
       this.NotifyOfAutoAddCheckBox.Size = new System.Drawing.Size(284, 19);
@@ -158,6 +163,7 @@ namespace MySql.Notifier
       // 
       // AutoAddRegexTextBox
       // 
+      this.AutoAddRegexTextBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.AutoAddRegexTextBox.Location = new System.Drawing.Point(59, 237);
       this.AutoAddRegexTextBox.Name = "AutoAddRegexTextBox";
       this.AutoAddRegexTextBox.Size = new System.Drawing.Size(300, 23);
@@ -166,17 +172,19 @@ namespace MySql.Notifier
       // AutoAddServicesCheckBox
       // 
       this.AutoAddServicesCheckBox.AutoSize = true;
+      this.AutoAddServicesCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.AutoAddServicesCheckBox.Location = new System.Drawing.Point(31, 211);
       this.AutoAddServicesCheckBox.Name = "AutoAddServicesCheckBox";
-      this.AutoAddServicesCheckBox.Size = new System.Drawing.Size(316, 19);
+      this.AutoAddServicesCheckBox.Size = new System.Drawing.Size(313, 19);
       this.AutoAddServicesCheckBox.TabIndex = 7;
-      this.AutoAddServicesCheckBox.Text = "Automatically add new services that match this pattern\r\n";
+      this.AutoAddServicesCheckBox.Text = "Automatically add new services whose name contains:";
       this.AutoAddServicesCheckBox.UseVisualStyleBackColor = true;
       this.AutoAddServicesCheckBox.CheckedChanged += new System.EventHandler(this.AutoAddServicesCheckBox_CheckedChanged);
       // 
       // lblWeeks
       // 
       this.lblWeeks.AutoSize = true;
+      this.lblWeeks.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.lblWeeks.Location = new System.Drawing.Point(338, 173);
       this.lblWeeks.Name = "lblWeeks";
       this.lblWeeks.Size = new System.Drawing.Size(41, 15);
@@ -185,6 +193,7 @@ namespace MySql.Notifier
       // 
       // CheckUpdatesWeeksNumericUpDown
       // 
+      this.CheckUpdatesWeeksNumericUpDown.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.CheckUpdatesWeeksNumericUpDown.Location = new System.Drawing.Point(278, 170);
       this.CheckUpdatesWeeksNumericUpDown.Name = "CheckUpdatesWeeksNumericUpDown";
       this.CheckUpdatesWeeksNumericUpDown.Size = new System.Drawing.Size(52, 23);
@@ -193,6 +202,7 @@ namespace MySql.Notifier
       // AutoCheckUpdatesCheckBox
       // 
       this.AutoCheckUpdatesCheckBox.AutoSize = true;
+      this.AutoCheckUpdatesCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.AutoCheckUpdatesCheckBox.Location = new System.Drawing.Point(31, 172);
       this.AutoCheckUpdatesCheckBox.Name = "AutoCheckUpdatesCheckBox";
       this.AutoCheckUpdatesCheckBox.Size = new System.Drawing.Size(233, 19);
@@ -204,6 +214,7 @@ namespace MySql.Notifier
       // RunAtStartupCheckBox
       // 
       this.RunAtStartupCheckBox.AutoSize = true;
+      this.RunAtStartupCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.RunAtStartupCheckBox.Location = new System.Drawing.Point(31, 136);
       this.RunAtStartupCheckBox.Name = "RunAtStartupCheckBox";
       this.RunAtStartupCheckBox.Size = new System.Drawing.Size(153, 19);
