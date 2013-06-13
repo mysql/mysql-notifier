@@ -30,7 +30,6 @@
     <VerboseOutput>False</VerboseOutput>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="MyExitDialog.wxs" />
     <Compile Include="main.wxs" />
     <Compile Include="WixUI_InstallDirNoLicense.wxs" />
   </ItemGroup>
@@ -77,7 +76,7 @@
     </CreateProperty>
   </Target>
   <Target Name="Clean">
-     <RemoveDir Directories="obj\$(Configuration)" />
+    <RemoveDir Directories="obj\$(Configuration)" />
   </Target>
   <PropertyGroup>
     <BuildDependsOn>Clean;SetVariables;$(BuildDependsOn)</BuildDependsOn>

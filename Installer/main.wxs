@@ -91,6 +91,7 @@
     <InstallExecuteSequence>
       <Custom Action="RemoveScheduledTask" Before="RemoveFiles">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
       <RemoveExistingProducts After="InstallValidate" />
+      <Custom Action="LaunchApplication" After="InstallFinalize">NOT (REMOVE="ALL")</Custom>
     </InstallExecuteSequence>
 
     <CustomAction Id="LaunchApplication" FileKey="MySqlNotifierEXE" ExeCommand="" Execute="immediate" Impersonate="yes" Return="asyncNoWait" />
