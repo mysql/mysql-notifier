@@ -70,6 +70,7 @@
         <Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"   Description="MySQL Notifier"  Target="[INSTALLDIR]MySqlNotifier.exe"  WorkingDirectory="INSTALLDIR"/>
         <RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
         <RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="location" Type="string" Value="[INSTALLDIR]"/>
+        <RegistryValue Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Run" Name="MySQL Notifier" Type="string" Value="[INSTALLDIR]MySqlNotifier.exe"/>
       </Component>
     </DirectoryRef>
 
