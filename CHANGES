@@ -1,3 +1,13 @@
+1.1.4
+- Fixed code to auto launch notifier right after installing it. (Bug #16927045 - AUTOSTART NOTIFIER AFTER SUCCESSFULL INSTALLATION)
+- Corrected code to set the registry key to start Notifier along with Windows. (MySQL bug #69279, Bug #16832752 - MYSQL NOTIFIER: DOES NOT START WITH WINDOWS, 
+  INCORRECT SETTING WITHIN REGISTER.)
+  (Bug #14400738 - RUN AT WINDOWS STARTUP OPTION IS NOT WORKING)
+- Fixed code to automatically add matching services. (MySql bug #67617, Bug #15887501 - MySQL Notifier autofilter not auto finding running services)
+  (Bug#16660623 - NOTIFIER IS NOT LISTING THE JUST INSTALLED SERVER INSTANCE)
+  (Bug#14345177 - NEW SERVICE IS NOT ADDED TO NOTIFIER)
+- Fixed the SQL Editor menu to be enabled if there is only1 connection related to the current service, if there are no connections the menu item is disabled. (Bug#14332402 - CLICKING "SQL EDITOR" DOESN'T ACTUALLY OPEN SQL EDITOR IN WB)
+
 1.1.2
 - From now on if you have the AutoAddServicesToMonitor option checked and you add a new service which Name matches the filter ("mysql") in a monitored 
   machine (localhost is monitored by default) it will be automatically added to the list of monitored services.

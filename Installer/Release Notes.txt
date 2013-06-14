@@ -17,6 +17,7 @@ Welcome to the release notes for MySQL Notifier 1.1.4
 	  are migrated to MySQL Workbench when it is installed.
 	- Monitored instances display the SQL Editor and Configure Instance menus (as similar local services do) and the connection used to
 	  monitor the instance is displayed in bold.
+	- MySQL Notifier is launched right after installed and on every restart. This behavior can be changed through the options Window.
 
 Known Limitations
 --------------------
