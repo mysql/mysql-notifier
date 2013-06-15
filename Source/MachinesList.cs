@@ -214,6 +214,7 @@ namespace MySql.Notifier
     {
       LocalMachine = GetMachineByName(MySqlWorkbenchConnection.DEFAULT_HOSTNAME) ?? new Machine();
       LocalMachine.LoadServicesParameters(true);
+      OnMachineListChanged(LocalMachine, ChangeType.AutoAdd);
 
       MigrateOldServices();
       AutoAddLocalServices();
@@ -293,7 +294,7 @@ namespace MySql.Notifier
         machine.ServiceStatusChangeError += OnMachineServiceStatusChangeError;
       }
 
-      if (MachineListChanged != null)
+      if (MachineListChanged != null && !(machine.IsLocal && !machine.HasServices))
       {
         MachineListChanged(machine, changeType);
       }

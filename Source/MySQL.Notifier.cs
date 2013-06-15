@@ -566,7 +566,7 @@ namespace MySql.Notifier
         case ChangeType.AddByLoad:
         case ChangeType.AutoAdd:
           machine.SetupMenuGroup(notifyIcon.ContextMenuStrip);
-          if (changeType == ChangeType.AutoAdd)
+          if (changeType == ChangeType.AddByUser)
           {
             ShowTooltip(false, Resources.BalloonTitleMachinesList, string.Format(Resources.BalloonTextMachineAdded, machine.Name));
           }

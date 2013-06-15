@@ -446,6 +446,18 @@ namespace MySql.Notifier
     public bool ConnectionTestInProgress { get; private set; }
 
     /// <summary>
+    /// Gets a value indicating whether the machine has at least one service in its monitoring list.
+    /// </summary>
+    [XmlIgnore]
+    public bool HasServices
+    {
+      get
+      {
+        return Services != null ? Services.Count > 0 : false;
+      }
+    }
+
+    /// <summary>
     /// Gets a value indicating whether the initial load of the machine has been done.
     /// </summary>
     [XmlIgnore]
