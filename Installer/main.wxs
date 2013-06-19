@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?define ProductName="MySQL Notifier $(var.Version)"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
 
   <Product Name="$(var.ProductName)" Id ="*" Manufacturer="Oracle" Language="1033" Version="$(var.Version)"
            UpgradeCode="9e9fb57a-62e3-45cf-a896-686e33407606">
@@ -10,10 +10,11 @@
     <Property Id="ARPURLUPDATEINFO" Value="http://dev.mysql.com"/>
 
     <Upgrade Id="9e9fb57a-62e3-45cf-a896-686e33407606">
+      <UpgradeVersion OnlyDetect="yes" Minimum="$(var.Version)" Property="NEWERVERSIONDETECTED" IncludeMinimum="no" />
       <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND" Minimum="1.0.0" IncludeMinimum="yes" Maximum="$(var.Version)" IncludeMaximum="no" />
     </Upgrade>
 
-    <Media Id="1" Cabinet="MySqlNotifier.cab" EmbedCab="yes"  CompressionLevel="high"/>
+    <Media Id="1" Cabinet="MySqlNotifier.cab" EmbedCab="yes" CompressionLevel="high"/>
 
     <Condition Message="You must have Administrative rights on this machine to install [ProductName].">
       <![CDATA[ Privileged  ]]>
@@ -67,7 +68,7 @@
         <CreateFolder Directory="ShortCutDir" />
         <RemoveFolder Id="RemovePMCompanyDir" Directory="PMCompanyDir" On="uninstall" />
         <RemoveFolder Id="RemoveShortCutDir"  Directory="ShortCutDir" On="uninstall"/>
-        <Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)"   Description="MySQL Notifier"  Target="[INSTALLDIR]MySqlNotifier.exe"  WorkingDirectory="INSTALLDIR"/>
+        <Shortcut Id="ApplicationStartMenuShortcut" Name="$(var.ProductName)" Description="MySQL Notifier" Target="[INSTALLDIR]MySqlNotifier.exe" WorkingDirectory="INSTALLDIR"/>
         <RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
         <RegistryValue Root="HKCU" Key="Software\MySQL AB\[ProductName]" Name="location" Type="string" Value="[INSTALLDIR]"/>
         <RegistryValue Root="HKCU" Key="Software\Microsoft\Windows\CurrentVersion\Run" Name="MySQL Notifier" Type="string" Value="[INSTALLDIR]MySqlNotifier.exe"/>
@@ -79,7 +80,6 @@
       <!--<ComponentRef Id="DesktopShortcut" />-->
       <ComponentRef Id="ProgramMenuShortcutsComponent"/>
     </Feature>
-
 
     <Property Id="LAUNCHAPPONEXIT" Value="1"/>
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
@@ -93,10 +93,12 @@
       <Custom Action="RemoveScheduledTask" Before="RemoveFiles">(NOT UPGRADINGPRODUCTCODE) AND (REMOVE="ALL")</Custom>
       <RemoveExistingProducts After="InstallValidate" />
       <Custom Action="LaunchApplication" After="InstallFinalize">NOT (REMOVE="ALL")</Custom>
+      <Custom Action="WixCloseApplications" After="InstallValidate" />
     </InstallExecuteSequence>
 
     <CustomAction Id="LaunchApplication" FileKey="MySqlNotifierEXE" ExeCommand="" Execute="immediate" Impersonate="yes" Return="asyncNoWait" />
     <CustomAction Id="RemoveScheduledTask" Return="ignore"  Directory="ProgramFilesFolder"  ExeCommand= "schtasks /delete /tn MySQLNotifierTask /f " />
+    <util:CloseApplication Id="CloseNotifier" Target="MySqlNotifier.exe" RebootPrompt="no" CloseMessage="yes" />
 
   </Product>
 </Wix>

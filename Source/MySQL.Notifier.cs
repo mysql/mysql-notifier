@@ -58,6 +58,7 @@ namespace MySql.Notifier
     private FileSystemWatcher _settingsFileWatcher;
     private FileSystemWatcher _connectionsFileWatcher;
     private FileSystemWatcher _serversFileWatcher;
+    private bool _closing;
 
     /// <summary>
     /// The timer that fires the connection status checks.
@@ -72,6 +73,7 @@ namespace MySql.Notifier
     public Notifier()
     {
       //// Fields initializations.
+      _closing = false;
       _globalTimer = null;
       _optionsDialog = null;
       _manageItemsDialog = null;
@@ -258,11 +260,25 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Forces the Notifier to quit, called from the Application Context.
+    /// </summary>
+    public void ForceExit()
+    {
+      if (_closing)
+      {
+        return;
+      }
+
+      OnExit(EventArgs.Empty);
+    }
+
+    /// <summary>
     /// Invokes the Exit event
     /// </summary>
     /// <param name="e">Event arguments</param>
     protected virtual void OnExit(EventArgs e)
     {
+      _closing = true;
       notifyIcon.Visible = false;
       if (_globalTimer != null && _globalTimer.Enabled)
       {

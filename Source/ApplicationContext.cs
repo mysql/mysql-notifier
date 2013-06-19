@@ -37,8 +37,15 @@ namespace MySql.Notifier
       WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
       bool hasAdminPrivileges = principal.IsInRole(WindowsBuiltInRole.Administrator);
 
-      this.notifierApp = new Notifier();
-      this.notifierApp.Exit += NotifierApp_Exit;
+      notifierApp = new Notifier();
+      MainForm = new DumbForm();
+      notifierApp.Exit += NotifierApp_Exit;
+    }
+
+    protected override void OnMainFormClosed(object sender, EventArgs e)
+    {
+      notifierApp.ForceExit();
+      base.OnMainFormClosed(sender, e);
     }
 
     private void NotifierApp_Exit(object sender, EventArgs e)
@@ -69,6 +76,7 @@ namespace MySql.Notifier
       if (disposing)
       {
         //// Free managed resources
+        MainForm.Dispose();
         notifierApp.Dispose();
         GC.SuppressFinalize(this);
       }
