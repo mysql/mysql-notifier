@@ -375,13 +375,16 @@ namespace MySql.Notifier
             image = Resources.NotifierIconStarting;
             break;
 
-          case MySQLServiceStatus.Unavailable:
           case MySQLServiceStatus.Stopped:
             image = Resources.NotifierIconStopped;
             break;
 
           case MySQLServiceStatus.Running:
             image = Resources.NotifierIconRunning;
+            break;
+
+          case MySQLServiceStatus.Unavailable:
+            image = Resources.NotifierIcon;
             break;
         }
 

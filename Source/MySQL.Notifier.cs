@@ -51,7 +51,6 @@ namespace MySql.Notifier
     private MachinesList machinesList;
     private MySQLInstancesList mySQLInstancesList;
     private NotifyIcon notifyIcon;
-    private int previousServicesAndInstancesQuantity;
     private OptionsDialog _optionsDialog;
     private ManageItemsDialog _manageItemsDialog;
     private AboutDialog _aboutDialog;
@@ -59,11 +58,24 @@ namespace MySql.Notifier
     private FileSystemWatcher _connectionsFileWatcher;
     private FileSystemWatcher _serversFileWatcher;
     private bool _closing;
+    private ToolStripSeparator _refreshStatusSeparator;
+    private ToolStripMenuItem _refreshStatusMenuItem;
+    private ToolStripMenuItem _manageServicesMenuItem;
+    private ToolStripMenuItem _checkForUpdatesMenuItem;
+    private ToolStripMenuItem _optionsMenuItem;
+    private ToolStripMenuItem _aboutMenuItem;
+    private ToolStripMenuItem _exitMenuItem;
+    private bool _statusRefreshCancelled;
 
     /// <summary>
     /// The timer that fires the connection status checks.
     /// </summary>
     private System.Timers.Timer _globalTimer;
+
+    /// <summary>
+    /// Background worker that performs the refresh of machines, services and MySQL instances.
+    /// </summary>
+    private BackgroundWorker _worker;
 
     #endregion Fields
 
@@ -74,6 +86,7 @@ namespace MySql.Notifier
     {
       //// Fields initializations.
       _closing = false;
+      _statusRefreshCancelled = false;
       _globalTimer = null;
       _optionsDialog = null;
       _manageItemsDialog = null;
@@ -81,6 +94,15 @@ namespace MySql.Notifier
       _serversFileWatcher = null;
       _connectionsFileWatcher = null;
       _settingsFileWatcher = null;
+      _refreshStatusSeparator = null;
+      _refreshStatusMenuItem = null;
+      _manageServicesMenuItem = null;
+      _checkForUpdatesMenuItem = null;
+      _optionsMenuItem = null;
+      _aboutMenuItem = null;
+      _exitMenuItem = null;
+      _worker = null;
+      StatusRefreshInProgress = false;
 
       //// Static initializations.
       CustomizeInfoDialog();
@@ -112,7 +134,7 @@ namespace MySql.Notifier
 
       //// This method ▼ populates services with post-load information, we need to execute it after the Popup-Menu has been initialized at RefreshMenuIfNeeded(bool).
       machinesList.LoadMachinesServices();
-      previousServicesAndInstancesQuantity = machinesList.ServicesCount + mySQLInstancesList.Count;
+      PreviousServicesAndInstancesCount = CurrentServicesAndInstancesCount;
 
       //// Create watcher for WB files
       string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -152,12 +174,75 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Gets the current total count of monitored services in all machines plus all mysql instances.
+    /// </summary>
+    public int CurrentServicesAndInstancesCount
+    {
+      get
+      {
+        return (machinesList != null ? machinesList.ServicesCount : 0) + (mySQLInstancesList != null ? mySQLInstancesList.Count : 0);
+      }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether a status refresh is still ongoing.
+    /// </summary>
+    public bool StatusRefreshInProgress { get; private set; }
+
+    /// <summary>
+    /// Gets the total count of monitored services in all machines plus all mysql instances stored at the time of building menu items.
+    /// </summary>
+    public int PreviousServicesAndInstancesCount { get; private set; }
+
+    /// <summary>
+    /// Cancels the asynchronous status refresh.
+    /// </summary>
+    /// <returns>true if the background status refresh was cancelled, false otherwise</returns>
+    public void CancelAsynchronousStatusRefresh()
+    {
+      if (_worker != null && _worker.WorkerSupportsCancellation && (StatusRefreshInProgress || _worker.IsBusy))
+      {
+        _statusRefreshCancelled = true;
+        _worker.CancelAsync();
+      }
+    }
+
+    /// <summary>
     /// Releases all resources used by the <see cref="MySQL.Notifier"/> class
     /// </summary>
     public void Dispose()
     {
       Dispose(true);
       GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Refreshes the status .
+    /// </summary>
+    /// <param name="asynchronous">Flag indicating if the status check is run asynchronously or synchronously.</param>
+    public void RefreshStatus(bool asynchronous)
+    {
+      if (StatusRefreshInProgress)
+      {
+        return;
+      }
+
+      StatusRefreshInProgress = true;
+      _refreshStatusMenuItem.Text = Resources.CancelStatusRefreshMenuText;
+      _refreshStatusMenuItem.Image = Resources.CancelRefresh;
+
+      if (asynchronous)
+      {
+        SetupStatusRefreshBackgroundWorker();
+        _worker.RunWorkerAsync();
+      }
+      else
+      {
+        Cursor.Current = Cursors.WaitCursor;
+        StatusRefreshWorkerDoWork(this, new DoWorkEventArgs(null));
+        StatusRefreshWorkerCompleted(this, new RunWorkerCompletedEventArgs(null, null, false));
+        Cursor.Current = Cursors.Default;
+      }
     }
 
     /// <summary>
@@ -173,34 +258,77 @@ namespace MySql.Notifier
         {
           components.Dispose();
         }
+
         if (hasUpdatesSeparator != null)
         {
           hasUpdatesSeparator.Dispose();
         }
+
         if (ignoreAvailableUpdateMenuItem != null)
         {
           ignoreAvailableUpdateMenuItem.Dispose();
         }
+
         if (installAvailablelUpdatesMenuItem != null)
         {
           installAvailablelUpdatesMenuItem.Dispose();
         }
+
         if (launchInstallerMenuItem != null)
         {
           launchInstallerMenuItem.Dispose();
         }
+
         if (launchWorkbenchUtilitiesMenuItem != null)
         {
           launchWorkbenchUtilitiesMenuItem.Dispose();
         }
+
+        if (_refreshStatusSeparator != null)
+        {
+          _refreshStatusSeparator.Dispose();
+        }
+
+        if (_refreshStatusMenuItem != null)
+        {
+          _refreshStatusMenuItem.Dispose();
+        }
+
+        if (_manageServicesMenuItem != null)
+        {
+          _manageServicesMenuItem.Dispose();
+        }
+
+        if (_checkForUpdatesMenuItem != null)
+        {
+          _checkForUpdatesMenuItem.Dispose();
+        }
+
+        if (_optionsMenuItem != null)
+        {
+          _optionsMenuItem.Dispose();
+        }
+
+        if (_aboutMenuItem != null)
+        {
+          _aboutMenuItem.Dispose();
+        }
+
+        if (_exitMenuItem != null)
+        {
+          _exitMenuItem.Dispose();
+        }
+
         if (mySQLInstancesList != null)
         {
           mySQLInstancesList.Dispose();
         }
+
         if (machinesList != null)
         {
           machinesList.Dispose();
         }
+
         if (notifyIcon != null)
         {
           notifyIcon.Dispose();
@@ -219,6 +347,24 @@ namespace MySql.Notifier
         if (_settingsFileWatcher != null)
         {
           _settingsFileWatcher.Dispose();
+        }
+
+        if (_worker != null)
+        {
+          if (_worker.IsBusy)
+          {
+            _worker.CancelAsync();
+            ushort cancelAsyncWait = 0;
+            while (_worker.IsBusy && cancelAsyncWait < Machine.DEFAULT_CANCEL_ASYNC_WAIT)
+            {
+              Thread.Sleep(Machine.DEFAULT_CANCEL_ASYNC_STEP);
+              cancelAsyncWait += Machine.DEFAULT_CANCEL_ASYNC_STEP;
+            }
+          }
+
+          _worker.DoWork -= StatusRefreshWorkerDoWork;
+          _worker.RunWorkerCompleted -= StatusRefreshWorkerCompleted;
+          _worker.Dispose();
         }
       }
 
@@ -280,10 +426,8 @@ namespace MySql.Notifier
     {
       _closing = true;
       notifyIcon.Visible = false;
-      if (_globalTimer != null && _globalTimer.Enabled)
-      {
-        _globalTimer.Stop();
-      }
+
+      StopBackgroundActions();
 
       if (this.Exit != null)
       {
@@ -315,46 +459,81 @@ namespace MySql.Notifier
     {
       ContextMenuStrip menu = new ContextMenuStrip();
 
-      ToolStripMenuItem manageServices = new ToolStripMenuItem(Resources.ManageItemsMenuText);
-      manageServices.Click += new EventHandler(manageServicesDialogItem_Click);
-      manageServices.Image = Resources.ManageServicesIcon;
-      launchInstallerMenuItem = new ToolStripMenuItem(Resources.LaunchInstallerMenuText);
-      launchInstallerMenuItem.Click += new EventHandler(launchInstallerItem_Click);
-      launchInstallerMenuItem.Image = Resources.StartInstallerIcon;
+      if (_refreshStatusSeparator == null)
+      {
+        _refreshStatusSeparator = new ToolStripSeparator();
+      }
 
-      ToolStripMenuItem checkForUpdates = new ToolStripMenuItem(Resources.CheckUpdatesMenuText);
-      checkForUpdates.Click += new EventHandler(checkUpdatesItem_Click);
-      checkForUpdates.Image = Resources.CheckForUpdatesIcon;
+      if (_refreshStatusMenuItem == null)
+      {
+        _refreshStatusMenuItem = new ToolStripMenuItem(Resources.RefreshStatusMenuText);
+        _refreshStatusMenuItem.Click += refreshStatus_Click;
+        _refreshStatusMenuItem.Image = Resources.RefreshStatus;
+      }
 
-      if (MySqlWorkbench.AllowsExternalConnectionsManagement)
+      if (_manageServicesMenuItem == null)
+      {
+        _manageServicesMenuItem = new ToolStripMenuItem(Resources.ManageItemsMenuText);
+        _manageServicesMenuItem.Click += new EventHandler(manageServicesDialogItem_Click);
+        _manageServicesMenuItem.Image = Resources.ManageServicesIcon;
+      }
+
+      if (launchInstallerMenuItem == null)
+      {
+        launchInstallerMenuItem = new ToolStripMenuItem(Resources.LaunchInstallerMenuText);
+        launchInstallerMenuItem.Click += new EventHandler(launchInstallerItem_Click);
+        launchInstallerMenuItem.Image = Resources.StartInstallerIcon;
+      }
+
+      if (_checkForUpdatesMenuItem == null)
+      {
+        _checkForUpdatesMenuItem = new ToolStripMenuItem(Resources.CheckUpdatesMenuText);
+        _checkForUpdatesMenuItem.Click += new EventHandler(checkUpdatesItem_Click);
+        _checkForUpdatesMenuItem.Image = Resources.CheckForUpdatesIcon;
+      }
+
+      if (launchWorkbenchUtilitiesMenuItem == null)
       {
         launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem(Resources.UtilitiesShellMenuText);
         launchWorkbenchUtilitiesMenuItem.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
         launchWorkbenchUtilitiesMenuItem.Image = Resources.LaunchUtilities;
       }
 
-      ToolStripMenuItem optionsMenu = new ToolStripMenuItem(Resources.OptionsMenuText);
-      optionsMenu.Click += new EventHandler(optionsItem_Click);
+      if (_optionsMenuItem == null)
+      {
+        _optionsMenuItem = new ToolStripMenuItem(Resources.OptionsMenuText);
+        _optionsMenuItem.Click += new EventHandler(optionsItem_Click);
+      }
 
-      ToolStripMenuItem aboutMenu = new ToolStripMenuItem(Resources.AboutMenuText);
-      aboutMenu.Click += new EventHandler(aboutMenu_Click);
+      if (_aboutMenuItem == null)
+      {
+        _aboutMenuItem = new ToolStripMenuItem(Resources.AboutMenuText);
+        _aboutMenuItem.Click += new EventHandler(aboutMenu_Click);
+      }
 
-      ToolStripMenuItem exitMenu = new ToolStripMenuItem(Resources.CloseNotifierMenuText);
-      exitMenu.Click += new EventHandler(exitItem_Click);
+      if (_exitMenuItem == null)
+      {
+        _exitMenuItem = new ToolStripMenuItem(Resources.CloseNotifierMenuText);
+        _exitMenuItem.Click += new EventHandler(exitItem_Click);
+      }
 
-      menu.Items.Add(manageServices);
+      menu.Items.Add(_manageServicesMenuItem);
       menu.Items.Add(launchInstallerMenuItem);
-      menu.Items.Add(checkForUpdates);
+      menu.Items.Add(_checkForUpdatesMenuItem);
 
-      if (launchWorkbenchUtilitiesMenuItem != null)
+      if (MySqlWorkbench.AllowsExternalConnectionsManagement)
+      {
         menu.Items.Add(launchWorkbenchUtilitiesMenuItem);
+      }
 
+      menu.Items.Add(_refreshStatusSeparator);
+      menu.Items.Add(_refreshStatusMenuItem);
       menu.Items.Add(new ToolStripSeparator());
-      menu.Items.Add(optionsMenu);
-      menu.Items.Add(aboutMenu);
-      menu.Items.Add(exitMenu);
+      menu.Items.Add(_optionsMenuItem);
+      menu.Items.Add(_aboutMenuItem);
+      menu.Items.Add(_exitMenuItem);
 
-      if (machinesList.ServicesCount + mySQLInstancesList.Count > 0)
+      if (CurrentServicesAndInstancesCount > 0)
       {
         ToolStripMenuItem actionsMenu = new ToolStripMenuItem(Resources.Actions, null);
         actionsMenu.Tag = Resources.Actions;
@@ -366,18 +545,39 @@ namespace MySql.Notifier
         notifyIcon.ContextMenuStrip = menu;
       }
 
-      // now we add the menu items we will show when we have updates available
-      hasUpdatesSeparator = new ToolStripSeparator();
+      //// Menu items shown when there are updates available
+      if (hasUpdatesSeparator == null)
+      {
+        hasUpdatesSeparator = new ToolStripSeparator();
+      }
 
-      installAvailablelUpdatesMenuItem = new ToolStripMenuItem("Install available updates...", Resources.InstallAvailableUpdatesIcon);
-      installAvailablelUpdatesMenuItem.Click += new EventHandler(InstallAvailablelUpdates_Click);
+      if (installAvailablelUpdatesMenuItem == null)
+      {
+        installAvailablelUpdatesMenuItem = new ToolStripMenuItem("Install available updates...", Resources.InstallAvailableUpdatesIcon);
+        installAvailablelUpdatesMenuItem.Click += new EventHandler(InstallAvailablelUpdates_Click);
+      }
 
-      ignoreAvailableUpdateMenuItem = new ToolStripMenuItem("Ignore this update");
-      ignoreAvailableUpdateMenuItem.Click += new EventHandler(IgnoreAvailableUpdateItem_Click);
+      if (ignoreAvailableUpdateMenuItem == null)
+      {
+        ignoreAvailableUpdateMenuItem = new ToolStripMenuItem("Ignore this update");
+        ignoreAvailableUpdateMenuItem.Click += new EventHandler(IgnoreAvailableUpdateItem_Click);
+      }
 
       notifyIcon.ContextMenuStrip.Items.Add(hasUpdatesSeparator);
       notifyIcon.ContextMenuStrip.Items.Add(installAvailablelUpdatesMenuItem);
       notifyIcon.ContextMenuStrip.Items.Add(ignoreAvailableUpdateMenuItem);
+    }
+
+    private void refreshStatus_Click(object sender, EventArgs e)
+    {
+      if (StatusRefreshInProgress)
+      {
+        CancelAsynchronousStatusRefresh();
+      }
+      else
+      {
+        RefreshStatus(true);
+      }
     }
 
     private void checkUpdatesItem_Click(object sender, EventArgs e)
@@ -707,26 +907,8 @@ namespace MySql.Notifier
     {
       if (_manageItemsDialog == null)
       {
-        //// Stop the global timer and cancel any background machine connection tests while the user opens the dialog to manage machines, services or instances.
-        _globalTimer.Stop();
-        if (machinesList.Machines != null)
-        {
-          foreach (Machine machine in machinesList.Machines)
-          {
-            machine.CancelAsynchronousConnectionTest();
-          }
-        }
-
-        foreach (MySQLInstance instance in mySQLInstancesList)
-        {
-          instance.CancelAsynchronousStatusCheck();
-        }
-
-        //// Stop the connections file watcher while users maintain services and instances.
-        if (_connectionsFileWatcher != null)
-        {
-          _connectionsFileWatcher.EnableRaisingEvents = false;
-        }
+        //// Stop background actions while the user opens the dialog to manage machines, services or instances.
+        StopBackgroundActions();
 
         bool instancesListChanged = false;
         using (ManageItemsDialog manageItemsDialog = new ManageItemsDialog(mySQLInstancesList, machinesList))
@@ -737,19 +919,7 @@ namespace MySql.Notifier
           _manageItemsDialog = null;
         }
 
-        //// Resume the global timer.
-        _globalTimer.Start();
-
-        //// Resume the connections file watcher and refresh manually if a change on instances took place.
-        if (_connectionsFileWatcher != null)
-        {
-          if (instancesListChanged)
-          {
-            connectionsFile_Changed(this, new FileSystemEventArgs(WatcherChangeTypes.Changed, string.Empty, string.Empty));
-          }
-
-          _connectionsFileWatcher.EnableRaisingEvents = true;
-        }
+        ResumeBackgroundActions(instancesListChanged);
       }
       else
       {
@@ -792,7 +962,7 @@ namespace MySql.Notifier
           break;
 
         case ListChangedType.ItemChanged:
-          args.Instance.MenuGroup.Update();
+          args.Instance.MenuGroup.Update(false);
           RefreshNotifierIcon();
           break;
 
@@ -813,7 +983,7 @@ namespace MySql.Notifier
     /// <param name="args">Event arguments.</param>
     private void MySQLInstanceStatusChanged(object sender, InstanceStatusChangedArgs args)
     {
-      args.Instance.MenuGroup.Update();
+      args.Instance.MenuGroup.Update(false);
       notifyIcon.ContextMenuStrip.Refresh();
 
       if (args.OldInstanceStatus != MySqlWorkbenchConnection.ConnectionStatusType.Unknown && args.Instance.MonitorAndNotifyStatus && Settings.Default.NotifyOfStatusChange)
@@ -877,11 +1047,10 @@ namespace MySql.Notifier
     {
       bool menuWasRebuilt = false;
 
-      if ((machinesList.ServicesCount + mySQLInstancesList.Count == 0 && itemRemoved) ||
-         (previousServicesAndInstancesQuantity == 0 && !itemRemoved))
+      if ((CurrentServicesAndInstancesCount == 0 && itemRemoved) || (PreviousServicesAndInstancesCount == 0 && !itemRemoved))
       {
         ReBuildMenu();
-        previousServicesAndInstancesQuantity = machinesList.ServicesCount + mySQLInstancesList.Count;
+        PreviousServicesAndInstancesCount = CurrentServicesAndInstancesCount;
         menuWasRebuilt = true;
       }
 
@@ -894,6 +1063,27 @@ namespace MySql.Notifier
     private void RefreshNotifierIcon()
     {
       notifyIcon.Icon = Icon.FromHandle(GetIconForNotifier().GetHicon());
+    }
+
+    /// <summary>
+    /// Resume background connection activities like connection tests, etc.
+    /// </summary>
+    /// <param name="instancesListChanged">Flag indicating whether MySQL instances were added or deleted shile background actions were paused.</param>
+    private void ResumeBackgroundActions(bool instancesListChanged)
+    {
+      //// Resume the global timer.
+      _globalTimer.Start();
+
+      //// Resume the connections file watcher and refresh manually if a change on instances took place.
+      if (_connectionsFileWatcher != null)
+      {
+        if (instancesListChanged)
+        {
+          connectionsFile_Changed(this, new FileSystemEventArgs(WatcherChangeTypes.Changed, string.Empty, string.Empty));
+        }
+
+        _connectionsFileWatcher.EnableRaisingEvents = true;
+      }
     }
 
     /// <summary>
@@ -990,6 +1180,21 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Initializes the background worker used to refresh services and instances statuses asynchronously.
+    /// </summary>
+    private void SetupStatusRefreshBackgroundWorker()
+    {
+      if (_worker == null)
+      {
+        _worker = new BackgroundWorker();
+        _worker.WorkerSupportsCancellation = true;
+        _worker.WorkerReportsProgress = false;
+        _worker.DoWork += StatusRefreshWorkerDoWork;
+        _worker.RunWorkerCompleted += StatusRefreshWorkerCompleted;
+      }
+    }
+
+    /// <summary>
     /// Generic routine to help with showing tooltips
     /// </summary>
     /// <param name="error">Flag indicating if the message displayed is an error message.</param>
@@ -1039,6 +1244,123 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Delegate method that reports the asynchronous operation to refresh the services and instances statuses has completed.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void StatusRefreshWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+    {
+      if (e.Cancelled)
+      {
+        MySQLSourceTrace.WriteToLog("Notifier status refresh was cancelled.", SourceLevels.Information);
+      }
+      else
+      {
+        MySQLSourceTrace.WriteToLog("Notifier status refresh completed successfully.", SourceLevels.Information);
+      }
+
+      _refreshStatusMenuItem.Text = Resources.RefreshStatusMenuText;
+      _refreshStatusMenuItem.Image = Resources.RefreshStatus;
+      StatusRefreshInProgress = false;
+    }
+
+    /// <summary>
+    /// Delegate method that asynchronously refreshes the services and instances statuses.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void StatusRefreshWorkerDoWork(object sender, DoWorkEventArgs e)
+    {
+      BackgroundWorker worker = sender is BackgroundWorker ? sender as BackgroundWorker : null;
+
+      if (worker != null && worker.CancellationPending)
+      {
+        e.Cancel = true;
+        return;
+      }
+
+      //// First refresh local machine.
+      bool cancelled = machinesList.LocalMachine.RefreshStatus(ref worker);
+      if (cancelled)
+      {
+        e.Cancel = true;
+        return;
+      }
+
+      //// Refresh remote machines.
+      foreach (var remoteMachine in machinesList.Machines)
+      {
+        if (worker != null && worker.CancellationPending)
+        {
+          e.Cancel = true;
+          return;
+        }
+
+        if (remoteMachine.IsLocal)
+        {
+          continue;
+        }
+
+        cancelled = remoteMachine.RefreshStatus(ref worker);
+        if (cancelled)
+        {
+          e.Cancel = true;
+          return;
+        }
+      }
+
+      //// Refresh MySQL Instances
+      foreach (var instance in mySQLInstancesList)
+      {
+        cancelled = instance.RefreshStatus(ref worker);
+        if (cancelled)
+        {
+          e.Cancel = true;
+          return;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Stops background connection activities like connection tests, etc.
+    /// </summary>
+    private void StopBackgroundActions()
+    {
+      //// Stop global status refresh.
+      if (StatusRefreshInProgress)
+      {
+        CancelAsynchronousStatusRefresh();
+      }
+
+      //// Stop the global timer that fires connection tests for offline machines and MySQL instances.
+      if (_globalTimer != null && _globalTimer.Enabled)
+      {
+        _globalTimer.Stop();
+      }
+
+      //// Cancel any background machine connection tests.
+      if (machinesList.Machines != null)
+      {
+        foreach (Machine machine in machinesList.Machines)
+        {
+          machine.CancelAsynchronousConnectionTest();
+        }
+      }
+
+      //// Stop MySQL Instances connection checks.
+      foreach (MySQLInstance instance in mySQLInstancesList)
+      {
+        instance.CancelAsynchronousStatusCheck();
+      }
+
+      //// Stop the connections file watcher while users maintain services and instances.
+      if (_connectionsFileWatcher != null)
+      {
+        _connectionsFileWatcher.EnableRaisingEvents = false;
+      }
+    }
+
+    /// <summary>
     /// Event delegate method fired when the instance monitoring timer's interval elapses.
     /// </summary>
     /// <param name="sender">Sender object.</param>
@@ -1057,6 +1379,15 @@ namespace MySql.Notifier
       if (ignoreAvailableUpdateMenuItem != null) ignoreAvailableUpdateMenuItem.Visible = hasUpdates;
       if (launchInstallerMenuItem != null) launchInstallerMenuItem.Enabled = MySqlInstaller.IsInstalled;
       if (launchWorkbenchUtilitiesMenuItem != null) launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySQLUtilitiesInstalled();
+      if (_refreshStatusSeparator != null)
+      {
+        _refreshStatusSeparator.Visible = CurrentServicesAndInstancesCount > 0;
+      }
+
+      if (_refreshStatusMenuItem != null)
+      {
+        _refreshStatusMenuItem.Visible = CurrentServicesAndInstancesCount > 0;
+      }
     }
   }
 

@@ -99,7 +99,8 @@ namespace MySql.Notifier
     /// <param name="watchForServiceDeletion">Flag indicating whether the watcher will monitor service deletion.</param>
     /// <param name="watchForServiceStatusChange">Flag indicating whether the watcher will monitor service status changes.</param>
     /// <param name="asynchronous">Flag indicating if the watcher uses asnynchronous or semi-synchronous operations.</param>
-    public ServiceWatcher(bool watchForServiceCreation, bool watchForServiceDeletion, bool watchForServiceStatusChange, bool asynchronous)
+    /// <param name="isMachineOnline">Flag indicating whether the consumer machine is online.</param>
+    public ServiceWatcher(bool watchForServiceCreation, bool watchForServiceDeletion, bool watchForServiceStatusChange, bool asynchronous, bool isMachineOnline)
     {
       _watchForServiceCreation = true;
       _wmiAsyncCreationWatcher = null;
@@ -109,6 +110,7 @@ namespace MySql.Notifier
       _wmiSemiSyncDeletionWatcher = null;
       _wmiSemiSyncStatusChangeWatcher = null;
       Asynchronous = asynchronous;
+      IsMachineOnline = isMachineOnline;
       IsRunning = false;
       WatchForServiceCreation = watchForServiceCreation;
       WatchForServiceDeletion = watchForServiceDeletion;
@@ -150,6 +152,11 @@ namespace MySql.Notifier
     public bool Asynchronous { get; private set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the consumer machine is online.
+    /// </summary>
+    public bool IsMachineOnline { get; set; }
+
+    /// <summary>
     /// Gets a value indicating whether the watcher is running.
     /// </summary>
     public bool IsRunning { get; private set; }
@@ -173,6 +180,7 @@ namespace MySql.Notifier
     /// Gets or sets the timeout in seconds for WMI queries.
     /// </summary>
     public ushort WMIQueriesTimeoutInSeconds { get; set; }
+
     #endregion Properties
 
     /// <summary>
@@ -198,10 +206,11 @@ namespace MySql.Notifier
     /// <summary>
     /// Attempts to stop the running creation, deletion and status change watchers. 
     /// </summary>
+    /// <param name="displayErrors">Flag indicating whether errors are displayed to users or just logged.</param>
     /// <returns>true if watchers were stopped successfully, false otherwise.</returns>
-    public bool Stop()
+    public bool Stop(bool displayErrors)
     {
-      bool success = ServiceCreationWatcherStop(true) && ServiceDeletionWatcherStop(true) && ServiceStatusChangeWatcherStop(true);
+      bool success = ServiceCreationWatcherStop(displayErrors) && ServiceDeletionWatcherStop(displayErrors) && ServiceStatusChangeWatcherStop(displayErrors);
       IsRunning = !success;
       return success;
     }
@@ -485,7 +494,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Attempts to stop the service creation watcher.
     /// </summary>
-    /// <param name="displayErrors">Flag indiacting whether errors are displayed to users or just logged.</param>
+    /// <param name="displayErrors">Flag indicating whether errors are displayed to users or just logged.</param>
     /// <returns>true if watcher was stopped successfull, false otherwise.</returns>
     private bool ServiceCreationWatcherStop(bool displayErrors)
     {
@@ -500,7 +509,10 @@ namespace MySql.Notifier
         if (Asynchronous && _wmiAsyncCreationWatcher != null)
         {
           _wmiAsyncCreationWatcher.EventArrived -= ServiceCreationWatcher_EventArrived;
-          _wmiAsyncCreationWatcher.Stop();
+          if (IsMachineOnline)
+          {
+            _wmiAsyncCreationWatcher.Stop();
+          }
         }
         else if (!Asynchronous && _wmiSemiSyncCreationWatcher != null && _wmiSemiSyncCreationWatcher.IsBusy)
         {
@@ -682,7 +694,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Attempts to stop the service deletion watcher.
     /// </summary>
-    /// <param name="displayErrors">Flag indiacting whether errors are displayed to users or just logged.</param>
+    /// <param name="displayErrors">Flag indicating whether errors are displayed to users or just logged.</param>
     /// <returns>true if watcher was stopped successfull, false otherwise.</returns>
     private bool ServiceDeletionWatcherStop(bool displayErrors)
     {
@@ -697,7 +709,10 @@ namespace MySql.Notifier
         if (Asynchronous && _wmiAsyncDeletionWatcher != null)
         {
           _wmiAsyncDeletionWatcher.EventArrived -= ServiceDeletionWatcher_EventArrived;
-          _wmiAsyncDeletionWatcher.Stop();
+          if (IsMachineOnline)
+          {
+            _wmiAsyncDeletionWatcher.Stop();
+          }
         }
         else if (!Asynchronous && _wmiSemiSyncDeletionWatcher != null && _wmiSemiSyncDeletionWatcher.IsBusy)
         {
@@ -879,7 +894,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Attempts to stop the service status change watcher.
     /// </summary>
-    /// <param name="displayErrors">Flag indiacting whether errors are displayed to users or just logged.</param>
+    /// <param name="displayErrors">Flag indicating whether errors are displayed to users or just logged.</param>
     /// <returns>true if watcher was stopped successfull, false otherwise.</returns>
     private bool ServiceStatusChangeWatcherStop(bool displayErrors)
     {
@@ -894,7 +909,10 @@ namespace MySql.Notifier
         if (Asynchronous && _wmiAsyncStatusChangeWatcher != null)
         {
           _wmiAsyncStatusChangeWatcher.EventArrived -= ServiceStatusChangeWatcher_EventArrived;
-          _wmiAsyncStatusChangeWatcher.Stop();
+          if (IsMachineOnline)
+          {
+            _wmiAsyncStatusChangeWatcher.Stop();
+          }
         }
         else if (!Asynchronous && _wmiSemiSyncStatusChangeWatcher != null && _wmiSemiSyncStatusChangeWatcher.IsBusy)
         {

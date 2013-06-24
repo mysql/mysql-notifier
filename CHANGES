@@ -6,7 +6,10 @@
 - Fixed code to automatically add matching services. (MySql bug #67617, Bug #15887501 - MySQL Notifier autofilter not auto finding running services)
   (Bug#16660623 - NOTIFIER IS NOT LISTING THE JUST INSTALLED SERVER INSTANCE)
   (Bug#14345177 - NEW SERVICE IS NOT ADDED TO NOTIFIER)
-- Fixed the SQL Editor menu to be enabled if there is only1 connection related to the current service, if there are no connections the menu item is disabled. (Bug#14332402 - CLICKING "SQL EDITOR" DOESN'T ACTUALLY OPEN SQL EDITOR IN WB)
+- Fixed the SQL Editor menu to be enabled if there is only1 connection related to the current service, if there are no connections the menu item is disabled.
+  (Bug#14332402 - CLICKING "SQL EDITOR" DOESN'T ACTUALLY OPEN SQL EDITOR IN WB)
+- Added a custom action to the WIX project to send a WM_CLOSE message to the Notifier at uninstall time, for it to catch it and close.
+  (Bug#16661468 - NOTIFIER PROCESS/APPLICATION IS STILL RUNNING AFTER UNINSTALL.)
 
 1.1.2
 - From now on if you have the AutoAddServicesToMonitor option checked and you add a new service which Name matches the filter ("mysql") in a monitored 

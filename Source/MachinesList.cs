@@ -409,7 +409,7 @@ namespace MySql.Notifier
         foreach (ManagementObject mo in servicesToAddList)
         {
           MySQLService service = new MySQLService(mo.Properties["Name"].Value.ToString(), true, true, LocalMachine);
-          service.SetServiceParameters();
+          service.SetServiceParameters(true);
           LocalMachine.ChangeService(service, ChangeType.AutoAdd);
         }
       }

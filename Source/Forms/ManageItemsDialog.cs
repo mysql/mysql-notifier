@@ -139,7 +139,7 @@ namespace MySql.Notifier
       if (service.Host == null)
       {
         service.Host = machine;
-        service.SetServiceParameters();
+        service.SetServiceParameters(true);
       }
 
       ListViewItem newItem = new ListViewItem(service.DisplayName);

@@ -281,6 +281,25 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap CancelRefresh {
+            get {
+                object obj = ResourceManager.GetObject("CancelRefresh", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel Status Refresh.
+        /// </summary>
+        internal static string CancelStatusRefreshMenuText {
+            get {
+                return ResourceManager.GetString("CancelStatusRefreshMenuText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Localhost or 127.0.0.1 are invalid host names for a remote computer..
         /// </summary>
         internal static string CannotAddLocalhostMessage {
@@ -883,6 +902,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reconnect.
+        /// </summary>
+        internal static string ReconnectMenuText {
+            get {
+                return ResourceManager.GetString("ReconnectMenuText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap refresh {
@@ -893,29 +921,30 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hard.
+        ///   Looks up a localized string similar to  - Refreshing Status . . ..
         /// </summary>
-        internal static string RefreshMethodHard {
+        internal static string RefreshingStatusText {
             get {
-                return ResourceManager.GetString("RefreshMethodHard", resourceCulture);
+                return ResourceManager.GetString("RefreshingStatusText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Soft.
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static string RefreshMethodSoft {
+        internal static System.Drawing.Bitmap RefreshStatus {
             get {
-                return ResourceManager.GetString("RefreshMethodSoft", resourceCulture);
+                object obj = ResourceManager.GetObject("RefreshStatus", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Refresh Service Instances.
+        ///   Looks up a localized string similar to Refresh Status.
         /// </summary>
-        internal static string RefreshServices {
+        internal static string RefreshStatusMenuText {
             get {
-                return ResourceManager.GetString("RefreshServices", resourceCulture);
+                return ResourceManager.GetString("RefreshStatusMenuText", resourceCulture);
             }
         }
         

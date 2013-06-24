@@ -52,7 +52,7 @@ namespace MySql.Notifier
 
       RecreateSQLEditorMenus();
       Separator = new ToolStripSeparator();
-      Update();
+      Update(false);
     }
 
     /// <summary>
@@ -304,16 +304,17 @@ namespace MySql.Notifier
     /// <summary>
     /// Enables and disables menus based on the bound MySQL instance's connection status.
     /// </summary>
-    public void Update()
+    /// <param name="refreshing">Flag indicating if the instance is refreshing its status.</param>
+    public void Update(bool refreshing)
     {
       ToolStrip menu = InstanceMenuItem.GetCurrentParent();
       if (menu != null && menu.InvokeRequired)
       {
-        menu.Invoke(new MethodInvoker(() => { Update(); }));
+        menu.Invoke(new MethodInvoker(() => { Update(refreshing); }));
       }
       else
       {
-        InstanceMenuItem.Text = BoundInstance.HostIdentifier + " - " + BoundInstance.ConnectionStatusText;
+        InstanceMenuItem.Text = BoundInstance.HostIdentifier + (refreshing ? Resources.RefreshingStatusText : " - " + BoundInstance.ConnectionStatusText);
         switch (BoundInstance.ConnectionStatus)
         {
           case MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections:

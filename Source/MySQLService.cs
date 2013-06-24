@@ -97,7 +97,7 @@ namespace MySql.Notifier
       NotifyOnStatusChange = notificationOnChange;
       UpdateTrayIconOnStatusChange = updatesTrayIcon;
       ServiceName = serviceName;
-      SetServiceParameters();
+      SetServiceParameters(false);
     }
 
     /// <summary>
@@ -375,6 +375,30 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Fetches the real service via WMI and its current status.
+    /// </summary>
+    /// <param name="retryToGetServiceInstance">Flag indicating if the method will attempt to re-fetch the serice instance.</param>
+    public void RefreshStatusAndName(bool retryToGetServiceInstance)
+    {
+      //// If the WMI management object is not available, attempt to fetch it.
+      if (ServiceManagementObject == null && retryToGetServiceInstance)
+      {
+        GetServiceInstance(false);
+      }
+
+      //// If the WMI management object is still not available, a refresh can't be done, so return.
+      if (ServiceManagementObject != null)
+      {
+        SetStatus(Host.IsOnline ? ServiceManagementObject.Properties["State"].Value.ToString() : "Unavailable");
+        DisplayName = ServiceManagementObject.Properties["DisplayName"].Value.ToString();
+      }
+      else
+      {
+        SetStatus("Unavailable");
+      }
+    }
+
+    /// <summary>
     /// Attempts to stop and then start the current MySQL Service
     /// </summary>
     /// <returns>Flag indicating if the action completed succesfully</returns>
@@ -393,22 +417,14 @@ namespace MySql.Notifier
     /// <summary>
     /// Sets up this service status, bound WMI service and other parameters.
     /// </summary>
-    public void SetServiceParameters()
+    /// <param name="doNotFetchInstanceIfOffline">Flag indicating whether no attempt should be made to connect to the real host if the related machine is offline.</param>
+    public void SetServiceParameters(bool doNotFetchInstanceIfOffline)
     {
-      GetServiceInstance();
+      GetServiceInstance(doNotFetchInstanceIfOffline);
       try
       {
         FindMatchingWBConnections();
-
-        if (ServiceManagementObject != null)
-        {
-          if (Host.IsOnline)
-          {
-            SetStatus(ServiceManagementObject.Properties["State"].Value.ToString());
-          }
-
-          DisplayName = ServiceManagementObject.Properties["DisplayName"].Value.ToString();
-        }
+        RefreshStatusAndName(false);
 
         if (MenuGroup == null)
         {
@@ -511,9 +527,15 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the corresponding WMI service instance and sets it in the <see cref="ServiceManagementObject"/> property.
     /// </summary>
-    private void GetServiceInstance()
+    /// <param name="doNotFetchIfOffline">Flag indicating whether no attempt should be made to connect to the real host if the related machine is offline.</param>
+    private void GetServiceInstance(bool doNotFetchIfOffline)
     {
       _managementObject = null;
+      if (doNotFetchIfOffline && !Host.IsOnline)
+      {
+        return;
+      }
+
       ManagementObjectCollection retObjectCollection = Host.GetWMIServices(ServiceName, false, false);
       if (retObjectCollection != null && retObjectCollection.Count > 0)
       {
@@ -631,7 +653,7 @@ namespace MySql.Notifier
 
       while (_isWaitingOnStatusChange)
       {
-        SetServiceParameters();
+        SetServiceParameters(false);
         System.Threading.Thread.Sleep(2000);
       }
 
@@ -653,7 +675,7 @@ namespace MySql.Notifier
 
       while (_isWaitingOnStatusChange)
       {
-        SetServiceParameters();
+        SetServiceParameters(false);
         System.Threading.Thread.Sleep(2000);
       }
 

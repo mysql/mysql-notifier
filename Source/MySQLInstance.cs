@@ -130,6 +130,7 @@ namespace MySql.Notifier
       _worker = null;
       InstanceStatusCheckInProgress = false;
       MenuGroup = null;
+      RefreshingStatus = false;
       SecondsToMonitorInstance = MonitoringIntervalInSeconds;
       InstanceID = Guid.NewGuid().ToString("B");
     }
@@ -365,6 +366,12 @@ namespace MySql.Notifier
     public uint Port { get; set; }
 
     /// <summary>
+    /// Gets a value indicating whether the instance is in the process of refreshing its connection status.
+    /// </summary>
+    [XmlIgnore]
+    public bool RefreshingStatus { get; private set; }
+
+    /// <summary>
     /// Gets the list of Workbench connections that connect to this MySQL instance.
     /// </summary>
     [XmlIgnore]
@@ -416,7 +423,6 @@ namespace MySql.Notifier
         _secondsToMonitorInstance = value;
         if (_secondsToMonitorInstance <= 0)
         {
-          _secondsToMonitorInstance = MonitoringIntervalInSeconds;
           CheckInstanceStatus(true);
         }
 
@@ -530,6 +536,8 @@ namespace MySql.Notifier
     /// <param name="asynchronous">Flag indicating if the status check is run asynchronously or synchronously.</param>
     public void CheckInstanceStatus(bool asynchronous)
     {
+      _secondsToMonitorInstance = MonitoringIntervalInSeconds;
+
       if (WorkbenchConnection == null || InstanceStatusCheckInProgress)
       {
         return;
@@ -550,6 +558,29 @@ namespace MySql.Notifier
         CheckInstanceStatusWorkerCompleted(this, new RunWorkerCompletedEventArgs(null, null, false));
         Cursor.Current = Cursors.Default;
       }
+    }
+
+    /// <summary>
+    /// Refreshes the instance's connection status.
+    /// </summary>
+    /// <param name="worker"><see cref="BackgroundWorker"/> object in case that the caller means to execute this method in another thread.</param>
+    /// <returns>true if the operation was cancelled by the passed background worker, false otherwise.</returns>
+    public bool RefreshStatus(ref BackgroundWorker worker)
+    {
+      //// If user cancells before even checking the connection status, then return.
+      if (worker != null && worker.CancellationPending)
+      {
+        return true;
+      }
+
+      MenuGroup.Update(true);
+      CheckInstanceStatus(false);
+      if (MenuGroup.InstanceMenuItem.Text.EndsWith(Properties.Resources.RefreshingStatusText))
+      {
+        MenuGroup.Update(false);
+      }
+
+      return false;
     }
 
     /// <summary>

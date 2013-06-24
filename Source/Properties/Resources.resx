@@ -183,24 +183,12 @@
     <value>There was a problem retrieving Windows Services</value>
     <comment>Exception message shown when refreshing services</comment>
   </data>
-  <data name="RefreshMethodHard" xml:space="preserve">
-    <value>Hard</value>
-    <comment>Value stored in Settings for RefreshMethod setting</comment>
-  </data>
-  <data name="RefreshMethodSoft" xml:space="preserve">
-    <value>Soft</value>
-    <comment>Value stored in Settings for RefreshMethod setting</comment>
-  </data>
   <data name="CheckUpdatesMenuText" xml:space="preserve">
     <value>Check for Updates...</value>
     <comment>Sub-Action Menu (Actions)</comment>
   </data>
   <data name="LaunchInstallerMenuText" xml:space="preserve">
     <value>Launch MySQL Installer...</value>
-    <comment>Sub-Action Menu (Actions)</comment>
-  </data>
-  <data name="RefreshServices" xml:space="preserve">
-    <value>Refresh Service Instances</value>
     <comment>Sub-Action Menu (Actions)</comment>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
@@ -504,5 +492,26 @@ Please make sure the connections.xml file is not open by another program.</value
   </data>
   <data name="WMISemiSyncEventsErrorTitle" xml:space="preserve">
     <value>WMI Event Error</value>
+  </data>
+  <data name="RefreshStatusMenuText" xml:space="preserve">
+    <value>Refresh Status</value>
+    <comment>Sub-Action Menu (Actions)</comment>
+  </data>
+  <data name="CancelStatusRefreshMenuText" xml:space="preserve">
+    <value>Cancel Status Refresh</value>
+    <comment>Sub-Action Menu (Actions)</comment>
+  </data>
+  <data name="RefreshingStatusText" xml:space="preserve">
+    <value> - Refreshing Status . . .</value>
+  </data>
+  <data name="ReconnectMenuText" xml:space="preserve">
+    <value>Reconnect</value>
+    <comment>Machine Sub-Action Menu</comment>
+  </data>
+  <data name="CancelRefresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CancelRefresh.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RefreshStatus" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RefreshStatus.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
