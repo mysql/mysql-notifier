@@ -263,7 +263,6 @@
     <None Include="Resources\RefreshStatus.png" />
     <None Include="Resources\refresh.png" />
     <None Include="Resources\NotifierSplashWindow.png" />
-    <None Include="Resources\about.png" />
     <None Include="Resources\delete.png" />
     <None Include="Resources\CancelRefresh.png" />
     <Content Include="Resources\iconDB.jpg" />

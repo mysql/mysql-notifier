@@ -4,16 +4,16 @@ MySQL Notifier 1.1.4 Release Notes
 Welcome to the release notes for MySQL Notifier 1.1.4
 
 * Monitoring of services in remote Windows computers through WMI (see 'WMI Configuration' below this section for details).
-    - Remote services can be started, stopped and restarted (just as local services on MySQL Notifier 1.0).
+  - Remote services can be started, stopped and restarted (just as local services on MySQL Notifier 1.0).
 	- Balloon notifications are displayed for each monitored remote service status change (just as local services on MySQL Notifier 1.0)
-    - Monitored services (local and remote) are grouped and saved by machine.
-    - Windows services are automatically added in any monitored machine (localhost or remote) as long as the service names contain the text
-      specified in the "Automatically add new services whose name contains:" option. By default this option is set to "mysql".
-    - Remote Machines status are checked regularly (via a configurable timer) to generate notifications about machines going online/offline.
+  - Monitored services (local and remote) are grouped and saved by machine.
+  - Windows services are automatically added in any monitored machine (localhost or remote) as long as the service names contain the text
+    specified in the "Automatically add new services whose name contains:" option. By default this option is set to "mysql".
+  - Remote Machines status are checked regularly (via a configurable timer) to generate notifications about machines going online/offline.
 * Monitoring of MySQL Instances (multi-platform) via a configurable timer.
-    - Instances can be monitored by selecting existing MySQL Workbench connections and balloon notifications are displayed for each
+  - Instances can be monitored by selecting existing MySQL Workbench connections and balloon notifications are displayed for each
 	  monitored instance status change.
-    - MySQL Workbench connections are maintained directly in MySQL Workbench files if installed or in MySQL Notifer files otherwise, and
+  - MySQL Workbench connections are maintained directly in MySQL Workbench files if installed or in MySQL Notifer files otherwise, and
 	  are migrated to MySQL Workbench when it is installed.
 	- Monitored instances display the SQL Editor and Configure Instance menus (as similar local services do) and the connection used to
 	  monitor the instance is displayed in bold.
@@ -21,8 +21,6 @@ Welcome to the release notes for MySQL Notifier 1.1.4
 
 Known Limitations
 --------------------
-* The MySQL Notifier is not closed upon uninstallation.
-  Workaround: Users must close the MySQL Notifier prior removing the product
 * MySQL Workbench-related menus (SQL Editor and Configure Instance) are not available for monitored remote services.
   Workaround: Open MySQL Workbench and select the connection of the monitored remote service.
 * MySQL Workbench connections used to monitor MySQL instances cannot be edited, just added or deleted.
