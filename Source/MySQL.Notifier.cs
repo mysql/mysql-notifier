@@ -68,6 +68,7 @@ namespace MySql.Notifier
     private ToolStripMenuItem _actionsMenuItem;
     private ContextMenuStrip _staticMenu;
     private bool _statusRefreshCancelled;
+    private int previousMachineCount;
 
     /// <summary>
     /// The timer that fires the connection status checks.
@@ -139,6 +140,7 @@ namespace MySql.Notifier
       //// This method ▼ populates services with post-load information, we need to execute it after the Popup-Menu has been initialized at RefreshMenuIfNeeded(bool).
       machinesList.LoadMachinesServices();
       PreviousServicesAndInstancesCount = CurrentServicesAndInstancesCount;
+      previousMachineCount = machinesList.Machines.Count;
 
       //// Create watcher for WB files
       string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -679,7 +681,7 @@ namespace MySql.Notifier
         case ChangeType.AddByLoad:
         case ChangeType.AutoAdd:
           ResetContextMenuStructure(changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser);
-          if (machine.IsLocal && !machine.HasServices)
+          if (machine.IsLocal && !machine.HasServices && changeType == ChangeType.AutoAdd)
           {
             break;
           }
@@ -1011,12 +1013,14 @@ namespace MySql.Notifier
       }
       else
       {
-        if ((CurrentServicesAndInstancesCount == 0 && itemRemoved) || (PreviousServicesAndInstancesCount == 0 && !itemRemoved))
+        if ((CurrentServicesAndInstancesCount + machinesList.Machines.Count == 0 && itemRemoved)
+            || (PreviousServicesAndInstancesCount + previousMachineCount == 0 && !itemRemoved))
         {
           PreviousServicesAndInstancesCount = CurrentServicesAndInstancesCount;
+          previousMachineCount = machinesList.Machines.Count;
           notifyIcon.ContextMenuStrip = new ContextMenuStrip();
           notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
-          if (CurrentServicesAndInstancesCount > 0)
+          if (CurrentServicesAndInstancesCount + machinesList.Machines.Count > 0)
           {
             notifyIcon.ContextMenuStrip.Items.Add(_actionsMenuItem);
           }

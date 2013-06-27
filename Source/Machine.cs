@@ -1037,20 +1037,27 @@ namespace MySql.Notifier
     /// <param name="menu">The Notifier's context menu.</param>
     public void RemoveMenuGroup(ContextMenuStrip menu)
     {
-      foreach (MySQLService service in Services)
+      if (menu.InvokeRequired)
       {
-        service.MenuGroup.RemoveFromContextMenu(menu);
+        menu.Invoke(new MethodInvoker(() => { RemoveMenuGroup(menu); }));
       }
-
-      MenuGroup.DropDownItems.Clear();
-      int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(menu, MachineId);
-      if (index >= 0)
+      else
       {
-        menu.Items.RemoveAt(index);
-        menu.Refresh();
-      }
+        foreach (MySQLService service in Services)
+        {
+          service.MenuGroup.RemoveFromContextMenu(menu);
+        }
 
-      MenuGroup = null;
+        MenuGroup.DropDownItems.Clear();
+        int index = ServiceMenuGroup.FindMenuItemWithinMenuStrip(menu, MachineId);
+        if (index >= 0)
+        {
+          menu.Items.RemoveAt(index);
+          menu.Refresh();
+        }
+
+        MenuGroup = null;
+      }
     }
 
     /// <summary>
