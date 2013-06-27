@@ -699,6 +699,10 @@ namespace MySql.Notifier
             service.UpdateTrayIconOnStatusChange = true;
             Services.Add(service);
             OnServiceListChanged(service, changeType);
+            if (IsLocal && Services.Count == 1 && !InitialLoadDone)
+            {
+              InitialLoadDone = true;
+            }
           }
 
           LoadServiceParameters(service, changeType);
@@ -1045,6 +1049,8 @@ namespace MySql.Notifier
         menu.Items.RemoveAt(index);
         menu.Refresh();
       }
+
+      MenuGroup = null;
     }
 
     /// <summary>

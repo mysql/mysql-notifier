@@ -65,6 +65,8 @@ namespace MySql.Notifier
     private ToolStripMenuItem _optionsMenuItem;
     private ToolStripMenuItem _aboutMenuItem;
     private ToolStripMenuItem _exitMenuItem;
+    private ToolStripMenuItem _actionsMenuItem;
+    private ContextMenuStrip _staticMenu;
     private bool _statusRefreshCancelled;
 
     /// <summary>
@@ -101,6 +103,8 @@ namespace MySql.Notifier
       _optionsMenuItem = null;
       _aboutMenuItem = null;
       _exitMenuItem = null;
+      _actionsMenuItem = null;
+      _staticMenu = null;
       _worker = null;
       StatusRefreshInProgress = false;
 
@@ -129,7 +133,7 @@ namespace MySql.Notifier
       machinesList.MachineServiceStatusChanged += machinesList_MachineServiceStatusChanged;
       machinesList.MachineStatusChanged += machinesList_MachineStatusChanged;
 
-      RebuildMenuIfNeeded(false);
+      SetupContextMenu();
       SetNotifyIconToolTip();
 
       //// This method ▼ populates services with post-load information, we need to execute it after the Popup-Menu has been initialized at RefreshMenuIfNeeded(bool).
@@ -319,6 +323,16 @@ namespace MySql.Notifier
           _exitMenuItem.Dispose();
         }
 
+        if (_actionsMenuItem != null)
+        {
+          _actionsMenuItem.Dispose();
+        }
+
+        if (_staticMenu != null)
+        {
+          _staticMenu.Dispose();
+        }
+
         if (mySQLInstancesList != null)
         {
           mySQLInstancesList.Dispose();
@@ -450,122 +464,6 @@ namespace MySql.Notifier
       {
         _aboutDialog.Activate();
       }
-    }
-
-    /// <summary>
-    /// Adds the static menu items such as Options, Exit, About..
-    /// </summary>
-    private void AddStaticMenuItems()
-    {
-      ContextMenuStrip menu = new ContextMenuStrip();
-
-      if (_refreshStatusSeparator == null)
-      {
-        _refreshStatusSeparator = new ToolStripSeparator();
-      }
-
-      if (_refreshStatusMenuItem == null)
-      {
-        _refreshStatusMenuItem = new ToolStripMenuItem(Resources.RefreshStatusMenuText);
-        _refreshStatusMenuItem.Click += refreshStatus_Click;
-        _refreshStatusMenuItem.Image = Resources.RefreshStatus;
-      }
-
-      if (_manageServicesMenuItem == null)
-      {
-        _manageServicesMenuItem = new ToolStripMenuItem(Resources.ManageItemsMenuText);
-        _manageServicesMenuItem.Click += new EventHandler(manageServicesDialogItem_Click);
-        _manageServicesMenuItem.Image = Resources.ManageServicesIcon;
-      }
-
-      if (launchInstallerMenuItem == null)
-      {
-        launchInstallerMenuItem = new ToolStripMenuItem(Resources.LaunchInstallerMenuText);
-        launchInstallerMenuItem.Click += new EventHandler(launchInstallerItem_Click);
-        launchInstallerMenuItem.Image = Resources.StartInstallerIcon;
-      }
-
-      if (_checkForUpdatesMenuItem == null)
-      {
-        _checkForUpdatesMenuItem = new ToolStripMenuItem(Resources.CheckUpdatesMenuText);
-        _checkForUpdatesMenuItem.Click += new EventHandler(checkUpdatesItem_Click);
-        _checkForUpdatesMenuItem.Image = Resources.CheckForUpdatesIcon;
-      }
-
-      if (launchWorkbenchUtilitiesMenuItem == null)
-      {
-        launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem(Resources.UtilitiesShellMenuText);
-        launchWorkbenchUtilitiesMenuItem.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
-        launchWorkbenchUtilitiesMenuItem.Image = Resources.LaunchUtilities;
-      }
-
-      if (_optionsMenuItem == null)
-      {
-        _optionsMenuItem = new ToolStripMenuItem(Resources.OptionsMenuText);
-        _optionsMenuItem.Click += new EventHandler(optionsItem_Click);
-      }
-
-      if (_aboutMenuItem == null)
-      {
-        _aboutMenuItem = new ToolStripMenuItem(Resources.AboutMenuText);
-        _aboutMenuItem.Click += new EventHandler(aboutMenu_Click);
-      }
-
-      if (_exitMenuItem == null)
-      {
-        _exitMenuItem = new ToolStripMenuItem(Resources.CloseNotifierMenuText);
-        _exitMenuItem.Click += new EventHandler(exitItem_Click);
-      }
-
-      menu.Items.Add(_manageServicesMenuItem);
-      menu.Items.Add(launchInstallerMenuItem);
-      menu.Items.Add(_checkForUpdatesMenuItem);
-
-      if (MySqlWorkbench.AllowsExternalConnectionsManagement)
-      {
-        menu.Items.Add(launchWorkbenchUtilitiesMenuItem);
-      }
-
-      menu.Items.Add(_refreshStatusSeparator);
-      menu.Items.Add(_refreshStatusMenuItem);
-      menu.Items.Add(new ToolStripSeparator());
-      menu.Items.Add(_optionsMenuItem);
-      menu.Items.Add(_aboutMenuItem);
-      menu.Items.Add(_exitMenuItem);
-
-      if (CurrentServicesAndInstancesCount > 0)
-      {
-        ToolStripMenuItem actionsMenu = new ToolStripMenuItem(Resources.Actions, null);
-        actionsMenu.Tag = Resources.Actions;
-        actionsMenu.DropDown = menu;
-        notifyIcon.ContextMenuStrip.Items.Add(actionsMenu);
-      }
-      else
-      {
-        notifyIcon.ContextMenuStrip = menu;
-      }
-
-      //// Menu items shown when there are updates available
-      if (hasUpdatesSeparator == null)
-      {
-        hasUpdatesSeparator = new ToolStripSeparator();
-      }
-
-      if (installAvailablelUpdatesMenuItem == null)
-      {
-        installAvailablelUpdatesMenuItem = new ToolStripMenuItem("Install available updates...", Resources.InstallAvailableUpdatesIcon);
-        installAvailablelUpdatesMenuItem.Click += new EventHandler(InstallAvailablelUpdates_Click);
-      }
-
-      if (ignoreAvailableUpdateMenuItem == null)
-      {
-        ignoreAvailableUpdateMenuItem = new ToolStripMenuItem("Ignore this update");
-        ignoreAvailableUpdateMenuItem.Click += new EventHandler(IgnoreAvailableUpdateItem_Click);
-      }
-
-      notifyIcon.ContextMenuStrip.Items.Add(hasUpdatesSeparator);
-      notifyIcon.ContextMenuStrip.Items.Add(installAvailablelUpdatesMenuItem);
-      notifyIcon.ContextMenuStrip.Items.Add(ignoreAvailableUpdateMenuItem);
     }
 
     private void refreshStatus_Click(object sender, EventArgs e)
@@ -775,17 +673,23 @@ namespace MySql.Notifier
     /// <param name="changeType">List change type.</param>
     private void machinesList_MachineListChanged(Machine machine, ChangeType changeType)
     {
-      RebuildMenuIfNeeded(changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser);
       switch (changeType)
       {
         case ChangeType.AddByUser:
         case ChangeType.AddByLoad:
         case ChangeType.AutoAdd:
+          ResetContextMenuStructure(changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser);
+          if (machine.IsLocal && !machine.HasServices)
+          {
+            break;
+          }
+
           machine.SetupMenuGroup(notifyIcon.ContextMenuStrip);
           if (changeType == ChangeType.AddByUser)
           {
             ShowTooltip(false, Resources.BalloonTitleMachinesList, string.Format(Resources.BalloonTextMachineAdded, machine.Name));
           }
+
           break;
 
         case ChangeType.RemoveByUser:
@@ -795,7 +699,13 @@ namespace MySql.Notifier
           {
             ShowTooltip(false, Resources.BalloonTitleMachinesList, string.Format(Resources.BalloonTextMachineRemoved, machine.Name));
           }
-          machine.Dispose();
+
+          if (machine != machinesList.LocalMachine)
+          {
+            machine.Dispose();
+          }
+
+          ResetContextMenuStructure(changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser);
           break;
       }
     }
@@ -808,7 +718,7 @@ namespace MySql.Notifier
     /// <param name="changeType">List change type.</param>
     private void machinesList_MachineServiceListChanged(Machine machine, MySQLService service, ChangeType changeType)
     {
-      RebuildMenuIfNeeded(changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser);
+      ResetContextMenuStructure(changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser);
       switch (changeType)
       {
         case ChangeType.AddByLoad:
@@ -946,7 +856,7 @@ namespace MySql.Notifier
     private void MySQLInstancesListChanged(object sender, InstancesListChangedArgs args)
     {
       bool instanceRemoved = args.ListChange == ListChangedType.ItemDeleted;
-      RebuildMenuIfNeeded(instanceRemoved);
+      ResetContextMenuStructure(instanceRemoved);
       switch (args.ListChange)
       {
         case ListChangedType.ItemAdded:
@@ -1030,31 +940,92 @@ namespace MySql.Notifier
       }
     }
 
-    private void ReBuildMenu()
+    /// <summary>
+    /// Creates the context Notifier context menu.
+    /// </summary>
+    private void SetupContextMenu()
     {
-      notifyIcon.ContextMenuStrip = new ContextMenuStrip();
-      notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
-      AddStaticMenuItems();
+      _staticMenu = new ContextMenuStrip();
+      _refreshStatusSeparator = new ToolStripSeparator();
+      _refreshStatusMenuItem = new ToolStripMenuItem(Resources.RefreshStatusMenuText);
+      _refreshStatusMenuItem.Click += refreshStatus_Click;
+      _refreshStatusMenuItem.Image = Resources.RefreshStatus;
+      _manageServicesMenuItem = new ToolStripMenuItem(Resources.ManageItemsMenuText);
+      _manageServicesMenuItem.Click += new EventHandler(manageServicesDialogItem_Click);
+      _manageServicesMenuItem.Image = Resources.ManageServicesIcon;
+      launchInstallerMenuItem = new ToolStripMenuItem(Resources.LaunchInstallerMenuText);
+      launchInstallerMenuItem.Click += new EventHandler(launchInstallerItem_Click);
+      launchInstallerMenuItem.Image = Resources.StartInstallerIcon;
+      _checkForUpdatesMenuItem = new ToolStripMenuItem(Resources.CheckUpdatesMenuText);
+      _checkForUpdatesMenuItem.Click += new EventHandler(checkUpdatesItem_Click);
+      _checkForUpdatesMenuItem.Image = Resources.CheckForUpdatesIcon;
+      launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem(Resources.UtilitiesShellMenuText);
+      launchWorkbenchUtilitiesMenuItem.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
+      launchWorkbenchUtilitiesMenuItem.Image = Resources.LaunchUtilities;
+      _optionsMenuItem = new ToolStripMenuItem(Resources.OptionsMenuText);
+      _optionsMenuItem.Click += new EventHandler(optionsItem_Click);
+      _aboutMenuItem = new ToolStripMenuItem(Resources.AboutMenuText);
+      _aboutMenuItem.Click += new EventHandler(aboutMenu_Click);
+      _exitMenuItem = new ToolStripMenuItem(Resources.CloseNotifierMenuText);
+      _exitMenuItem.Click += new EventHandler(exitItem_Click);
+      hasUpdatesSeparator = new ToolStripSeparator();
+      installAvailablelUpdatesMenuItem = new ToolStripMenuItem(Resources.InstallAvailableUpdatesMenuText, Resources.InstallAvailableUpdatesIcon);
+      installAvailablelUpdatesMenuItem.Click += new EventHandler(InstallAvailablelUpdates_Click);
+      ignoreAvailableUpdateMenuItem = new ToolStripMenuItem(Resources.IgnoreUpdateMenuText);
+      ignoreAvailableUpdateMenuItem.Click += new EventHandler(IgnoreAvailableUpdateItem_Click);
+      _actionsMenuItem = new ToolStripMenuItem(Resources.Actions, null);
+      _actionsMenuItem.Tag = Resources.Actions;
+
+      _staticMenu.Items.Add(_manageServicesMenuItem);
+      _staticMenu.Items.Add(launchInstallerMenuItem);
+      _staticMenu.Items.Add(_checkForUpdatesMenuItem);
+      _staticMenu.Items.Add(launchWorkbenchUtilitiesMenuItem);
+      _staticMenu.Items.Add(_refreshStatusSeparator);
+      _staticMenu.Items.Add(_refreshStatusMenuItem);
+      _staticMenu.Items.Add(hasUpdatesSeparator);
+      _staticMenu.Items.Add(installAvailablelUpdatesMenuItem);
+      _staticMenu.Items.Add(ignoreAvailableUpdateMenuItem);
+      _staticMenu.Items.Add(new ToolStripSeparator());
+      _staticMenu.Items.Add(_optionsMenuItem);
+      _staticMenu.Items.Add(_aboutMenuItem);
+      _staticMenu.Items.Add(_exitMenuItem);
+      _actionsMenuItem.DropDown = _staticMenu;
+
+      ResetContextMenuStructure(false);
       UpdateStaticMenuItems();
     }
 
     /// <summary>
-    /// Checks if the context menus need to be rebuilt.
+    /// Resets the appearance of the context menu by having the static menu items under an Actions sub-menu or directly on the main menu.
     /// </summary>
     /// <param name="itemRemoved">Flag indicating if a service or instance was removed.</param>
-    /// <returns>true if the menu was rebuilt, false otherwise.</returns>
-    private bool RebuildMenuIfNeeded(bool itemRemoved)
+    private void ResetContextMenuStructure(bool itemRemoved)
     {
-      bool menuWasRebuilt = false;
-
-      if ((CurrentServicesAndInstancesCount == 0 && itemRemoved) || (PreviousServicesAndInstancesCount == 0 && !itemRemoved))
+      if (_actionsMenuItem.DropDown.InvokeRequired && CurrentServicesAndInstancesCount > 0)
       {
-        ReBuildMenu();
-        PreviousServicesAndInstancesCount = CurrentServicesAndInstancesCount;
-        menuWasRebuilt = true;
+        _actionsMenuItem.DropDown.Invoke(new MethodInvoker(() => { ResetContextMenuStructure(itemRemoved); }));
       }
-
-      return menuWasRebuilt;
+      else if (_staticMenu.InvokeRequired && CurrentServicesAndInstancesCount <= 0)
+      {
+        _staticMenu.Invoke(new MethodInvoker(() => { ResetContextMenuStructure(itemRemoved); }));
+      }
+      else
+      {
+        if ((CurrentServicesAndInstancesCount == 0 && itemRemoved) || (PreviousServicesAndInstancesCount == 0 && !itemRemoved))
+        {
+          PreviousServicesAndInstancesCount = CurrentServicesAndInstancesCount;
+          notifyIcon.ContextMenuStrip = new ContextMenuStrip();
+          notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
+          if (CurrentServicesAndInstancesCount > 0)
+          {
+            notifyIcon.ContextMenuStrip.Items.Add(_actionsMenuItem);
+          }
+          else
+          {
+            notifyIcon.ContextMenuStrip = _staticMenu;
+          }
+        }
+      }
     }
 
     /// <summary>
@@ -1374,20 +1345,14 @@ namespace MySql.Notifier
     private void UpdateStaticMenuItems()
     {
       bool hasUpdates = (Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0;
-      if (hasUpdatesSeparator != null) hasUpdatesSeparator.Visible = hasUpdates;
-      if (installAvailablelUpdatesMenuItem != null) installAvailablelUpdatesMenuItem.Visible = hasUpdates;
-      if (ignoreAvailableUpdateMenuItem != null) ignoreAvailableUpdateMenuItem.Visible = hasUpdates;
-      if (launchInstallerMenuItem != null) launchInstallerMenuItem.Enabled = MySqlInstaller.IsInstalled;
-      if (launchWorkbenchUtilitiesMenuItem != null) launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySQLUtilitiesInstalled();
-      if (_refreshStatusSeparator != null)
-      {
-        _refreshStatusSeparator.Visible = CurrentServicesAndInstancesCount > 0;
-      }
-
-      if (_refreshStatusMenuItem != null)
-      {
-        _refreshStatusMenuItem.Visible = CurrentServicesAndInstancesCount > 0;
-      }
+      hasUpdatesSeparator.Visible = hasUpdates;
+      installAvailablelUpdatesMenuItem.Visible = hasUpdates;
+      ignoreAvailableUpdateMenuItem.Visible = hasUpdates;
+      launchInstallerMenuItem.Enabled = MySqlInstaller.IsInstalled;
+      launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySQLUtilitiesInstalled();
+      _refreshStatusSeparator.Visible = CurrentServicesAndInstancesCount > 0;
+      _refreshStatusMenuItem.Visible = CurrentServicesAndInstancesCount > 0;
+      _actionsMenuItem.Visible = CurrentServicesAndInstancesCount > 0;
     }
   }
 

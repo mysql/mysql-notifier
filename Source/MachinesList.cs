@@ -272,10 +272,13 @@ namespace MySql.Notifier
           SavetoFile();
         }
 
-        machine.MachineStatusChanged -= OnMachineStatusChanged;
-        machine.ServiceListChanged -= OnMachineServiceListChanged;
-        machine.ServiceStatusChanged -= OnMachineServiceStatusChanged;
-        machine.ServiceStatusChangeError -= OnMachineServiceStatusChangeError;
+        if (machine != LocalMachine)
+        {
+          machine.MachineStatusChanged -= OnMachineStatusChanged;
+          machine.ServiceListChanged -= OnMachineServiceListChanged;
+          machine.ServiceStatusChanged -= OnMachineServiceStatusChanged;
+          machine.ServiceStatusChangeError -= OnMachineServiceStatusChangeError;
+        }
       }
       else
       {
@@ -294,7 +297,7 @@ namespace MySql.Notifier
         machine.ServiceStatusChangeError += OnMachineServiceStatusChangeError;
       }
 
-      if (MachineListChanged != null && !(machine.IsLocal && !machine.HasServices))
+      if (MachineListChanged != null)
       {
         MachineListChanged(machine, changeType);
       }
@@ -308,24 +311,20 @@ namespace MySql.Notifier
     /// <param name="changeType">Service list change type.</param>
     protected virtual void OnMachineServiceListChanged(Machine machine, MySQLService service, ChangeType changeType)
     {
-      if (MachineServiceListChanged != null)
-      {
-        MachineServiceListChanged(machine, service, changeType);
-      }
-
       switch (changeType)
       {
         case ChangeType.RemoveByEvent:
         case ChangeType.RemoveByUser:
+          if (MachineServiceListChanged != null)
+          {
+            MachineServiceListChanged(machine, service, changeType);
+          }
+
           if (machine.Services.Count == 0)
           {
             ChangeMachine(machine, ChangeType.RemoveByEvent);
           }
-          SavetoFile();
-          break;
 
-        case ChangeType.AddByUser:
-          SavetoFile();
           break;
 
         case ChangeType.AutoAdd:
@@ -333,9 +332,24 @@ namespace MySql.Notifier
           {
             ChangeMachine(machine, ChangeType.AutoAdd);
           }
-          SavetoFile();
+
+          if (MachineServiceListChanged != null)
+          {
+            MachineServiceListChanged(machine, service, changeType);
+          }
+
+          break;
+
+        default:
+          if (MachineServiceListChanged != null)
+          {
+            MachineServiceListChanged(machine, service, changeType);
+          }
+
           break;
       }
+
+      SavetoFile();
     }
 
     /// <summary>

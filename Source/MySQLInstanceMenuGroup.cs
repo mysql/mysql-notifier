@@ -72,24 +72,34 @@ namespace MySql.Notifier
     {
       if (disposing)
       {
-        //// Free managed resources
-        if (ConfigureMenuItem != null)
+        try
         {
-          ConfigureMenuItem.Dispose();
-        }
+          //// Free managed resources
+          if (ConfigureMenuItem != null)
+          {
+            ConfigureMenuItem.Dispose();
+          }
 
-        if (InstanceMenuItem != null)
-        {
-          InstanceMenuItem.Dispose();
-        }
-        if (SQLEditorMenuItem != null)
-        {
-          SQLEditorMenuItem.Dispose();
-        }
+          if (InstanceMenuItem != null)
+          {
+            InstanceMenuItem.Dispose();
+          }
 
-        if (Separator != null)
+          if (SQLEditorMenuItem != null)
+          {
+            SQLEditorMenuItem.Dispose();
+          }
+
+          if (Separator != null)
+          {
+            Separator.Dispose();
+          }
+        }
+        catch
         {
-          Separator.Dispose();
+          //// Sometimes when the dispose is done from a thread different than the main one a cross-thread exception is thrown which is not critical
+          //// since these menu items will be disposed later by the garbage collector. No Exception is being actually handled or logged since we do
+          //// not wat to overwhelm the log with these error messages since they do not affect the Notifier's execution.
         }
       }
 
@@ -262,43 +272,50 @@ namespace MySql.Notifier
     /// <param name="menu">Context menu strip to remove the MySQL instance's menu items from..</param>
     public void RemoveFromContextMenu(ContextMenuStrip menu)
     {
-      string[] menuItemTexts = new string[4];
-      int index = -1;
-
-      if (MySqlWorkbench.AllowsExternalConnectionsManagement)
+      if (menu.InvokeRequired)
       {
-        //// The last itemText we delete is the service name itemText which is the reference for the others.
-        menuItemTexts[0] = "Configure Menu";
-        menuItemTexts[1] = "Editor Menu";
-        menuItemTexts[2] = "Separator";
-        menuItemTexts[3] = InstanceMenuItem.Text;
+        menu.Invoke(new MethodInvoker(() => { RemoveFromContextMenu(menu); }));
       }
       else
       {
-        menuItemTexts[0] = "Separator";
-        menuItemTexts[1] = InstanceMenuItem.Text;
-      }
+        string[] menuItemTexts = new string[4];
+        int index = -1;
 
-      foreach (var itemText in menuItemTexts)
-      {
-        if (string.IsNullOrEmpty(itemText))
+        if (MySqlWorkbench.AllowsExternalConnectionsManagement)
         {
-          continue;
+          //// The last itemText we delete is the service name itemText which is the reference for the others.
+          menuItemTexts[0] = "Configure Menu";
+          menuItemTexts[1] = "Editor Menu";
+          menuItemTexts[2] = "Separator";
+          menuItemTexts[3] = InstanceMenuItem.Text;
+        }
+        else
+        {
+          menuItemTexts[0] = "Separator";
+          menuItemTexts[1] = InstanceMenuItem.Text;
         }
 
-        index = FindInstanceMenuItemWithinMenuStrip(menu);
-        if (index >= 0)
+        foreach (var itemText in menuItemTexts)
         {
-          if (!itemText.Equals(InstanceMenuItem.Text))
+          if (string.IsNullOrEmpty(itemText))
           {
-            index++;
+            continue;
           }
 
-          menu.Items.RemoveAt(index);
-        }
-      }
+          index = FindInstanceMenuItemWithinMenuStrip(menu);
+          if (index >= 0)
+          {
+            if (!itemText.Equals(InstanceMenuItem.Text))
+            {
+              index++;
+            }
 
-      menu.Refresh();
+            menu.Items.RemoveAt(index);
+          }
+        }
+
+        menu.Refresh();
+      }
     }
 
     /// <summary>

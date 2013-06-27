@@ -425,40 +425,49 @@ namespace MySql.Notifier
     {
       if (disposing)
       {
-        //// Free managed resources
-        if (configureMenu != null)
+        try
         {
-          configureMenu.Dispose();
-        }
+          //// Free managed resources
+          if (editorMenu != null)
+          {
+            editorMenu.Dispose();
+          }
 
-        if (editorMenu != null)
-        {
-          editorMenu.Dispose();
-        }
+          if (restartMenu != null)
+          {
+            restartMenu.Dispose();
+          }
 
-        if (restartMenu != null)
-        {
-          restartMenu.Dispose();
-        }
+          if (separator != null)
+          {
+            separator.Dispose();
+          }
 
-        if (separator != null)
-        {
-          separator.Dispose();
-        }
+          if (startMenu != null)
+          {
+            startMenu.Dispose();
+          }
 
-        if (startMenu != null)
-        {
-          startMenu.Dispose();
-        }
+          if (statusMenu != null)
+          {
+            statusMenu.Dispose();
+          }
 
-        if (statusMenu != null)
-        {
-          statusMenu.Dispose();
-        }
+          if (stopMenu != null)
+          {
+            stopMenu.Dispose();
+          }
 
-        if (stopMenu != null)
+          if (configureMenu != null)
+          {
+            configureMenu.Dispose();
+          }
+        }
+        catch
         {
-          stopMenu.Dispose();
+          //// Sometimes when the dispose is done from a thread different than the main one a cross-thread exception is thrown which is not critical
+          //// since these menu items will be disposed later by the garbage collector. No Exception is being actually handled or logged since we do
+          //// not wat to overwhelm the log with these error messages since they do not affect the Notifier's execution.
         }
       }
 

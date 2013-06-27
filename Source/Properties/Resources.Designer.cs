@@ -546,12 +546,30 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ignore this update.
+        /// </summary>
+        internal static string IgnoreUpdateMenuText {
+            get {
+                return ResourceManager.GetString("IgnoreUpdateMenuText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap InstallAvailableUpdatesIcon {
             get {
                 object obj = ResourceManager.GetObject("InstallAvailableUpdatesIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Install available updates....
+        /// </summary>
+        internal static string InstallAvailableUpdatesMenuText {
+            get {
+                return ResourceManager.GetString("InstallAvailableUpdatesMenuText", resourceCulture);
             }
         }
         
