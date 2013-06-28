@@ -379,6 +379,7 @@ namespace MySql.Notifier
       this.Name = "ManageItemsDialog";
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Manage Items";
+      this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ManageItemsDialog_FormClosed);
       this.Controls.SetChildIndex(this.ContentAreaPanel, 0);
       this.Controls.SetChildIndex(this.FootnoteAreaPanel, 0);
       this.Controls.SetChildIndex(this.CommandAreaPanel, 0);

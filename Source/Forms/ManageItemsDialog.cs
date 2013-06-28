@@ -38,12 +38,25 @@ namespace MySql.Notifier
     private object _selectedItem;
 
     /// <summary>
+    /// Flag indicating if any of the maintained instances properties changed and need to be saved.
+    /// </summary>
+    private bool _instancesHaveChanges;
+
+    /// <summary>
+    /// Flag indicating if any of the maintained services properties changed and need to be saved.
+    /// </summary>
+    private bool _servicesHaveChanges;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ManageItemsDialog"/> class.
     /// </summary>
     /// <param name="instancesList">List of <see cref="MySQLInstance"/> objects.</param>
     /// <param name="machineslist">List of <see cref="Machine"/> objects.</param>
     public ManageItemsDialog(MySQLInstancesList instancesList, MachinesList machineslist)
     {
+      _selectedItem = null;
+      _instancesHaveChanges = false;
+      _servicesHaveChanges = false;
       InitializeComponent();
       InstancesList = instancesList;
       InstancesListChanged = false;
@@ -185,6 +198,27 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Event delegate method fired when the <see cref="ManageItemsDialog"/> button is closed.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void ManageItemsDialog_FormClosed(object sender, FormClosedEventArgs e)
+    {
+      if (DialogResult == System.Windows.Forms.DialogResult.OK)
+      {
+        if (_instancesHaveChanges)
+        {
+          InstancesList.SaveToFile();
+        }
+
+        if (_servicesHaveChanges)
+        {
+          machinesList.SavetoFile();
+        }
+      }
+    }
+
+    /// <summary>
     /// Event delegate method fired when the <see cref="InstanceMonitorIntervalNumericUpDown"/> value changes.
     /// </summary>
     /// <param name="sender">Sender object.</param>
@@ -198,6 +232,7 @@ namespace MySql.Notifier
 
       MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
       selectedInstance.MonitoringInterval = (uint)InstanceMonitorIntervalNumericUpDown.Value;
+      _instancesHaveChanges = true;
     }
 
     /// <summary>
@@ -214,6 +249,7 @@ namespace MySql.Notifier
 
       MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
       selectedInstance.MonitoringIntervalUnitOfMeasure = (TimeUtilities.IntervalUnitOfMeasure)InstanceMonitorIntervalUOMComboBox.SelectedIndex;
+      _instancesHaveChanges = true;
     }
 
     /// <summary>
@@ -338,11 +374,13 @@ namespace MySql.Notifier
       {
         MySQLService selectedService = _selectedItem as MySQLService;
         selectedService.NotifyOnStatusChange = NotifyOnStatusChangeCheckBox.Checked;
+        _servicesHaveChanges = true;
       }
       else if (_selectedItem is MySQLInstance)
       {
         MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
         selectedInstance.MonitorAndNotifyStatus = NotifyOnStatusChangeCheckBox.Checked;
+        _instancesHaveChanges = true;
       }
     }
 
@@ -488,11 +526,13 @@ namespace MySql.Notifier
       {
         MySQLService selectedService = _selectedItem as MySQLService;
         selectedService.UpdateTrayIconOnStatusChange = UpdateTrayIconCheckBox.Checked;
+        _servicesHaveChanges = true;
       }
       else if (_selectedItem is MySQLInstance)
       {
         MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
         selectedInstance.UpdateTrayIconOnStatusChange = UpdateTrayIconCheckBox.Checked;
+        _instancesHaveChanges = true;
       }
     }
   }

@@ -1294,6 +1294,12 @@ namespace MySql.Notifier
           return;
         }
       }
+
+      //// Refresh Notifier's icon.
+      if (Settings.Default.NotifyOfStatusChange)
+      {
+        RefreshNotifierIcon();
+      }
     }
 
     /// <summary>
