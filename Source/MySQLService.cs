@@ -381,20 +381,34 @@ namespace MySql.Notifier
     public void RefreshStatusAndName(bool retryToGetServiceInstance)
     {
       //// If the WMI management object is not available, attempt to fetch it.
-      if (ServiceManagementObject == null && retryToGetServiceInstance)
+      if (retryToGetServiceInstance)
       {
         GetServiceInstance(false);
       }
 
-      //// If the WMI management object is still not available, a refresh can't be done, so return.
+      //// If the WMI management object is still not available, set the status to Unavailable.
+      string newStatusText = "Unavailable";
       if (ServiceManagementObject != null)
       {
-        SetStatus(Host.IsOnline ? ServiceManagementObject.Properties["State"].Value.ToString() : "Unavailable");
+        if (Host.IsOnline)
+        {
+          newStatusText = ServiceManagementObject.Properties["State"].Value.ToString();
+        }
+
         DisplayName = ServiceManagementObject.Properties["DisplayName"].Value.ToString();
       }
-      else
+
+      MySQLServiceStatus newStatus;
+      GetStatusFromText(newStatusText, out newStatus);
+      if (Status != newStatus)
       {
-        SetStatus("Unavailable");
+        //// Set the new status since it is different to the previous status.
+        SetStatus(newStatusText);
+      }
+      else if (MenuGroup != null)
+      {
+        //// Force the update of the UI even if the previous status is the same as the new status.
+        MenuGroup.Update();
       }
     }
 
@@ -446,9 +460,8 @@ namespace MySql.Notifier
     public void SetStatus(string statusString)
     {
       MySQLServiceStatus newStatus;
-      statusString = statusString.Replace(" ", string.Empty);
-      bool parsed = MySQLServiceStatus.TryParse(statusString, out newStatus);
-      if (parsed)
+      bool matchingStatusFound = GetStatusFromText(statusString, out newStatus);
+      if (matchingStatusFound)
       {
         Status = newStatus;
       }
@@ -522,6 +535,20 @@ namespace MySql.Notifier
       worker.DoWork += new DoWorkEventHandler(worker_DoWork);
       worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
       worker.RunWorkerAsync(action);
+    }
+
+    /// <summary>
+    /// Converts a service status text extracted from the Service's state property to a <see cref="MySQLServiceStatus"/> enumeration value.
+    /// </summary>
+    /// <param name="statusText">Service's state property text.</param>
+    /// <param name="convertedStatus">A <see cref="MySQLServiceStatus"/> enumeration value if a matching one was found.</param>
+    /// <returns>true if a matching enumeration value is found for the given status text, false otherwise.</returns>
+    private bool GetStatusFromText(string statusText, out MySQLServiceStatus convertedStatus)
+    {
+      convertedStatus = MySQLServiceStatus.Unavailable;
+      statusText = statusText.Replace(" ", string.Empty);
+      bool parsed = MySQLServiceStatus.TryParse(statusText, out convertedStatus);
+      return parsed;
     }
 
     /// <summary>
