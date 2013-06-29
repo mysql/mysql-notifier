@@ -701,7 +701,7 @@ namespace MySql.Notifier
             OnServiceListChanged(service, changeType);
             if (IsLocal && Services.Count == 1 && !InitialLoadDone)
             {
-              InitialLoadDone = true;
+              InitialLoadDone = !Settings.Default.FirstRun;
             }
           }
 
