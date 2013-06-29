@@ -896,7 +896,14 @@ namespace MySql.Notifier
     private void MySQLInstanceStatusChanged(object sender, InstanceStatusChangedArgs args)
     {
       args.Instance.MenuGroup.Update(false);
-      notifyIcon.ContextMenuStrip.Refresh();
+      if (notifyIcon.ContextMenuStrip.InvokeRequired)
+      {
+        notifyIcon.ContextMenuStrip.Invoke(new MethodInvoker(() => { notifyIcon.ContextMenuStrip.Refresh(); }));
+      }
+      else
+      {
+        notifyIcon.ContextMenuStrip.Refresh();
+      }
 
       if (args.OldInstanceStatus != MySqlWorkbenchConnection.ConnectionStatusType.Unknown && args.Instance.MonitorAndNotifyStatus && Settings.Default.NotifyOfStatusChange)
       {

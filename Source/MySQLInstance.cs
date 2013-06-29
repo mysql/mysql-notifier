@@ -51,7 +51,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Default monitoring interval for a MySQL instance, set to 10.
     /// </summary>
-    public const ushort DEFAULT_MONITORING_INTERVAL = 10;
+    public const ushort DEFAULT_MONITORING_INTERVAL = 2;
 
     /// <summary>
     /// Default monitoring interval unit of measures, set to minutes by default.
