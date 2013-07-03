@@ -438,21 +438,23 @@ namespace MySql.Notifier
     private void MigrateOldServices()
     {
       //// Load old services schema
-      MySQLServicesList mySQLServicesList = new MySQLServicesList();
+      List<MySQLService> services = Settings.Default.ServiceList;
 
       //// Attempt migration only if services were found
-      if (mySQLServicesList.Services != null && mySQLServicesList.Services.Count > 0)
+      if (services != null && services.Count > 0)
       {
         ChangeMachine(LocalMachine, ChangeType.AutoAdd);
 
         //// Copy services from old schema to the Local machine
-        foreach (MySQLService service in mySQLServicesList.Services)
+        foreach (MySQLService service in services)
         {
-          LocalMachine.ChangeService(service, ChangeType.AutoAdd);
+          service.Host = LocalMachine;
+          service.SetServiceParameters(true);
+          LocalMachine.Services.Add(service);
         }
 
         //// Clear the old list of services to erase the duplicates on the newer schema
-        mySQLServicesList.Services.Clear();
+        services.Clear();
         SavetoFile();
       }
     }
