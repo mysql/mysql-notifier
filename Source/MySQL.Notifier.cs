@@ -67,7 +67,6 @@ namespace MySql.Notifier
     private ToolStripMenuItem _exitMenuItem;
     private ToolStripMenuItem _actionsMenuItem;
     private ContextMenuStrip _staticMenu;
-    private bool _statusRefreshCancelled;
     private int previousMachineCount;
 
     /// <summary>
@@ -89,7 +88,6 @@ namespace MySql.Notifier
     {
       //// Fields initializations.
       _closing = false;
-      _statusRefreshCancelled = false;
       _globalTimer = null;
       _optionsDialog = null;
       _manageItemsDialog = null;
@@ -208,7 +206,6 @@ namespace MySql.Notifier
     {
       if (_worker != null && _worker.WorkerSupportsCancellation && (StatusRefreshInProgress || _worker.IsBusy))
       {
-        _statusRefreshCancelled = true;
         _worker.CancelAsync();
       }
     }

@@ -56,11 +56,6 @@ namespace MySql.Notifier
     #region Fields
 
     /// <summary>
-    /// Flag indicating whether the watcher will monitor services creation.
-    /// </summary>
-    private bool _watchForServiceCreation;
-
-    /// <summary>
     /// Asynchronous WMI watcher for creation of services related to this machine.
     /// </summary>
     private ManagementEventWatcher _wmiAsyncCreationWatcher;
@@ -102,7 +97,6 @@ namespace MySql.Notifier
     /// <param name="isMachineOnline">Flag indicating whether the consumer machine is online.</param>
     public ServiceWatcher(bool watchForServiceCreation, bool watchForServiceDeletion, bool watchForServiceStatusChange, bool asynchronous, bool isMachineOnline)
     {
-      _watchForServiceCreation = true;
       _wmiAsyncCreationWatcher = null;
       _wmiAsyncDeletionWatcher = null;
       _wmiAsyncStatusChangeWatcher = null;
