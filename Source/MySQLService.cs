@@ -29,6 +29,7 @@ namespace MySql.Notifier
   using System.Timers;
   using System.Xml;
   using System.Xml.Serialization;
+  using System.IO;
   using Microsoft.Win32;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
@@ -612,7 +613,7 @@ namespace MySql.Notifier
         .Add("enable-named-pipe", v => parameters.NamedPipesEnabled = true)
         .Add("socket=", "", v => parameters.PipeName = v);
       p.Parse(args);
-      if (parameters.DefaultsFile == null)
+      if (parameters.DefaultsFile == null || !File.Exists(parameters.DefaultsFile))
       {
         return parameters;
       }
