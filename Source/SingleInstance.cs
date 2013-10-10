@@ -19,6 +19,7 @@
 
 namespace MySql.Notifier
 {
+  using MySQL.Utility;
   using System;
   using System.Threading;
 
