@@ -19,12 +19,13 @@
 
 namespace MySql.Notifier
 {
+  using MySql.Notifier.Properties;
+  using MySQL.Utility;
   using System;
   using System.Collections.Generic;
   using System.Linq;
   using System.Management;
-  using MySql.Notifier.Properties;
-  using MySQL.Utility;
+  using System.Reflection;
 
   /// <summary>
   /// This class serves as a manager of machines and its services for the Notifier class
@@ -216,8 +217,24 @@ namespace MySql.Notifier
       LocalMachine.LoadServicesParameters(true);
       OnMachineListChanged(LocalMachine, ChangeType.AutoAdd);
 
+      if (!Settings.Default.FirstRun)
+      {
+        return;
+      }
+
+      CreateScheduledTask();
       MigrateOldServices();
       AutoAddLocalServices();
+      Settings.Default.FirstRun = false;
+      SavetoFile();
+    }
+
+    private void CreateScheduledTask()
+    {
+      if (Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0 && !String.IsNullOrEmpty(AssemblyInfo.AssemblyTitle))
+      {
+        Utility.CreateScheduledTask(Notifier.DefaultTaskName, Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
+      }
     }
 
     /// <summary>
@@ -397,11 +414,6 @@ namespace MySql.Notifier
     /// </summary>
     private void AutoAddLocalServices()
     {
-      if (!Settings.Default.FirstRun)
-      {
-        return;
-      }
-
       //// Verify if MySQL services are present on the local machine
       string autoAddPattern = Settings.Default.AutoAddPattern;
       ManagementObjectCollection localServicesList = LocalMachine.GetWMIServices(autoAddPattern, true, false);
@@ -427,9 +439,6 @@ namespace MySql.Notifier
           LocalMachine.ChangeService(service, ChangeType.AutoAdd);
         }
       }
-
-      Settings.Default.FirstRun = false;
-      SavetoFile();
     }
 
     /// <summary>

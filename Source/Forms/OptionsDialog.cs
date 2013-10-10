@@ -19,11 +19,12 @@
 
 namespace MySql.Notifier
 {
-  using System;
-  using System.Windows.Forms;
   using MySql.Notifier.Properties;
   using MySQL.Utility;
   using MySQL.Utility.Forms;
+  using System;
+  using System.Reflection;
+  using System.Windows.Forms;
 
   public partial class OptionsDialog : AutoStyleableBaseDialog
   {
@@ -64,15 +65,14 @@ namespace MySql.Notifier
 
       if (updateTask)
       {
-        if (Settings.Default.AutoCheckForUpdates)
+        if (Settings.Default.AutoCheckForUpdates && !String.IsNullOrEmpty(Utility.GetInstallLocation(AssemblyInfo.AssemblyTitle)))
         {
-          if (!String.IsNullOrEmpty(Utility.GetInstallLocation(Application.ProductName)))
-          {
-            Utility.CreateScheduledTask("MySQLNotifierTask", Utility.GetInstallLocation(Application.ProductName) + "MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, deleteIfPrevious, Utility.GetOsVersion() == Utility.OSVersion.WindowsXp);
-          }
+          Utility.CreateScheduledTask(Notifier.DefaultTaskName, Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
         }
         if (deleteTask)
-          Utility.DeleteScheduledTask("MySQLNotifierTask");
+        {
+          Utility.DeleteScheduledTask(Notifier.DefaultTaskName);
+        }
       }
     }
 

@@ -17,6 +17,7 @@
 // 02110-1301  USA
 //
 
+using MySQL.Utility;
 using System;
 using System.Reflection;
 using System.Windows.Forms;

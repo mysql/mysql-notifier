@@ -141,49 +141,36 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Forms\DumbForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\DumbForm.Designer.cs">
       <DependentUpon>DumbForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\MachineAwareForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\MachineAwareForm.cs" />
     <Compile Include="Forms\AboutDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\AddServiceDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\AddServiceDialog.cs" />
     <Compile Include="Forms\AddServiceDialog.Designer.cs">
       <DependentUpon>AddServiceDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ManageItemsDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\ManageItemsDialog.cs" />
     <Compile Include="Forms\ManageItemsDialog.Designer.cs">
       <DependentUpon>ManageItemsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\MonitorMySQLServerInstancesDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\MonitorMySQLServerInstancesDialog.cs" />
     <Compile Include="Forms\MonitorMySQLServerInstancesDialog.Designer.cs">
       <DependentUpon>MonitorMySQLServerInstancesDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\OptionsDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\OptionsDialog.cs" />
     <Compile Include="Forms\OptionsDialog.Designer.cs">
       <DependentUpon>OptionsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\WindowsConnectionDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\WindowsConnectionDialog.cs" />
     <Compile Include="Forms\WindowsConnectionDialog.designer.cs">
       <DependentUpon>WindowsConnectionDialog.cs</DependentUpon>
     </Compile>

@@ -40,6 +40,34 @@ namespace MySql.Notifier
     /// </summary>
     private const int DEFAULT_FILE_LOAD_RETRY_WAIT = 333;
 
+    /// <summary>
+    /// Gets the default name of the task which usually will be MySQLNotifierTask.
+    /// </summary>
+    /// <value>
+    /// The default name of the task.
+    /// </value>
+    public static string DefaultTaskName
+    {
+      get
+      {
+        return AssemblyInfo.AssemblyTitle.Replace(" ", string.Empty) + "Task";
+      }
+    }
+
+    /// <summary>
+    /// Gets the default task path. Usually the path where the executable MySQLNotifier.exe is.
+    /// </summary>
+    /// <value>
+    /// The default task path.
+    /// </value>
+    public static string DefaultTaskPath
+    {
+      get
+      {
+        return Utility.GetInstallLocation(AssemblyInfo.AssemblyTitle) + Assembly.GetExecutingAssembly().ManifestModule.Name;
+      }
+    }
+
     #region Fields
 
     private System.ComponentModel.IContainer components;
@@ -154,15 +182,6 @@ namespace MySql.Notifier
         if (File.Exists(file))
         {
           _serversFileWatcher = StartWatcherForFile(file, serversFile_Changed);
-        }
-      }
-
-      if (Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0)
-      {
-        var location = Utility.GetInstallLocation("MySQL Notifier");
-        if (!String.IsNullOrEmpty(location))
-        {
-          Utility.CreateScheduledTask("MySQLNotifierTask", location + @"MySqlNotifier.exe", "--c", Settings.Default.CheckForUpdatesFrequency, false, Utility.GetOsVersion() == Utility.OSVersion.WindowsXp);
         }
       }
 
