@@ -1,31 +1,28 @@
-﻿// 
-// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
-//
 
-namespace MySql.Notifier
+using System;
+using System.Windows.Forms;
+using MySql.Notifier.Properties;
+using MySQL.Utility.Classes;
+using MySQL.Utility.Forms;
+
+namespace MySql.Notifier.Forms
 {
-  using MySql.Notifier.Properties;
-  using MySQL.Utility;
-  using MySQL.Utility.Forms;
-  using System;
-  using System.Reflection;
-  using System.Windows.Forms;
-
   public partial class OptionsDialog : AutoStyleableBaseDialog
   {
     /// <summary>
@@ -49,7 +46,7 @@ namespace MySql.Notifier
     {
       var updateTask = AutoCheckUpdatesCheckBox.Checked != Settings.Default.AutoCheckForUpdates ? true : false;
       var deleteTask = !AutoCheckUpdatesCheckBox.Checked && Settings.Default.AutoCheckForUpdates ? true : false;
-      var deleteIfPrevious = AutoCheckUpdatesCheckBox.Checked && !Settings.Default.AutoCheckForUpdates ? false : true;
+      var deleteIfPrevious = !AutoCheckUpdatesCheckBox.Checked || Settings.Default.AutoCheckForUpdates;
 
       if (Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(this.CheckUpdatesWeeksNumericUpDown.Value)) updateTask = true;
 
@@ -63,16 +60,19 @@ namespace MySql.Notifier
       Settings.Default.Save();
       Utility.SetRunAtStartUp(Application.ProductName, RunAtStartupCheckBox.Checked);
 
-      if (updateTask)
+      if (!updateTask)
       {
-        if (Settings.Default.AutoCheckForUpdates && !String.IsNullOrEmpty(Utility.GetInstallLocation(AssemblyInfo.AssemblyTitle)))
-        {
-          Utility.CreateScheduledTask(Notifier.DefaultTaskName, Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
-        }
-        if (deleteTask)
-        {
-          Utility.DeleteScheduledTask(Notifier.DefaultTaskName);
-        }
+        return;
+      }
+
+      if (Settings.Default.AutoCheckForUpdates && !String.IsNullOrEmpty(Utility.GetInstallLocation(AssemblyInfo.AssemblyTitle)))
+      {
+        Utility.CreateScheduledTask(Notifier.DefaultTaskName, Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
+      }
+
+      if (deleteTask)
+      {
+        Utility.DeleteScheduledTask(Notifier.DefaultTaskName);
       }
     }
 

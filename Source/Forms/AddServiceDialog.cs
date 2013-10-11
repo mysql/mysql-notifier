@@ -1,42 +1,40 @@
-﻿// 
-// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
-//
 
-namespace MySql.Notifier
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Management;
+using System.Windows.Forms;
+using MySql.Notifier.Properties;
+using MySQL.Utility.Classes;
+using MySQL.Utility.Forms;
+
+namespace MySql.Notifier.Forms
 {
-  using System;
-  using System.Collections;
-  using System.Collections.Generic;
-  using System.Linq;
-  using System.Management;
-  using System.Windows.Forms;
-  using MySql.Notifier.Properties;
-  using MySQL.Utility;
-  using MySQL.Utility.Forms;
-
   public partial class AddServiceDialog : MachineAwareForm
   {
     public bool HasChanges { get; private set; }
-    private int sortColumn;
+    private int _sortColumn;
     public AddServiceDialog(MachinesList machineslist)
     {
-      sortColumn = -1;
-      machinesList = machineslist;
+      _sortColumn = -1;
+      MachinesList = machineslist;
       HasChanges = false;
 
       InitializeComponent();
@@ -47,7 +45,7 @@ namespace MySql.Notifier
 
     public Machine.LocationType MachineLocationType { get; set; }
 
-    public List<MySQLService> ServicesToAdd { get; set; }
+    public List<MySqlService> ServicesToAdd { get; set; }
 
     /// <summary>
     /// Event delegate method fired when the <see cref="DeleteButton"/> is clicked.
@@ -57,23 +55,25 @@ namespace MySql.Notifier
     private void DeleteButton_Click(object sender, EventArgs e)
     {
       DialogResult dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.DeleteMachineConfirmationTitle, Resources.DeleteMachineConfirmationText, null, null, true, InfoDialog.DefaultButtonType.CancelButton, 30);
-      if (dr == DialogResult.Yes)
+      if (dr != DialogResult.Yes)
       {
-        HasChanges = true;
-        machinesList.ChangeMachine(newMachine, ChangeType.RemoveByUser);
-        int removedMachineIndex = MachineSelectionComboBox.SelectedIndex;
-        MachineSelectionComboBox.SelectedIndex = 0;
-        MachineSelectionComboBox.Items.RemoveAt(removedMachineIndex);
+        return;
       }
+
+      HasChanges = true;
+      MachinesList.ChangeMachine(NewMachine, ChangeType.RemoveByUser);
+      int removedMachineIndex = MachineSelectionComboBox.SelectedIndex;
+      MachineSelectionComboBox.SelectedIndex = 0;
+      MachineSelectionComboBox.Items.RemoveAt(removedMachineIndex);
     }
 
     private void DialogOKButton_Click(object sender, EventArgs e)
     {
       Cursor.Current = Cursors.WaitCursor;
-      ServicesToAdd = new List<MySQLService>();
+      ServicesToAdd = new List<MySqlService>();
       foreach (ListViewItem lvi in ServicesListView.SelectedItems)
       {
-        ServicesToAdd.Add(new MySQLService(lvi.Tag as string, true, true, newMachine));
+        ServicesToAdd.Add(new MySqlService(lvi.Tag as string, true, true, NewMachine));
       }
 
       Cursor.Current = Cursors.Default;
@@ -86,20 +86,22 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void EditButton_Click(object sender, EventArgs e)
     {
-      string oldUser = newMachine.User;
-      string oldPassword = newMachine.Password;
-      using (var windowsConnectionDialog = new WindowsConnectionDialog(machinesList, newMachine))
+      string oldUser = NewMachine.User;
+      string oldPassword = NewMachine.Password;
+      using (var windowsConnectionDialog = new WindowsConnectionDialog(MachinesList, NewMachine))
       {
         DialogResult dr = windowsConnectionDialog.ShowDialog();
-        if (dr != DialogResult.Cancel)
+        if (dr == DialogResult.Cancel)
         {
-          HasChanges = true;
-          newMachine.CopyMachineData(windowsConnectionDialog.newMachine,
-          oldUser != windowsConnectionDialog.newMachine.User ||
-          MySQLSecurity.DecryptPassword(oldPassword) != windowsConnectionDialog.newMachine.UnprotectedPassword);
-          machinesList.ChangeMachine(newMachine, ChangeType.Updated);
-          RefreshList();
+          return;
         }
+
+        HasChanges = true;
+        NewMachine.CopyMachineData(windowsConnectionDialog.NewMachine,
+          oldUser != windowsConnectionDialog.NewMachine.User ||
+          MySqlSecurity.DecryptPassword(oldPassword) != windowsConnectionDialog.NewMachine.UnprotectedPassword);
+        MachinesList.ChangeMachine(NewMachine, ChangeType.Updated);
+        RefreshList();
       }
     }
 
@@ -118,12 +120,12 @@ namespace MySql.Notifier
 
     private void InsertMachinesIntoComboBox()
     {
-      if (machinesList == null || machinesList.Machines == null)
+      if (MachinesList == null || MachinesList.Machines == null)
       {
         return;
       }
 
-      foreach (Machine machine in machinesList.Machines)
+      foreach (Machine machine in MachinesList.Machines)
       {
         if (machine.IsLocal)
         {
@@ -152,18 +154,18 @@ namespace MySql.Notifier
           MachineLocationType = Machine.LocationType.Local;
           if (MachineSelectionComboBox.SelectedItem is Machine)
           {
-            newMachine = MachineSelectionComboBox.SelectedItem as Machine;
+            NewMachine = MachineSelectionComboBox.SelectedItem as Machine;
           }
           else
           {
-            newMachine = machinesList.LocalMachine;
-            MachineSelectionComboBox.Items[0] = newMachine;
+            NewMachine = MachinesList.LocalMachine;
+            MachineSelectionComboBox.Items[0] = NewMachine;
           }
           break;
 
         case 1:
           MachineLocationType = Machine.LocationType.Remote;
-          using (var windowsConnectionDialog = new WindowsConnectionDialog(machinesList, null))
+          using (var windowsConnectionDialog = new WindowsConnectionDialog(MachinesList, null))
           {
             dr = windowsConnectionDialog.ShowDialog();
             if (dr == DialogResult.Cancel)
@@ -172,13 +174,13 @@ namespace MySql.Notifier
             }
             else
             {
-              newMachine = windowsConnectionDialog.newMachine;
-              newMachine.LoadServicesParameters(false);
+              NewMachine = windowsConnectionDialog.NewMachine;
+              NewMachine.LoadServicesParameters(false);
               int index = -1;
               for (int machineIndex = 3; machineIndex < MachineSelectionComboBox.Items.Count && index < 0; machineIndex++)
               {
                 string machineName = MachineSelectionComboBox.Items[machineIndex].ToString();
-                if (machineName == newMachine.Name)
+                if (machineName == NewMachine.Name)
                 {
                   index = machineIndex;
                 }
@@ -186,7 +188,7 @@ namespace MySql.Notifier
 
               if (index == -1)
               {
-                MachineSelectionComboBox.Items.Add(newMachine);
+                MachineSelectionComboBox.Items.Add(NewMachine);
                 MachineSelectionComboBox.SelectedIndex = MachineSelectionComboBox.Items.Count - 1;
               }
               else
@@ -198,7 +200,7 @@ namespace MySql.Notifier
           return;
 
         case 2:
-          if (newMachine.IsLocal)
+          if (NewMachine.IsLocal)
           {
             MachineSelectionComboBox.SelectedIndex = 0;
             return;
@@ -208,7 +210,7 @@ namespace MySql.Notifier
           for (int machineIndex = 3; machineIndex < MachineSelectionComboBox.Items.Count; machineIndex++)
           {
             string machineName = MachineSelectionComboBox.Items[machineIndex].ToString();
-            if (machineName == newMachine.Name)
+            if (machineName == NewMachine.Name)
             {
               mIndex = machineIndex;
               break;
@@ -220,16 +222,16 @@ namespace MySql.Notifier
 
         default:
           MachineLocationType = Machine.LocationType.Remote;
-          newMachine = (Machine)MachineSelectionComboBox.SelectedItem;
-          if (!newMachine.IsOnline)
+          NewMachine = (Machine)MachineSelectionComboBox.SelectedItem;
+          if (!NewMachine.IsOnline)
           {
             dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.MachineUnavailableTitle, Resources.MachineUnavailableYesNoDetail, null, Resources.MachineUnavailableExtendedMessage, true, InfoDialog.DefaultButtonType.CancelButton, 30);
             if (dr == DialogResult.Yes)
             {
-              newMachine.TestConnection(true, false);
+              NewMachine.TestConnection(true, false);
             }
 
-            if (!newMachine.IsOnline)
+            if (!NewMachine.IsOnline)
             {
               ServicesListView.SelectedItems.Clear();
             }
@@ -237,9 +239,9 @@ namespace MySql.Notifier
           break;
       }
 
-      ServicesListView.Enabled = newMachine.IsOnline;
+      ServicesListView.Enabled = NewMachine.IsOnline;
       Machine servicesMachine = ServicesListView.Tag as Machine;
-      if (servicesMachine != newMachine)
+      if (servicesMachine != NewMachine)
       {
         RefreshList();
       }
@@ -250,11 +252,11 @@ namespace MySql.Notifier
     /// </summary>
     private void RefreshList()
     {
-      //// Store the machine used to browse services so we can compare it with the current value in newMachine to know if we need to call RefreshList.
-      ServicesListView.Tag = newMachine;
+      // Store the machine used to browse services so we can compare it with the current value in newMachine to know if we need to call RefreshList.
+      ServicesListView.Tag = NewMachine;
 
       ServicesListView.Items.Clear();
-      if (newMachine == null || !newMachine.IsOnline)
+      if (NewMachine == null || !NewMachine.IsOnline)
       {
         return;
       }
@@ -263,15 +265,12 @@ namespace MySql.Notifier
 
       ServicesListView.BeginUpdate();
       List<ManagementObject> services = new List<ManagementObject>();
-      if (newMachine != null && MachineLocationType == Machine.LocationType.Remote)
+      if (NewMachine != null && MachineLocationType == Machine.LocationType.Remote)
       {
-        ManagementObjectCollection machineServicesCollection = newMachine.GetWMIServices(true);
+        ManagementObjectCollection machineServicesCollection = NewMachine.GetWmiServices(true);
         if (machineServicesCollection != null)
         {
-          foreach (ManagementObject mo in machineServicesCollection)
-          {
-            services.Add(mo);
-          }
+          services.AddRange(machineServicesCollection.Cast<ManagementObject>());
         }
       }
       else
@@ -287,9 +286,12 @@ namespace MySql.Notifier
 
       foreach (ManagementObject item in services)
       {
-        ListViewItem newItem = new ListViewItem();
-        newItem.Text = item.Properties["DisplayName"].Value.ToString();
-        newItem.Tag = item.Properties["Name"].Value.ToString();
+        ListViewItem newItem = new ListViewItem
+        {
+          Text = item.Properties["DisplayName"].Value.ToString(),
+          Tag = item.Properties["Name"].Value.ToString()
+        };
+
         newItem.SubItems.Add(item.Properties["State"].Value.ToString());
         ServicesListView.Items.Add(newItem);
       }
@@ -299,17 +301,14 @@ namespace MySql.Notifier
 
     private void ServicesListView_ColumnClick(object sender, ColumnClickEventArgs e)
     {
-      if (e.Column != sortColumn)
+      if (e.Column != _sortColumn)
       {
-        sortColumn = e.Column;
+        _sortColumn = e.Column;
         ServicesListView.Sorting = SortOrder.Ascending;
       }
       else
       {
-        if (ServicesListView.Sorting == SortOrder.Ascending)
-          ServicesListView.Sorting = SortOrder.Descending;
-        else
-          ServicesListView.Sorting = SortOrder.Ascending;
+        ServicesListView.Sorting = ServicesListView.Sorting == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
       }
 
       ServicesListView.Sort();
@@ -324,28 +323,28 @@ namespace MySql.Notifier
 
     private class ListViewItemComparer : IComparer
     {
-      private int col;
-      private SortOrder order;
+      private int _col;
+      private SortOrder _order;
 
       public ListViewItemComparer()
       {
-        col = 0;
-        order = SortOrder.Ascending;
+        _col = 0;
+        _order = SortOrder.Ascending;
       }
 
       public ListViewItemComparer(int column, SortOrder order)
       {
-        col = column;
-        this.order = order;
+        _col = column;
+        this._order = order;
       }
 
       public int Compare(object x, object y)
       {
         int returnVal = -1;
 
-        returnVal = String.Compare(((ListViewItem)x).SubItems[col].Text, ((ListViewItem)y).SubItems[col].Text);
+        returnVal = string.CompareOrdinal(((ListViewItem)x).SubItems[_col].Text, ((ListViewItem)y).SubItems[_col].Text);
 
-        if (order == SortOrder.Descending)
+        if (_order == SortOrder.Descending)
           returnVal *= -1;
 
         return returnVal;

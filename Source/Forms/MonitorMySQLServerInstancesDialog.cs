@@ -1,37 +1,35 @@
-﻿// 
-// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
-//
 
-namespace MySql.Notifier
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+using MySql.Notifier.Properties;
+using MySQL.Utility.Classes.MySQLWorkbench;
+using MySQL.Utility.Forms;
+
+namespace MySql.Notifier.Forms
 {
-  using System;
-  using System.ComponentModel;
-  using System.Drawing;
-  using System.Linq;
-  using System.Windows.Forms;
-  using MySql.Notifier.Properties;
-  using MySQL.Utility;
-  using MySQL.Utility.Forms;
-
   /// <summary>
   /// Dialog window showing MySQL Server Instances to select for monitoring.
   /// </summary>
-  public partial class MonitorMySQLServerInstancesDialog : AutoStyleableBaseDialog
+  public partial class MonitorMySqlServerInstancesDialog : AutoStyleableBaseDialog
   {
     #region Fields
 
@@ -48,35 +46,26 @@ namespace MySql.Notifier
     #endregion Fields
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MonitorMySQLServerInstancesDialog"/> class.
+    /// Initializes a new instance of the <see cref="MonitorMySqlServerInstancesDialog"/> class.
     /// </summary>
-    public MonitorMySQLServerInstancesDialog()
+    public MonitorMySqlServerInstancesDialog()
       : this(null, null)
     {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MonitorMySQLServerInstancesDialog"/> class.
+    /// Initializes a new instance of the <see cref="MonitorMySqlServerInstancesDialog"/> class.
     /// </summary>
-    /// <param name="machinesList">List of <see cref="MySQLService"/> objects monitored by the Notifier.</param>
+    /// <param name="machinesList">List of <see cref="MySqlService"/> objects monitored by the Notifier.</param>
     /// <param name="instancesList">List of names of MySQL instance monitored by the Notifier.</param>
-    public MonitorMySQLServerInstancesDialog(MachinesList machinesList, MySQLInstancesList instancesList)
+    public MonitorMySqlServerInstancesDialog(MachinesList machinesList, MySqlInstancesList instancesList)
     {
       InitializeComponent();
 
       _lastServicesNameFilter = FilterTextBox.Text;
       _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
       MachinesList = machinesList;
-
-      if (instancesList == null)
-      {
-        MySQLInstancesList = new MySQLInstancesList();
-      }
-      else
-      {
-        MySQLInstancesList = instancesList;
-      }
-
+      MySqlInstancesList = instancesList ?? new MySqlInstancesList();
       InstancesListChanged = false;
     }
 
@@ -104,7 +93,7 @@ namespace MySql.Notifier
     /// Gets a list of names of MySQL instance monitored by the Notifier.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public MySQLInstancesList MySQLInstancesList { get; private set; }
+    public MySqlInstancesList MySqlInstancesList { get; private set; }
 
     /// <summary>
     /// Gets a list of <see cref="Machine"/> objects monitored by the Notifier.
@@ -127,16 +116,18 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void AddConnectionButton_Click(object sender, EventArgs e)
     {
-      using (var instanceConnectionDialog = new MySQLWorkbenchConnectionDialog(null))
+      using (var instanceConnectionDialog = new MySqlWorkbenchConnectionDialog(null))
       {
         instanceConnectionDialog.Icon = Properties.Resources.MySqlNotifierIcon;
         instanceConnectionDialog.ShowIcon = true;
         DialogResult dr = instanceConnectionDialog.ShowIfWorkbenchNotRunning();
-        if (dr == DialogResult.OK)
+        if (dr != DialogResult.OK)
         {
-          InstancesListChanged = true;
-          RefreshMySQLInstancesList(false);
+          return;
         }
+
+        InstancesListChanged = true;
+        RefreshMySqlInstancesList(false);
       }
     }
 
@@ -187,11 +178,13 @@ namespace MySql.Notifier
       }
 
       var workbenchConnection = WorkbenchConnectionsListView.SelectedItems[0].Tag as MySqlWorkbenchConnection;
-      if (MySqlWorkbench.Connections.DeleteConnection(workbenchConnection.Id))
+      if (workbenchConnection == null || !MySqlWorkbench.Connections.DeleteConnection(workbenchConnection.Id))
       {
-        InstancesListChanged = true;
-        RefreshMySQLInstancesList(false);
+        return;
       }
+
+      InstancesListChanged = true;
+      RefreshMySqlInstancesList(false);
     }
 
     /// <summary>
@@ -239,7 +232,7 @@ namespace MySql.Notifier
       FilterTimer.Stop();
       if (filter)
       {
-        RefreshMySQLInstancesList(false);
+        RefreshMySqlInstancesList(false);
       }
     }
 
@@ -247,7 +240,7 @@ namespace MySql.Notifier
     /// Checks if a Workbench connection is being monitored already.
     /// </summary>
     /// <param name="connection">A Workbench connection to check for.</param>
-    /// <returns><see cref="true"/> if the connection is already being monitored, <see cref="false"/> otherwise.</returns>
+    /// <returns><c>true</c> if the connection is already being monitored, <c>false</c> otherwise.</returns>
     private bool IsWorkbenchConnectionAlreadyMonitored(MySqlWorkbenchConnection connection)
     {
       foreach (var machine in MachinesList.Machines)
@@ -266,51 +259,47 @@ namespace MySql.Notifier
         }
       }
 
-      foreach (var mySqlInstance in MySQLInstancesList)
-      {
-        if (mySqlInstance.RelatedConnections.Exists(wbConn => wbConn.Id == connection.Id))
-        {
-          return true;
-        }
-      }
-
-      return false;
+      return MySqlInstancesList.Any(mySqlInstance => mySqlInstance.RelatedConnections.Exists(wbConn => wbConn.Id == connection.Id));
     }
 
     /// <summary>
-    /// Event delegate method fired before the <see cref="MonitorMySQLServerInstancesDialog"/> dialog is closed.
+    /// Event delegate method fired before the <see cref="MonitorMySqlServerInstancesDialog"/> dialog is closed.
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
     private void MonitorMySQLServerInstancesDialog_FormClosing(object sender, FormClosingEventArgs e)
     {
-      if (SelectedWorkbenchConnection != null && WorkbenchConnectionsListView.SelectedItems.Count > 0 && !WorkbenchConnectionsListView.SelectedItems[0].Checked)
+      if (SelectedWorkbenchConnection == null || WorkbenchConnectionsListView.SelectedItems.Count <= 0 || WorkbenchConnectionsListView.SelectedItems[0].Checked)
       {
-        DialogResult dr = InfoDialog.ShowYesNoDialog(
-          InfoDialog.InfoType.Info,
-          Resources.ConnectionAlreadyInInstancesTitle,
-          Resources.ConnectionAlreadyInInstancesDetail,
-          Resources.ConnectionAlreadyInInstancesSubDetail,
-          null,
-          true,
-          InfoDialog.DefaultButtonType.CancelButton,
-          10);
-        if (dr != DialogResult.Yes)
-        {
-          SelectedWorkbenchConnection = null;
-          e.Cancel = true;
-        }
+        return;
       }
+
+      DialogResult dr = InfoDialog.ShowYesNoDialog(
+        InfoDialog.InfoType.Info,
+        Resources.ConnectionAlreadyInInstancesTitle,
+        Resources.ConnectionAlreadyInInstancesDetail,
+        Resources.ConnectionAlreadyInInstancesSubDetail,
+        null,
+        true,
+        InfoDialog.DefaultButtonType.CancelButton,
+        10);
+      if (dr == DialogResult.Yes)
+      {
+        return;
+      }
+
+      SelectedWorkbenchConnection = null;
+      e.Cancel = true;
     }
 
     /// <summary>
-    /// Event delegate method fired when the <see cref="MonitorMySQLServerInstancesDialog"/> dialog is shown.
+    /// Event delegate method fired when the <see cref="MonitorMySqlServerInstancesDialog"/> dialog is shown.
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
     private void MonitorMySQLServerInstancesDialog_Shown(object sender, EventArgs e)
     {
-      RefreshMySQLInstancesList(true);
+      RefreshMySqlInstancesList(true);
     }
 
     /// <summary>
@@ -320,16 +309,16 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void RefreshConnectionsToolStripMenuItem_Click(object sender, EventArgs e)
     {
-      RefreshMySQLInstancesList(true);
+      RefreshMySqlInstancesList(true);
     }
 
     /// <summary>
     /// Reloads the list of MySQL Server instances from the ones contained in the MySQL Workbench connections file.
     /// </summary>
     /// <param name="forceRefresh">Flag indicating if the refresh must be done although filters haven'_statusChangeTimer changed.</param>
-    private void RefreshMySQLInstancesList(bool forceRefresh)
+    private void RefreshMySqlInstancesList(bool forceRefresh)
     {
-      if (_lastServicesNameFilter != FilterTextBox.Text)
+      if (_lastServicesNameFilter != null && _lastServicesNameFilter != FilterTextBox.Text)
       {
         _lastServicesNameFilter = FilterTextBox.Text;
       }
@@ -344,7 +333,7 @@ namespace MySql.Notifier
         MySqlWorkbench.Connections.Load();
       }
 
-      RefreshMySQLInstancesList(_lastServicesNameFilter, _lastShowMonitoredServices);
+      RefreshMySqlInstancesList(_lastServicesNameFilter, _lastShowMonitoredServices);
     }
 
     /// <summary>
@@ -352,7 +341,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="connectionNameFilter">Filter for connection names to only list ones containing the filter text.</param>
     /// <param name="showNonMonitoredConnections">Flag indicating if Workbench connections already being monitored are listed too.</param>
-    private void RefreshMySQLInstancesList(string connectionNameFilter, bool showNonMonitoredConnections)
+    private void RefreshMySqlInstancesList(string connectionNameFilter, bool showNonMonitoredConnections)
     {
       if (MySqlWorkbench.Connections.Count == 0)
       {
@@ -367,13 +356,8 @@ namespace MySql.Notifier
       WorkbenchConnectionsListView.Items.Clear();
       WorkbenchConnectionsListView.BeginUpdate();
 
-      foreach (var connection in MySqlWorkbench.Connections.OrderBy(conn => conn.Name))
+      foreach (var connection in MySqlWorkbench.Connections.OrderBy(conn => conn.Name).Where(connection => string.IsNullOrEmpty(connectionNameFilter) || connection.Name.ToLowerInvariant().Contains(connectionNameFilter)))
       {
-        if (!string.IsNullOrEmpty(connectionNameFilter) && !connection.Name.ToLowerInvariant().Contains(connectionNameFilter))
-        {
-          continue;
-        }
-
         AddWorkbenchConnectionToConnectionsList(connection, showNonMonitoredConnections);
       }
 
@@ -388,7 +372,7 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void ShowMonitoredInstancesCheckBox_CheckedChanged(object sender, EventArgs e)
     {
-      RefreshMySQLInstancesList(false);
+      RefreshMySqlInstancesList(false);
     }
 
     /// <summary>

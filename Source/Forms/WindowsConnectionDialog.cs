@@ -1,31 +1,30 @@
-﻿// 
-// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
-//
 
-namespace MySql.Notifier
+using System;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using MySql.Notifier.Properties;
+using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQLWorkbench;
+using MySQL.Utility.Forms;
+
+namespace MySql.Notifier.Forms
 {
-  using System;
-  using System.Text.RegularExpressions;
-  using System.Windows.Forms;
-  using MySql.Notifier.Properties;
-  using MySQL.Utility;
-  using MySQL.Utility.Forms;
-
   public partial class WindowsConnectionDialog : MachineAwareForm
   {
     /// <summary>
@@ -60,21 +59,21 @@ namespace MySql.Notifier
 
       if (currentMachine != null)
       {
-        newMachine = currentMachine;
+        NewMachine = currentMachine;
         HostTextBox.Text = currentMachine.Name;
         UserTextBox.Text = currentMachine.User;
         PasswordTextBox.Text = currentMachine.UnprotectedPassword;
         MachineAutoTestConnectionLabel.Visible = true;
         MachineAutoTestConnectionIntervalNumericUpDown.Visible = true;
-        MachineAutoTestConnectionIntervalNumericUpDown.Value = newMachine.AutoTestConnectionInterval;
+        MachineAutoTestConnectionIntervalNumericUpDown.Value = NewMachine.AutoTestConnectionInterval;
         MachineAutoTestConnectionIntervalUOMComboBox.Visible = true;
-        MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndex = (int)newMachine.AutoTestConnectionIntervalUnitOfMeasure;
+        MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndex = (int)NewMachine.AutoTestConnectionIntervalUnitOfMeasure;
         Height = 265;
         EditMode = true;
       }
       else
       {
-        newMachine = new Machine();
+        NewMachine = new Machine();
         MachineAutoTestConnectionLabel.Visible = false;
         MachineAutoTestConnectionIntervalNumericUpDown.Visible = false;
         MachineAutoTestConnectionIntervalUOMComboBox.Visible = false;
@@ -82,13 +81,21 @@ namespace MySql.Notifier
         EditMode = false;
       }
 
-      if (machineslist != null)
+      if (machineslist == null)
       {
-        if (machineslist.Machines != null)
-        {
-          machinesList = machineslist;
-        }
+        return;
       }
+
+      if (machineslist.Machines != null)
+      {
+        MachinesList = machineslist;
+      }
+    }
+
+    public override sealed string Text
+    {
+      get { return base.Text; }
+      set { base.Text = value; }
     }
 
     /// <summary>
@@ -116,12 +123,12 @@ namespace MySql.Notifier
     {
       Cursor = Cursors.WaitCursor;
       DialogOKButton.Enabled = false;
-      newMachine.Name = HostTextBox.Text.Trim();
-      newMachine.User = UserTextBox.Text.Trim();
-      newMachine.Password = MySQLSecurity.EncryptPassword(PasswordTextBox.Text);
+      NewMachine.Name = HostTextBox.Text.Trim();
+      NewMachine.User = UserTextBox.Text.Trim();
+      NewMachine.Password = MySqlSecurity.EncryptPassword(PasswordTextBox.Text);
       bool editMode = Text.Equals(Resources.EditMachineText);
       bool testConnection = sender.Equals(TestConnectionButton);
-      bool connectionSuccessful = (testConnection || !editMode) ? TestConnectionAndPermissionsSet(testConnection) : false;
+      bool connectionSuccessful = (testConnection || !editMode) && TestConnectionAndPermissionsSet(testConnection);
 
       if (testConnection && connectionSuccessful)
       {
@@ -144,7 +151,7 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void MachineAutoTestConnectionIntervalNumericUpDown_ValueChanged(object sender, EventArgs e)
     {
-      newMachine.AutoTestConnectionInterval = (uint)MachineAutoTestConnectionIntervalNumericUpDown.Value;
+      NewMachine.AutoTestConnectionInterval = (uint)MachineAutoTestConnectionIntervalNumericUpDown.Value;
     }
 
     /// <summary>
@@ -154,7 +161,7 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void MachineAutoTestConnectionIntervalUOMComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
-      newMachine.AutoTestConnectionIntervalUnitOfMeasure = (TimeUtilities.IntervalUnitOfMeasure)MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndex;
+      NewMachine.AutoTestConnectionIntervalUnitOfMeasure = (TimeUtilities.IntervalUnitOfMeasure)MachineAutoTestConnectionIntervalUOMComboBox.SelectedIndex;
     }
 
     /// <summary>
@@ -169,12 +176,12 @@ namespace MySql.Notifier
         return false;
       }
 
-      if (forceTest || !newMachine.IsOnline)
+      if (forceTest || !NewMachine.IsOnline)
       {
-        newMachine.TestConnection(true, false);
+        NewMachine.TestConnection(true, false);
       }
 
-      return newMachine.IsOnline;
+      return NewMachine.IsOnline;
     }
 
     /// <summary>
@@ -218,36 +225,36 @@ namespace MySql.Notifier
     /// </summary>
     private void ValidateEntries()
     {
-      //// Validate Host name
+      // Validate Host name
       if (!string.IsNullOrEmpty(HostTextBox.Text))
       {
         bool validName = true;
         string hostname = HostTextBox.Text.Trim();
         if (hostname.ToLowerInvariant() == MySqlWorkbenchConnection.DEFAULT_HOSTNAME || hostname == MySqlWorkbenchConnection.LOCAL_IP || hostname == ".")
         {
-          //// Host name is invalid if is a local machine
+          // Host name is invalid if is a local machine
           validName = false;
           InfoDialog.ShowErrorDialog(Resources.CannotAddLocalhostTitle, Resources.CannotAddLocalhostMessage);
         }
-        else if (!EditMode && machinesList.HasMachineWithName(hostname))
+        else if (!EditMode && MachinesList.HasMachineWithName(hostname))
         {
-          //// Host name already exists on the list of added remote machines
+          // Host name already exists on the list of added remote machines
           validName = false;
           InfoDialog.ShowErrorDialog(Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage);
         }
         else
         {
-          //// Host name is also invalid if has non allowed characters or if is not a proper formated IP address.
+          // Host name is also invalid if has non allowed characters or if is not a proper formated IP address.
           validName = Regex.IsMatch(hostname, VALID_NAME_REGEX) || Regex.IsMatch(hostname, VALID_IP_REGEX);
         }
 
         hostErrorSign.Visible = !validName;
       }
 
-      //// Username is invalid if if has non allowed characters.
+      // Username is invalid if if has non allowed characters.
       userErrorSign.Visible = !string.IsNullOrEmpty(UserTextBox.Text) && !Regex.IsMatch(UserTextBox.Text, VALID_NAME_REGEX);
 
-      //// Enable DialogOKButton if entries seem valid.
+      // Enable DialogOKButton if entries seem valid.
       DialogOKButton.Enabled = EntriesAreValid;
     }
   }

@@ -168,11 +168,11 @@
     <Compile Include="Forms\ManageItemsDialog.Designer.cs">
       <DependentUpon>ManageItemsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\MonitorMySQLServerInstancesDialog.cs">
+    <Compile Include="Forms\MonitorMySqlServerInstancesDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\MonitorMySQLServerInstancesDialog.Designer.cs">
-      <DependentUpon>MonitorMySQLServerInstancesDialog.cs</DependentUpon>
+    <Compile Include="Forms\MonitorMySqlServerInstancesDialog.Designer.cs">
+      <DependentUpon>MonitorMySqlServerInstancesDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\OptionsDialog.cs">
       <SubType>Form</SubType>
@@ -186,15 +186,15 @@
     <Compile Include="Forms\WindowsConnectionDialog.designer.cs">
       <DependentUpon>WindowsConnectionDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="MySQLInstanceMenuGroup.cs" />
+    <Compile Include="MySqlInstanceMenuGroup.cs" />
     <Compile Include="Machine.cs" />
     <Compile Include="MachinesList.cs" />
-    <Compile Include="MySQLInstance.cs" />
-    <Compile Include="MySQLInstancesList.cs" />
-    <Compile Include="MySQLSecurity.cs" />
+    <Compile Include="MySqlInstance.cs" />
+    <Compile Include="MySqlInstancesList.cs" />
+    <Compile Include="MySqlSecurity.cs" />
     <Compile Include="NotifierSettings.cs" />
     <Compile Include="ServiceMenuGroup.cs" />
-    <Compile Include="MySQLService.cs" />
+    <Compile Include="MySqlService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceWatcher.cs" />

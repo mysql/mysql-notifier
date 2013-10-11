@@ -1,40 +1,38 @@
-﻿// 
-// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
-//
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading;
+using System.Windows.Forms;
+using System.Xml.Serialization;
+using MySql.Data.MySqlClient;
+using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQLWorkbench;
 
 namespace MySql.Notifier
 {
-  using System;
-  using System.Collections.Generic;
-  using System.ComponentModel;
-  using System.Linq;
-  using System.Threading;
-  using System.Windows.Forms;
-  using System.Xml;
-  using System.Xml.Serialization;
-  using MySql.Data.MySqlClient;
-  using MySQL.Utility;
-
   /// <summary>
   /// A MySQL Server instance that can be reached through a <see cref="MySqlWorkbenchConnection"/>.
   /// </summary>
   [Serializable]
-  public class MySQLInstance : INotifyPropertyChanged, IDisposable
+  public class MySqlInstance : INotifyPropertyChanged, IDisposable
   {
     #region Constants
 
@@ -115,9 +113,9 @@ namespace MySql.Notifier
     #endregion Fields
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MySQLInstance"/> class.
+    /// Initializes a new instance of the <see cref="MySqlInstance"/> class.
     /// </summary>
-    public MySQLInstance()
+    public MySqlInstance()
     {
       _workbenchConnectionId = string.Empty;
       _monitoringInterval = DEFAULT_MONITORING_INTERVAL;
@@ -132,21 +130,21 @@ namespace MySql.Notifier
       MenuGroup = null;
       RefreshingStatus = false;
       SecondsToMonitorInstance = MonitoringIntervalInSeconds;
-      InstanceID = Guid.NewGuid().ToString("B");
+      InstanceId = Guid.NewGuid().ToString("B");
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MySQLInstance"/> class.
+    /// Initializes a new instance of the <see cref="MySqlInstance"/> class.
     /// </summary>
     /// <param name="workbenchConnection">A <see cref="MySqlWorkbenchConnection"/> object.</param>
-    public MySQLInstance(MySqlWorkbenchConnection workbenchConnection)
+    public MySqlInstance(MySqlWorkbenchConnection workbenchConnection)
       : this()
     {
       WorkbenchConnection = workbenchConnection;
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MySQLInstance"/> class
+    /// Releases all resources used by the <see cref="MySqlInstance"/> class
     /// </summary>
     public void Dispose()
     {
@@ -160,7 +158,7 @@ namespace MySql.Notifier
     /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
     protected virtual void Dispose(bool disposing)
     {
-      //// Free managed resources
+      // Free managed resources
       if (_worker != null)
       {
         if (_worker.IsBusy)
@@ -179,8 +177,8 @@ namespace MySql.Notifier
         _worker.Dispose();
       }
 
-      //// Add class finalizer if unmanaged resources are added to the class
-      //// Free unmanaged resources if there are any
+      // Add class finalizer if unmanaged resources are added to the class
+      // Free unmanaged resources if there are any
     }
 
     #region Events
@@ -222,7 +220,7 @@ namespace MySql.Notifier
     /// Gets a unique instance ID.
     /// </summary>
     [XmlIgnore]
-    public string InstanceID { get; private set; }
+    public string InstanceId { get; private set; }
 
     /// <summary>
     /// Gets the status of this isntance's connection.
@@ -276,7 +274,7 @@ namespace MySql.Notifier
     /// Gets the group of ToolStripMenuItem controls for each of the corresponding instance's context menu items.
     /// </summary>
     [XmlIgnore]
-    public MySQLInstanceMenuGroup MenuGroup { get; private set; }
+    public MySqlInstanceMenuGroup MenuGroup { get; private set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether this instance is being monitored and status changes notified to users.
@@ -293,11 +291,13 @@ namespace MySql.Notifier
       {
         bool lastValue = _monitorAndNotifyStatus;
         _monitorAndNotifyStatus = value;
-        if (lastValue != value)
+        if (lastValue == value)
         {
-          SecondsToMonitorInstance = MonitoringIntervalInSeconds;
-          OnPropertyChanged("MonitorAndNotifyStatus");
+          return;
         }
+
+        SecondsToMonitorInstance = MonitoringIntervalInSeconds;
+        OnPropertyChanged("MonitorAndNotifyStatus");
       }
     }
 
@@ -316,11 +316,13 @@ namespace MySql.Notifier
       {
         uint lastValue = _monitoringInterval;
         _monitoringInterval = value;
-        if (lastValue != value)
+        if (lastValue == value)
         {
-          SecondsToMonitorInstance = MonitoringIntervalInSeconds;
-          OnPropertyChanged("MonitoringInterval");
+          return;
         }
+
+        SecondsToMonitorInstance = MonitoringIntervalInSeconds;
+        OnPropertyChanged("MonitoringInterval");
       }
     }
 
@@ -351,11 +353,13 @@ namespace MySql.Notifier
       {
         TimeUtilities.IntervalUnitOfMeasure lastValue = _monitoringIntervalUnitOfMeasure;
         _monitoringIntervalUnitOfMeasure = value;
-        if (lastValue != value)
+        if (lastValue == value)
         {
-          SecondsToMonitorInstance = MonitoringIntervalInSeconds;
-          OnPropertyChanged("MonitoringIntervalUnitOfMeasure");
+          return;
         }
+
+        SecondsToMonitorInstance = MonitoringIntervalInSeconds;
+        OnPropertyChanged("MonitoringIntervalUnitOfMeasure");
       }
     }
 
@@ -379,27 +383,24 @@ namespace MySql.Notifier
     {
       get
       {
-        if (_relatedConnections == null)
+        if (_relatedConnections != null)
         {
-          _relatedConnections = new List<MySqlWorkbenchConnection>();
-          bool isLocalInstance = MySqlWorkbenchConnection.IsHostLocal(HostName);
-          foreach (var workbenchConnection in MySqlWorkbench.Connections)
+          return _relatedConnections;
+        }
+
+        _relatedConnections = new List<MySqlWorkbenchConnection>();
+        bool isLocalInstance = MySqlWorkbenchConnection.IsHostLocal(HostName);
+        foreach (var workbenchConnection in MySqlWorkbench.Connections.Where(workbenchConnection => workbenchConnection.Port == Port))
+        {
+          if (string.IsNullOrEmpty(workbenchConnection.Host) && string.IsNullOrEmpty(HostName))
           {
-            if (workbenchConnection.Port != Port)
-            {
-              continue;
-            }
+            _relatedConnections.Add(workbenchConnection);
+            continue;
+          }
 
-            if (string.IsNullOrEmpty(workbenchConnection.Host) && string.IsNullOrEmpty(HostName))
-            {
-              _relatedConnections.Add(workbenchConnection);
-              continue;
-            }
-
-            if ((workbenchConnection.IsLocalConnection && isLocalInstance) || (workbenchConnection.Host.ToLowerInvariant() == HostName.ToLowerInvariant()))
-            {
-              _relatedConnections.Add(workbenchConnection);
-            }
+          if ((workbenchConnection.IsLocalConnection && isLocalInstance) || (workbenchConnection.Host.ToLowerInvariant() == HostName.ToLowerInvariant()))
+          {
+            _relatedConnections.Add(workbenchConnection);
           }
         }
 
@@ -461,13 +462,8 @@ namespace MySql.Notifier
 
       set
       {
-        _workbenchConnection = value;
-
-        //// If the connection is null maybe it was not found anymore so we fallback to use the first found related connection.
-        if (_workbenchConnection == null)
-        {
-          _workbenchConnection = RelatedConnections.First();
-        }
+        // If the connection is null maybe it was not found anymore so we fallback to use the first found related connection.
+        _workbenchConnection = value ?? RelatedConnections.First();
 
         if (_workbenchConnection != null)
         {
@@ -512,7 +508,7 @@ namespace MySql.Notifier
     {
       get
       {
-        return MySqlWorkbench.Servers.Any(s => s.ConnectionId == WorkbenchConnectionId) ? MySqlWorkbench.Servers.First(s => s.ConnectionId == WorkbenchConnectionId) : null;
+        return MySqlWorkbench.Servers.FirstOrDefault(s => s.ConnectionId == WorkbenchConnectionId);
       }
     }
 
@@ -521,7 +517,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Cancels the asynchronous status check.
     /// </summary>
-    /// <returns>true if the background connection test was cancelled, false otherwise</returns>
+    /// <returns><c>true</c> if the background connection test was cancelled, <c>false</c> otherwise</returns>
     public void CancelAsynchronousStatusCheck()
     {
       if (_worker != null && _worker.WorkerSupportsCancellation && (InstanceStatusCheckInProgress || _worker.IsBusy))
@@ -564,10 +560,10 @@ namespace MySql.Notifier
     /// Refreshes the instance's connection status.
     /// </summary>
     /// <param name="worker"><see cref="BackgroundWorker"/> object in case that the caller means to execute this method in another thread.</param>
-    /// <returns>true if the operation was cancelled by the passed background worker, false otherwise.</returns>
+    /// <returns><c>true</c> if the operation was cancelled by the passed background worker, <c>false</c> otherwise.</returns>
     public bool RefreshStatus(ref BackgroundWorker worker)
     {
-      //// If user cancells before even checking the connection status, then return.
+      // If user cancells before even checking the connection status, then return.
       if (worker != null && worker.CancellationPending)
       {
         return true;
@@ -598,7 +594,7 @@ namespace MySql.Notifier
     {
       if (MenuGroup == null)
       {
-        MenuGroup = new MySQLInstanceMenuGroup(this);
+        MenuGroup = new MySqlInstanceMenuGroup(this);
       }
     }
 
@@ -669,28 +665,30 @@ namespace MySql.Notifier
         return;
       }
 
-      if (ex != null && ex is MySqlException)
+      if (ex == null || !(ex is MySqlException))
       {
-        MySqlException mySqlEx = ex as MySqlException;
-        int errorNumber = mySqlEx.Number > 0 ? mySqlEx.Number : (mySqlEx.InnerException != null && mySqlEx.InnerException is MySqlException ? (mySqlEx.InnerException as MySqlException).Number : 0);
-        switch (errorNumber)
-        {
-          case 1042:
-            //// Unable to connect to any of the specified MySQL hosts.
-            break;
+        return;
+      }
 
-          case 1045:
-            //// Authentication to host {0} for user {1} using method {2} failed with message: Access denied for user '{1}'@'{0}' (using password: NO)"}
-            break;
+      MySqlException mySqlEx = ex as MySqlException;
+      int errorNumber = mySqlEx.Number > 0 ? mySqlEx.Number : (mySqlEx.InnerException != null && mySqlEx.InnerException is MySqlException ? (mySqlEx.InnerException as MySqlException).Number : 0);
+      switch (errorNumber)
+      {
+        case 1042:
+          // Unable to connect to any of the specified MySQL hosts.
+          break;
 
-          case 0:
-            //// No error number
-            break;
+        case 1045:
+          // Authentication to host {0} for user {1} using method {2} failed with message: Access denied for user '{1}'@'{0}' (using password: NO)"}
+          break;
 
-          default:
-            OnInstanceStatusTestErrorThrown(ex);
-            break;
-        }
+        case 0:
+          // No error number
+          break;
+
+        default:
+          OnInstanceStatusTestErrorThrown(ex);
+          break;
       }
     }
 
@@ -699,19 +697,19 @@ namespace MySql.Notifier
     /// </summary>
     private void SetupInstanceStatusCheckBackgroundWorker()
     {
-      if (_worker == null)
+      if (_worker != null)
       {
-        _worker = new BackgroundWorker();
-        _worker.WorkerSupportsCancellation = true;
-        _worker.WorkerReportsProgress = false;
-        _worker.DoWork += CheckInstanceStatusWorkerDoWork;
-        _worker.RunWorkerCompleted += CheckInstanceStatusWorkerCompleted;
+        return;
       }
+
+      _worker = new BackgroundWorker {WorkerSupportsCancellation = true, WorkerReportsProgress = false};
+      _worker.DoWork += CheckInstanceStatusWorkerDoWork;
+      _worker.RunWorkerCompleted += CheckInstanceStatusWorkerCompleted;
     }
   }
 
   /// <summary>
-  /// Provides information for the <see cref="InstanceStatusChanged"/> event.
+  /// Provides information for the InstanceStatusChanged event.
   /// </summary>
   public class InstanceStatusChangedArgs : EventArgs
   {
@@ -720,7 +718,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance whose status changed.</param>
     /// <param name="oldInstanceStatus">Old instance status.</param>
-    public InstanceStatusChangedArgs(MySQLInstance instance, MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
+    public InstanceStatusChangedArgs(MySqlInstance instance, MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
     {
       Instance = instance;
       OldInstanceStatus = oldInstanceStatus;
@@ -729,7 +727,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the MySQL instance whose status changed.
     /// </summary>
-    public MySQLInstance Instance { get; private set; }
+    public MySqlInstance Instance { get; private set; }
 
     /// <summary>
     /// Gets the new status of the instance.
@@ -771,7 +769,7 @@ namespace MySql.Notifier
   }
 
   /// <summary>
-  /// Provides information for the <see cref="InstanceConnectionStatusTestErrorThrown"/> event.
+  /// Provides information for the InstanceConnectionStatusTestErrorThrown event.
   /// </summary>
   public class InstanceConnectionStatusTestErrorThrownArgs : EventArgs
   {
@@ -780,7 +778,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance whose status changed.</param>
     /// <param name="ex">Exception thrown during a connection status test.</param>
-    public InstanceConnectionStatusTestErrorThrownArgs(MySQLInstance instance, Exception ex)
+    public InstanceConnectionStatusTestErrorThrownArgs(MySqlInstance instance, Exception ex)
     {
       Instance = instance;
       ErrorException = ex;
@@ -794,6 +792,6 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the MySQL instance whose status changed.
     /// </summary>
-    public MySQLInstance Instance { get; private set; }
+    public MySqlInstance Instance { get; private set; }
   }
 }

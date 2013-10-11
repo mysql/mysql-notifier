@@ -1,48 +1,47 @@
-﻿// 
-// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
-//
+
+using System;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+using MySql.Notifier.Properties;
+using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQLWorkbench;
+using MySQL.Utility.Forms;
 
 namespace MySql.Notifier
 {
-  using System;
-  using System.Drawing;
-  using System.Linq;
-  using System.Windows.Forms;
-  using MySql.Notifier.Properties;
-  using MySQL.Utility;
-  using MySQL.Utility.Forms;
-
   /// <summary>
   /// Contains a group of ToolStripMenuItem controls for each of the corresponding MySQLInstance’s context menu items.
   /// </summary>
-  public class MySQLInstanceMenuGroup : IDisposable
+  public class MySqlInstanceMenuGroup : IDisposable
   {
     /// <summary>
-    /// Initializes a new instance of the <see cref="MySQLInstanceMenuGroup"/> class.
+    /// Initializes a new instance of the <see cref="MySqlInstanceMenuGroup"/> class.
     /// </summary>
     /// <param name="boundInstance">The MySQL instance that this menu group is associated to.</param>
-    public MySQLInstanceMenuGroup(MySQLInstance boundInstance)
+    public MySqlInstanceMenuGroup(MySqlInstance boundInstance)
     {
       BoundInstance = boundInstance;
       InstanceMenuItem = new ToolStripMenuItem();
       Font menuItemFont = new Font(InstanceMenuItem.Font, FontStyle.Bold);
       InstanceMenuItem.Font = menuItemFont;
-      InstanceMenuItem.Tag = boundInstance.InstanceID;
+      InstanceMenuItem.Tag = boundInstance.InstanceId;
 
       if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
@@ -50,13 +49,13 @@ namespace MySql.Notifier
         ConfigureMenuItem.Click += new EventHandler(ConfigureMenuItem_Click);
       }
 
-      RecreateSQLEditorMenus();
+      RecreateSqlEditorMenus();
       Separator = new ToolStripSeparator();
       Update(false);
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MySQLInstanceMenuGroup"/> class
+    /// Releases all resources used by the <see cref="MySqlInstanceMenuGroup"/> class
     /// </summary>
     public void Dispose()
     {
@@ -65,7 +64,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MySQLInstanceMenuGroup"/> class
+    /// Releases all resources used by the <see cref="MySqlInstanceMenuGroup"/> class
     /// </summary>
     /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
     protected virtual void Dispose(bool disposing)
@@ -74,7 +73,7 @@ namespace MySql.Notifier
       {
         try
         {
-          //// Free managed resources
+          // Free managed resources
           if (ConfigureMenuItem != null)
           {
             ConfigureMenuItem.Dispose();
@@ -85,9 +84,9 @@ namespace MySql.Notifier
             InstanceMenuItem.Dispose();
           }
 
-          if (SQLEditorMenuItem != null)
+          if (SqlEditorMenuItem != null)
           {
-            SQLEditorMenuItem.Dispose();
+            SqlEditorMenuItem.Dispose();
           }
 
           if (Separator != null)
@@ -97,14 +96,14 @@ namespace MySql.Notifier
         }
         catch
         {
-          //// Sometimes when the dispose is done from a thread different than the main one a cross-thread exception is thrown which is not critical
-          //// since these menu items will be disposed later by the garbage collector. No Exception is being actually handled or logged since we do
-          //// not wat to overwhelm the log with these error messages since they do not affect the Notifier's execution.
+          // Sometimes when the dispose is done from a thread different than the main one a cross-thread exception is thrown which is not critical
+          // since these menu items will be disposed later by the garbage collector. No Exception is being actually handled or logged since we do
+          // not wat to overwhelm the log with these error messages since they do not affect the Notifier's execution.
         }
       }
 
-      //// Add class finalizer if unmanaged resources are added to the class
-      //// Free unmanaged resources if there are any
+      // Add class finalizer if unmanaged resources are added to the class
+      // Free unmanaged resources if there are any
     }
 
     /// <summary>
@@ -118,7 +117,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the MySQL instance that this menu group is associated to.
     /// </summary>
-    public MySQLInstance BoundInstance { get; private set; }
+    public MySqlInstance BoundInstance { get; private set; }
 
     /// <summary>
     /// Gets the Configure Instance menu itemText that opens the instance's configuration page in MySQL Workbench.
@@ -133,7 +132,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the SQL Editor menu itemText that opens the SQL Editor page in MySQL Workbench for related connections.
     /// </summary>
-    public ToolStripMenuItem SQLEditorMenuItem { get; private set; }
+    public ToolStripMenuItem SqlEditorMenuItem { get; private set; }
 
     /// <summary>
     /// The separator menu itemText at the end of all menu items.
@@ -146,19 +145,21 @@ namespace MySql.Notifier
     /// Finds the menu item's index within a context menu strip corresponding to the menu item with the given text.
     /// </summary>
     /// <param name="menu"><see cref="ContextMenuStrip"/> containing the itemText to find.</param>
-    /// <param name="menuItemID">Menu item ID.</param>
-    /// <returns>Index of the dound menu itemText, -1 if  not found.</returns>
-    public static int FindMenuItemWithinMenuStrip(ContextMenuStrip menu, string menuItemID)
+    /// <param name="menuItemId">Menu item ID.</param>
+    /// <returns>Index of the found menu itemText, <c>-1</c> if  not found.</returns>
+    public static int FindMenuItemWithinMenuStrip(ContextMenuStrip menu, string menuItemId)
     {
       int index = -1;
 
       for (int i = 0; i < menu.Items.Count; i++)
       {
-        if (menu.Items[i].Tag != null && menu.Items[i].Tag.Equals(menuItemID))
+        if (menu.Items[i].Tag == null || !menu.Items[i].Tag.Equals(menuItemId))
         {
-          index = i;
-          break;
+          continue;
         }
+
+        index = i;
+        break;
       }
 
       return index;
@@ -172,7 +173,7 @@ namespace MySql.Notifier
     {
       if (menu.InvokeRequired)
       {
-        menu.Invoke(new MethodInvoker(() => { AddToContextMenu(menu); }));
+        menu.Invoke(new MethodInvoker(() => AddToContextMenu(menu)));
       }
       else
       {
@@ -191,9 +192,9 @@ namespace MySql.Notifier
             menu.Items.Insert(index++, ConfigureMenuItem);
           }
 
-          if (SQLEditorMenuItem != null)
+          if (SqlEditorMenuItem != null)
           {
-            menu.Items.Insert(index++, SQLEditorMenuItem);
+            menu.Items.Insert(index++, SqlEditorMenuItem);
           }
         }
 
@@ -206,21 +207,21 @@ namespace MySql.Notifier
     /// Finds the menu item's index within a context menu strip corresponding to this instance menu group.
     /// </summary>
     /// <param name="menu"><see cref="ContextMenuStrip"/> containing the itemText to find.</param>
-    /// <returns>Index of the dound menu itemText, -1 if  not found.</returns>
+    /// <returns>Index of the found menu itemText, <c>-1</c> if  not found.</returns>
     public int FindInstanceMenuItemWithinMenuStrip(ContextMenuStrip menu)
     {
-      return FindMenuItemWithinMenuStrip(menu, BoundInstance.InstanceID);
+      return FindMenuItemWithinMenuStrip(menu, BoundInstance.InstanceId);
     }
 
     /// <summary>
     /// Recreates the SQL Editor sub menu items.
     /// </summary>
-    public void RecreateSQLEditorMenus()
+    public void RecreateSqlEditorMenus()
     {
       var notifierMenu = InstanceMenuItem.GetCurrentParent();
       if (notifierMenu != null && notifierMenu.InvokeRequired)
       {
-        notifierMenu.Invoke(new MethodInvoker(() => { RecreateSQLEditorMenus(); }));
+        notifierMenu.Invoke(new MethodInvoker(RecreateSqlEditorMenus));
       }
       else
       {
@@ -229,28 +230,28 @@ namespace MySql.Notifier
           return;
         }
 
-        if (SQLEditorMenuItem == null)
+        if (SqlEditorMenuItem == null)
         {
-          SQLEditorMenuItem = new ToolStripMenuItem(Resources.SQLEditor);
+          SqlEditorMenuItem = new ToolStripMenuItem(Resources.SQLEditor);
         }
         else
         {
-          SQLEditorMenuItem.DropDownItems.Clear();
+          SqlEditorMenuItem.DropDownItems.Clear();
         }
 
-        //// If there are 0 or 1 connections then the single menu will suffice.
+        // If there are 0 or 1 connections then the single menu will suffice.
         if (BoundInstance.RelatedConnections.Count <= 1)
         {
-          SQLEditorMenuItem.Enabled = true;
-          SQLEditorMenuItem.Click += new EventHandler(SQLEditorMenuItem_Click);
+          SqlEditorMenuItem.Enabled = true;
+          SqlEditorMenuItem.Click += new EventHandler(SqlEditorMenuItem_Click);
           return;
         }
         else
         {
-          SQLEditorMenuItem.Enabled = false;
+          SqlEditorMenuItem.Enabled = false;
         }
 
-        //// We have more than 1 connection so we create a submenu.
+        // We have more than 1 connection so we create a submenu.
         foreach (var conn in BoundInstance.RelatedConnections)
         {
           ToolStripMenuItem menu = new ToolStripMenuItem(conn.Name);
@@ -260,8 +261,8 @@ namespace MySql.Notifier
             menu.Font = boldFont;
           }
 
-          menu.Click += new EventHandler(SQLEditorMenuItem_Click);
-          SQLEditorMenuItem.DropDownItems.Add(menu);
+          menu.Click += new EventHandler(SqlEditorMenuItem_Click);
+          SqlEditorMenuItem.DropDownItems.Add(menu);
         }
       }
     }
@@ -274,16 +275,14 @@ namespace MySql.Notifier
     {
       if (menu.InvokeRequired)
       {
-        menu.Invoke(new MethodInvoker(() => { RemoveFromContextMenu(menu); }));
+        menu.Invoke(new MethodInvoker(() => RemoveFromContextMenu(menu)));
       }
       else
       {
         string[] menuItemTexts = new string[4];
-        int index = -1;
-
         if (MySqlWorkbench.AllowsExternalConnectionsManagement)
         {
-          //// The last itemText we delete is the service name itemText which is the reference for the others.
+          // The last itemText we delete is the service name itemText which is the reference for the others.
           menuItemTexts[0] = "Configure Menu";
           menuItemTexts[1] = "Editor Menu";
           menuItemTexts[2] = "Separator";
@@ -302,16 +301,18 @@ namespace MySql.Notifier
             continue;
           }
 
-          index = FindInstanceMenuItemWithinMenuStrip(menu);
-          if (index >= 0)
+          int index = FindInstanceMenuItemWithinMenuStrip(menu);
+          if (index < 0)
           {
-            if (!itemText.Equals(InstanceMenuItem.Text))
-            {
-              index++;
-            }
-
-            menu.Items.RemoveAt(index);
+            continue;
           }
+
+          if (!itemText.Equals(InstanceMenuItem.Text))
+          {
+            index++;
+          }
+
+          menu.Items.RemoveAt(index);
         }
 
         menu.Refresh();
@@ -327,7 +328,7 @@ namespace MySql.Notifier
       ToolStrip menu = InstanceMenuItem.GetCurrentParent();
       if (menu != null && menu.InvokeRequired)
       {
-        menu.Invoke(new MethodInvoker(() => { Update(refreshing); }));
+        menu.Invoke(new MethodInvoker(() => Update(refreshing)));
       }
       else
       {
@@ -347,9 +348,9 @@ namespace MySql.Notifier
             break;
         }
 
-        if (SQLEditorMenuItem != null)
+        if (SqlEditorMenuItem != null)
         {
-          SQLEditorMenuItem.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && BoundInstance.WorkbenchConnection != null;
+          SqlEditorMenuItem.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && BoundInstance.WorkbenchConnection != null;
         }
 
         if (ConfigureMenuItem != null)
@@ -379,7 +380,7 @@ namespace MySql.Notifier
       catch (Exception ex)
       {
         InfoDialog.ShowErrorDialog(Resources.ErrorTitle, string.Format(Resources.FailureToLaunchWorkbench, ex.Message));
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
       }
     }
 
@@ -388,7 +389,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void SQLEditorMenuItem_Click(object sender, EventArgs e)
+    private void SqlEditorMenuItem_Click(object sender, EventArgs e)
     {
       try
       {
@@ -396,15 +397,15 @@ namespace MySql.Notifier
         {
           MySqlWorkbench.LaunchSQLEditor(null);
         }
-        else if (!SQLEditorMenuItem.HasDropDownItems)
+        else if (!SqlEditorMenuItem.HasDropDownItems)
         {
           MySqlWorkbench.LaunchSQLEditor(BoundInstance.WorkbenchConnection.Name);
         }
         else
         {
-          for (int i = 0; i < SQLEditorMenuItem.DropDownItems.Count; i++)
+          for (int i = 0; i < SqlEditorMenuItem.DropDownItems.Count; i++)
           {
-            if (sender == SQLEditorMenuItem.DropDownItems[i])
+            if (sender == SqlEditorMenuItem.DropDownItems[i])
             {
               MySqlWorkbench.LaunchSQLEditor(BoundInstance.RelatedConnections[i].Name);
             }
@@ -414,7 +415,7 @@ namespace MySql.Notifier
       catch (Exception ex)
       {
         InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
       }
     }
   }

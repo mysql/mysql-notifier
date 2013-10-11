@@ -1,32 +1,30 @@
-﻿// 
-// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
-//
+
+using System;
+using System.ComponentModel;
+using System.Management;
+using System.Threading;
+using MySql.Notifier.Properties;
+using MySQL.Utility.Classes;
+using MySQL.Utility.Forms;
 
 namespace MySql.Notifier
 {
-  using System;
-  using System.ComponentModel;
-  using System.Management;
-  using System.Threading;
-  using MySql.Notifier.Properties;
-  using MySQL.Utility;
-  using MySQL.Utility.Forms;
-
   internal class ServiceWatcher : IDisposable
   {
     #region Constants
@@ -109,7 +107,7 @@ namespace MySql.Notifier
       WatchForServiceCreation = watchForServiceCreation;
       WatchForServiceDeletion = watchForServiceDeletion;
       WatchForServiceStatusChange = watchForServiceStatusChange;
-      WMIQueriesTimeoutInSeconds = WMI_QUERIES_DEFAULT_TIMEOUT_IN_SECONDS;
+      WmiQueriesTimeoutInSeconds = WMI_QUERIES_DEFAULT_TIMEOUT_IN_SECONDS;
     }
 
     #region Events
@@ -117,8 +115,6 @@ namespace MySql.Notifier
     /// <summary>
     /// This event system handles the case where the remote machine is unavailable, and a service has failed to connect to the host.
     /// </summary>
-    /// <param name="sender">Machine instance.</param>
-    /// <param name="oldConnectionStatus">Old connection status.</param>
     public delegate void ServiceEventHandler(ManagementBaseObject remoteService);
 
     /// <summary>
@@ -173,7 +169,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets or sets the timeout in seconds for WMI queries.
     /// </summary>
-    public ushort WMIQueriesTimeoutInSeconds { get; set; }
+    public ushort WmiQueriesTimeoutInSeconds { get; set; }
 
     #endregion Properties
 
@@ -217,7 +213,7 @@ namespace MySql.Notifier
     {
       if (disposing)
       {
-        //// Free managed resources
+        // Free managed resources
         ServiceCreationWatcherStop(false);
         if (_wmiAsyncCreationWatcher != null)
         {
@@ -287,8 +283,8 @@ namespace MySql.Notifier
         }
       }
 
-      //// Add class finalizer if unmanaged resources are added to the class
-      //// Free unmanaged resources if there are any
+      // Add class finalizer if unmanaged resources are added to the class
+      // Free unmanaged resources if there are any
     }
 
     /// <summary>
@@ -350,7 +346,7 @@ namespace MySql.Notifier
       bool success = true;
       if (!WatchForServiceCreation)
       {
-        return success;
+        return true;
       }
 
       try
@@ -362,7 +358,7 @@ namespace MySql.Notifier
 
         if (Asynchronous)
         {
-          _wmiAsyncCreationWatcher = _wmiAsyncCreationWatcher ?? new ManagementEventWatcher(wmiManagementScope, new WqlEventQuery("__InstanceCreationEvent", TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
+          _wmiAsyncCreationWatcher = _wmiAsyncCreationWatcher ?? new ManagementEventWatcher(wmiManagementScope, new WqlEventQuery("__InstanceCreationEvent", TimeSpan.FromSeconds(WmiQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
           _wmiAsyncCreationWatcher.EventArrived -= ServiceCreationWatcher_EventArrived;
           _wmiAsyncCreationWatcher.EventArrived += ServiceCreationWatcher_EventArrived;
           _wmiAsyncCreationWatcher.Start();
@@ -371,9 +367,11 @@ namespace MySql.Notifier
         {
           if (_wmiSemiSyncCreationWatcher == null)
           {
-            _wmiSemiSyncCreationWatcher = new BackgroundWorker();
-            _wmiSemiSyncCreationWatcher.WorkerSupportsCancellation = true;
-            _wmiSemiSyncCreationWatcher.WorkerReportsProgress = true;
+            _wmiSemiSyncCreationWatcher = new BackgroundWorker
+            {
+              WorkerSupportsCancellation = true,
+              WorkerReportsProgress = true
+            };
             _wmiSemiSyncCreationWatcher.DoWork += ServiceCreationWatcherStartSemiSyncDoWork;
             _wmiSemiSyncCreationWatcher.ProgressChanged += ServiceCreationWatcherStartSemiSynProgressChanged;
             _wmiSemiSyncCreationWatcher.RunWorkerCompleted += ServiceCreationWatcherStartSemiSyncCompleted;
@@ -388,7 +386,7 @@ namespace MySql.Notifier
       catch (Exception ex)
       {
         success = false;
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
         InfoDialog.ShowErrorDialog(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, null, ex.Message);
       }
 
@@ -402,18 +400,20 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void ServiceCreationWatcherStartSemiSyncCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      if (e.Error != null)
+      if (e.Error == null)
       {
-        MySQLSourceTrace.WriteAppErrorToLog(e.Error);
-        InfoDialog.ShowErrorDialog(
-          Resources.WMISemiSyncEventsErrorTitle,
-          string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncCreationWatcher.Scope.Path.Server),
-          null,
-          e.Error.Message,
-          false,
-          InfoDialog.DefaultButtonType.AcceptButton,
-          30);
+        return;
       }
+
+      MySqlSourceTrace.WriteAppErrorToLog(e.Error);
+      InfoDialog.ShowErrorDialog(
+        Resources.WMISemiSyncEventsErrorTitle,
+        string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncCreationWatcher.Scope.Path.Server),
+        null,
+        e.Error.Message,
+        false,
+        InfoDialog.DefaultButtonType.AcceptButton,
+        30);
     }
 
     /// <summary>
@@ -425,7 +425,7 @@ namespace MySql.Notifier
     {
       BackgroundWorker worker = sender as BackgroundWorker;
       Exception throwException = null;
-      if (worker.CancellationPending)
+      if (worker != null && worker.CancellationPending)
       {
         e.Cancel = true;
         return;
@@ -435,8 +435,8 @@ namespace MySql.Notifier
       {
         int eventCount = 0;
         ManagementScope scope = e.Argument as ManagementScope;
-        _wmiAsyncCreationWatcher = _wmiAsyncCreationWatcher ?? new ManagementEventWatcher(scope, new WqlEventQuery("__InstanceCreationEvent", TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
-        while (!worker.CancellationPending)
+        _wmiAsyncCreationWatcher = _wmiAsyncCreationWatcher ?? new ManagementEventWatcher(scope, new WqlEventQuery("__InstanceCreationEvent", TimeSpan.FromSeconds(WmiQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
+        while (worker != null && !worker.CancellationPending)
         {
           ManagementBaseObject remoteService = _wmiAsyncCreationWatcher.WaitForNextEvent();
           if (remoteService != null)
@@ -450,15 +450,19 @@ namespace MySql.Notifier
         throwException = ex;
       }
 
-      if (worker.CancellationPending)
+      if (worker != null && worker.CancellationPending)
       {
         e.Cancel = true;
       }
 
       try
       {
-        _wmiAsyncCreationWatcher.Stop();
-        _wmiAsyncCreationWatcher.Dispose();
+        if (_wmiAsyncCreationWatcher != null)
+        {
+          _wmiAsyncCreationWatcher.Stop();
+          _wmiAsyncCreationWatcher.Dispose();
+        }
+
         _wmiAsyncCreationWatcher = null;
       }
       catch
@@ -495,7 +499,7 @@ namespace MySql.Notifier
       bool success = true;
       if (!WatchForServiceCreation && _wmiAsyncCreationWatcher == null)
       {
-        return success;
+        return true;
       }
 
       try
@@ -517,7 +521,7 @@ namespace MySql.Notifier
       catch (Exception ex)
       {
         success = false;
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
         if (displayErrors)
         {
           InfoDialog.ShowErrorDialog(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, null, ex.Message);
@@ -550,7 +554,7 @@ namespace MySql.Notifier
       bool success = true;
       if (!WatchForServiceDeletion)
       {
-        return success;
+        return true;
       }
 
       try
@@ -562,7 +566,7 @@ namespace MySql.Notifier
 
         if (Asynchronous)
         {
-          _wmiAsyncDeletionWatcher = _wmiAsyncDeletionWatcher ?? new ManagementEventWatcher(wmiManagementScope, new WqlEventQuery("__InstanceDeletionEvent", TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
+          _wmiAsyncDeletionWatcher = _wmiAsyncDeletionWatcher ?? new ManagementEventWatcher(wmiManagementScope, new WqlEventQuery("__InstanceDeletionEvent", TimeSpan.FromSeconds(WmiQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
           _wmiAsyncDeletionWatcher.EventArrived -= ServiceDeletionWatcher_EventArrived;
           _wmiAsyncDeletionWatcher.EventArrived += ServiceDeletionWatcher_EventArrived;
           _wmiAsyncDeletionWatcher.Start();
@@ -571,9 +575,11 @@ namespace MySql.Notifier
         {
           if (_wmiSemiSyncDeletionWatcher == null)
           {
-            _wmiSemiSyncDeletionWatcher = new BackgroundWorker();
-            _wmiSemiSyncDeletionWatcher.WorkerSupportsCancellation = true;
-            _wmiSemiSyncDeletionWatcher.WorkerReportsProgress = true;
+            _wmiSemiSyncDeletionWatcher = new BackgroundWorker
+            {
+              WorkerSupportsCancellation = true,
+              WorkerReportsProgress = true
+            };
             _wmiSemiSyncDeletionWatcher.DoWork += ServiceDeletionWatcherStartSemiSyncDoWork;
             _wmiSemiSyncDeletionWatcher.ProgressChanged += ServiceDeletionWatcherStartSemiSynProgressChanged;
             _wmiSemiSyncDeletionWatcher.RunWorkerCompleted += ServiceDeletionWatcherStartSemiSyncCompleted;
@@ -588,7 +594,7 @@ namespace MySql.Notifier
       catch (Exception ex)
       {
         success = false;
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
         InfoDialog.ShowErrorDialog(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, null, ex.Message);
       }
 
@@ -602,18 +608,20 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void ServiceDeletionWatcherStartSemiSyncCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      if (e.Error != null)
+      if (e.Error == null)
       {
-        MySQLSourceTrace.WriteAppErrorToLog(e.Error);
-        InfoDialog.ShowErrorDialog(
-          Resources.WMISemiSyncEventsErrorTitle,
-          string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncDeletionWatcher.Scope.Path.Server),
-          null,
-          e.Error.Message,
-          false,
-          InfoDialog.DefaultButtonType.AcceptButton,
-          30);
+        return;
       }
+
+      MySqlSourceTrace.WriteAppErrorToLog(e.Error);
+      InfoDialog.ShowErrorDialog(
+        Resources.WMISemiSyncEventsErrorTitle,
+        string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncDeletionWatcher.Scope.Path.Server),
+        null,
+        e.Error.Message,
+        false,
+        InfoDialog.DefaultButtonType.AcceptButton,
+        30);
     }
 
     /// <summary>
@@ -625,7 +633,7 @@ namespace MySql.Notifier
     {
       BackgroundWorker worker = sender as BackgroundWorker;
       Exception throwException = null;
-      if (worker.CancellationPending)
+      if (worker != null && worker.CancellationPending)
       {
         e.Cancel = worker.CancellationPending;
         return;
@@ -635,8 +643,8 @@ namespace MySql.Notifier
       {
         int eventCount = 0;
         ManagementScope scope = e.Argument as ManagementScope;
-        _wmiAsyncDeletionWatcher = new ManagementEventWatcher(scope, new WqlEventQuery("__InstanceDeletionEvent", TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
-        while (!worker.CancellationPending)
+        _wmiAsyncDeletionWatcher = new ManagementEventWatcher(scope, new WqlEventQuery("__InstanceDeletionEvent", TimeSpan.FromSeconds(WmiQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
+        while (worker != null && !worker.CancellationPending)
         {
           ManagementBaseObject remoteService = _wmiAsyncDeletionWatcher.WaitForNextEvent();
           if (remoteService != null)
@@ -650,7 +658,7 @@ namespace MySql.Notifier
         throwException = ex;
       }
 
-      if (worker.CancellationPending)
+      if (worker != null && worker.CancellationPending)
       {
         e.Cancel = true;
       }
@@ -695,7 +703,7 @@ namespace MySql.Notifier
       bool success = true;
       if (!WatchForServiceDeletion && _wmiAsyncDeletionWatcher == null)
       {
-        return success;
+        return true;
       }
 
       try
@@ -717,7 +725,7 @@ namespace MySql.Notifier
       catch (Exception ex)
       {
         success = false;
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
         if (displayErrors)
         {
           InfoDialog.ShowErrorDialog(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, null, ex.Message);
@@ -750,7 +758,7 @@ namespace MySql.Notifier
       bool success = true;
       if (!WatchForServiceStatusChange)
       {
-        return success;
+        return true;
       }
 
       try
@@ -762,8 +770,8 @@ namespace MySql.Notifier
 
         if (Asynchronous)
         {
-          TimeSpan queryTimeout = TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds);
-          _wmiAsyncStatusChangeWatcher = _wmiAsyncStatusChangeWatcher ?? new ManagementEventWatcher(wmiManagementScope, new WqlEventQuery("__InstanceModificationEvent", TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
+          TimeSpan queryTimeout = TimeSpan.FromSeconds(WmiQueriesTimeoutInSeconds);
+          _wmiAsyncStatusChangeWatcher = _wmiAsyncStatusChangeWatcher ?? new ManagementEventWatcher(wmiManagementScope, new WqlEventQuery("__InstanceModificationEvent", TimeSpan.FromSeconds(WmiQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
           _wmiAsyncStatusChangeWatcher.EventArrived += ServiceStatusChangeWatcher_EventArrived;
           _wmiAsyncStatusChangeWatcher.Start();
         }
@@ -771,9 +779,11 @@ namespace MySql.Notifier
         {
           if (_wmiSemiSyncStatusChangeWatcher == null)
           {
-            _wmiSemiSyncStatusChangeWatcher = new BackgroundWorker();
-            _wmiSemiSyncStatusChangeWatcher.WorkerSupportsCancellation = true;
-            _wmiSemiSyncStatusChangeWatcher.WorkerReportsProgress = true;
+            _wmiSemiSyncStatusChangeWatcher = new BackgroundWorker
+            {
+              WorkerSupportsCancellation = true,
+              WorkerReportsProgress = true
+            };
             _wmiSemiSyncStatusChangeWatcher.DoWork += ServiceStatusChangeWatcherStartSemiSyncDoWork;
             _wmiSemiSyncStatusChangeWatcher.ProgressChanged += ServiceStatusChangeWatcherStartSemiSynProgressChanged;
             _wmiSemiSyncStatusChangeWatcher.RunWorkerCompleted += ServiceStatusChangeWatcherStartSemiSyncCompleted;
@@ -788,7 +798,7 @@ namespace MySql.Notifier
       catch (Exception ex)
       {
         success = false;
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
         InfoDialog.ShowErrorDialog(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, null, ex.Message);
       }
 
@@ -802,18 +812,20 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void ServiceStatusChangeWatcherStartSemiSyncCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      if (e.Error != null)
+      if (e.Error == null)
       {
-        MySQLSourceTrace.WriteAppErrorToLog(e.Error);
-        InfoDialog.ShowErrorDialog(
-          Resources.WMISemiSyncEventsErrorTitle,
-          string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncStatusChangeWatcher.Scope.Path.Server),
-          null,
-          e.Error.Message,
-          false,
-          InfoDialog.DefaultButtonType.AcceptButton,
-          30);
+        return;
       }
+
+      MySqlSourceTrace.WriteAppErrorToLog(e.Error);
+      InfoDialog.ShowErrorDialog(
+        Resources.WMISemiSyncEventsErrorTitle,
+        string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncStatusChangeWatcher.Scope.Path.Server),
+        null,
+        e.Error.Message,
+        false,
+        InfoDialog.DefaultButtonType.AcceptButton,
+        30);
     }
 
     /// <summary>
@@ -825,7 +837,7 @@ namespace MySql.Notifier
     {
       BackgroundWorker worker = sender as BackgroundWorker;
       Exception throwException = null;
-      if (worker.CancellationPending)
+      if (worker != null && worker.CancellationPending)
       {
         e.Cancel = true;
         return;
@@ -835,8 +847,8 @@ namespace MySql.Notifier
       {
         int eventCount = 0;
         ManagementScope scope = e.Argument as ManagementScope;
-        _wmiAsyncStatusChangeWatcher = _wmiAsyncStatusChangeWatcher ?? new ManagementEventWatcher(scope, new WqlEventQuery("__InstanceModificationEvent", TimeSpan.FromSeconds(WMIQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
-        while (!worker.CancellationPending)
+        _wmiAsyncStatusChangeWatcher = _wmiAsyncStatusChangeWatcher ?? new ManagementEventWatcher(scope, new WqlEventQuery("__InstanceModificationEvent", TimeSpan.FromSeconds(WmiQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
+        while (worker != null && !worker.CancellationPending)
         {
           ManagementBaseObject remoteService = _wmiAsyncStatusChangeWatcher.WaitForNextEvent();
           if (remoteService != null)
@@ -850,7 +862,7 @@ namespace MySql.Notifier
         throwException = ex;
       }
 
-      if (worker.CancellationPending)
+      if (worker != null && worker.CancellationPending)
       {
         e.Cancel = true;
       }
@@ -895,7 +907,7 @@ namespace MySql.Notifier
       bool success = true;
       if (!WatchForServiceStatusChange && _wmiAsyncStatusChangeWatcher == null)
       {
-        return success;
+        return true;
       }
 
       try
@@ -917,7 +929,7 @@ namespace MySql.Notifier
       catch (Exception ex)
       {
         success = false;
-        MySQLSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
         if (displayErrors)
         {
           InfoDialog.ShowErrorDialog(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, null, ex.Message);

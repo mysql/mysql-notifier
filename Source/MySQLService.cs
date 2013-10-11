@@ -1,42 +1,40 @@
-﻿// 
-// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
-//
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Management;
+using System.ServiceProcess;
+using System.Timers;
+using System.Xml.Serialization;
+using System.IO;
+using Microsoft.Win32;
+using MySql.Notifier.Properties;
+using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQLWorkbench;
+using MySQL.Utility.Forms;
 
 namespace MySql.Notifier
 {
-  using System;
-  using System.Collections.Generic;
-  using System.ComponentModel;
-  using System.Diagnostics;
-  using System.Linq;
-  using System.Management;
-  using System.ServiceProcess;
-  using System.Timers;
-  using System.Xml;
-  using System.Xml.Serialization;
-  using System.IO;
-  using Microsoft.Win32;
-  using MySql.Notifier.Properties;
-  using MySQL.Utility;
-  using MySQL.Utility.Forms;
-
   [Serializable]
-  public class MySQLService : IDisposable
+  public class MySqlService : IDisposable
   {
     #region Fields
 
@@ -63,7 +61,7 @@ namespace MySql.Notifier
     /// <summary>
     /// The current status of this service.
     /// </summary>
-    private MySQLServiceStatus _currentStatus;
+    private MySqlServiceStatus _currentStatus;
 
     /// <summary>
     /// Timer used to wait for a status change.
@@ -73,25 +71,25 @@ namespace MySql.Notifier
     #endregion Fields
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MySQLService"/> class.
+    /// Initializes a new instance of the <see cref="MySqlService"/> class.
     /// </summary>
-    public MySQLService()
+    public MySqlService()
     {
-      _currentStatus = MySQLServiceStatus.Unavailable;
+      _currentStatus = MySqlServiceStatus.Unavailable;
       _statusChangeTimer = new Timer(100);
       _displayName = string.Empty;
       _isWaitingOnStatusChange = false;
       _loops = 0;
       _managementObject = null;
       MenuGroup = null;
-      PreviousStatus = MySQLServiceStatus.Unavailable;
-      ServiceID = Guid.NewGuid().ToString("B");
+      PreviousStatus = MySqlServiceStatus.Unavailable;
+      ServiceId = Guid.NewGuid().ToString("B");
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MySQLService"/> class.
+    /// Initializes a new instance of the <see cref="MySqlService"/> class.
     /// </summary>
-    public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, Machine machine = null)
+    public MySqlService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, Machine machine = null)
       : this()
     {
       Host = machine ?? new Machine();
@@ -102,7 +100,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MySQLService"/> class
+    /// Releases all resources used by the <see cref="MySqlService"/> class
     /// </summary>
     public void Dispose()
     {
@@ -111,14 +109,14 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MySQLService"/> class
+    /// Releases all resources used by the <see cref="MySqlService"/> class
     /// </summary>
     /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
     protected virtual void Dispose(bool disposing)
     {
       if (disposing)
       {
-        //// Free managed resources
+        // Free managed resources
         if (_statusChangeTimer != null)
         {
           _statusChangeTimer.Dispose();
@@ -135,8 +133,8 @@ namespace MySql.Notifier
         }
       }
 
-      //// Add class finalizer if unmanaged resources are added to the class
-      //// Free unmanaged resources if there are any
+      // Add class finalizer if unmanaged resources are added to the class
+      // Free unmanaged resources if there are any
     }
 
     #region Events
@@ -145,14 +143,14 @@ namespace MySql.Notifier
     /// Handles the case where the service successfully moved to a new status.
     /// </summary>
     /// <param name="service">MySQLService instance.</param>
-    public delegate void StatusChangedHandler(MySQLService service);
+    public delegate void StatusChangedHandler(MySqlService service);
 
     /// <summary>
     /// Handles the case where the service failed to move to a proposed status.
     /// </summary>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="ex">Exception thrown while trying to change the service's status.</param>
-    public delegate void StatusChangeErrorHandler(MySQLService service, Exception ex);
+    public delegate void StatusChangeErrorHandler(MySqlService service, Exception ex);
 
     /// <summary>
     /// Occurs when the service has a status change.
@@ -172,7 +170,7 @@ namespace MySql.Notifier
     /// Gets a unique service ID.
     /// </summary>
     [XmlIgnore]
-    public string ServiceID { get; private set; }
+    public string ServiceId { get; private set; }
 
     /// <summary>
     /// Gets or sets the display name of the service.
@@ -204,7 +202,7 @@ namespace MySql.Notifier
     /// Gets a flag indicating if this service is bound to a MySQL server service.
     /// </summary>
     [XmlIgnore]
-    public bool IsRealMySQLService { get; private set; }
+    public bool IsRealMySqlService { get; private set; }
 
     /// <summary>
     /// Gets the group of ToolStripMenuItem controls for each of the corresponding instance's context menu items.
@@ -222,7 +220,7 @@ namespace MySql.Notifier
     /// Gets the previous status of this service.
     /// </summary>
     [XmlIgnore]
-    public MySQLServiceStatus PreviousStatus { get; private set; }
+    public MySqlServiceStatus PreviousStatus { get; private set; }
 
     /// <summary>
     /// Gets a value indicating if the WMI instance bound to this service exists.
@@ -258,13 +256,13 @@ namespace MySql.Notifier
     /// Gets the parameters used to initialize a MySQL server instance.
     /// </summary>
     [XmlIgnore]
-    public MySQLStartupParameters StartupParameters { get; private set; }
+    public MySqlStartupParameters StartupParameters { get; private set; }
 
     /// <summary>
     /// Gets the current status of this service.
     /// </summary>
     [XmlIgnore]
-    public MySQLServiceStatus Status
+    public MySqlServiceStatus Status
     {
       get
       {
@@ -273,13 +271,15 @@ namespace MySql.Notifier
 
       private set
       {
-        MySQLServiceStatus oldStatus = _currentStatus;
+        MySqlServiceStatus oldStatus = _currentStatus;
         _currentStatus = value;
-        if (_currentStatus != oldStatus)
+        if (_currentStatus == oldStatus)
         {
-          PreviousStatus = oldStatus;
-          OnStatusChanged(this);
+          return;
         }
+
+        PreviousStatus = oldStatus;
+        OnStatusChanged(this);
       }
     }
 
@@ -306,16 +306,16 @@ namespace MySql.Notifier
     /// <summary>
     /// Finds the related Workbench connections that connect to this MySQL service, only for services running on local computers.
     /// </summary>
-    public void FindMatchingWBConnections()
+    public void FindMatchingWbConnections()
     {
       if (!Host.IsLocal || ServiceManagementObject == null)
       {
         return;
       }
 
-      //// Discover what StartupParameters we were started with for local connections
-      MySQLStartupParameters StartupParameters = GetStartupParameters();
-      if (string.IsNullOrEmpty(StartupParameters.HostName) || !IsRealMySQLService)
+      // Discover what StartupParameters we were started with for local connections
+      StartupParameters = GetStartupParameters();
+      if (string.IsNullOrEmpty(StartupParameters.HostName) || !IsRealMySqlService)
       {
         return;
       }
@@ -330,48 +330,45 @@ namespace MySql.Notifier
       }
 
       var filteredConnections = MySqlWorkbench.WorkbenchConnections.Where(t => !String.IsNullOrEmpty(t.Name) && t.Port == StartupParameters.Port);
-      if (filteredConnections != null)
+      foreach (MySqlWorkbenchConnection c in filteredConnections)
       {
-        foreach (MySqlWorkbenchConnection c in filteredConnections)
+        switch (c.DriverType)
         {
-          switch (c.DriverType)
-          {
-            case MySqlWorkbenchConnectionType.NamedPipes:
-              if (!StartupParameters.NamedPipesEnabled || string.Compare(c.Socket, StartupParameters.PipeName, true) != 0)
-              {
-                continue;
-              }
-              break;
-
-            case MySqlWorkbenchConnectionType.Tcp:
-              if (c.Port != StartupParameters.Port)
-              {
-                continue;
-              }
-              break;
-
-            case MySqlWorkbenchConnectionType.Ssh:
-            case MySqlWorkbenchConnectionType.Unknown:
-              continue;
-          }
-
-          if (!Utility.IsValidIpAddress(c.Host))
-          {
-            if (Utility.GetIPv4ForHostName(c.Host) != StartupParameters.HostIPv4)
+          case MySqlWorkbenchConnectionType.NamedPipes:
+            if (!StartupParameters.NamedPipesEnabled || string.Compare(c.Socket, StartupParameters.PipeName, StringComparison.OrdinalIgnoreCase) != 0)
             {
               continue;
             }
-          }
-          else
-          {
-            if (c.Host != StartupParameters.HostIPv4)
+            break;
+
+          case MySqlWorkbenchConnectionType.Tcp:
+            if (c.Port != StartupParameters.Port)
             {
               continue;
             }
-          }
+            break;
 
-          WorkbenchConnections.Add(c);
+          case MySqlWorkbenchConnectionType.Ssh:
+          case MySqlWorkbenchConnectionType.Unknown:
+            continue;
         }
+
+        if (!Utility.IsValidIpAddress(c.Host))
+        {
+          if (Utility.GetIPv4ForHostName(c.Host) != StartupParameters.HostIPv4)
+          {
+            continue;
+          }
+        }
+        else
+        {
+          if (c.Host != StartupParameters.HostIPv4)
+          {
+            continue;
+          }
+        }
+
+        WorkbenchConnections.Add(c);
       }
     }
 
@@ -381,13 +378,13 @@ namespace MySql.Notifier
     /// <param name="retryToGetServiceInstance">Flag indicating if the method will attempt to re-fetch the serice instance.</param>
     public void RefreshStatusAndName(bool retryToGetServiceInstance)
     {
-      //// If the WMI management object is not available, attempt to fetch it.
+      // If the WMI management object is not available, attempt to fetch it.
       if (retryToGetServiceInstance)
       {
         GetServiceInstance(false);
       }
 
-      //// If the WMI management object is still not available, set the status to Unavailable.
+      // If the WMI management object is still not available, set the status to Unavailable.
       string newStatusText = "Unavailable";
       if (ServiceManagementObject != null)
       {
@@ -399,16 +396,16 @@ namespace MySql.Notifier
         DisplayName = ServiceManagementObject.Properties["DisplayName"].Value.ToString();
       }
 
-      MySQLServiceStatus newStatus;
+      MySqlServiceStatus newStatus;
       GetStatusFromText(newStatusText, out newStatus);
       if (Status != newStatus)
       {
-        //// Set the new status since it is different to the previous status.
+        // Set the new status since it is different to the previous status.
         SetStatus(newStatusText);
       }
       else if (MenuGroup != null)
       {
-        //// Force the update of the UI even if the previous status is the same as the new status.
+        // Force the update of the UI even if the previous status is the same as the new status.
         MenuGroup.Update();
       }
     }
@@ -438,7 +435,7 @@ namespace MySql.Notifier
       GetServiceInstance(doNotFetchInstanceIfOffline);
       try
       {
-        FindMatchingWBConnections();
+        FindMatchingWbConnections();
         RefreshStatusAndName(false);
 
         if (MenuGroup == null)
@@ -449,7 +446,7 @@ namespace MySql.Notifier
       catch (InvalidOperationException ioEx)
       {
         InfoDialog.ShowErrorDialog(Resources.HighSeverityError, ioEx.Message);
-        MySQLSourceTrace.WriteAppErrorToLog(ioEx);
+        MySqlSourceTrace.WriteAppErrorToLog(ioEx);
         _managementObject = null;
       }
     }
@@ -460,7 +457,7 @@ namespace MySql.Notifier
     /// <param name="statusString">Text of the new status.</param>
     public void SetStatus(string statusString)
     {
-      MySQLServiceStatus newStatus;
+      MySqlServiceStatus newStatus;
       bool matchingStatusFound = GetStatusFromText(statusString, out newStatus);
       if (matchingStatusFound)
       {
@@ -480,7 +477,7 @@ namespace MySql.Notifier
       }
       else
       {
-        ExecuteWMIMethod("StartService");
+        ExecuteWmiMethod("StartService");
       }
     }
 
@@ -496,7 +493,7 @@ namespace MySql.Notifier
       }
       else
       {
-        ExecuteWMIMethod("StopService");
+        ExecuteWmiMethod("StopService");
       }
     }
 
@@ -504,7 +501,7 @@ namespace MySql.Notifier
     /// Fires the <see cref="StatusChanged"/> event.
     /// </summary>
     /// <param name="sender">Sender object.</param>
-    protected virtual void OnStatusChanged(MySQLService sender)
+    protected virtual void OnStatusChanged(MySqlService sender)
     {
       if (this.StatusChanged != null)
       {
@@ -530,25 +527,23 @@ namespace MySql.Notifier
     /// <param name="action">Action to perform on the service to change its status.</param>
     private void ChangeServiceStatus(int action)
     {
-      BackgroundWorker worker = new BackgroundWorker();
-      worker.WorkerSupportsCancellation = false;
-      worker.WorkerReportsProgress = false;
-      worker.DoWork += new DoWorkEventHandler(worker_DoWork);
-      worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(worker_RunWorkerCompleted);
+      BackgroundWorker worker = new BackgroundWorker {WorkerSupportsCancellation = false, WorkerReportsProgress = false};
+      worker.DoWork += new DoWorkEventHandler(WorkerDoWork);
+      worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(WorkerRunWorkerCompleted);
       worker.RunWorkerAsync(action);
     }
 
     /// <summary>
-    /// Converts a service status text extracted from the Service's state property to a <see cref="MySQLServiceStatus"/> enumeration value.
+    /// Converts a service status text extracted from the Service's state property to a <see cref="MySqlServiceStatus"/> enumeration value.
     /// </summary>
     /// <param name="statusText">Service's state property text.</param>
-    /// <param name="convertedStatus">A <see cref="MySQLServiceStatus"/> enumeration value if a matching one was found.</param>
+    /// <param name="convertedStatus">A <see cref="MySqlServiceStatus"/> enumeration value if a matching one was found.</param>
     /// <returns>true if a matching enumeration value is found for the given status text, false otherwise.</returns>
-    private bool GetStatusFromText(string statusText, out MySQLServiceStatus convertedStatus)
+    private static bool GetStatusFromText(string statusText, out MySqlServiceStatus convertedStatus)
     {
-      convertedStatus = MySQLServiceStatus.Unavailable;
+      convertedStatus = MySqlServiceStatus.Unavailable;
       statusText = statusText.Replace(" ", string.Empty);
-      bool parsed = MySQLServiceStatus.TryParse(statusText, out convertedStatus);
+      bool parsed = MySqlServiceStatus.TryParse(statusText, out convertedStatus);
       return parsed;
     }
 
@@ -564,17 +559,16 @@ namespace MySql.Notifier
         return;
       }
 
-      ManagementObjectCollection retObjectCollection = Host.GetWMIServices(ServiceName, false, false);
-      if (retObjectCollection != null && retObjectCollection.Count > 0)
+      ManagementObjectCollection retObjectCollection = Host.GetWmiServices(ServiceName, false, false);
+      if (retObjectCollection == null || retObjectCollection.Count <= 0)
       {
-        foreach (ManagementObject mo in retObjectCollection)
-        {
-          if (mo != null)
-          {
-            _managementObject = mo;
-            break;
-          }
-        }
+        return;
+      }
+
+      foreach (ManagementObject mo in retObjectCollection.Cast<ManagementObject>().Where(mo => mo != null))
+      {
+        _managementObject = mo;
+        break;
       }
     }
 
@@ -582,13 +576,15 @@ namespace MySql.Notifier
     /// Gets the parameters used to initialize a MySQL server instance.
     /// </summary>
     /// <returns></returns>
-    private MySQLStartupParameters GetStartupParameters()
+    private MySqlStartupParameters GetStartupParameters()
     {
-      MySQLStartupParameters parameters = new MySQLStartupParameters();
-      parameters.PipeName = "mysql";
+      MySqlStartupParameters parameters = new MySqlStartupParameters
+      {
+        PipeName = "mysql",
+        HostName = Host.Name == "." ? MySqlWorkbenchConnection.DEFAULT_HOSTNAME : Host.Name
+      };
 
-      //// Get our host information
-      parameters.HostName = Host.Name == "." ? MySqlWorkbenchConnection.DEFAULT_HOSTNAME : Host.Name;
+      // Get our host information
       parameters.HostIPv4 = Utility.GetIPv4ForHostName(parameters.HostName);
 
       RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format(@"SYSTEM\CurrentControlSet\Services\{0}", ServiceName));
@@ -596,6 +592,7 @@ namespace MySql.Notifier
       {
         return parameters;
       }
+
       string imagepath = (string)key.GetValue("ImagePath", null);
       key.Close();
       if (imagepath == null)
@@ -604,9 +601,9 @@ namespace MySql.Notifier
       }
 
       string[] args = Utility.SplitArgs(imagepath);
-      IsRealMySQLService = args[0].EndsWith("mysqld.exe") || args[0].EndsWith("mysqld-nt.exe") || args[0].EndsWith("mysqld") || args[0].EndsWith("mysqld-nt");
+      IsRealMySqlService = args[0].EndsWith("mysqld.exe") || args[0].EndsWith("mysqld-nt.exe") || args[0].EndsWith("mysqld") || args[0].EndsWith("mysqld-nt");
 
-      //// Parse our command line args
+      // Parse our command line args
       Mono.Options.OptionSet p = new Mono.Options.OptionSet()
         .Add("defaults-file=", "", v => parameters.DefaultsFile = v)
         .Add("port=|P=", "", v => Int32.TryParse(v, out parameters.Port))
@@ -618,12 +615,12 @@ namespace MySql.Notifier
         return parameters;
       }
 
-      //// We have a valid defaults file
+      // We have a valid defaults file
       IniFile f = new IniFile(parameters.DefaultsFile);
       Int32.TryParse(f.ReadValue("mysqld", "port", parameters.Port.ToString()), out parameters.Port);
       parameters.PipeName = f.ReadValue("mysqld", "socket", parameters.PipeName);
 
-      //// Now see if named pipes are enabled
+      // Now see if named pipes are enabled
       parameters.NamedPipesEnabled = parameters.NamedPipesEnabled || f.HasKey("mysqld", "enable-named-pipe");
       return parameters;
     }
@@ -635,9 +632,7 @@ namespace MySql.Notifier
     private void ProcessStatusService(string action)
     {
       ServiceController winService = new ServiceController(ServiceName);
-      Process proc = new Process();
-      proc.StartInfo.Verb = "runas";
-      proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+      Process proc = new Process {StartInfo = {Verb = "runas", WindowStyle = ProcessWindowStyle.Hidden}};
 
       if (action == "restart")
       {
@@ -672,9 +667,9 @@ namespace MySql.Notifier
     {
       _loops = 0;
       _isWaitingOnStatusChange = true;
-      _statusChangeTimer.Elapsed += new ElapsedEventHandler(statusChangeTimer_ElapsedToStop);
+      _statusChangeTimer.Elapsed += new ElapsedEventHandler(StatusChangeTimerElapsedToStop);
       _statusChangeTimer.Start();
-      if (!ExecuteWMIMethod("StopService"))
+      if (!ExecuteWmiMethod("StopService"))
       {
         return;
       }
@@ -685,18 +680,18 @@ namespace MySql.Notifier
         System.Threading.Thread.Sleep(2000);
       }
 
-      _statusChangeTimer.Elapsed -= new ElapsedEventHandler(statusChangeTimer_ElapsedToStop);
+      _statusChangeTimer.Elapsed -= new ElapsedEventHandler(StatusChangeTimerElapsedToStop);
 
-      if (Status != MySQLServiceStatus.Stopped && _loops >= 50)
+      if (Status != MySqlServiceStatus.Stopped && _loops >= 50)
       {
         throw new System.TimeoutException("Unable to stop service, the operation has timed out.");
       }
 
       _loops = 0;
       _isWaitingOnStatusChange = true;
-      _statusChangeTimer.Elapsed += new ElapsedEventHandler(statusChangeTimer_ElapsedToStart);
+      _statusChangeTimer.Elapsed += new ElapsedEventHandler(StatusChangeTimerElapsedToStart);
       _statusChangeTimer.Start();
-      if (!ExecuteWMIMethod("StartService"))
+      if (!ExecuteWmiMethod("StartService"))
       {
         return;
       }
@@ -707,9 +702,9 @@ namespace MySql.Notifier
         System.Threading.Thread.Sleep(2000);
       }
 
-      _statusChangeTimer.Elapsed -= new ElapsedEventHandler(statusChangeTimer_ElapsedToStart);
+      _statusChangeTimer.Elapsed -= new ElapsedEventHandler(StatusChangeTimerElapsedToStart);
 
-      if (Status != MySQLServiceStatus.Running && _loops >= 100)
+      if (Status != MySqlServiceStatus.Running && _loops >= 100)
       {
         throw new System.TimeoutException("Unable to restart service, the operation has timed out.");
       }
@@ -720,7 +715,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="methodName">WMI method name to execute.</param>
     /// <returns>true if the method executed successfully, false otherwise.</returns>
-    private bool ExecuteWMIMethod(string methodName)
+    private bool ExecuteWmiMethod(string methodName)
     {
       if (string.IsNullOrEmpty(methodName))
       {
@@ -740,51 +735,56 @@ namespace MySql.Notifier
         {
           serviceUnavailable = true;
           errorException = ex;
-          MySQLSourceTrace.WriteAppErrorToLog(ex);
+          MySqlSourceTrace.WriteAppErrorToLog(ex);
         }
       }
 
-      if (serviceUnavailable)
+      if (!serviceUnavailable)
       {
-        if (errorException == null)
-        {
-          errorException = new Exception(string.Format(Resources.ServiceActionErrorDetail, methodName));
-        }
-
-        OnStatusChangeError(errorException);
+        return true;
       }
 
-      return !serviceUnavailable;
+      if (errorException == null)
+      {
+        errorException = new Exception(string.Format(Resources.ServiceActionErrorDetail, methodName));
+      }
+
+      OnStatusChangeError(errorException);
+      return false;
     }
 
     /// <summary>
-    /// Event delegate method fired when the <see cref="statusChangeTimer"/> timer elapses.
+    /// Event delegate method fired when the <see cref="_statusChangeTimer"/> timer elapses.
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
-    private void statusChangeTimer_ElapsedToStart(object sender, ElapsedEventArgs e)
+    private void StatusChangeTimerElapsedToStart(object sender, ElapsedEventArgs e)
     {
       _loops++;
-      if (Status == MySQLServiceStatus.Running || _loops >= 50)
+      if (Status != MySqlServiceStatus.Running && _loops < 50)
       {
-        _statusChangeTimer.Stop();
-        _isWaitingOnStatusChange = false;
+        return;
       }
+
+      _statusChangeTimer.Stop();
+      _isWaitingOnStatusChange = false;
     }
 
     /// <summary>
-    /// Event delegate method fired when the <see cref="statusChangeTimer"/> timer elapses.
+    /// Event delegate method fired when the <see cref="_statusChangeTimer"/> timer elapses.
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
-    private void statusChangeTimer_ElapsedToStop(object sender, ElapsedEventArgs e)
+    private void StatusChangeTimerElapsedToStop(object sender, ElapsedEventArgs e)
     {
       _loops++;
-      if (Status == MySQLServiceStatus.Stopped || _loops >= 100)
+      if (Status != MySqlServiceStatus.Stopped && _loops < 100)
       {
-        _statusChangeTimer.Stop();
-        _isWaitingOnStatusChange = false;
+        return;
       }
+
+      _statusChangeTimer.Stop();
+      _isWaitingOnStatusChange = false;
     }
 
     /// <summary>
@@ -792,7 +792,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
-    private void worker_DoWork(object sender, DoWorkEventArgs e)
+    private void WorkerDoWork(object sender, DoWorkEventArgs e)
     {
       if (!Service.ExistsServiceInstance(ServiceName))
       {
@@ -823,7 +823,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
-    private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+    private void WorkerRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
       if (e.Error != null)
       {
@@ -839,7 +839,7 @@ namespace MySql.Notifier
   /// <summary>
   /// Indicates the current state of the service.
   /// </summary>
-  public enum MySQLServiceStatus
+  public enum MySqlServiceStatus
   {
     /// <summary>
     /// The service is not reachable. Verify WMI connection with the host.
@@ -885,7 +885,7 @@ namespace MySql.Notifier
   /// <summary>
   /// Represents StartupParameters used to initialize a MySQL server instance.
   /// </summary>
-  public struct MySQLStartupParameters
+  public struct MySqlStartupParameters
   {
     public string DefaultsFile;
     public string HostIPv4;

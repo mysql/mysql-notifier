@@ -522,4 +522,7 @@ Please make sure the connections.xml file is not open by another program.</value
     <value>Install available updates...</value>
     <comment>Sub-Action Menu (Actions)</comment>
   </data>
+  <data name="IgnoreAvailableUpdatesText" xml:space="preserve">
+    <value>This action will completely ignore the available software updates. Would you like to continue?</value>
+  </data>
 </root>

@@ -1,25 +1,23 @@
-﻿// 
-// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
-//
 
-namespace MySql.Notifier
+namespace MySql.Notifier.Forms
 {
-  partial class MonitorMySQLServerInstancesDialog
+  partial class MonitorMySqlServerInstancesDialog
   {
     /// <summary>
     /// Required designer variable.
@@ -48,7 +46,7 @@ namespace MySql.Notifier
     private void InitializeComponent()
     {
       this.components = new System.ComponentModel.Container();
-      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MonitorMySQLServerInstancesDialog));
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MonitorMySqlServerInstancesDialog));
       this.ConnectionNameLabel = new System.Windows.Forms.Label();
       this.ShowMonitoredInstancesCheckBox = new System.Windows.Forms.CheckBox();
       this.FilterTextBox = new System.Windows.Forms.TextBox();
@@ -289,7 +287,7 @@ namespace MySql.Notifier
       this.FootnoteAreaHeight = 0;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MinimumSize = new System.Drawing.Size(610, 600);
-      this.Name = "MonitorMySQLServerInstancesDialog";
+      this.Name = "MonitorMySqlServerInstancesDialog";
       this.Text = "Monitor MySQL Server Instance";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MonitorMySQLServerInstancesDialog_FormClosing);
       this.Shown += new System.EventHandler(this.MonitorMySQLServerInstancesDialog_Shown);

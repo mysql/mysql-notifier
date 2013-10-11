@@ -1,36 +1,36 @@
-﻿// 
-// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
 // published by the Free Software Foundation; version 2 of the
 // License.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
-//
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Linq;
+using System.Management;
+using System.Threading;
+using System.Windows.Forms;
+using System.Xml.Serialization;
+using MySql.Notifier.Properties;
+using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQLWorkbench;
+using MySQL.Utility.Forms;
 
 namespace MySql.Notifier
 {
-  using System;
-  using System.Collections.Generic;
-  using System.ComponentModel;
-  using System.Drawing;
-  using System.Management;
-  using System.Threading;
-  using System.Windows.Forms;
-  using System.Xml.Serialization;
-  using MySql.Notifier.Properties;
-  using MySQL.Utility;
-  using MySQL.Utility.Forms;
-
   /// <summary>
   /// Contains all the information required to connect to a remote host, plus a list of of the services that will be monitored by Notifier inside it and logic to manage them.
   /// </summary>
@@ -164,7 +164,7 @@ namespace MySql.Notifier
       Password = string.Empty;
       RefreshingStatus = false;
       SecondsToAutoTestConnection = AutoTestConnectionIntervalInSeconds;
-      Services = new List<MySQLService>();
+      Services = new List<MySqlService>();
       UseAsynchronousWMI = true;
       WMIQueriesTimeoutInSeconds = 5;
     }
@@ -181,7 +181,7 @@ namespace MySql.Notifier
       _name = MySqlWorkbenchConnection.IsHostLocal(name) ? name : name.ToUpper();
       _connectionStatus = IsLocal ? ConnectionStatusType.Online : ConnectionStatusType.Unknown;
       User = user.ToUpper();
-      Password = MySQLSecurity.EncryptPassword(password);
+      Password = MySqlSecurity.EncryptPassword(password);
     }
 
     #region Enumerations
@@ -266,14 +266,14 @@ namespace MySql.Notifier
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="changeType">Service list change type.</param>
-    public delegate void ServiceListChangedHandler(Machine machine, MySQLService service, ChangeType changeType);
+    public delegate void ServiceListChangedHandler(Machine machine, MySqlService service, ChangeType changeType);
 
     /// <summary>
     /// Notifies that the status of one of the services in the list has changed.
     /// </summary>
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
-    public delegate void ServiceStatusChangedHandler(Machine machine, MySQLService service);
+    public delegate void ServiceStatusChangedHandler(Machine machine, MySqlService service);
 
     /// <summary>
     /// This event system handles the case where the remote machine is unavailable, and a service has failed to connect to the host.
@@ -281,7 +281,7 @@ namespace MySql.Notifier
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="ex">Exception thrown while trying to change the service's status.</param>
-    public delegate void ServiceStatusChangeErrorHandler(Machine machine, MySQLService service, Exception ex);
+    public delegate void ServiceStatusChangeErrorHandler(Machine machine, MySqlService service, Exception ex);
 
     /// <summary>
     /// Occurs when the machine status changes.
@@ -364,13 +364,13 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Gets the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWMIServices"/> method.
+    /// Gets the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWmiServices"/> method.
     /// </summary>
     [XmlIgnore]
     public ConnectionProblemType ConnectionProblem { get; private set; }
 
     /// <summary>
-    /// Gets a long description about the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWMIServices"/> method.
+    /// Gets a long description about the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWmiServices"/> method.
     /// </summary>
     [XmlIgnore]
     public string ConnectionProblemLongDescription
@@ -414,7 +414,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Gets the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWMIServices"/> method.
+    /// Gets the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWmiServices"/> method.
     /// </summary>
     [XmlIgnore]
     public ConnectionStatusType ConnectionStatus
@@ -428,15 +428,17 @@ namespace MySql.Notifier
       {
         ConnectionStatusType oldConnectionStatus = _connectionStatus;
         _connectionStatus = value;
-        if (oldConnectionStatus != _connectionStatus)
+        if (oldConnectionStatus == _connectionStatus)
         {
-          if (oldConnectionStatus != ConnectionStatusType.Connecting && oldConnectionStatus != ConnectionStatusType.Unknown)
-          {
-            OldConnectionStatus = oldConnectionStatus;
-          }
-
-          OnMachineStatusChanged(oldConnectionStatus);
+          return;
         }
+
+        if (oldConnectionStatus != ConnectionStatusType.Connecting && oldConnectionStatus != ConnectionStatusType.Unknown)
+        {
+          OldConnectionStatus = oldConnectionStatus;
+        }
+
+        OnMachineStatusChanged(oldConnectionStatus);
       }
     }
 
@@ -454,7 +456,7 @@ namespace MySql.Notifier
     {
       get
       {
-        return Services != null ? Services.Count > 0 : false;
+        return Services != null && Services.Count > 0;
       }
     }
 
@@ -525,9 +527,9 @@ namespace MySql.Notifier
 
       set
       {
-        string _oldName = _name;
+        string oldName = _name;
         _name = value;
-        if (string.Compare(_oldName, _name, true) != 0)
+        if (string.Compare(oldName, _name, StringComparison.OrdinalIgnoreCase) != 0)
         {
           ConnectionStatus = IsLocal ? ConnectionStatusType.Online : ConnectionStatusType.Unknown;
         }
@@ -579,8 +581,8 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets or sets the list of services associated with this machine.
     /// </summary>
-    [XmlElement(ElementName = "ServicesList", Type = typeof(List<MySQLService>))]
-    public List<MySQLService> Services { get; set; }
+    [XmlElement(ElementName = "ServicesList", Type = typeof(List<MySqlService>))]
+    public List<MySqlService> Services { get; set; }
 
     /// <summary>
     /// Gets the password as an unencrypted string.
@@ -590,7 +592,7 @@ namespace MySql.Notifier
     {
       get
       {
-        return string.IsNullOrEmpty(Password) ? string.Empty : MySQLSecurity.DecryptPassword(Password);
+        return string.IsNullOrEmpty(Password) ? string.Empty : MySqlSecurity.DecryptPassword(Password);
       }
     }
 
@@ -630,7 +632,7 @@ namespace MySql.Notifier
         }
 
         _wmiConnectionOptions.Username = User;
-        _wmiConnectionOptions.Password = MySQLSecurity.DecryptPassword(Password);
+        _wmiConnectionOptions.Password = MySqlSecurity.DecryptPassword(Password);
         return _wmiConnectionOptions;
       }
     }
@@ -674,11 +676,13 @@ namespace MySql.Notifier
     /// <returns>true if the background connection test was cancelled, false otherwise</returns>
     public void CancelAsynchronousConnectionTest()
     {
-      if (_worker != null && _worker.WorkerSupportsCancellation && (ConnectionTestInProgress || _worker.IsBusy))
+      if (_worker == null || !_worker.WorkerSupportsCancellation || (!ConnectionTestInProgress && !_worker.IsBusy))
       {
-        _connectionTestCancelled = true;
-        _worker.CancelAsync();
+        return;
       }
+
+      _connectionTestCancelled = true;
+      _worker.CancelAsync();
     }
 
     /// <summary>
@@ -686,7 +690,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">The MySQL service involved on the change.</param>
     /// <param name="changeType">Change type (addition, removal, update) related to a MySQL service.</param>
-    public void ChangeService(MySQLService service, ChangeType changeType)
+    public void ChangeService(MySqlService service, ChangeType changeType)
     {
       switch (changeType)
       {
@@ -727,14 +731,14 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">MySQLService instance to look for.</param>
     /// <returns>True if current machine contains it already.</returns>
-    public bool ContainsService(MySQLService service)
+    public bool ContainsService(MySqlService service)
     {
       if (Services == null || Services.Count == 0)
       {
         return false;
       }
 
-      return GetServiceByName(service.ServiceName) == null ? false : true;
+      return GetServiceByName(service.ServiceName) != null;
     }
 
     /// <summary>
@@ -754,7 +758,7 @@ namespace MySql.Notifier
     {
       if (disposing)
       {
-        //// Free managed resources
+        // Free managed resources
         if (_wmiServicesWatcher != null)
         {
           _wmiServicesWatcher.Dispose();
@@ -780,18 +784,15 @@ namespace MySql.Notifier
 
         if (Services != null)
         {
-          foreach (MySQLService service in Services)
+          foreach (MySqlService service in Services.Where(service => service != null))
           {
-            if (service != null)
-            {
-              service.Dispose();
-            }
+            service.Dispose();
           }
         }
       }
 
-      //// Add class finalizer if unmanaged resources are added to the class
-      //// Free unmanaged resources if there are any
+      // Add class finalizer if unmanaged resources are added to the class
+      // Free unmanaged resources if there are any
     }
 
     /// <summary>
@@ -799,17 +800,9 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="name">MySQLService instance name</param>
     /// <returns>MySQLService instance</returns>
-    public MySQLService GetServiceByName(string name)
+    public MySqlService GetServiceByName(string name)
     {
-      foreach (MySQLService service in Services)
-      {
-        if (string.Compare(service.ServiceName, name, true) == 0)
-        {
-          return service;
-        }
-      }
-
-      return null;
+      return Services.FirstOrDefault(service => string.Compare(service.ServiceName, name, StringComparison.OrdinalIgnoreCase) == 0);
     }
 
     /// <summary>
@@ -817,9 +810,9 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="displayMessageOnError">Flag indicating if an error message is displayed to users indicating the connection error.</param>
     /// <returns>A collection of management objects.</returns>
-    public ManagementObjectCollection GetWMIServices(bool displayMessageOnError)
+    public ManagementObjectCollection GetWmiServices(bool displayMessageOnError)
     {
-      return GetWMIServices(null, false, displayMessageOnError);
+      return GetWmiServices(null, false, displayMessageOnError);
     }
 
     /// <summary>
@@ -829,14 +822,13 @@ namespace MySql.Notifier
     /// <param name="useDisplayName">Flag indicating if the display name is used to match the name filter instead of the service name.</param>
     /// <param name="displayMessageOnError">Flag indicating if an error message is displayed to users indicating the connection error.</param>
     /// <returns>A collection of management objects.</returns>
-    public ManagementObjectCollection GetWMIServices(string serviceNameFilter, bool useDisplayName, bool displayMessageOnError)
+    public ManagementObjectCollection GetWmiServices(string serviceNameFilter, bool useDisplayName, bool displayMessageOnError)
     {
       ManagementObjectCollection wmiServicesCollection = null;
       Exception connectionException = null;
 
       try
       {
-        string serviceDisplayName;
         if (!WMIManagementScope.IsConnected)
         {
           WMIManagementScope.Connect();
@@ -858,14 +850,12 @@ namespace MySql.Notifier
           return null;
         }
 
-        if (wmiServicesCollection != null)
+        // Verify if we can access the services within the services collection by trying to access the first element
+        // that is why after the element is successfully accessed (a property in it) we exit the loop.
+        foreach (var mo in wmiServicesCollection)
         {
-          //// Verify if we can access the services within the services collection.
-          foreach (var mo in wmiServicesCollection)
-          {
-            serviceDisplayName = mo["DisplayName"].ToString();
-            break;
-          }
+          string serviceDisplayName = mo["DisplayName"].ToString();
+          break;
         }
 
         if (_connectionTestCancelled)
@@ -887,55 +877,51 @@ namespace MySql.Notifier
         connectionException = ex;
       }
 
-      if (connectionException != null)
+      if (connectionException == null)
       {
-        MySQLSourceTrace.WriteToLog(ConnectionProblemLongDescription, System.Diagnostics.SourceLevels.Information);
-        MySQLSourceTrace.WriteAppErrorToLog(connectionException);
-        if (displayMessageOnError)
-        {
-          InfoDialog.ShowErrorDialog(
-            ConnectionProblemShortDescription,
-            ConnectionProblemLongDescription,
-            null,
-            ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + connectionException.Message : null,
-            true,
-            InfoDialog.DefaultButtonType.AcceptButton,
-            30);
-        }
-
-        return null;
+        return wmiServicesCollection;
       }
 
-      return wmiServicesCollection;
+      MySqlSourceTrace.WriteToLog(ConnectionProblemLongDescription, System.Diagnostics.SourceLevels.Information);
+      MySqlSourceTrace.WriteAppErrorToLog(connectionException);
+      if (displayMessageOnError)
+      {
+        InfoDialog.ShowErrorDialog(
+          ConnectionProblemShortDescription,
+          ConnectionProblemLongDescription,
+          null,
+          ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + connectionException.Message : null,
+          true,
+          InfoDialog.DefaultButtonType.AcceptButton,
+          30);
+      }
+
+      return null;
     }
 
     /// <summary>
     /// Load Calculated, Machine dependant StartupParameters
     /// </summary>
-    /// <param name="setupWMIEventsOnly">When true will suscribe WMI event watchers only and will skip further operations with services.</param>
-    public void LoadServicesParameters(bool setupWMIEventsOnly)
+    /// <param name="setupWmiEventsOnly">When <c>true</c> will suscribe WMI event watchers only and will skip further operations with services.</param>
+    public void LoadServicesParameters(bool setupWmiEventsOnly)
     {
-      if (!InitialLoadDone && IsLocal && setupWMIEventsOnly)
+      if (!InitialLoadDone && IsLocal && setupWmiEventsOnly)
       {
-        SetupWMIEvents();
+        SetupWmiEvents();
         return;
       }
 
-      //// Set services StartupParameters and subscribe to service events.
+      // Set services StartupParameters and subscribe to service events.
       if (Services != null && Services.Count > 0)
       {
         var serviceNamesList = Services.ConvertAll<string>(service => service.ServiceName);
-        foreach (string serviceName in serviceNamesList)
+        foreach (MySqlService service in serviceNamesList.Select(GetServiceByName).Where(service => service != null))
         {
-          MySQLService service = GetServiceByName(serviceName);
-          if (service != null)
-          {
-            ChangeService(service, InitialLoadDone ? ChangeType.Updated : ChangeType.AddByLoad);
-          }
+          ChangeService(service, InitialLoadDone ? ChangeType.Updated : ChangeType.AddByLoad);
         }
       }
 
-      //// Test connection status if this is a remote machine during an initial load only.
+      // Test connection status if this is a remote machine during an initial load only.
       if (!InitialLoadDone && !IsLocal && ConnectionStatus != ConnectionStatusType.Online)
       {
         TestConnection(false, true);
@@ -957,37 +943,37 @@ namespace MySql.Notifier
     /// Refreshes the machine's status and the status of each of its services.
     /// </summary>
     /// <param name="worker"><see cref="BackgroundWorker"/> object in case that the caller means to execute this method in another thread.</param>
-    /// <returns>true if the operation was cancelled by the passed background worker, false otherwise.</returns>
+    /// <returns><c>true</c> if the operation was cancelled by the passed background worker, <c>false</c> otherwise.</returns>
     public bool RefreshStatus(ref BackgroundWorker worker)
     {
       bool cancelled = false;
 
-      //// If it's the local Machine, check if it contains services since it may not have been added to the menu and it may just be monitoring for services creation.
+      // If it's the local Machine, check if it contains services since it may not have been added to the menu and it may just be monitoring for services creation.
       if (IsLocal && Services.Count == 0)
       {
         return false;
       }
 
-      //// If user cancells before even testing the connection, then return.
+      // If user cancells before even testing the connection, then return.
       if (worker != null && worker.CancellationPending)
       {
         return true;
       }
 
-      //// Update the machine's menu item stating that the machine is refreshing its status.
+      // Update the machine's menu item stating that the machine is refreshing its status.
       RefreshingStatus = true;
       UpdateMenuGroup();
 
-      //// Attempt to test the connection only if the machine is a remote one.
+      // Attempt to test the connection only if the machine is a remote one.
       var remoteMachineStatus = ConnectionStatus;
       if (!IsLocal)
       {
         TestConnection(false, false);
       }
 
-      //// Refresh the machine services only if it's a local machine or if it was online and status did not chance,
-      //// this in order to fix a racing condition where services do not report back a status change after they are
-      //// in a Start Pending or Stop Pending status.
+      // Refresh the machine services only if it's a local machine or if it was online and status did not chance,
+      // this in order to fix a racing condition where services do not report back a status change after they are
+      // in a Start Pending or Stop Pending status.
       if (IsLocal || (remoteMachineStatus == ConnectionStatusType.Online && IsOnline))
       {
         foreach (var remoteService in Services)
@@ -1002,7 +988,7 @@ namespace MySql.Notifier
         }
       }
 
-      //// Update the machine's menu item only reflecting its new status.
+      // Update the machine's menu item only reflecting its new status.
       RefreshingStatus = false;
       UpdateMenuGroup();
       return cancelled;
@@ -1021,9 +1007,8 @@ namespace MySql.Notifier
       }
 
       var serviceNamesList = Services.ConvertAll<string>(service => service.ServiceName);
-      foreach (string serviceName in serviceNamesList)
+      foreach (MySqlService service in serviceNamesList.Select(GetServiceByName))
       {
-        MySQLService service = GetServiceByName(serviceName);
         ChangeService(service, ChangeType.Cleared);
         removedServicesQuantity++;
       }
@@ -1039,11 +1024,11 @@ namespace MySql.Notifier
     {
       if (menu.InvokeRequired)
       {
-        menu.Invoke(new MethodInvoker(() => { RemoveMenuGroup(menu); }));
+        menu.Invoke(new MethodInvoker(() => RemoveMenuGroup(menu)));
       }
       else
       {
-        foreach (MySQLService service in Services)
+        foreach (MySqlService service in Services)
         {
           service.MenuGroup.RemoveFromContextMenu(menu);
         }
@@ -1068,7 +1053,7 @@ namespace MySql.Notifier
     {
       if (menu.InvokeRequired)
       {
-        menu.Invoke(new MethodInvoker(() => { SetupMenuGroup(menu); }));
+        menu.Invoke(new MethodInvoker(() => SetupMenuGroup(menu)));
       }
       else
       {
@@ -1077,8 +1062,11 @@ namespace MySql.Notifier
           return;
         }
 
-        MenuGroup = new ToolStripMenuItem(string.Format("{0} ({1})", Name, ConnectionStatus.ToString()));
-        MenuGroup.Tag = MachineId;
+        MenuGroup = new ToolStripMenuItem(string.Format("{0} ({1})", Name, ConnectionStatus.ToString()))
+        {
+          Tag = MachineId
+        };
+
         Font boldFont = new Font(MenuGroup.Font, FontStyle.Bold);
         MenuGroup.Font = boldFont;
         MenuGroup.BackColor = SystemColors.MenuText;
@@ -1099,7 +1087,7 @@ namespace MySql.Notifier
 
         menu.Items.Insert(index, MenuGroup);
 
-        //// Hide the separator just above this new menu item if needed.
+        // Hide the separator just above this new menu item if needed.
         if (index > 0 && menu.Items[index - 1] is ToolStripSeparator)
         {
           menu.Items[index - 1].Visible = false;
@@ -1123,7 +1111,7 @@ namespace MySql.Notifier
         return;
       }
 
-      //// Start with a Connecting... status
+      // Start with a Connecting... status
       ConnectionTestInProgress = true;
       ConnectionStatus = ConnectionStatusType.Connecting;
 
@@ -1158,7 +1146,7 @@ namespace MySql.Notifier
       ToolStrip menu = MenuGroup.GetCurrentParent();
       if (menu != null && menu.InvokeRequired)
       {
-        menu.Invoke(new MethodInvoker(() => { UpdateMenuGroup(); }));
+        menu.Invoke(new MethodInvoker(UpdateMenuGroup));
       }
       else
       {
@@ -1188,12 +1176,14 @@ namespace MySql.Notifier
       AutoTestConnectionInterval = fromMachine.AutoTestConnectionInterval;
       AutoTestConnectionIntervalUnitOfMeasure = fromMachine.AutoTestConnectionIntervalUnitOfMeasure;
 
-      if (loginHasChanged)
+      if (!loginHasChanged)
       {
-        foreach (MySQLService service in Services)
-        {
-          service.SetServiceParameters(true);
-        }
+        return;
+      }
+
+      foreach (MySqlService service in Services)
+      {
+        service.SetServiceParameters(true);
       }
     }
 
@@ -1208,15 +1198,18 @@ namespace MySql.Notifier
         MachineStatusChanged(this, oldConnectionStatus);
       }
 
-      if (OldConnectionStatus != ConnectionStatus && (IsOnline || ConnectionStatus == Machine.ConnectionStatusType.Unavailable))
+      if (OldConnectionStatus == ConnectionStatus ||
+          (!IsOnline && ConnectionStatus != Machine.ConnectionStatusType.Unavailable))
       {
-        if (InitialLoadDone)
-        {
-          LoadServicesParameters(false);
-        }
-
-        SetupWMIEvents();
+        return;
       }
+
+      if (InitialLoadDone)
+      {
+        LoadServicesParameters(false);
+      }
+
+      SetupWmiEvents();
     }
 
     /// <summary>
@@ -1224,7 +1217,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">Service that caused the services list change.</param>
     /// <param name="changeType">List change type.</param>
-    protected virtual void OnServiceListChanged(MySQLService service, ChangeType changeType)
+    protected virtual void OnServiceListChanged(MySqlService service, ChangeType changeType)
     {
       if (ServiceListChanged != null)
       {
@@ -1236,7 +1229,7 @@ namespace MySql.Notifier
     /// Fires the <see cref="ServiceStatusChanged"/> event.
     /// </summary>
     /// <param name="service">Service whose status changed.</param>
-    protected virtual void OnServiceStatusChanged(MySQLService service)
+    protected virtual void OnServiceStatusChanged(MySqlService service)
     {
       if (ServiceStatusChanged != null)
       {
@@ -1249,7 +1242,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">Service to initialize.</param>
     /// <param name="changeType">Change type (addition, removal, update) related to a MySQL service.</param>
-    private void LoadServiceParameters(MySQLService service, ChangeType changeType)
+    private void LoadServiceParameters(MySqlService service, ChangeType changeType)
     {
       service.Host = this;
       service.SetServiceParameters(changeType == ChangeType.Updated);
@@ -1276,7 +1269,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">Service whose status changed.</param>
     /// <param name="ex">Exception error thrown while trying to change service status.</param>
-    private void OnServiceStatusChangeError(MySQLService service, Exception ex)
+    private void OnServiceStatusChangeError(MySqlService service, Exception ex)
     {
       if (ServiceStatusChangeError != null)
       {
@@ -1288,7 +1281,7 @@ namespace MySql.Notifier
     /// Event delegate method that is fired when a WMI service is created.
     /// </summary>
     /// <param name="remoteService">Remote service firing the status changed event.</param>
-    private void OnWMIServiceCreated(ManagementBaseObject remoteService)
+    private void OnWmiServiceCreated(ManagementBaseObject remoteService)
     {
       if (!Settings.Default.AutoAddServicesToMonitor)
       {
@@ -1301,20 +1294,22 @@ namespace MySql.Notifier
       }
 
       string serviceName = remoteService["Name"].ToString().Trim();
-      MySQLService service = GetServiceByName(serviceName);
-      if (service == null)
+      MySqlService service = GetServiceByName(serviceName);
+      if (service != null)
       {
-        service = new MySQLService(serviceName, Settings.Default.NotifyOfStatusChange, Settings.Default.NotifyOfStatusChange, this);
-        service.SetServiceParameters(true);
-        ChangeService(service, ChangeType.AutoAdd);
+        return;
       }
+
+      service = new MySqlService(serviceName, Settings.Default.NotifyOfStatusChange, Settings.Default.NotifyOfStatusChange, this);
+      service.SetServiceParameters(true);
+      ChangeService(service, ChangeType.AutoAdd);
     }
 
     /// <summary>
     /// Event delegate method that is fired when a WMI service is deleted.
     /// </summary>
     /// <param name="remoteService">Remote service firing the status changed event.</param>
-    private void OnWMIServiceDeleted(ManagementBaseObject remoteService)
+    private void OnWmiServiceDeleted(ManagementBaseObject remoteService)
     {
       if (remoteService == null)
       {
@@ -1322,7 +1317,7 @@ namespace MySql.Notifier
       }
 
       string serviceName = remoteService["Name"].ToString().Trim();
-      MySQLService service = GetServiceByName(serviceName);
+      MySqlService service = GetServiceByName(serviceName);
       if (service != null)
       {
         ChangeService(service, ChangeType.RemoveByEvent);
@@ -1333,7 +1328,7 @@ namespace MySql.Notifier
     /// Event delegate method that is fired when a WMI service status changes.
     /// </summary>
     /// <param name="remoteService">Remote service firing the status changed event.</param>
-    private void OnWMIServiceStatusChanged(ManagementBaseObject remoteService)
+    private void OnWmiServiceStatusChanged(ManagementBaseObject remoteService)
     {
       if (remoteService == null)
       {
@@ -1342,7 +1337,7 @@ namespace MySql.Notifier
 
       string serviceName = remoteService["Name"].ToString().Trim();
       string state = remoteService["State"].ToString();
-      MySQLService service = GetServiceByName(serviceName);
+      MySqlService service = GetServiceByName(serviceName);
       if (service != null)
       {
         service.SetStatus(state);
@@ -1364,7 +1359,7 @@ namespace MySql.Notifier
       ToolStrip menu = MenuGroup.GetCurrentParent();
       if (menu != null && menu.InvokeRequired)
       {
-        menu.Invoke(new MethodInvoker(() => { ReconnectMenu_Click(sender, e); }));
+        menu.Invoke(new MethodInvoker(() => ReconnectMenu_Click(sender, e)));
       }
       else
       {
@@ -1377,37 +1372,37 @@ namespace MySql.Notifier
     /// </summary>
     private void SetupConnectionTestBackgroundWorker()
     {
-      if (_worker == null)
+      if (_worker != null)
       {
-        _worker = new BackgroundWorker();
-        _worker.WorkerSupportsCancellation = true;
-        _worker.WorkerReportsProgress = false;
-        _worker.DoWork += TestConnectionWorkerDoWork;
-        _worker.RunWorkerCompleted += TestConnectionWorkerCompleted;
+        return;
       }
+
+      _worker = new BackgroundWorker {WorkerSupportsCancellation = true, WorkerReportsProgress = false};
+      _worker.DoWork += TestConnectionWorkerDoWork;
+      _worker.RunWorkerCompleted += TestConnectionWorkerCompleted;
     }
 
     /// <summary>
     /// Sets up the WMI events that monitor service deletions and service status changes.
     /// </summary>
-    private void SetupWMIEvents()
+    private void SetupWmiEvents()
     {
       _wmiServicesWatcher = _wmiServicesWatcher ?? new ServiceWatcher(true, true, true, UseAsynchronousWMI, IsOnline);
-      _wmiServicesWatcher.WMIQueriesTimeoutInSeconds = WMIQueriesTimeoutInSeconds;
+      _wmiServicesWatcher.WmiQueriesTimeoutInSeconds = WMIQueriesTimeoutInSeconds;
 
       if (IsOnline)
       {
-        _wmiServicesWatcher.ServiceCreated += OnWMIServiceCreated;
-        _wmiServicesWatcher.ServiceDeleted += OnWMIServiceDeleted;
-        _wmiServicesWatcher.ServiceStatusChanged += OnWMIServiceStatusChanged;
+        _wmiServicesWatcher.ServiceCreated += OnWmiServiceCreated;
+        _wmiServicesWatcher.ServiceDeleted += OnWmiServiceDeleted;
+        _wmiServicesWatcher.ServiceStatusChanged += OnWmiServiceStatusChanged;
         _wmiServicesWatcher.Start(WMIManagementScope);
       }
       else
       {
         _wmiServicesWatcher.IsMachineOnline = IsOnline;
-        _wmiServicesWatcher.ServiceCreated -= OnWMIServiceCreated;
-        _wmiServicesWatcher.ServiceDeleted -= OnWMIServiceDeleted;
-        _wmiServicesWatcher.ServiceStatusChanged -= OnWMIServiceStatusChanged;
+        _wmiServicesWatcher.ServiceCreated -= OnWmiServiceCreated;
+        _wmiServicesWatcher.ServiceDeleted -= OnWmiServiceDeleted;
+        _wmiServicesWatcher.ServiceStatusChanged -= OnWmiServiceStatusChanged;
         _wmiServicesWatcher.Stop(true);
       }
     }
@@ -1427,7 +1422,7 @@ namespace MySql.Notifier
       }
       else
       {
-        //// Report the connection status based on the Connection + Services retrieval + WMI events tests
+        // Report the connection status based on the Connection + Services retrieval + WMI events tests
         ConnectionStatus = ConnectionProblem != ConnectionProblemType.None ? ConnectionStatusType.Unavailable : ConnectionStatusType.Online;
       }
     }
@@ -1441,7 +1436,7 @@ namespace MySql.Notifier
     {
       BackgroundWorker worker = sender is BackgroundWorker ? sender as BackgroundWorker : null;
 
-      //// Try to see if we can connect to the remote computer and retrieve its services
+      // Try to see if we can connect to the remote computer and retrieve its services
       bool displayMessageOnError = (bool)e.Argument;
       if (worker != null && worker.CancellationPending)
       {
@@ -1449,56 +1444,61 @@ namespace MySql.Notifier
         return;
       }
 
-      ManagementObjectCollection wmiServicesCollection = GetWMIServices("eventlog", false, displayMessageOnError);
+      ManagementObjectCollection wmiServicesCollection = GetWmiServices("eventlog", false, displayMessageOnError);
       if (worker != null && worker.CancellationPending)
       {
         e.Cancel = true;
         return;
       }
 
-      //// If services could be retrieved, try to subscribe to WMI events using a dummy watcher (ONLY if using asynchronous mode).
-      if (UseAsynchronousWMI && ConnectionProblem == ConnectionProblemType.None)
+      // If services could be retrieved, try to subscribe to WMI events using a dummy watcher (ONLY if using asynchronous mode).
+      if (!UseAsynchronousWMI || ConnectionProblem != ConnectionProblemType.None)
       {
-        ServiceWatcher dummyWatcher = null;
-        try
-        {
-          if (!WMIManagementScope.IsConnected)
-          {
-            WMIManagementScope.Connect();
-          }
+        return;
+      }
 
-          if (worker != null && worker.CancellationPending)
-          {
-            e.Cancel = true;
-            return;
-          }
+      ServiceWatcher dummyWatcher = null;
+      try
+      {
+        if (!WMIManagementScope.IsConnected)
+        {
+          WMIManagementScope.Connect();
+        }
 
-          dummyWatcher = new ServiceWatcher(false, false, true, UseAsynchronousWMI, true);
-          dummyWatcher.WMIQueriesTimeoutInSeconds = WMIQueriesTimeoutInSeconds;
-          dummyWatcher.Start(WMIManagementScope);
-        }
-        catch (Exception ex)
+        if (worker != null && worker.CancellationPending)
         {
-          ConnectionProblem = ConnectionProblemType.InsufficientAccessPermissions;
-          MySQLSourceTrace.WriteToLog(ConnectionProblemLongDescription, System.Diagnostics.SourceLevels.Information);
-          MySQLSourceTrace.WriteAppErrorToLog(ex);
-          if (displayMessageOnError)
-          {
-            InfoDialog.ShowErrorDialog(
-                ConnectionProblemShortDescription,
-                ConnectionProblemLongDescription,
-                null,
-                Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + ex.Message,
-                true,
-                InfoDialog.DefaultButtonType.AcceptButton, 30);
-          }
+          e.Cancel = true;
+          return;
         }
-        finally
+
+        dummyWatcher = new ServiceWatcher(false, false, true, UseAsynchronousWMI, true)
         {
-          if (dummyWatcher != null)
-          {
-            dummyWatcher.Dispose();
-          }
+          WmiQueriesTimeoutInSeconds = WMIQueriesTimeoutInSeconds
+        };
+
+        dummyWatcher.Start(WMIManagementScope);
+      }
+      catch (Exception ex)
+      {
+        ConnectionProblem = ConnectionProblemType.InsufficientAccessPermissions;
+        MySqlSourceTrace.WriteToLog(ConnectionProblemLongDescription, System.Diagnostics.SourceLevels.Information);
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
+        if (displayMessageOnError)
+        {
+          InfoDialog.ShowErrorDialog(
+            ConnectionProblemShortDescription,
+            ConnectionProblemLongDescription,
+            null,
+            Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + ex.Message,
+            true,
+            InfoDialog.DefaultButtonType.AcceptButton, 30);
+        }
+      }
+      finally
+      {
+        if (dummyWatcher != null)
+        {
+          dummyWatcher.Dispose();
         }
       }
     }
