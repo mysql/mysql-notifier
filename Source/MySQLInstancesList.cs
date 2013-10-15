@@ -51,6 +51,8 @@ namespace MySql.Notifier
     {
       _instancesRefreshing = false;
       InstancesList = Settings.Default.MySQLInstancesList ?? new List<MySqlInstance>();
+      // We need to remove instances related Workbench connection that no longer exist, this probably happened because the connection was removed at workbench.
+      RefreshInstances(false);
     }
 
     /// <summary>
@@ -257,7 +259,7 @@ namespace MySql.Notifier
     /// <returns><c>true</c> if <seealso cref="item"/> is successfully removed; otherwise, <c>false</c>. This method also returns <c>false</c> if <seealso cref="item"/> was not found in the list.</returns>
     public bool Remove(MySqlInstance item)
     {
-      int index = InstancesList.IndexOf(item);
+      int index = IndexOf(item);
       bool success = index >= 0;
       if (!success)
       {
@@ -319,8 +321,8 @@ namespace MySql.Notifier
     /// <summary>
     /// Refreshes the instances list and subscribes to events.
     /// </summary>
-    /// <param name="initialRefresh">Flag indicating if this is being run at the initialization of the instances list.</param>
-    public void RefreshInstances(bool initialRefresh)
+    /// <param name="menuGroupRefresh">Flag indicating if instances list on the popup menu needs to be updated .</param>
+    public void RefreshInstances(bool menuGroupRefresh)
     {
       // Initial list creation (empty actually).
       _instancesRefreshing = true;
@@ -365,7 +367,7 @@ namespace MySql.Notifier
         instance.InstanceConnectionStatusTestErrorThrown += SingleInstanceConnectionStatusTestErrorThrown;
 
         // Check the instance's connection status now or restore the monitor timeout if possible.
-        if (initialRefresh)
+        if (menuGroupRefresh)
         {
           instance.CheckInstanceStatus(true);
           instance.SetupMenuGroup();

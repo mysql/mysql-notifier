@@ -525,6 +525,31 @@ namespace MySql.Notifier
     /// <param name="e"></param>
     private void connectionsFile_Changed(object sender, FileSystemEventArgs e)
     {
+      if (!ReloadWorkbenchConnectionsFile())
+      {
+        return;
+      }
+
+      // If the application is exiting (so the Notifier icon was hidden), then don't continue on refreshing instances.
+      if (!_notifyIcon.Visible)
+      {
+        return;
+      }
+
+      MarkOrphanInstancesForRemoval();
+      _mySQLInstancesList.RefreshInstances(false);
+
+      foreach (var item in _machinesList.Machines.SelectMany(machine => machine.Services))
+      {
+        item.MenuGroup.RefreshMenu(_notifyIcon.ContextMenuStrip);
+      }
+    }
+
+    /// <summary>
+    /// Reloads Workbench's connections file to get the latest changes.
+    /// </summary>
+    private bool ReloadWorkbenchConnectionsFile()
+    {
       bool workbenchConnectionsLoadSuccessful = false;
       Exception loadException = null;
       for (int retryCount = 0; retryCount < 3 && !workbenchConnectionsLoadSuccessful; retryCount++)
@@ -547,19 +572,19 @@ namespace MySql.Notifier
       {
         InfoDialog.ShowErrorDialog(Resources.ConnectionsFileLoadingErrorTitle, Resources.ConnectionsFileLoadingErrorDetail, null, Resources.ConnectionsFileLoadingErrorMoreInfo, true, InfoDialog.DefaultButtonType.AcceptButton, 30);
         MySqlSourceTrace.WriteAppErrorToLog(loadException);
-        return;
       }
 
-      // If the application is exiting (so the Notifier icon was hidden), then don't continue on refreshing instances.
-      if (!_notifyIcon.Visible)
-      {
-        return;
-      }
+      return workbenchConnectionsLoadSuccessful;
+    }
 
-      _mySQLInstancesList.RefreshInstances(false);
-      foreach (var item in _machinesList.Machines.SelectMany(machine => machine.Services))
+    /// <summary>
+    /// Sets instances with related workbench connections that were deleted at workbench for further deletion.
+    /// </summary>
+    private void MarkOrphanInstancesForRemoval()
+    {
+      foreach (var i in _mySQLInstancesList.InstancesList.Where(i => MySqlWorkbench.Connections.All(wbc => wbc.Id != i.WorkbenchConnection.Id)))
       {
-        item.MenuGroup.RefreshMenu(_notifyIcon.ContextMenuStrip);
+        i.ClearWorkbenchConnection();
       }
     }
 
@@ -1151,43 +1176,50 @@ namespace MySql.Notifier
     /// </summary>
     private void SetupMySqlInstancesMainMenuItem()
     {
-      int index = MySqlInstanceMenuGroup.FindMenuItemWithinMenuStrip(_notifyIcon.ContextMenuStrip, Resources.MySQLInstances);
-      if (index < 0 && _mySQLInstancesList.Count > 0)
+      if (_notifyIcon.ContextMenuStrip.InvokeRequired)
       {
-        index = MySqlInstanceMenuGroup.FindMenuItemWithinMenuStrip(_notifyIcon.ContextMenuStrip, Resources.Actions);
-        if (index < 0)
-        {
-          index = 0;
-        }
-
-        // Hide the separator just above this new menu item.
-        if (index > 0 && _notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
-        {
-          _notifyIcon.ContextMenuStrip.Items[index - 1].Visible = false;
-        }
-
-        ToolStripMenuItem instancesMainMenuItem = new ToolStripMenuItem(Resources.MySQLInstances)
-        {
-          Tag = Resources.MySQLInstances
-        };
-
-        Font boldFont = new Font(instancesMainMenuItem.Font, FontStyle.Bold);
-        instancesMainMenuItem.Font = boldFont;
-        instancesMainMenuItem.BackColor = SystemColors.MenuText;
-        instancesMainMenuItem.ForeColor = SystemColors.Menu;
-        _notifyIcon.ContextMenuStrip.Items.Insert(index, instancesMainMenuItem);
-        _notifyIcon.ContextMenuStrip.Refresh();
+        _notifyIcon.ContextMenuStrip.Invoke(new MethodInvoker(SetupMySqlInstancesMainMenuItem));
       }
-      else if (index >= 0 && _mySQLInstancesList.Count == 0)
+      else
       {
-        // Show the separator just above this new menu item if it's hidden.
-        if (_notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
+        int index = MySqlInstanceMenuGroup.FindMenuItemWithinMenuStrip(_notifyIcon.ContextMenuStrip,
+          Resources.MySQLInstances);
+        if (index < 0 && _mySQLInstancesList.Count > 0)
         {
-          _notifyIcon.ContextMenuStrip.Items[index - 1].Visible = true;
-        }
+          index = MySqlInstanceMenuGroup.FindMenuItemWithinMenuStrip(_notifyIcon.ContextMenuStrip, Resources.Actions);
+          if (index < 0)
+          {
+            index = 0;
+          }
 
-        _notifyIcon.ContextMenuStrip.Items.RemoveAt(index);
-        _notifyIcon.ContextMenuStrip.Refresh();
+          // Hide the separator just above this new menu item.
+          if (index > 0 && _notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
+          {
+            _notifyIcon.ContextMenuStrip.Items[index - 1].Visible = false;
+          }
+
+          ToolStripMenuItem instancesMainMenuItem = new ToolStripMenuItem(Resources.MySQLInstances)
+          {
+            Tag = Resources.MySQLInstances
+          };
+
+          Font boldFont = new Font(instancesMainMenuItem.Font, FontStyle.Bold);
+          instancesMainMenuItem.Font = boldFont;
+          instancesMainMenuItem.BackColor = SystemColors.MenuText;
+          instancesMainMenuItem.ForeColor = SystemColors.Menu;
+          _notifyIcon.ContextMenuStrip.Items.Insert(index, instancesMainMenuItem);
+          _notifyIcon.ContextMenuStrip.Refresh();
+        }
+        else if (index >= 0 && _mySQLInstancesList.Count == 0)
+        {
+          // Show the separator just above this new menu item if it's hidden.
+          if (_notifyIcon.ContextMenuStrip.Items[index - 1] is ToolStripSeparator)
+          {
+            _notifyIcon.ContextMenuStrip.Items[index - 1].Visible = true;
+          }
+          _notifyIcon.ContextMenuStrip.Items.RemoveAt(index);
+          _notifyIcon.ContextMenuStrip.Refresh();
+        }
       }
     }
 
@@ -1225,11 +1257,13 @@ namespace MySql.Notifier
       {
         Path = Path.GetDirectoryName(filePath),
         Filter = Path.GetFileName(filePath),
-        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Attributes
+        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.DirectoryName,
+        EnableRaisingEvents = true,
+        IncludeSubdirectories = true
       };
 
-      watcher.Changed += new FileSystemEventHandler(method);
-      watcher.EnableRaisingEvents = true;
+      watcher.Changed += method;
+      watcher.Deleted += method;
       return watcher;
     }
 

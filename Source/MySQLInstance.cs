@@ -463,7 +463,7 @@ namespace MySql.Notifier
       set
       {
         // If the connection is null maybe it was not found anymore so we fallback to use the first found related connection.
-        _workbenchConnection = value ?? RelatedConnections.First();
+        _workbenchConnection = value ?? RelatedConnections.FirstOrDefault();
 
         if (_workbenchConnection != null)
         {
@@ -577,6 +577,14 @@ namespace MySql.Notifier
       }
 
       return false;
+    }
+
+    /// <summary>
+    /// Clears related workbench connection, Marking the instance for further removal.
+    /// </summary>
+    public void ClearWorkbenchConnection()
+    {
+      _workbenchConnection = null;
     }
 
     /// <summary>
