@@ -1,3 +1,19 @@
+MySQL Notifier 1.1.5 Release Notes
+------------------------------------
+
+Welcome to the release notes for MySQL Notifier 1.1.5
+
+* Edition of MySQL Workbench connections right from the Monitor MySQL Server Instance window of the MySQL Notifier (accessed through Actions
+  > Manage Monitored Items... > Add... > MySQL Instance). Any of the listed MySQL Workbench connections can be right-clicked and a new "Edit
+  Connection" context menu is available for users to edit the Workbench connection properties.  This feature shines brighter when MySQL
+  Workbench is not installed since users only relied on MySQL Workbench to edit a connection, without Workbench users had to delete a 
+  connection and create it again with updated values.
+* When there were MySQL instances being monitored at Notifier created from a Workbench connection,  if they were deleted using MySQL Workbench
+  the connections would not be removed from the Notifier until a manual restart. These external changes to the connections file are now being
+  monitored automatically and MySQL instances refreshed accordingly.
+
+
+
 MySQL Notifier 1.1.4 Release Notes
 ------------------------------------
 

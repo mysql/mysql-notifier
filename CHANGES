@@ -1,3 +1,16 @@
+1.1.5
+- Added Workbench connections edition capability right from the Monitor MySQL Server Instance window of the MySQL Notifier (accessed through Actions
+  > Manage Monitored Items… > Add… > MySQL Instance). Any of the listed MySQL Workbench connections can be right-clicked and a new “Edit
+  Connection” context menu is available for users to edit the Workbench connection properties.
+- Fixed a problem in which MySQL Service menu options (Configure Instance and SQL Editor submenus) were not refreshed correctly when the Workbench
+  connections tied to them were changed on MySQL Workbench.
+- Simplified method signatures at MySQL.Utility and updated every call to them at notifier. Moved method call to create the schedule task properly.
+  (Bug #14388579 - SCHEDULED TASK TO CHECK FOR UPDATES DOESN'T START IN XP)
+- Removed AssemblyInfo.cs from Notifier since this class is now shared from Utility dll.
+- When the user deletes the .ini file for any server at c:\ProgramData\MySQL Server 5.X\ and somewhat the services is not deleted when uninstalling that
+  server, it causes the app to crash. This fix adds an additional check to verify such .ini files exist before attempting to get some values out of them.
+  (Bug #17432516 - MYSQL NOTIFIER OPENS AND GIVES AN ERROR MESSAGE "HIGH SEVERITY ERROR")
+
 1.1.4
 - Fixed code to auto launch notifier right after installing it. (Bug #16927045 - AUTOSTART NOTIFIER AFTER SUCCESSFULL INSTALLATION)
 - Corrected code to set the registry key to start Notifier along with Windows. (MySQL bug #69279, Bug #16832752 - MYSQL NOTIFIER: DOES NOT START WITH WINDOWS, 
