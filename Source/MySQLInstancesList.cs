@@ -51,8 +51,6 @@ namespace MySql.Notifier
     {
       _instancesRefreshing = false;
       InstancesList = Settings.Default.MySQLInstancesList ?? new List<MySqlInstance>();
-      // We need to remove instances related Workbench connection that no longer exist, this probably happened because the connection was removed at workbench.
-      RefreshInstances(false);
     }
 
     /// <summary>
@@ -360,6 +358,14 @@ namespace MySql.Notifier
         {
           RemoveAt(instanceIndex--);
         }
+        else
+        {
+          MySqlWorkbenchConnection connectionInDisk = MySqlWorkbench.Connections.GetConnectionForId(instance.WorkbenchConnection.Id);
+          if (!instance.WorkbenchConnection.Equals(connectionInDisk))
+          {
+            instance.WorkbenchConnection.Sync(connectionInDisk, false);
+          }
+        }
 
         // Subscribe to instance events.
         instance.PropertyChanged += SingleInstancePropertyChanged;
@@ -377,6 +383,7 @@ namespace MySql.Notifier
         {
           instance.ResetRelatedWorkbenchConnections();
           instance.MenuGroup.RecreateSqlEditorMenus();
+          instance.MenuGroup.Update(false);
           if (_instanceMonitoringTimeouts.ContainsKey(instance.WorkbenchConnectionId))
           {
             instance.SecondsToMonitorInstance = _instanceMonitoringTimeouts[instance.WorkbenchConnectionId];

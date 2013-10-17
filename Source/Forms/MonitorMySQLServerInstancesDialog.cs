@@ -18,6 +18,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
@@ -118,17 +119,16 @@ namespace MySql.Notifier.Forms
     {
       using (var instanceConnectionDialog = new MySqlWorkbenchConnectionDialog(null))
       {
-        instanceConnectionDialog.Icon = Properties.Resources.MySqlNotifierIcon;
+        instanceConnectionDialog.Icon = Resources.MySqlNotifierIcon;
         instanceConnectionDialog.ShowIcon = true;
-        DialogResult dr = instanceConnectionDialog.ShowIfWorkbenchNotRunning();
-        if (dr != DialogResult.OK)
+        if (instanceConnectionDialog.ShowIfWorkbenchNotRunning() != DialogResult.OK)
         {
           return;
         }
-
-        InstancesListChanged = true;
-        RefreshMySqlInstancesList(false);
       }
+
+      InstancesListChanged = true;
+      RefreshMySqlInstancesList(false);
     }
 
     /// <summary>
@@ -147,8 +147,8 @@ namespace MySql.Notifier.Forms
       ListViewItem newItem = new ListViewItem(workbenchConnection.DriverType.ToString());
       newItem.SubItems.Add(workbenchConnection.Name);
       newItem.SubItems.Add(workbenchConnection.Host);
-      newItem.SubItems.Add(workbenchConnection.Port.ToString());
-      newItem.SubItems.Add(alreadyMonitored ? Properties.Resources.YesText : Properties.Resources.NoText);
+      newItem.SubItems.Add(workbenchConnection.Port.ToString(CultureInfo.InvariantCulture));
+      newItem.SubItems.Add(alreadyMonitored ? Resources.YesText : Resources.NoText);
       newItem.Tag = workbenchConnection;
       newItem.Checked = !alreadyMonitored;
       newItem.ForeColor = alreadyMonitored ? SystemColors.InactiveCaption : SystemColors.WindowText;
@@ -198,6 +198,38 @@ namespace MySql.Notifier.Forms
       {
         SelectedWorkbenchConnection = WorkbenchConnectionsListView.SelectedItems[0].Tag as MySqlWorkbenchConnection;
       }
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="EditConnectionToolStripMenuItem"/> context menu item is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void EditConnectionToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+      if (WorkbenchConnectionsListView.SelectedItems.Count == 0)
+      {
+        return;
+      }
+
+      var workbenchConnection = WorkbenchConnectionsListView.SelectedItems[0].Tag as MySqlWorkbenchConnection;
+      if (workbenchConnection == null)
+      {
+        return;
+      }
+
+      using (var instanceConnectionDialog = new MySqlWorkbenchConnectionDialog(workbenchConnection))
+      {
+        instanceConnectionDialog.Icon = Resources.MySqlNotifierIcon;
+        instanceConnectionDialog.ShowIcon = true;
+        if (instanceConnectionDialog.ShowIfWorkbenchNotRunning() != DialogResult.OK)
+        {
+          return;
+        }
+      }
+
+      InstancesListChanged = true;
+      RefreshMySqlInstancesList(false);
     }
 
     /// <summary>
@@ -252,7 +284,7 @@ namespace MySql.Notifier.Forms
             continue;
           }
 
-          if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Name == connection.Name))
+          if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Id == connection.Id))
           {
             return true;
           }
@@ -315,7 +347,7 @@ namespace MySql.Notifier.Forms
     /// <summary>
     /// Reloads the list of MySQL Server instances from the ones contained in the MySQL Workbench connections file.
     /// </summary>
-    /// <param name="forceRefresh">Flag indicating if the refresh must be done although filters haven'_statusChangeTimer changed.</param>
+    /// <param name="forceRefresh">Flag indicating if the refresh must be done although filters haven't changed.</param>
     private void RefreshMySqlInstancesList(bool forceRefresh)
     {
       if (_lastServicesNameFilter != null && _lastServicesNameFilter != FilterTextBox.Text)
@@ -323,11 +355,7 @@ namespace MySql.Notifier.Forms
         _lastServicesNameFilter = FilterTextBox.Text;
       }
 
-      if (_lastShowMonitoredServices != ShowMonitoredInstancesCheckBox.Checked)
-      {
-        _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
-      }
-
+      _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
       if (forceRefresh)
       {
         MySqlWorkbench.Connections.Load();

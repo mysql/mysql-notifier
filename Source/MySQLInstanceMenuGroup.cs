@@ -46,7 +46,7 @@ namespace MySql.Notifier
       if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
         ConfigureMenuItem = new ToolStripMenuItem(Resources.ConfigureInstance);
-        ConfigureMenuItem.Click += new EventHandler(ConfigureMenuItem_Click);
+        ConfigureMenuItem.Click += ConfigureMenuItem_Click;
       }
 
       RecreateSqlEditorMenus();
@@ -105,12 +105,6 @@ namespace MySql.Notifier
       // Add class finalizer if unmanaged resources are added to the class
       // Free unmanaged resources if there are any
     }
-
-    /// <summary>
-    /// Delegate to refresh the context menus.
-    /// </summary>
-    /// <param name="menu"></param>
-    private delegate void MenuRefreshDelegate(ContextMenuStrip menu);
 
     #region Properties
 
@@ -183,7 +177,7 @@ namespace MySql.Notifier
           index = 0;
         }
 
-        InstanceMenuItem.Text = BoundInstance.HostIdentifier + " - " + BoundInstance.ConnectionStatusText;
+        InstanceMenuItem.Text = BoundInstance.HostIdentifier + @" - " + BoundInstance.ConnectionStatusText;
         menu.Items.Insert(index++, InstanceMenuItem);
         if (BoundInstance.WorkbenchConnection != null)
         {
@@ -198,7 +192,7 @@ namespace MySql.Notifier
           }
         }
 
-        menu.Items.Insert(index++, Separator);
+        menu.Items.Insert(index, Separator);
         menu.Refresh();
       }
     }
@@ -243,13 +237,11 @@ namespace MySql.Notifier
         if (BoundInstance.RelatedConnections.Count <= 1)
         {
           SqlEditorMenuItem.Enabled = true;
-          SqlEditorMenuItem.Click += new EventHandler(SqlEditorMenuItem_Click);
+          SqlEditorMenuItem.Click += SqlEditorMenuItem_Click;
           return;
         }
-        else
-        {
-          SqlEditorMenuItem.Enabled = false;
-        }
+
+        SqlEditorMenuItem.Enabled = false;
 
         // We have more than 1 connection so we create a submenu.
         foreach (var conn in BoundInstance.RelatedConnections)
@@ -261,7 +253,7 @@ namespace MySql.Notifier
             menu.Font = boldFont;
           }
 
-          menu.Click += new EventHandler(SqlEditorMenuItem_Click);
+          menu.Click += SqlEditorMenuItem_Click;
           SqlEditorMenuItem.DropDownItems.Add(menu);
         }
       }
@@ -395,11 +387,11 @@ namespace MySql.Notifier
       {
         if (BoundInstance.RelatedConnections.Count == 0)
         {
-          MySqlWorkbench.LaunchSQLEditor(null);
+          MySqlWorkbench.LaunchSqlEditor(null);
         }
         else if (!SqlEditorMenuItem.HasDropDownItems)
         {
-          MySqlWorkbench.LaunchSQLEditor(BoundInstance.WorkbenchConnection.Name);
+          MySqlWorkbench.LaunchSqlEditor(BoundInstance.WorkbenchConnection.Name);
         }
         else
         {
@@ -407,7 +399,7 @@ namespace MySql.Notifier
           {
             if (sender == SqlEditorMenuItem.DropDownItems[i])
             {
-              MySqlWorkbench.LaunchSQLEditor(BoundInstance.RelatedConnections[i].Name);
+              MySqlWorkbench.LaunchSqlEditor(BoundInstance.RelatedConnections[i].Name);
             }
           }
         }

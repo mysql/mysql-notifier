@@ -60,6 +60,7 @@ namespace MySql.Notifier.Forms
       this.MonitoredColumnHeader = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
       this.ConnectionsContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
       this.DeleteConnectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+      this.EditConnectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.RefreshConnectionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.DialogCancelButton = new System.Windows.Forms.Button();
       this.AddConnectionButton = new System.Windows.Forms.Button();
@@ -211,9 +212,10 @@ namespace MySql.Notifier.Forms
       // 
       this.ConnectionsContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.DeleteConnectionToolStripMenuItem,
+            this.EditConnectionToolStripMenuItem,
             this.RefreshConnectionsToolStripMenuItem});
       this.ConnectionsContextMenuStrip.Name = "ConnectionsContextMenuStrip";
-      this.ConnectionsContextMenuStrip.Size = new System.Drawing.Size(184, 48);
+      this.ConnectionsContextMenuStrip.Size = new System.Drawing.Size(184, 70);
       this.ConnectionsContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.ConnectionsContextMenuStrip_Opening);
       // 
       // DeleteConnectionToolStripMenuItem
@@ -223,6 +225,14 @@ namespace MySql.Notifier.Forms
       this.DeleteConnectionToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
       this.DeleteConnectionToolStripMenuItem.Text = "Delete Connection";
       this.DeleteConnectionToolStripMenuItem.Click += new System.EventHandler(this.DeleteConnectionToolStripMenuItem_Click);
+      // 
+      // EditConnectionToolStripMenuItem
+      // 
+      this.EditConnectionToolStripMenuItem.Image = global::MySql.Notifier.Properties.Resources.edit;
+      this.EditConnectionToolStripMenuItem.Name = "EditConnectionToolStripMenuItem";
+      this.EditConnectionToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+      this.EditConnectionToolStripMenuItem.Text = "Edit Connection";
+      this.EditConnectionToolStripMenuItem.Click += new System.EventHandler(this.EditConnectionToolStripMenuItem_Click);
       // 
       // RefreshConnectionsToolStripMenuItem
       // 
@@ -276,7 +286,7 @@ namespace MySql.Notifier.Forms
       this.FilterTimer.Interval = 500;
       this.FilterTimer.Tick += new System.EventHandler(this.FilterTimer_Tick);
       // 
-      // MonitorMySQLServerInstancesDialog
+      // MonitorMySqlServerInstancesDialog
       // 
       this.AcceptButton = this.DialogOKButton;
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -321,5 +331,6 @@ namespace MySql.Notifier.Forms
     private System.Windows.Forms.ContextMenuStrip ConnectionsContextMenuStrip;
     private System.Windows.Forms.ToolStripMenuItem RefreshConnectionsToolStripMenuItem;
     private System.Windows.Forms.ToolStripMenuItem DeleteConnectionToolStripMenuItem;
+    private System.Windows.Forms.ToolStripMenuItem EditConnectionToolStripMenuItem;
   }
 }

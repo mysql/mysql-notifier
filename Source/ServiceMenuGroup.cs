@@ -68,29 +68,26 @@ namespace MySql.Notifier
       if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
         _configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
-        _configureMenu.Click += new EventHandler(configureInstanceItem_Click);
+        _configureMenu.Click += configureInstanceItem_Click;
         CreateEditorMenus();
       }
 
       _separator = new ToolStripSeparator();
 
       Font menuItemFont = new Font(_statusMenu.Font, FontStyle.Bold);
-      Font subMenuItemFont = new Font(_statusMenu.Font, FontStyle.Regular);
       _statusMenu.Font = menuItemFont;
 
       _startMenu = new ToolStripMenuItem(Resources.StartText, Resources.play);
-      _startMenu.Click += new EventHandler(start_Click);
+      _startMenu.Click += start_Click;
 
       _stopMenu = new ToolStripMenuItem(Resources.StopText, Resources.stop);
-      _stopMenu.Click += new EventHandler(stop_Click);
+      _stopMenu.Click += stop_Click;
 
       _restartMenu = new ToolStripMenuItem(Resources.RestartText, Resources.restart);
-      _restartMenu.Click += new EventHandler(restart_Click);
+      _restartMenu.Click += restart_Click;
 
       Update();
     }
-
-    private delegate void MenuRefreshDelegate(ContextMenuStrip menu);
 
     public string BoundServiceName
     {
@@ -132,7 +129,7 @@ namespace MySql.Notifier
     /// <param name="eventHandler">Event handler method to register with the Click event</param>
     /// <param name="enable">Flag that indicates the Enabled status of the menu itemText</param>
     /// <returns>A new ToolStripMenuItem object</returns>
-    public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, string menuName, System.Drawing.Image image, EventHandler eventHandler, bool enable)
+    public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, string menuName, Image image, EventHandler eventHandler, bool enable)
     {
       var menuItem = new ToolStripMenuItem(displayText);
       if (eventHandler != null)
@@ -154,7 +151,7 @@ namespace MySql.Notifier
     /// <param name="image">Menu itemText's icon displayed at its left</param>
     /// <param name="eventHandler">Event handler method to register with the Click event</param>
     /// <returns>A new ToolStripMenuItem object</returns>
-    public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, string menuName, System.Drawing.Image image, EventHandler eventHandler)
+    public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, string menuName, Image image, EventHandler eventHandler)
     {
       return ToolStripMenuItemWithHandler(displayText, menuName, image, eventHandler, true);
     }
@@ -167,7 +164,7 @@ namespace MySql.Notifier
     /// <param name="eventHandler">Event handler method to register with the Click event</param>
     /// <param name="enable">Flag that indicates the Enabled status of the menu itemText</param>
     /// <returns>A new ToolStripMenuItem object</returns>
-    public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, System.Drawing.Image image, EventHandler eventHandler, bool enable)
+    public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, Image image, EventHandler eventHandler, bool enable)
     {
       return ToolStripMenuItemWithHandler(displayText, String.Format("mnu{0}", displayText.Replace(" ", String.Empty)), image, eventHandler, enable);
     }
@@ -179,7 +176,7 @@ namespace MySql.Notifier
     /// <param name="image">Menu itemText's icon displayed at its left</param>
     /// <param name="eventHandler">Event handler method to register with the Click event</param>
     /// <returns>A new ToolStripMenuItem object</returns>
-    public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, System.Drawing.Image image, EventHandler eventHandler)
+    public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, Image image, EventHandler eventHandler)
     {
       return ToolStripMenuItemWithHandler(displayText, image, eventHandler, true);
     }
@@ -310,7 +307,7 @@ namespace MySql.Notifier
       else
       {
         string[] menuItems = new string[4];
-        int index = -1;
+        int index;
 
         if (_boundService.IsRealMySqlService && MySqlWorkbench.AllowsExternalConnectionsManagement)
         {
@@ -501,7 +498,7 @@ namespace MySql.Notifier
     private void CreateEditorMenus()
     {
       _editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
-      _editorMenu.Click -= new EventHandler(workbenchConnection_Clicked);
+      _editorMenu.Click -= workbenchConnection_Clicked;
 
       // If there are no connections then we disable the SQL Editor menu.
       _editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && _boundService.WorkbenchConnections != null && _boundService.WorkbenchConnections.Count > 0;
@@ -513,7 +510,7 @@ namespace MySql.Notifier
       // If there is only 1 connection then we open Workbench directly from the SQL Editor menu.
       if (_boundService.WorkbenchConnections != null && _boundService.WorkbenchConnections.Count == 1)
       {
-        _editorMenu.Click += new EventHandler(workbenchConnection_Clicked);
+        _editorMenu.Click += workbenchConnection_Clicked;
         return;
       }
 
@@ -525,7 +522,7 @@ namespace MySql.Notifier
 
       foreach (ToolStripMenuItem menu in _boundService.WorkbenchConnections.Select(c => new ToolStripMenuItem(c.Name)))
       {
-        menu.Click += new EventHandler(workbenchConnection_Clicked);
+        menu.Click += workbenchConnection_Clicked;
         _editorMenu.DropDownItems.Add(menu);
       }
     }
@@ -551,11 +548,11 @@ namespace MySql.Notifier
       {
         if (_boundService.WorkbenchConnections.Count == 0)
         {
-          MySqlWorkbench.LaunchSQLEditor(null);
+          MySqlWorkbench.LaunchSqlEditor(null);
         }
         else if (!_editorMenu.HasDropDownItems)
         {
-          MySqlWorkbench.LaunchSQLEditor(_boundService.WorkbenchConnections[0].Name);
+          MySqlWorkbench.LaunchSqlEditor(_boundService.WorkbenchConnections[0].Name);
         }
         else
         {
@@ -563,7 +560,7 @@ namespace MySql.Notifier
           {
             if (sender == _editorMenu.DropDownItems[x])
             {
-              MySqlWorkbench.LaunchSQLEditor(_boundService.WorkbenchConnections[x].Name);
+              MySqlWorkbench.LaunchSqlEditor(_boundService.WorkbenchConnections[x].Name);
             }
           }
         }

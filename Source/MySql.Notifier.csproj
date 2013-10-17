@@ -263,6 +263,7 @@
     <None Include="Resources\NotifierSplashWindow.png" />
     <None Include="Resources\delete.png" />
     <None Include="Resources\CancelRefresh.png" />
+    <None Include="Resources\edit.png" />
     <Content Include="Resources\iconDB.jpg" />
     <None Include="Resources\stop.png" />
     <None Include="Resources\play.png" />

@@ -307,11 +307,15 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void MySQLInstanceToolStripMenuItem_Click(object sender, EventArgs e)
     {
+      Cursor.Current = Cursors.WaitCursor;
+      MonitoredServicesListView.BeginUpdate();
+      MySqlWorkbenchConnection selectedConnection = null;
+
       using (var monitorInstancesDialog = new MonitorMySqlServerInstancesDialog(MachinesList, InstancesList))
       {
         if (monitorInstancesDialog.ShowDialog() == DialogResult.OK)
         {
-          MySqlWorkbenchConnection selectedConnection = monitorInstancesDialog.SelectedWorkbenchConnection;
+          selectedConnection = monitorInstancesDialog.SelectedWorkbenchConnection;
           if (selectedConnection != null)
           {
             bool connectionAlreadyInInstance = false;
@@ -353,8 +357,31 @@ namespace MySql.Notifier.Forms
           }
         }
 
+        // Workbench connections may have been edited so we may need to refresh the items in the list.
+        foreach (ListViewItem lvi in MonitoredInstancesListView.Items)
+        {
+          var existingInstance = lvi.Tag as MySqlInstance;
+          if (existingInstance == null || (selectedConnection != null && existingInstance.WorkbenchConnection.Id == selectedConnection.Id))
+          {
+            continue;
+          }
+
+          var connectionInDisk = MySqlWorkbench.Connections.GetConnectionForId(existingInstance.WorkbenchConnection.Id);
+          if (connectionInDisk.Equals(existingInstance.WorkbenchConnection))
+          {
+            continue;
+          }
+
+          lvi.Text = connectionInDisk.HostIdentifier;
+          lvi.SubItems[1].Text = connectionInDisk.DriverType.ToString();
+          lvi.SubItems[2].Text = connectionInDisk.ConnectionStatusText;
+        }
+
         InstancesListChanged = monitorInstancesDialog.InstancesListChanged;
       }
+
+      MonitoredServicesListView.EndUpdate();
+      Cursor.Current = Cursors.Default;
     }
 
     /// <summary>

@@ -35,6 +35,8 @@ namespace MySql.Notifier
 {
   internal class Notifier : IDisposable
   {
+    #region Constants
+
     /// <summary>
     /// Default connections file load retry wait interval in milliseconds.
     /// </summary>
@@ -44,6 +46,8 @@ namespace MySql.Notifier
     /// Default framework constraint for notify icons.
     /// </summary>
     private const int MAX_TOOLTIP_LENGHT = 63;
+
+    #endregion Constants
 
     /// <summary>
     /// Gets the default name of the task which usually will be MySQLNotifierTask.
@@ -75,7 +79,7 @@ namespace MySql.Notifier
 
     #region Fields
 
-    private System.ComponentModel.IContainer _components;
+    private IContainer _components;
     private ToolStripSeparator _hasUpdatesSeparator;
     private ToolStripMenuItem _ignoreAvailableUpdateMenuItem;
     private ToolStripMenuItem _installAvailablelUpdatesMenuItem;
@@ -144,13 +148,12 @@ namespace MySql.Notifier
       CustomizeInfoDialog();
       InitializeMySqlWorkbenchStaticSettings();
 
-      _components = new System.ComponentModel.Container();
-      _notifyIcon = new NotifyIcon(_components);
-      _notifyIcon.Visible = true;
+      _components = new Container();
+      _notifyIcon = new NotifyIcon(_components) { Visible = true };
       RefreshNotifierIcon();
       _notifyIcon.MouseClick += notifyIcon_MouseClick;
       _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-      _notifyIcon.BalloonTipTitle = Properties.Resources.BalloonTitleServiceStatus;
+      _notifyIcon.BalloonTipTitle = Resources.BalloonTitleServiceStatus;
 
       // Setup instances list
       _mySQLInstancesList = new MySqlInstancesList();
@@ -177,13 +180,13 @@ namespace MySql.Notifier
       string applicationDataFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
       if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
-        string file = String.Format(@"{0}\MySQL\Workbench\connections.xml", applicationDataFolderPath);
+        string file = string.Format(@"{0}\MySQL\Workbench\connections.xml", applicationDataFolderPath);
         if (File.Exists(file))
         {
           _connectionsFileWatcher = StartWatcherForFile(file, connectionsFile_Changed);
         }
 
-        file = String.Format(@"{0}\MySQL\Workbench\server_instances.xml", applicationDataFolderPath);
+        file = string.Format(@"{0}\MySQL\Workbench\server_instances.xml", applicationDataFolderPath);
         if (File.Exists(file))
         {
           _serversFileWatcher = StartWatcherForFile(file, ServersFileChanged);
@@ -434,9 +437,9 @@ namespace MySql.Notifier
     {
       var version = Assembly.GetExecutingAssembly().GetName().Version.ToString().Split('.');
       string toolTipText = string.Format("{0} ({1})\n{2}.",
-                                         Properties.Resources.AppName,
+                                         Resources.AppName,
                                          string.Format("{0}.{1}.{2}", version[0], version[1], version[2]),
-                                         string.Format(Properties.Resources.ToolTipText, _machinesList.ServicesCount, _mySQLInstancesList.Count));
+                                         string.Format(Resources.ToolTipText, _machinesList.ServicesCount, _mySQLInstancesList.Count));
       _notifyIcon.Text = (toolTipText.Length >= MAX_TOOLTIP_LENGHT ? toolTipText.Substring(0, MAX_TOOLTIP_LENGHT - 3) + "..." : toolTipText);
     }
 
@@ -464,7 +467,7 @@ namespace MySql.Notifier
 
       StopBackgroundActions();
 
-      if (this.Exit != null)
+      if (Exit != null)
       {
         Exit(this, e);
       }
@@ -508,7 +511,6 @@ namespace MySql.Notifier
       }
 
       string path = @MySqlInstaller.GetInstallerPath();
-      Process proc = new Process();
       ProcessStartInfo startInfo = new ProcessStartInfo
       {
         FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path),
@@ -568,12 +570,13 @@ namespace MySql.Notifier
         }
       }
 
-      if (loadException != null)
+      if (loadException == null)
       {
-        InfoDialog.ShowErrorDialog(Resources.ConnectionsFileLoadingErrorTitle, Resources.ConnectionsFileLoadingErrorDetail, null, Resources.ConnectionsFileLoadingErrorMoreInfo, true, InfoDialog.DefaultButtonType.AcceptButton, 30);
-        MySqlSourceTrace.WriteAppErrorToLog(loadException);
+        return workbenchConnectionsLoadSuccessful;
       }
 
+      InfoDialog.ShowErrorDialog(Resources.ConnectionsFileLoadingErrorTitle, Resources.ConnectionsFileLoadingErrorDetail, null, Resources.ConnectionsFileLoadingErrorMoreInfo, true, InfoDialog.DefaultButtonType.AcceptButton, 30);
+      MySqlSourceTrace.WriteAppErrorToLog(loadException);
       return workbenchConnectionsLoadSuccessful;
     }
 
@@ -599,11 +602,11 @@ namespace MySql.Notifier
     private static void CustomizeInfoDialog()
     {
       InfoDialog.ApplicationName = AssemblyInfo.AssemblyTitle;
-      InfoDialog.SuccessLogo = Properties.Resources.ApplicationLogo;
-      InfoDialog.ErrorLogo = Properties.Resources.NotifierErrorImage;
-      InfoDialog.WarningLogo = Properties.Resources.NotifierWarningImage;
-      InfoDialog.InformationLogo = Properties.Resources.ApplicationLogo;
-      InfoDialog.ApplicationIcon = Properties.Resources.MySqlNotifierIcon;
+      InfoDialog.SuccessLogo = Resources.ApplicationLogo;
+      InfoDialog.ErrorLogo = Resources.NotifierErrorImage;
+      InfoDialog.WarningLogo = Resources.NotifierWarningImage;
+      InfoDialog.InformationLogo = Resources.ApplicationLogo;
+      InfoDialog.ApplicationIcon = Resources.MySqlNotifierIcon;
     }
 
     /// <summary>
@@ -624,7 +627,7 @@ namespace MySql.Notifier
     {
       if (_machinesList == null || _mySQLInstancesList == null)
       {
-        return Properties.Resources.NotifierIcon;
+        return Resources.NotifierIcon;
       }
 
       bool hasUpdates = (Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0;
@@ -635,25 +638,27 @@ namespace MySql.Notifier
       var updateIconInstancesList = _mySQLInstancesList.InstancesList.Where(instance => instance.UpdateTrayIconOnStatusChange);
 
       // Stopped or update+stopped notifier icon.
-      if (updateIconServicesList.Count(t => t.Status == MySqlServiceStatus.Stopped || t.Status == MySqlServiceStatus.Unavailable) + updateIconInstancesList.Count(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections) > 0)
+      var iconServicesList = updateIconServicesList as MySqlService[] ?? updateIconServicesList.ToArray();
+      var iconInstancesList = updateIconInstancesList as MySqlInstance[] ?? updateIconInstancesList.ToArray();
+      if (iconServicesList.Count(t => t.Status == MySqlServiceStatus.Stopped || t.Status == MySqlServiceStatus.Unavailable) + iconInstancesList.Count(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections) > 0)
       {
-        return useColorfulIcon ? (hasUpdates ? Properties.Resources.NotifierIconStoppedAlertStrong : Properties.Resources.NotifierIconStoppedStrong) : (hasUpdates ? Properties.Resources.NotifierIconStoppedAlert : Properties.Resources.NotifierIconStopped);
+        return useColorfulIcon ? (hasUpdates ? Resources.NotifierIconStoppedAlertStrong : Resources.NotifierIconStoppedStrong) : (hasUpdates ? Resources.NotifierIconStoppedAlert : Resources.NotifierIconStopped);
       }
 
       // Starting or update+starting notifier icon.
-      if (updateIconServicesList.Count(t => t.Status == MySqlServiceStatus.StartPending) > 0)
+      if (iconServicesList.Count(t => t.Status == MySqlServiceStatus.StartPending) > 0)
       {
-        return useColorfulIcon ? (hasUpdates ? Properties.Resources.NotifierIconStartingAlertStrong : Properties.Resources.NotifierIconStartingStrong) : (hasUpdates ? Properties.Resources.NotifierIconStartingAlert : Properties.Resources.NotifierIconStarting);
+        return useColorfulIcon ? (hasUpdates ? Resources.NotifierIconStartingAlertStrong : Resources.NotifierIconStartingStrong) : (hasUpdates ? Resources.NotifierIconStartingAlert : Resources.NotifierIconStarting);
       }
 
       // Running or update+running notifier icon.
-      if (updateIconServicesList.Count(t => t.Status == MySqlServiceStatus.Running) + updateIconInstancesList.Count(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections) > 0)
+      if (iconServicesList.Count(t => t.Status == MySqlServiceStatus.Running) + iconInstancesList.Count(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections) > 0)
       {
-        return hasUpdates ? Properties.Resources.NotifierIconRunningAlert : Properties.Resources.NotifierIconRunning;
+        return hasUpdates ? Resources.NotifierIconRunningAlert : Resources.NotifierIconRunning;
       }
 
       // Clean or update+clean notifier icon.
-      return hasUpdates ? Properties.Resources.NotifierIconAlert : Properties.Resources.NotifierIcon;
+      return hasUpdates ? Resources.NotifierIconAlert : Resources.NotifierIcon;
     }
 
     private void IgnoreAvailableUpdateItem_Click(object sender, EventArgs e)
@@ -682,12 +687,11 @@ namespace MySql.Notifier
       string path = MySqlInstaller.GetInstallerPath();
       if (string.IsNullOrEmpty(path))
       {
-        // this should not happen since our menu itemText is enabled
+        // This should not happen since our menu itemText is enabled
         return;
       }
 
-      Process proc = new Process();
-      ProcessStartInfo startInfo = new ProcessStartInfo {FileName = String.Format(@"{0}\MySQLInstaller.exe", path)};
+      ProcessStartInfo startInfo = new ProcessStartInfo { FileName = string.Format(@"{0}\MySQLInstaller.exe", path) };
       Process.Start(startInfo);
     }
 
@@ -708,7 +712,7 @@ namespace MySql.Notifier
         catch (IOException ex)
         {
           MySqlSourceTrace.WriteToLog(Resources.SettingsFileFailedToLoad + " - " + ex.Message + " " + ex.InnerException, SourceLevels.Warning);
-          System.Threading.Thread.Sleep(1000);
+          Thread.Sleep(1000);
         }
       }
 
@@ -870,7 +874,7 @@ namespace MySql.Notifier
         // Stop background actions while the user opens the dialog to manage machines, services or instances.
         StopBackgroundActions();
 
-        bool instancesListChanged = false;
+        bool instancesListChanged;
         using (ManageItemsDialog manageItemsDialog = new ManageItemsDialog(_mySQLInstancesList, _machinesList))
         {
           _manageItemsDialog = manageItemsDialog;
@@ -977,7 +981,7 @@ namespace MySql.Notifier
 
     private void optionsItem_Click(object sender, EventArgs e)
     {
-      var usecolorfulIcons = Properties.Settings.Default.UseColorfulStatusIcons;
+      var usecolorfulIcons = Settings.Default.UseColorfulStatusIcons;
       if (_optionsDialog == null)
       {
         using (OptionsDialog optionsDialog = new OptionsDialog())
@@ -988,7 +992,7 @@ namespace MySql.Notifier
         }
 
         // If there was a change in the setting for the icons then refresh Icon
-        if (usecolorfulIcons != Properties.Settings.Default.UseColorfulStatusIcons)
+        if (usecolorfulIcons != Settings.Default.UseColorfulStatusIcons)
         {
           RefreshNotifierIcon();
         }
@@ -1010,30 +1014,29 @@ namespace MySql.Notifier
       _refreshStatusMenuItem.Click += refreshStatus_Click;
       _refreshStatusMenuItem.Image = Resources.RefreshStatus;
       _manageServicesMenuItem = new ToolStripMenuItem(Resources.ManageItemsMenuText);
-      _manageServicesMenuItem.Click += new EventHandler(manageServicesDialogItem_Click);
+      _manageServicesMenuItem.Click += manageServicesDialogItem_Click;
       _manageServicesMenuItem.Image = Resources.ManageServicesIcon;
       _launchInstallerMenuItem = new ToolStripMenuItem(Resources.LaunchInstallerMenuText);
-      _launchInstallerMenuItem.Click += new EventHandler(LaunchInstallerItem_Click);
+      _launchInstallerMenuItem.Click += LaunchInstallerItem_Click;
       _launchInstallerMenuItem.Image = Resources.StartInstallerIcon;
       _checkForUpdatesMenuItem = new ToolStripMenuItem(Resources.CheckUpdatesMenuText);
-      _checkForUpdatesMenuItem.Click += new EventHandler(checkUpdatesItem_Click);
+      _checkForUpdatesMenuItem.Click += checkUpdatesItem_Click;
       _checkForUpdatesMenuItem.Image = Resources.CheckForUpdatesIcon;
       _launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem(Resources.UtilitiesShellMenuText);
-      _launchWorkbenchUtilitiesMenuItem.Click += new EventHandler(LaunchWorkbenchUtilities_Click);
+      _launchWorkbenchUtilitiesMenuItem.Click += LaunchWorkbenchUtilities_Click;
       _launchWorkbenchUtilitiesMenuItem.Image = Resources.LaunchUtilities;
       _optionsMenuItem = new ToolStripMenuItem(Resources.OptionsMenuText);
-      _optionsMenuItem.Click += new EventHandler(optionsItem_Click);
+      _optionsMenuItem.Click += optionsItem_Click;
       _aboutMenuItem = new ToolStripMenuItem(Resources.AboutMenuText);
-      _aboutMenuItem.Click += new EventHandler(aboutMenu_Click);
+      _aboutMenuItem.Click += aboutMenu_Click;
       _exitMenuItem = new ToolStripMenuItem(Resources.CloseNotifierMenuText);
-      _exitMenuItem.Click += new EventHandler(exitItem_Click);
+      _exitMenuItem.Click += exitItem_Click;
       _hasUpdatesSeparator = new ToolStripSeparator();
       _installAvailablelUpdatesMenuItem = new ToolStripMenuItem(Resources.InstallAvailableUpdatesMenuText, Resources.InstallAvailableUpdatesIcon);
-      _installAvailablelUpdatesMenuItem.Click += new EventHandler(InstallAvailablelUpdates_Click);
+      _installAvailablelUpdatesMenuItem.Click += InstallAvailablelUpdates_Click;
       _ignoreAvailableUpdateMenuItem = new ToolStripMenuItem(Resources.IgnoreUpdateMenuText);
-      _ignoreAvailableUpdateMenuItem.Click += new EventHandler(IgnoreAvailableUpdateItem_Click);
-      _actionsMenuItem = new ToolStripMenuItem(Resources.Actions, null);
-      _actionsMenuItem.Tag = Resources.Actions;
+      _ignoreAvailableUpdateMenuItem.Click += IgnoreAvailableUpdateItem_Click;
+      _actionsMenuItem = new ToolStripMenuItem(Resources.Actions, null) { Tag = Resources.Actions };
 
       _staticMenu.Items.Add(_manageServicesMenuItem);
       _staticMenu.Items.Add(_launchInstallerMenuItem);
@@ -1079,7 +1082,7 @@ namespace MySql.Notifier
         PreviousServicesAndInstancesCount = CurrentServicesAndInstancesCount;
         _previousMachineCount = _machinesList.Machines.Count;
         _notifyIcon.ContextMenuStrip = new ContextMenuStrip();
-        _notifyIcon.ContextMenuStrip.Opening += new CancelEventHandler(ContextMenuStrip_Opening);
+        _notifyIcon.ContextMenuStrip.Opening += ContextMenuStrip_Opening;
         if (CurrentServicesAndInstancesCount + _machinesList.Machines.Count > 0)
         {
           _notifyIcon.ContextMenuStrip.Items.Add(_actionsMenuItem);
@@ -1182,8 +1185,7 @@ namespace MySql.Notifier
       }
       else
       {
-        int index = MySqlInstanceMenuGroup.FindMenuItemWithinMenuStrip(_notifyIcon.ContextMenuStrip,
-          Resources.MySQLInstances);
+        int index = MySqlInstanceMenuGroup.FindMenuItemWithinMenuStrip(_notifyIcon.ContextMenuStrip, Resources.MySQLInstances);
         if (index < 0 && _mySQLInstancesList.Count > 0)
         {
           index = MySqlInstanceMenuGroup.FindMenuItemWithinMenuStrip(_notifyIcon.ContextMenuStrip, Resources.Actions);
@@ -1217,6 +1219,7 @@ namespace MySql.Notifier
           {
             _notifyIcon.ContextMenuStrip.Items[index - 1].Visible = true;
           }
+
           _notifyIcon.ContextMenuStrip.Items.RemoveAt(index);
           _notifyIcon.ContextMenuStrip.Refresh();
         }
@@ -1230,7 +1233,7 @@ namespace MySql.Notifier
     {
       if (_worker == null)
       {
-        _worker = new BackgroundWorker {WorkerSupportsCancellation = true, WorkerReportsProgress = false};
+        _worker = new BackgroundWorker { WorkerSupportsCancellation = true, WorkerReportsProgress = false };
         _worker.DoWork += StatusRefreshWorkerDoWork;
         _worker.RunWorkerCompleted += StatusRefreshWorkerCompleted;
       }
@@ -1257,13 +1260,12 @@ namespace MySql.Notifier
       {
         Path = Path.GetDirectoryName(filePath),
         Filter = Path.GetFileName(filePath),
-        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.DirectoryName,
-        EnableRaisingEvents = true,
-        IncludeSubdirectories = true
+        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.DirectoryName
       };
 
       watcher.Changed += method;
       watcher.Deleted += method;
+      watcher.EnableRaisingEvents = true;
       return watcher;
     }
 
@@ -1342,22 +1344,26 @@ namespace MySql.Notifier
         }
 
         cancelled = remoteMachine.RefreshStatus(ref worker);
-        if (cancelled)
+        if (!cancelled)
         {
-          e.Cancel = true;
-          return;
+          continue;
         }
+
+        e.Cancel = true;
+        return;
       }
 
       // Refresh MySQL Instances
       foreach (var instance in _mySQLInstancesList)
       {
         cancelled = instance.RefreshStatus(ref worker);
-        if (cancelled)
+        if (!cancelled)
         {
-          e.Cancel = true;
-          return;
+          continue;
         }
+
+        e.Cancel = true;
+        return;
       }
 
       // Refresh Notifier's icon.
@@ -1424,7 +1430,7 @@ namespace MySql.Notifier
       _installAvailablelUpdatesMenuItem.Visible = hasUpdates;
       _ignoreAvailableUpdateMenuItem.Visible = hasUpdates;
       _launchInstallerMenuItem.Enabled = MySqlInstaller.IsInstalled;
-      _launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySQLUtilitiesInstalled();
+      _launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySqlUtilitiesInstalled();
       _refreshStatusSeparator.Visible = CurrentServicesAndInstancesCount > 0;
       _refreshStatusMenuItem.Visible = CurrentServicesAndInstancesCount > 0;
       _actionsMenuItem.Visible = CurrentServicesAndInstancesCount > 0;
@@ -1438,7 +1444,7 @@ namespace MySql.Notifier
     Remove
   }
 
-  public enum SoftwareUpdateStaus : int
+  public enum SoftwareUpdateStaus
   {
     Checking = 1,
     HasUpdates = 2,
