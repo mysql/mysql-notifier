@@ -164,7 +164,7 @@ namespace MySql.Notifier
       Password = string.Empty;
       RefreshingStatus = false;
       SecondsToAutoTestConnection = AutoTestConnectionIntervalInSeconds;
-      Services = new List<MySqlService>();
+      Services = new List<MySQLService>();
       UseAsynchronousWMI = true;
       WMIQueriesTimeoutInSeconds = 5;
     }
@@ -266,14 +266,14 @@ namespace MySql.Notifier
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="changeType">Service list change type.</param>
-    public delegate void ServiceListChangedHandler(Machine machine, MySqlService service, ChangeType changeType);
+    public delegate void ServiceListChangedHandler(Machine machine, MySQLService service, ChangeType changeType);
 
     /// <summary>
     /// Notifies that the status of one of the services in the list has changed.
     /// </summary>
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
-    public delegate void ServiceStatusChangedHandler(Machine machine, MySqlService service);
+    public delegate void ServiceStatusChangedHandler(Machine machine, MySQLService service);
 
     /// <summary>
     /// This event system handles the case where the remote machine is unavailable, and a service has failed to connect to the host.
@@ -281,7 +281,7 @@ namespace MySql.Notifier
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="ex">Exception thrown while trying to change the service's status.</param>
-    public delegate void ServiceStatusChangeErrorHandler(Machine machine, MySqlService service, Exception ex);
+    public delegate void ServiceStatusChangeErrorHandler(Machine machine, MySQLService service, Exception ex);
 
     /// <summary>
     /// Occurs when the machine status changes.
@@ -581,8 +581,8 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets or sets the list of services associated with this machine.
     /// </summary>
-    [XmlElement(ElementName = "ServicesList", Type = typeof(List<MySqlService>))]
-    public List<MySqlService> Services { get; set; }
+    [XmlElement(ElementName = "ServicesList", Type = typeof(List<MySQLService>))]
+    public List<MySQLService> Services { get; set; }
 
     /// <summary>
     /// Gets the password as an unencrypted string.
@@ -690,7 +690,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">The MySQL service involved on the change.</param>
     /// <param name="changeType">Change type (addition, removal, update) related to a MySQL service.</param>
-    public void ChangeService(MySqlService service, ChangeType changeType)
+    public void ChangeService(MySQLService service, ChangeType changeType)
     {
       switch (changeType)
       {
@@ -731,7 +731,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">MySQLService instance to look for.</param>
     /// <returns>True if current machine contains it already.</returns>
-    public bool ContainsService(MySqlService service)
+    public bool ContainsService(MySQLService service)
     {
       if (Services == null || Services.Count == 0)
       {
@@ -784,7 +784,7 @@ namespace MySql.Notifier
 
         if (Services != null)
         {
-          foreach (MySqlService service in Services.Where(service => service != null))
+          foreach (MySQLService service in Services.Where(service => service != null))
           {
             service.Dispose();
           }
@@ -800,7 +800,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="name">MySQLService instance name</param>
     /// <returns>MySQLService instance</returns>
-    public MySqlService GetServiceByName(string name)
+    public MySQLService GetServiceByName(string name)
     {
       return Services.FirstOrDefault(service => string.Compare(service.ServiceName, name, StringComparison.OrdinalIgnoreCase) == 0);
     }
@@ -915,7 +915,7 @@ namespace MySql.Notifier
       if (Services != null && Services.Count > 0)
       {
         var serviceNamesList = Services.ConvertAll<string>(service => service.ServiceName);
-        foreach (MySqlService service in serviceNamesList.Select(GetServiceByName).Where(service => service != null))
+        foreach (MySQLService service in serviceNamesList.Select(GetServiceByName).Where(service => service != null))
         {
           ChangeService(service, InitialLoadDone ? ChangeType.Updated : ChangeType.AddByLoad);
         }
@@ -1007,7 +1007,7 @@ namespace MySql.Notifier
       }
 
       var serviceNamesList = Services.ConvertAll<string>(service => service.ServiceName);
-      foreach (MySqlService service in serviceNamesList.Select(GetServiceByName))
+      foreach (MySQLService service in serviceNamesList.Select(GetServiceByName))
       {
         ChangeService(service, ChangeType.Cleared);
         removedServicesQuantity++;
@@ -1028,7 +1028,7 @@ namespace MySql.Notifier
       }
       else
       {
-        foreach (MySqlService service in Services)
+        foreach (MySQLService service in Services)
         {
           service.MenuGroup.RemoveFromContextMenu(menu);
         }
@@ -1181,7 +1181,7 @@ namespace MySql.Notifier
         return;
       }
 
-      foreach (MySqlService service in Services)
+      foreach (MySQLService service in Services)
       {
         service.SetServiceParameters(true);
       }
@@ -1217,7 +1217,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">Service that caused the services list change.</param>
     /// <param name="changeType">List change type.</param>
-    protected virtual void OnServiceListChanged(MySqlService service, ChangeType changeType)
+    protected virtual void OnServiceListChanged(MySQLService service, ChangeType changeType)
     {
       if (ServiceListChanged != null)
       {
@@ -1229,7 +1229,7 @@ namespace MySql.Notifier
     /// Fires the <see cref="ServiceStatusChanged"/> event.
     /// </summary>
     /// <param name="service">Service whose status changed.</param>
-    protected virtual void OnServiceStatusChanged(MySqlService service)
+    protected virtual void OnServiceStatusChanged(MySQLService service)
     {
       if (ServiceStatusChanged != null)
       {
@@ -1242,7 +1242,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">Service to initialize.</param>
     /// <param name="changeType">Change type (addition, removal, update) related to a MySQL service.</param>
-    private void LoadServiceParameters(MySqlService service, ChangeType changeType)
+    private void LoadServiceParameters(MySQLService service, ChangeType changeType)
     {
       service.Host = this;
       service.SetServiceParameters(changeType == ChangeType.Updated);
@@ -1269,7 +1269,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">Service whose status changed.</param>
     /// <param name="ex">Exception error thrown while trying to change service status.</param>
-    private void OnServiceStatusChangeError(MySqlService service, Exception ex)
+    private void OnServiceStatusChangeError(MySQLService service, Exception ex)
     {
       if (ServiceStatusChangeError != null)
       {
@@ -1294,13 +1294,13 @@ namespace MySql.Notifier
       }
 
       string serviceName = remoteService["Name"].ToString().Trim();
-      MySqlService service = GetServiceByName(serviceName);
+      MySQLService service = GetServiceByName(serviceName);
       if (service != null)
       {
         return;
       }
 
-      service = new MySqlService(serviceName, Settings.Default.NotifyOfStatusChange, Settings.Default.NotifyOfStatusChange, this);
+      service = new MySQLService(serviceName, Settings.Default.NotifyOfStatusChange, Settings.Default.NotifyOfStatusChange, this);
       service.SetServiceParameters(true);
       ChangeService(service, ChangeType.AutoAdd);
     }
@@ -1317,7 +1317,7 @@ namespace MySql.Notifier
       }
 
       string serviceName = remoteService["Name"].ToString().Trim();
-      MySqlService service = GetServiceByName(serviceName);
+      MySQLService service = GetServiceByName(serviceName);
       if (service != null)
       {
         ChangeService(service, ChangeType.RemoveByEvent);
@@ -1337,7 +1337,7 @@ namespace MySql.Notifier
 
       string serviceName = remoteService["Name"].ToString().Trim();
       string state = remoteService["State"].ToString();
-      MySqlService service = GetServiceByName(serviceName);
+      MySQLService service = GetServiceByName(serviceName);
       if (service != null)
       {
         service.SetStatus(state);

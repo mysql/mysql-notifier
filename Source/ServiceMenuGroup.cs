@@ -33,7 +33,7 @@ namespace MySql.Notifier
   {
     #region Fields
 
-    private MySqlService _boundService;
+    private MySQLService _boundService;
 
     private ToolStripMenuItem _configureMenu;
 
@@ -55,7 +55,7 @@ namespace MySql.Notifier
     /// Initializes a new instance of the <see cref="ServiceMenuGroup"/> class.
     /// </summary>
     /// <param name="mySqlBoundService">The service this menu group is bound to.</param>
-    public ServiceMenuGroup(MySqlService mySqlBoundService)
+    public ServiceMenuGroup(MySQLService mySqlBoundService)
     {
       MenuItemsQuantity = 0;
       _boundService = mySqlBoundService;

@@ -57,16 +57,16 @@ namespace MySql.Notifier.Forms
     /// <summary>
     /// Initializes a new instance of the <see cref="MonitorMySqlServerInstancesDialog"/> class.
     /// </summary>
-    /// <param name="machinesList">List of <see cref="MySqlService"/> objects monitored by the Notifier.</param>
+    /// <param name="machinesList">List of <see cref="MySQLService"/> objects monitored by the Notifier.</param>
     /// <param name="instancesList">List of names of MySQL instance monitored by the Notifier.</param>
-    public MonitorMySqlServerInstancesDialog(MachinesList machinesList, MySqlInstancesList instancesList)
+    public MonitorMySqlServerInstancesDialog(MachinesList machinesList, MySQLInstancesList instancesList)
     {
       InitializeComponent();
 
       _lastServicesNameFilter = FilterTextBox.Text;
       _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
       MachinesList = machinesList;
-      MySqlInstancesList = instancesList ?? new MySqlInstancesList();
+      MySqlInstancesList = instancesList ?? new MySQLInstancesList();
       InstancesListChanged = false;
     }
 
@@ -94,7 +94,7 @@ namespace MySql.Notifier.Forms
     /// Gets a list of names of MySQL instance monitored by the Notifier.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public MySqlInstancesList MySqlInstancesList { get; private set; }
+    public MySQLInstancesList MySqlInstancesList { get; private set; }
 
     /// <summary>
     /// Gets a list of <see cref="Machine"/> objects monitored by the Notifier.

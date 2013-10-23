@@ -35,7 +35,7 @@ namespace MySql.Notifier
     /// Initializes a new instance of the <see cref="MySqlInstanceMenuGroup"/> class.
     /// </summary>
     /// <param name="boundInstance">The MySQL instance that this menu group is associated to.</param>
-    public MySqlInstanceMenuGroup(MySqlInstance boundInstance)
+    public MySqlInstanceMenuGroup(MySQLInstance boundInstance)
     {
       BoundInstance = boundInstance;
       InstanceMenuItem = new ToolStripMenuItem();
@@ -111,7 +111,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the MySQL instance that this menu group is associated to.
     /// </summary>
-    public MySqlInstance BoundInstance { get; private set; }
+    public MySQLInstance BoundInstance { get; private set; }
 
     /// <summary>
     /// Gets the Configure Instance menu itemText that opens the instance's configuration page in MySQL Workbench.

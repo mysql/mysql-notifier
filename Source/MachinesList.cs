@@ -212,13 +212,14 @@ namespace MySql.Notifier
       LocalMachine.LoadServicesParameters(true);
       OnMachineListChanged(LocalMachine, ChangeType.AutoAdd);
 
+      MigrateOldServices();
+
       if (!Settings.Default.FirstRun)
       {
         return;
       }
 
       CreateScheduledTask();
-      MigrateOldServices();
       AutoAddLocalServices();
       Settings.Default.FirstRun = false;
       SavetoFile();
@@ -317,7 +318,7 @@ namespace MySql.Notifier
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="changeType">Service list change type.</param>
-    protected virtual void OnMachineServiceListChanged(Machine machine, MySqlService service, ChangeType changeType)
+    protected virtual void OnMachineServiceListChanged(Machine machine, MySQLService service, ChangeType changeType)
     {
       switch (changeType)
       {
@@ -365,7 +366,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
-    protected virtual void OnMachineServiceStatusChanged(Machine machine, MySqlService service)
+    protected virtual void OnMachineServiceStatusChanged(Machine machine, MySQLService service)
     {
       if (MachineServiceStatusChanged != null)
       {
@@ -379,7 +380,7 @@ namespace MySql.Notifier
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="ex">Exception thrown while trying to change the service's status.</param>
-    protected virtual void OnMachineServiceStatusChangeError(Machine machine, MySqlService service, Exception ex)
+    protected virtual void OnMachineServiceStatusChangeError(Machine machine, MySQLService service, Exception ex)
     {
       if (MachineServiceStatusChangeError != null)
       {
@@ -419,7 +420,7 @@ namespace MySql.Notifier
       ChangeMachine(LocalMachine, ChangeType.AutoAdd);
 
       // Try to add the services we found on it.
-      foreach (MySqlService service in servicesToAddList.Select(mo => new MySqlService(mo.Properties["Name"].Value.ToString(), true, true, LocalMachine)))
+      foreach (MySQLService service in servicesToAddList.Select(mo => new MySQLService(mo.Properties["Name"].Value.ToString(), true, true, LocalMachine)))
       {
         service.SetServiceParameters(true);
         LocalMachine.ChangeService(service, ChangeType.AutoAdd);
@@ -432,7 +433,7 @@ namespace MySql.Notifier
     private void MigrateOldServices()
     {
       // Load old services schema
-      List<MySqlService> services = Settings.Default.ServiceList;
+      List<MySQLService> services = Settings.Default.ServiceList;
 
       // Attempt migration only if services were found
       if (services == null || services.Count <= 0)
@@ -443,7 +444,7 @@ namespace MySql.Notifier
       ChangeMachine(LocalMachine, ChangeType.AutoAdd);
 
       // Copy services from old schema to the Local machine
-      foreach (MySqlService service in services)
+      foreach (MySQLService service in services)
       {
         service.Host = LocalMachine;
         service.SetServiceParameters(true);

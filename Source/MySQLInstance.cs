@@ -32,7 +32,7 @@ namespace MySql.Notifier
   /// A MySQL Server instance that can be reached through a <see cref="MySqlWorkbenchConnection"/>.
   /// </summary>
   [Serializable]
-  public class MySqlInstance : INotifyPropertyChanged, IDisposable
+  public class MySQLInstance : INotifyPropertyChanged, IDisposable
   {
     #region Constants
 
@@ -113,9 +113,9 @@ namespace MySql.Notifier
     #endregion Fields
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MySqlInstance"/> class.
+    /// Initializes a new instance of the <see cref="MySQLInstance"/> class.
     /// </summary>
-    public MySqlInstance()
+    public MySQLInstance()
     {
       _workbenchConnectionId = string.Empty;
       _monitoringInterval = DEFAULT_MONITORING_INTERVAL;
@@ -134,17 +134,17 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MySqlInstance"/> class.
+    /// Initializes a new instance of the <see cref="MySQLInstance"/> class.
     /// </summary>
     /// <param name="workbenchConnection">A <see cref="MySqlWorkbenchConnection"/> object.</param>
-    public MySqlInstance(MySqlWorkbenchConnection workbenchConnection)
+    public MySQLInstance(MySqlWorkbenchConnection workbenchConnection)
       : this()
     {
       WorkbenchConnection = workbenchConnection;
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MySqlInstance"/> class
+    /// Releases all resources used by the <see cref="MySQLInstance"/> class
     /// </summary>
     public void Dispose()
     {
@@ -726,7 +726,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance whose status changed.</param>
     /// <param name="oldInstanceStatus">Old instance status.</param>
-    public InstanceStatusChangedArgs(MySqlInstance instance, MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
+    public InstanceStatusChangedArgs(MySQLInstance instance, MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
     {
       Instance = instance;
       OldInstanceStatus = oldInstanceStatus;
@@ -735,7 +735,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the MySQL instance whose status changed.
     /// </summary>
-    public MySqlInstance Instance { get; private set; }
+    public MySQLInstance Instance { get; private set; }
 
     /// <summary>
     /// Gets the new status of the instance.
@@ -786,7 +786,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance whose status changed.</param>
     /// <param name="ex">Exception thrown during a connection status test.</param>
-    public InstanceConnectionStatusTestErrorThrownArgs(MySqlInstance instance, Exception ex)
+    public InstanceConnectionStatusTestErrorThrownArgs(MySQLInstance instance, Exception ex)
     {
       Instance = instance;
       ErrorException = ex;
@@ -800,6 +800,6 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the MySQL instance whose status changed.
     /// </summary>
-    public MySqlInstance Instance { get; private set; }
+    public MySQLInstance Instance { get; private set; }
   }
 }

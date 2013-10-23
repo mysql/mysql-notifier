@@ -45,7 +45,7 @@ namespace MySql.Notifier.Forms
 
     public Machine.LocationType MachineLocationType { get; set; }
 
-    public List<MySqlService> ServicesToAdd { get; set; }
+    public List<MySQLService> ServicesToAdd { get; set; }
 
     /// <summary>
     /// Event delegate method fired when the <see cref="DeleteButton"/> is clicked.
@@ -70,10 +70,10 @@ namespace MySql.Notifier.Forms
     private void DialogOKButton_Click(object sender, EventArgs e)
     {
       Cursor.Current = Cursors.WaitCursor;
-      ServicesToAdd = new List<MySqlService>();
+      ServicesToAdd = new List<MySQLService>();
       foreach (ListViewItem lvi in ServicesListView.SelectedItems)
       {
-        ServicesToAdd.Add(new MySqlService(lvi.Tag as string, true, true, NewMachine));
+        ServicesToAdd.Add(new MySQLService(lvi.Tag as string, true, true, NewMachine));
       }
 
       Cursor.Current = Cursors.Default;

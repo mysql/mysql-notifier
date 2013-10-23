@@ -34,7 +34,7 @@ using MySQL.Utility.Forms;
 namespace MySql.Notifier
 {
   [Serializable]
-  public class MySqlService : IDisposable
+  public class MySQLService : IDisposable
   {
     #region Fields
 
@@ -71,9 +71,9 @@ namespace MySql.Notifier
     #endregion Fields
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MySqlService"/> class.
+    /// Initializes a new instance of the <see cref="MySQLService"/> class.
     /// </summary>
-    public MySqlService()
+    public MySQLService()
     {
       _currentStatus = MySqlServiceStatus.Unavailable;
       _statusChangeTimer = new Timer(100);
@@ -87,9 +87,9 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MySqlService"/> class.
+    /// Initializes a new instance of the <see cref="MySQLService"/> class.
     /// </summary>
-    public MySqlService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, Machine machine = null)
+    public MySQLService(string serviceName, bool notificationOnChange, bool updatesTrayIcon, Machine machine = null)
       : this()
     {
       Host = machine ?? new Machine();
@@ -100,7 +100,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MySqlService"/> class
+    /// Releases all resources used by the <see cref="MySQLService"/> class
     /// </summary>
     public void Dispose()
     {
@@ -109,7 +109,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MySqlService"/> class
+    /// Releases all resources used by the <see cref="MySQLService"/> class
     /// </summary>
     /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
     protected virtual void Dispose(bool disposing)
@@ -143,14 +143,14 @@ namespace MySql.Notifier
     /// Handles the case where the service successfully moved to a new status.
     /// </summary>
     /// <param name="service">MySQLService instance.</param>
-    public delegate void StatusChangedHandler(MySqlService service);
+    public delegate void StatusChangedHandler(MySQLService service);
 
     /// <summary>
     /// Handles the case where the service failed to move to a proposed status.
     /// </summary>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="ex">Exception thrown while trying to change the service's status.</param>
-    public delegate void StatusChangeErrorHandler(MySqlService service, Exception ex);
+    public delegate void StatusChangeErrorHandler(MySQLService service, Exception ex);
 
     /// <summary>
     /// Occurs when the service has a status change.
@@ -501,7 +501,7 @@ namespace MySql.Notifier
     /// Fires the <see cref="StatusChanged"/> event.
     /// </summary>
     /// <param name="sender">Sender object.</param>
-    protected virtual void OnStatusChanged(MySqlService sender)
+    protected virtual void OnStatusChanged(MySQLService sender)
     {
       if (this.StatusChanged != null)
       {
