@@ -213,6 +213,7 @@ namespace MySql.Notifier
       LocalMachine.LoadServicesParameters(true);
       OnMachineListChanged(LocalMachine, ChangeType.AutoAdd);
 
+      RecreateInvalidScheduledTask();
       MigrateOldServices();
 
       if (!Settings.Default.FirstRun)
@@ -226,6 +227,20 @@ namespace MySql.Notifier
       SavetoFile();
     }
 
+    /// <summary>
+    /// Recreates the scheduled task if it doesn't exist on the system and is supposed to already be there.
+    /// </summary>
+    private void RecreateInvalidScheduledTask()
+    {
+      if (!Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && !VerifyScheduledTaskExists(Notifier.DefaultTaskName))
+      {
+        CreateScheduledTask();
+      }
+    }
+
+    /// <summary>
+    /// Creates the scheduled task. If the task already exists it is deleted first.
+    /// </summary>
     private void CreateScheduledTask()
     {
       if (Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0 && !String.IsNullOrEmpty(AssemblyInfo.AssemblyTitle))
@@ -433,12 +448,6 @@ namespace MySql.Notifier
     /// </summary>
     private void MigrateOldServices()
     {
-      if (!Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates &&
-          !VerifyScheduledTaskExists(Notifier.DefaultTaskName))
-      {
-        CreateScheduledTask();
-      }
-
       // Load old services schema
       List<MySQLService> services = Settings.Default.ServiceList;
 
