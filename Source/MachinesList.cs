@@ -15,13 +15,14 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQLWorkbench;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Management;
 
 namespace MySql.Notifier
 {
@@ -432,6 +433,12 @@ namespace MySql.Notifier
     /// </summary>
     private void MigrateOldServices()
     {
+      if (!Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates &&
+          !VerifyScheduledTaskExists(Notifier.DefaultTaskName))
+      {
+        CreateScheduledTask();
+      }
+
       // Load old services schema
       List<MySQLService> services = Settings.Default.ServiceList;
 
@@ -454,6 +461,35 @@ namespace MySql.Notifier
       // Clear the old list of services to erase the duplicates on the newer schema
       services.Clear();
       SavetoFile();
+    }
+
+    /// <summary>
+    /// Verifies a task with the given name exists in the current machine.
+    /// </summary>
+    /// <param name="scheduledTaskToFind">The scheduled task name to be found.</param>
+    /// <returns>
+    ///   <c>true</c> if the schedule task is already created.
+    /// </returns>
+    public bool VerifyScheduledTaskExists(string scheduledTaskToFind)
+    {
+      var schtasks = new ProcessStartInfo
+      {
+        FileName = "schtasks.exe",
+        UseShellExecute = false,
+        CreateNoWindow = true,
+        WindowStyle = ProcessWindowStyle.Hidden,
+        Arguments = "/query /TN " + scheduledTaskToFind,
+        RedirectStandardOutput = true
+      };
+
+      using (var process = Process.Start(schtasks))
+      {
+        using (var reader = process.StandardOutput)
+        {
+          var stdout = reader.ReadToEnd();
+          return stdout.Contains(scheduledTaskToFind);
+        }
+      }
     }
   }
 
