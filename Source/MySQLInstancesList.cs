@@ -51,6 +51,7 @@ namespace MySql.Notifier
     {
       _instancesRefreshing = false;
       InstancesList = Settings.Default.MySQLInstancesList ?? new List<MySQLInstance>();
+      RefreshInstances(false);
     }
 
     /// <summary>
