@@ -1,4 +1,6 @@
 1.1.5
+- Fixed code that attempted to reflect changes done to a connection being used by a monitored MySQL Instance after adding new Workbench connections.
+  (Bug #17697914 - CHECK ADD INSTANCE LIST AND CLICK "CANCEL", RAISE ERROR)
 - Added code to refresh MySQL instances when the Notifier is loading so if Workbench was uninstalled and there were instances pointing to now invalid
   connections, they are removed and the menu items do not appear empty.
   (Bug #17671410 - NOTIFIER DOES NOT UPDATE INSTANCES EXISTED IN WORKBENCH WHEN REMOVING WORKBENCH)

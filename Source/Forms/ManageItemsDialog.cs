@@ -367,7 +367,7 @@ namespace MySql.Notifier.Forms
           }
 
           var connectionInDisk = MySqlWorkbench.Connections.GetConnectionForId(existingInstance.WorkbenchConnection.Id);
-          if (connectionInDisk.Equals(existingInstance.WorkbenchConnection))
+          if (connectionInDisk == null || connectionInDisk.Equals(existingInstance.WorkbenchConnection))
           {
             continue;
           }

@@ -307,7 +307,6 @@ namespace MySql.Notifier
       else
       {
         string[] menuItems = new string[4];
-        int index;
 
         if (_boundService.IsRealMySqlService && MySqlWorkbench.AllowsExternalConnectionsManagement)
         {
@@ -322,7 +321,7 @@ namespace MySql.Notifier
           menuItems[1] = _statusMenu.Text;
         }
 
-        index = FindMenuItemWithinMenuStrip(menu, _boundService.ServiceId);
+        int index = FindMenuItemWithinMenuStrip(menu, _boundService.ServiceId);
         if (index <= 0)
         {
           return;
@@ -334,14 +333,8 @@ namespace MySql.Notifier
           menu.Items[index - 1].Visible = menu.Items[index + 1].BackColor != SystemColors.MenuText;
         }
 
-        foreach (var item in menuItems)
+        foreach (int plusItem in from item in menuItems where !string.IsNullOrEmpty(item) select item.Equals(_statusMenu.Text) ? 0 : 1)
         {
-          if (string.IsNullOrEmpty(item))
-          {
-            continue;
-          }
-
-          int plusItem = !item.Equals(_statusMenu.Text) ? 1 : 0;
           menu.Items.RemoveAt(index + plusItem);
         }
 
