@@ -1,4 +1,7 @@
 1.1.5
+- Added code to refresh MySQL instances when the Notifier is loading so if Workbench was uninstalled and there were instances pointing to now invalid
+  connections, they are removed and the menu items do not appear empty.
+  (Bug #17671410 - NOTIFIER DOES NOT UPDATE INSTANCES EXISTED IN WORKBENCH WHEN REMOVING WORKBENCH)
 - Added Workbench connections edition capability right from the Monitor MySQL Server Instance window of the MySQL Notifier (accessed through Actions
   > Manage Monitored Items… > Add… > MySQL Instance). Any of the listed MySQL Workbench connections can be right-clicked and a new “Edit
   Connection” context menu is available for users to edit the Workbench connection properties.

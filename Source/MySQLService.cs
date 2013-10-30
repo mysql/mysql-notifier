@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Management;
 using System.ServiceProcess;
@@ -329,7 +330,7 @@ namespace MySql.Notifier
         WorkbenchConnections.Clear();
       }
 
-      var filteredConnections = MySqlWorkbench.WorkbenchConnections.Where(t => !String.IsNullOrEmpty(t.Name) && t.Port == StartupParameters.Port);
+      var filteredConnections = MySqlWorkbench.WorkbenchConnections.Where(t => !String.IsNullOrEmpty(t.Name) && t.Port == StartupParameters.Port).ToList();
       foreach (MySqlWorkbenchConnection c in filteredConnections)
       {
         switch (c.DriverType)
@@ -503,9 +504,9 @@ namespace MySql.Notifier
     /// <param name="sender">Sender object.</param>
     protected virtual void OnStatusChanged(MySQLService sender)
     {
-      if (this.StatusChanged != null)
+      if (StatusChanged != null)
       {
-        this.StatusChanged(this);
+        StatusChanged(this);
       }
     }
 
@@ -528,8 +529,8 @@ namespace MySql.Notifier
     private void ChangeServiceStatus(int action)
     {
       BackgroundWorker worker = new BackgroundWorker {WorkerSupportsCancellation = false, WorkerReportsProgress = false};
-      worker.DoWork += new DoWorkEventHandler(WorkerDoWork);
-      worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(WorkerRunWorkerCompleted);
+      worker.DoWork += WorkerDoWork;
+      worker.RunWorkerCompleted += WorkerRunWorkerCompleted;
       worker.RunWorkerAsync(action);
     }
 
@@ -543,7 +544,7 @@ namespace MySql.Notifier
     {
       convertedStatus = MySqlServiceStatus.Unavailable;
       statusText = statusText.Replace(" ", string.Empty);
-      bool parsed = MySqlServiceStatus.TryParse(statusText, out convertedStatus);
+      bool parsed = Enum.TryParse(statusText, out convertedStatus);
       return parsed;
     }
 
@@ -617,7 +618,7 @@ namespace MySql.Notifier
 
       // We have a valid defaults file
       IniFile f = new IniFile(parameters.DefaultsFile);
-      Int32.TryParse(f.ReadValue("mysqld", "port", parameters.Port.ToString()), out parameters.Port);
+      Int32.TryParse(f.ReadValue("mysqld", "port", parameters.Port.ToString(CultureInfo.InvariantCulture)), out parameters.Port);
       parameters.PipeName = f.ReadValue("mysqld", "socket", parameters.PipeName);
 
       // Now see if named pipes are enabled
@@ -667,7 +668,7 @@ namespace MySql.Notifier
     {
       _loops = 0;
       _isWaitingOnStatusChange = true;
-      _statusChangeTimer.Elapsed += new ElapsedEventHandler(StatusChangeTimerElapsedToStop);
+      _statusChangeTimer.Elapsed += StatusChangeTimerElapsedToStop;
       _statusChangeTimer.Start();
       if (!ExecuteWmiMethod("StopService"))
       {
@@ -680,7 +681,7 @@ namespace MySql.Notifier
         System.Threading.Thread.Sleep(2000);
       }
 
-      _statusChangeTimer.Elapsed -= new ElapsedEventHandler(StatusChangeTimerElapsedToStop);
+      _statusChangeTimer.Elapsed -= StatusChangeTimerElapsedToStop;
 
       if (Status != MySqlServiceStatus.Stopped && _loops >= 50)
       {
@@ -689,7 +690,7 @@ namespace MySql.Notifier
 
       _loops = 0;
       _isWaitingOnStatusChange = true;
-      _statusChangeTimer.Elapsed += new ElapsedEventHandler(StatusChangeTimerElapsedToStart);
+      _statusChangeTimer.Elapsed += StatusChangeTimerElapsedToStart;
       _statusChangeTimer.Start();
       if (!ExecuteWmiMethod("StartService"))
       {
@@ -702,7 +703,7 @@ namespace MySql.Notifier
         System.Threading.Thread.Sleep(2000);
       }
 
-      _statusChangeTimer.Elapsed -= new ElapsedEventHandler(StatusChangeTimerElapsedToStart);
+      _statusChangeTimer.Elapsed -= StatusChangeTimerElapsedToStart;
 
       if (Status != MySqlServiceStatus.Running && _loops >= 100)
       {
