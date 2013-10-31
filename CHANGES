@@ -1,4 +1,7 @@
 1.1.5
+- Changed the way the Workbench connections and servers files are monitored, now the Notifier detects automatically when Workbench is installed or
+  uninstalled and starts or stops monitoring its files on those events so the Notifier does not need to be restarted to setup the monitoring of the
+  files.
 - Fixed code that attempted to reflect changes done to a connection being used by a monitored MySQL Instance after adding new Workbench connections.
   (Bug #17697914 - CHECK ADD INSTANCE LIST AND CLICK "CANCEL", RAISE ERROR)
 - Added code to refresh MySQL instances when the Notifier is loading so if Workbench was uninstalled and there were instances pointing to now invalid

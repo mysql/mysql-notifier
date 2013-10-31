@@ -11,6 +11,9 @@ Welcome to the release notes for MySQL Notifier 1.1.5
 * When there were MySQL instances being monitored at Notifier created from a Workbench connection,  if they were deleted using MySQL Workbench
   the connections would not be removed from the Notifier until a manual restart. These external changes to the connections file are now being
   monitored automatically and MySQL instances refreshed accordingly.
+* Changed the way the Workbench connections and servers files are monitored, now the Notifier detects automatically when Workbench is installed
+  or uninstalled and starts or stops monitoring its files on those events so the Notifier does not need to be restarted to setup the monitoring
+  of the files.
 
 
 
