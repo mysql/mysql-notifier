@@ -20,7 +20,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes.MySQLWorkbench;
 using MySQL.Utility.Forms;
 using MySQL.Utility.Classes;
 
@@ -31,7 +30,7 @@ namespace MySql.Notifier
     private static void MySQLNotifierHandler(Exception e, bool critical)
     {
       InfoDialog.ShowErrorDialog(Resources.HighSeverityError, e.Message);
-      MySqlSourceTrace.WriteToLog("Unhandled Exception - " + e.Message + " " + e.InnerException, SourceLevels.Critical);
+      MySqlSourceTrace.WriteToLog("Unhandled Exception - " + e.Message + " " + e.InnerException, critical ? SourceLevels.Critical : SourceLevels.Error);
     }
 
     private static void MySQLNotifierThreadExceptionEventHandler(object sender, ThreadExceptionEventArgs args)
@@ -53,11 +52,6 @@ namespace MySql.Notifier
       if (args.Length > 0 && (args[0] == "--c" || args[0] == "--x"))
       {
         CheckForUpdates(args[0]);
-
-        // Migrate Notifier connections to the MySQL Workbench connections file if they have not been migrated and need migrating.
-        Notifier.InitializeMySqlWorkbenchStaticSettings();
-        MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
-        return;
       }
 
       if (!SingleInstance.Start())
@@ -67,13 +61,13 @@ namespace MySql.Notifier
 
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
-      Application.ThreadException += new ThreadExceptionEventHandler(MySQLNotifierThreadExceptionEventHandler);
+      Application.ThreadException += MySQLNotifierThreadExceptionEventHandler;
 
       // For Windows Forms errors to go through our handler.
       Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
 
       // For non-UI thread exceptions
-      AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(MySQLNotifierAppExceptionHandler);
+      AppDomain.CurrentDomain.UnhandledException += MySQLNotifierAppExceptionHandler;
 
       try
       {
@@ -83,7 +77,7 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        InfoDialog.ShowErrorDialog(Resources.HighSeverityError, ex.Message, null, ex.StackTrace, false, InfoDialog.DefaultButtonType.AcceptButton, 60, InfoDialog.FitTextsAction.IncreaseDialogWidth);
+        InfoDialog.ShowErrorDialog(Resources.HighSeverityError, ex.Message, null, ex.StackTrace, false, InfoDialog.DefaultButtonType.AcceptButton, 60);
         MySqlSourceTrace.WriteAppErrorToLog(ex);
       }
 
@@ -109,7 +103,6 @@ namespace MySql.Notifier
 
       Settings.Default.UpdateCheck = (int)SoftwareUpdateStaus.Checking;
       Settings.Default.Save();
-      return;
     }
   }
 }

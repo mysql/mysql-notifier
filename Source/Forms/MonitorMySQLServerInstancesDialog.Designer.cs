@@ -182,6 +182,7 @@ namespace MySql.Notifier.Forms
       this.WorkbenchConnectionsListView.UseCompatibleStateImageBehavior = false;
       this.WorkbenchConnectionsListView.View = System.Windows.Forms.View.Details;
       this.WorkbenchConnectionsListView.SelectedIndexChanged += new System.EventHandler(this.WorkbenchConnectionsListView_SelectedIndexChanged);
+      this.WorkbenchConnectionsListView.DoubleClick += new System.EventHandler(this.WorkbenchConnectionsListView_DoubleClick);
       // 
       // MethodColumnHeader
       // 

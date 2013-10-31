@@ -31,7 +31,7 @@ namespace MySql.Notifier
 
     public override string SettingsPath
     {
-      get { return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier\settings.config"; }
+      get { return Notifier.EnvironmentApplicationDataDirectory + Notifier.SETTINGS_FILE_RELATIVE_PATH; }
     }
   }
 }

@@ -86,7 +86,7 @@ namespace MySql.Notifier.Forms
     {
       get
       {
-        return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
+        return Notifier.EnvironmentApplicationDataDirectory + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
       }
     }
 
@@ -301,7 +301,7 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void MonitorMySQLServerInstancesDialog_FormClosing(object sender, FormClosingEventArgs e)
     {
-      if (SelectedWorkbenchConnection == null || WorkbenchConnectionsListView.SelectedItems.Count <= 0 || WorkbenchConnectionsListView.SelectedItems[0].Checked)
+      if (DialogResult != DialogResult.OK || SelectedWorkbenchConnection == null || WorkbenchConnectionsListView.SelectedItems.Count <= 0 || WorkbenchConnectionsListView.SelectedItems[0].Checked)
       {
         return;
       }
@@ -401,6 +401,16 @@ namespace MySql.Notifier.Forms
     private void ShowMonitoredInstancesCheckBox_CheckedChanged(object sender, EventArgs e)
     {
       RefreshMySqlInstancesList(false);
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="WorkbenchConnectionsListView"/> control is double-clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void WorkbenchConnectionsListView_DoubleClick(object sender, EventArgs e)
+    {
+      DialogOKButton.PerformClick();
     }
 
     /// <summary>
