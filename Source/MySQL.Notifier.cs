@@ -214,7 +214,7 @@ namespace MySql.Notifier
       _previousMachineCount = _machinesList.Machines.Count;
 
       // Monitor creation/deletion of the Workbench application data directory
-      _workbechAppDataDirWatcher = StartWatcherForFile(MySqlWorkbench.WorkbenchDataDirectory, WorkbenchAppDataDirectoryChanged);
+      _workbechAppDataDirWatcher = StartWatcherForFile(EnvironmentApplicationDataDirectory + @"\MySQL\", WorkbenchAppDataDirectoryChanged);
 
       // Create watcher for Workbench servers.xml and connections.xml files
       FileSystemEventArgs wbDirArgs = new FileSystemEventArgs(MySqlWorkbench.IsInstalled ? WatcherChangeTypes.Created : WatcherChangeTypes.Deleted, MySqlWorkbench.WorkbenchDataDirectory, string.Empty);
@@ -1323,6 +1323,7 @@ namespace MySql.Notifier
       {
         Path = monitorPath,
         Filter = isDirectory ? "*.*" : Path.GetFileName(filePath),
+        IncludeSubdirectories = isDirectory,
         NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.DirectoryName
       };
 
