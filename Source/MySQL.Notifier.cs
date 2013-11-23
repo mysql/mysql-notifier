@@ -153,7 +153,7 @@ namespace MySql.Notifier
     /// <summary>
     /// The timer that fires the connection status checks.
     /// </summary>
-    private System.Timers.Timer _globalTimer;
+    private Timer _globalTimer;
 
     /// <summary>
     /// Background worker that performs the refresh of machines, services and MySQL instances.
@@ -963,6 +963,46 @@ namespace MySql.Notifier
     }
 
     /// <summary>
+    /// Attempts to migrate connections created in the Notifier's connections file to the Workbench's one.
+    /// </summary>
+    /// <returns><c>true</c> if the Notifier connections were successfully migrated to the Workbench connections file, <c>false</c> otherwise.</returns>
+    private bool MigrateExternalConnectionsToWorkbench()
+    {
+      // Turn off the watcher monitoring the %APPDATA% directory and save its state.
+      bool workbechAppDataDirWatcherRaisingEvents = false;
+      if (_workbechAppDataDirWatcher != null && _workbechAppDataDirWatcher.EnableRaisingEvents)
+      {
+        workbechAppDataDirWatcherRaisingEvents = _workbechAppDataDirWatcher.EnableRaisingEvents;
+        _workbechAppDataDirWatcher.EnableRaisingEvents = false;
+      }
+
+      // Turn off the watcher monitoring the Workbench's connections.xml file and save its state.
+      bool connectionsFileWatcherRaisingEvents = false;
+      if (_connectionsFileWatcher != null && _connectionsFileWatcher.EnableRaisingEvents)
+      {
+        connectionsFileWatcherRaisingEvents = _connectionsFileWatcher.EnableRaisingEvents;
+        _connectionsFileWatcher.EnableRaisingEvents = false;
+      }
+
+      // Perform the migration and save its result.
+      bool migrationSuccessful = MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
+
+      // Revert the status of the watcher monitoring the %APPDATA% directory if needed.
+      if (_workbechAppDataDirWatcher != null && workbechAppDataDirWatcherRaisingEvents)
+      {
+        _workbechAppDataDirWatcher.EnableRaisingEvents = true;
+      }
+
+      // Revert the status of the watcher monitoring the Workbench's connections.xml file if needed.
+      if (_connectionsFileWatcher != null && connectionsFileWatcherRaisingEvents)
+      {
+        _connectionsFileWatcher.EnableRaisingEvents = true;
+      }
+
+      return migrationSuccessful;
+    }
+
+    /// <summary>
     /// Event delegate method fired when an error is thrown while testing a MySQL Instance's status witin the <see cref="_mySqlInstancesList"/>.
     /// </summary>
     /// <param name="sender">Sender object.</param>
@@ -1377,7 +1417,7 @@ namespace MySql.Notifier
     {
       if (_globalTimer == null)
       {
-        _globalTimer = new System.Timers.Timer { AutoReset = true };
+        _globalTimer = new Timer { AutoReset = true };
         _globalTimer.Elapsed += UpdateMachinesAndInstancesConnectionTimeouts;
         _globalTimer.Interval = 1000;
       }
@@ -1518,7 +1558,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
-    private void UpdateMachinesAndInstancesConnectionTimeouts(object sender, System.Timers.ElapsedEventArgs e)
+    private void UpdateMachinesAndInstancesConnectionTimeouts(object sender, ElapsedEventArgs e)
     {
       _machinesList.UpdateMachinesConnectionTimeouts();
       _mySqlInstancesList.UpdateInstancesConnectionTimeouts();
@@ -1604,7 +1644,7 @@ namespace MySql.Notifier
       }
 
       _migratingWorkbenchConnections = true;
-      bool migrationSucceeded = MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
+      bool migrationSucceeded = MigrateExternalConnectionsToWorkbench();
       _migratingWorkbenchConnections = false;
 
       // Try to migrate connections on the spot, if this fails the background worker is launch for periodical retry.
@@ -1633,7 +1673,7 @@ namespace MySql.Notifier
     /// </summary>
     private void OnWorkbenchConnectionsMigratorTimerElapsedEvent(object sender, ElapsedEventArgs e)
     {
-      if (MySqlWorkbench.MigrateExternalConnectionsToWorkbench())
+      if (MigrateExternalConnectionsToWorkbench())
       {
         _workbenchConnectionsMigratorTimer.Stop();
         Settings.Default.WorkbenchMigrationSucceeded = true;
