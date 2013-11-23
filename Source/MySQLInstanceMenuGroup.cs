@@ -272,7 +272,15 @@ namespace MySql.Notifier
       else
       {
         string[] menuItemTexts = new string[4];
-        if (MySqlWorkbench.AllowsExternalConnectionsManagement)
+        int index = FindInstanceMenuItemWithinMenuStrip(menu);
+
+        if (index < 0)
+        {
+          return;
+        }
+
+        // if index + 1 is a ConfigureInstance item, we need to dispose of the whole item.
+        if (menu.Items[index + 1].Text.Equals(Resources.ConfigureInstance))
         {
           // The last itemText we delete is the service name itemText which is the reference for the others.
           menuItemTexts[0] = "Configure Menu";
@@ -293,7 +301,7 @@ namespace MySql.Notifier
             continue;
           }
 
-          int index = FindInstanceMenuItemWithinMenuStrip(menu);
+          index = FindInstanceMenuItemWithinMenuStrip(menu);
           if (index < 0)
           {
             continue;
@@ -318,10 +326,16 @@ namespace MySql.Notifier
     public void Update(bool refreshing)
     {
       ToolStrip menu = InstanceMenuItem.GetCurrentParent();
-      if (menu != null && menu.InvokeRequired)
+      if (menu == null)
+      {
+        return;
+      }
+
+      if (menu.InvokeRequired)
       {
         menu.Invoke(new MethodInvoker(() => Update(refreshing)));
       }
+
       else
       {
         InstanceMenuItem.Text = BoundInstance.HostIdentifier + (refreshing ? Resources.RefreshingStatusText : " - " + BoundInstance.ConnectionStatusText);
@@ -408,6 +422,60 @@ namespace MySql.Notifier
       {
         InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
         MySqlSourceTrace.WriteAppErrorToLog(ex);
+      }
+    }
+
+    /// <summary>
+    /// Refreshes the menu items of this menu group.
+    /// </summary>
+    /// <param name="menu">The Notifier's context menu.</param>
+    public void RefreshMenu(ContextMenuStrip menu)
+    {
+      if (menu.InvokeRequired)
+      {
+        menu.Invoke(new MethodInvoker(() => RefreshMenu(menu)));
+      }
+      else
+      {
+        int index = FindMenuItemWithinMenuStrip(menu, BoundInstance.InstanceId);
+        if (index < 0)
+        {
+          return;
+        }
+
+        // We dispose of ConfigureInstance and SQLEditor items to recreate a clear menu.
+        if (menu.Items[index + 1].Text.Equals(Resources.ConfigureInstance))
+        {
+          menu.Items.RemoveAt(index + 1);
+        }
+
+        if (menu.Items[index + 1].Text.Equals(Resources.SQLEditor))
+        {
+          menu.Items.RemoveAt(index + 1);
+        }
+
+        // If Workbench is installed on the system, we add ConfigureInstance and SQLEditor items back.
+        if (MySqlWorkbench.AllowsExternalConnectionsManagement)
+        {
+          if (ConfigureMenuItem == null)
+          {
+            ConfigureMenuItem = new ToolStripMenuItem(Resources.ConfigureInstance);
+            ConfigureMenuItem.Click += ConfigureMenuItem_Click;
+            RecreateSqlEditorMenus();
+          }
+
+          if (ConfigureMenuItem != null)
+          {
+            menu.Items.Insert(++index, ConfigureMenuItem);
+          }
+
+          if (SqlEditorMenuItem != null)
+          {
+            menu.Items.Insert(++index, SqlEditorMenuItem);
+          }
+        }
+
+        menu.Refresh();
       }
     }
   }

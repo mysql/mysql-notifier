@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Timers;
 using System.Windows.Forms;
 using MySql.Notifier.Forms;
 using MySql.Notifier.Properties;
@@ -30,6 +31,7 @@ using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQLInstaller;
 using MySQL.Utility.Classes.MySQLWorkbench;
 using MySQL.Utility.Forms;
+using Timer = System.Timers.Timer;
 
 namespace MySql.Notifier
 {
@@ -56,6 +58,11 @@ namespace MySql.Notifier
     /// The relative path of the Notifier's settings file under the application data directory.
     /// </summary>
     public const string SETTINGS_FILE_RELATIVE_PATH = @"\Oracle\MySQL Notifier\settings.config";
+
+    /// <summary>
+    /// The number of milliseconds a minute has.
+    /// </summary>
+    public const int MILLISECONDS_IN_A_MINUTE = 60000;
 
     /// <summary>
     /// Default connections file load retry wait interval in milliseconds.
@@ -141,6 +148,7 @@ namespace MySql.Notifier
     private ToolStripMenuItem _actionsMenuItem;
     private ContextMenuStrip _staticMenu;
     private int _previousMachineCount;
+    private bool _migratingWorkbenchConnections;
 
     /// <summary>
     /// The timer that fires the connection status checks.
@@ -151,6 +159,11 @@ namespace MySql.Notifier
     /// Background worker that performs the refresh of machines, services and MySQL instances.
     /// </summary>
     private BackgroundWorker _worker;
+
+    /// <summary>
+    /// Timer that polls for migration of Workbench Connections as soon as possible.
+    /// </summary>
+    private Timer _workbenchConnectionsMigratorTimer;
 
     #endregion Fields
 
@@ -198,6 +211,7 @@ namespace MySql.Notifier
       _machinesList.MachineServiceListChanged += machinesList_MachineServiceListChanged;
       _machinesList.MachineServiceStatusChanged += machinesList_MachineServiceStatusChanged;
       _machinesList.MachineStatusChanged += machinesList_MachineStatusChanged;
+      _machinesList.WorkbenchInstallationChanged += MySqlWorkbenchInstallationChanged;
 
       // Setup instances list
       _mySqlInstancesList = new MySQLInstancesList();
@@ -229,6 +243,20 @@ namespace MySql.Notifier
 
       // Refresh the Notifier tray icon according to the status of services and instances.
       RefreshNotifierIcon();
+    }
+
+    /// <summary>
+    /// Manages the MySQL Workbench installation changed events.
+    /// </summary>
+    /// <param name="remoteService">The remote service.</param>
+    private void MySqlWorkbenchInstallationChanged(System.Management.ManagementBaseObject remoteService)
+    {
+      if (!Settings.Default.WorkbenchMigrationSucceeded && MySqlWorkbench.AllowsExternalConnectionsManagement)
+      {
+        StartMigrateWorkbenchConnectionsWorker();
+      }
+
+      ConnectionsFileChanged(this, new FileSystemEventArgs(WatcherChangeTypes.Changed, string.Empty, string.Empty));
     }
 
     #region Properties
@@ -442,6 +470,13 @@ namespace MySql.Notifier
           _worker.RunWorkerCompleted -= StatusRefreshWorkerCompleted;
           _worker.Dispose();
         }
+
+        if (_workbenchConnectionsMigratorTimer != null)
+        {
+          _workbenchConnectionsMigratorTimer.Stop();
+          _workbenchConnectionsMigratorTimer.Elapsed -= OnWorkbenchConnectionsMigratorTimerElapsedEvent;
+          _workbenchConnectionsMigratorTimer.Dispose();
+        }
       }
 
       // Add class finalizer if unmanaged resources are added to the class
@@ -562,13 +597,8 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void ConnectionsFileChanged(object sender, FileSystemEventArgs e)
     {
-      if (!ReloadWorkbenchConnectionsFile())
-      {
-        return;
-      }
-
-      // If the application is exiting (so the Notifier icon was hidden), then don't continue on refreshing instances.
-      if (!_notifyIcon.Visible)
+      // If the Workbench's connections file is not able to being load, Or the application is exiting (so the Notifier icon was hidden), then don't continue refreshing services and instances in the popup menu.
+      if (!ReloadWorkbenchConnectionsFile() || !_notifyIcon.Visible)
       {
         return;
       }
@@ -576,9 +606,26 @@ namespace MySql.Notifier
       MarkOrphanInstancesForRemoval();
       _mySqlInstancesList.RefreshInstances(false);
 
-      foreach (var item in _machinesList.Machines.SelectMany(machine => machine.Services))
+      foreach (var service in _machinesList.Machines.SelectMany(machine => machine.Services))
       {
-        item.MenuGroup.RefreshMenu(_notifyIcon.ContextMenuStrip);
+        service.MenuGroup.RefreshMenu(_notifyIcon.ContextMenuStrip);
+      }
+
+      foreach (var instance in _mySqlInstancesList.InstancesList.ToList())
+      {
+        instance.MenuGroup.RefreshMenu(_notifyIcon.ContextMenuStrip);
+      }
+    }
+
+    /// <summary>
+    /// Sets instances with related workbench connections that were deleted at workbench for further deletion.
+    /// </summary>
+    private void MarkOrphanInstancesForRemoval()
+    {
+      // If the Workbench Connection id for the instance 'i' is listed in either Workbench or External connections means the connection still exists not as an orphan.
+      foreach (var i in _mySqlInstancesList.InstancesList.Where(i => !MySqlWorkbench.WorkbenchConnections.Any(wbc => wbc.Id == i.WorkbenchConnectionId) && !MySqlWorkbench.ExternalConnections.Any(ec => ec.Id == i.WorkbenchConnectionId)))
+      {
+        i.ClearWorkbenchConnection();
       }
     }
 
@@ -613,17 +660,6 @@ namespace MySql.Notifier
       InfoDialog.ShowErrorDialog(Resources.ConnectionsFileLoadingErrorTitle, Resources.ConnectionsFileLoadingErrorDetail, null, Resources.ConnectionsFileLoadingErrorMoreInfo, true, InfoDialog.DefaultButtonType.AcceptButton, 30);
       MySqlSourceTrace.WriteAppErrorToLog(loadException);
       return workbenchConnectionsLoadSuccessful;
-    }
-
-    /// <summary>
-    /// Sets instances with related workbench connections that were deleted at workbench for further deletion.
-    /// </summary>
-    private void MarkOrphanInstancesForRemoval()
-    {
-      foreach (var i in _mySqlInstancesList.InstancesList.Where(i => MySqlWorkbench.Connections.All(wbc => wbc.Id != i.WorkbenchConnection.Id)))
-      {
-        i.ClearWorkbenchConnection();
-      }
     }
 
     private void ContextMenuStrip_Opening(object sender, CancelEventArgs e)
@@ -1341,7 +1377,7 @@ namespace MySql.Notifier
     {
       if (_globalTimer == null)
       {
-        _globalTimer = new System.Timers.Timer {AutoReset = true};
+        _globalTimer = new System.Timers.Timer { AutoReset = true };
         _globalTimer.Elapsed += UpdateMachinesAndInstancesConnectionTimeouts;
         _globalTimer.Interval = 1000;
       }
@@ -1520,8 +1556,6 @@ namespace MySql.Notifier
       {
         case WatcherChangeTypes.Created:
         case WatcherChangeTypes.Renamed:
-          // Migrate Notifier connections to the MySQL Workbench connections file if they have not been migrated and need migrating.
-          bool migratedConnections = MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
 
           if (Directory.Exists(MySqlWorkbench.WorkbenchDataDirectory) && MySqlWorkbench.AllowsExternalConnectionsManagement)
           {
@@ -1535,11 +1569,9 @@ namespace MySql.Notifier
               _serversFileWatcher = StartWatcherForFile(MySqlWorkbench.ServersFilePath, ServersFileChanged);
             }
 
-            // If connections were migrated after Workbench was installed BUT Workbench has not been run for the first time, we need to
-            // fire manually the event of the files change to ensure connections are refreshed.
-            if (migratedConnections)
+            if (!Settings.Default.WorkbenchMigrationSucceeded && MySqlWorkbench.AllowsExternalConnectionsManagement)
             {
-              ConnectionsFileChanged(_connectionsFileWatcher, new FileSystemEventArgs(WatcherChangeTypes.Changed, MySqlWorkbench.WorkbenchDataDirectory, MySqlWorkbench.CONNECTIONS_FILE_NAME));
+              StartMigrateWorkbenchConnectionsWorker();
             }
           }
           break;
@@ -1558,6 +1590,56 @@ namespace MySql.Notifier
             _serversFileWatcher = null;
           }
           break;
+      }
+    }
+
+    /// <summary>
+    /// Initializes the background worker used to refresh services and instances statuses asynchronously.
+    /// </summary>
+    private void StartMigrateWorkbenchConnectionsWorker()
+    {
+      if (_migratingWorkbenchConnections)
+      {
+        return;
+      }
+
+      _migratingWorkbenchConnections = true;
+      bool migrationSucceeded = MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
+      _migratingWorkbenchConnections = false;
+
+      // Try to migrate connections on the spot, if this fails the background worker is launch for periodical retry.
+      if (migrationSucceeded)
+      {
+        Settings.Default.WorkbenchMigrationSucceeded = true;
+        Settings.Default.Save();
+        return;
+      }
+
+      if (_workbenchConnectionsMigratorTimer != null)
+      {
+        return;
+      }
+
+      _workbenchConnectionsMigratorTimer = new Timer(Settings.Default.WorkbenchMigrationRetryDelay * MILLISECONDS_IN_A_MINUTE);
+
+      // Hook up the Elapsed event for the timer.
+      _workbenchConnectionsMigratorTimer.Elapsed += OnWorkbenchConnectionsMigratorTimerElapsedEvent;
+      _workbenchConnectionsMigratorTimer.Enabled = true;
+      _workbenchConnectionsMigratorTimer.Start();
+    }
+
+    /// <summary>
+    /// Specify what you want to happen when the Elapsed event is raised.
+    /// </summary>
+    private void OnWorkbenchConnectionsMigratorTimerElapsedEvent(object sender, ElapsedEventArgs e)
+    {
+      if (MySqlWorkbench.MigrateExternalConnectionsToWorkbench())
+      {
+        _workbenchConnectionsMigratorTimer.Stop();
+        Settings.Default.WorkbenchMigrationSucceeded = true;
+        Settings.Default.Save();
+        ConnectionsFileChanged(this, new FileSystemEventArgs(WatcherChangeTypes.Changed, string.Empty, string.Empty));
+        _workbenchConnectionsMigratorTimer.Dispose();
       }
     }
   }

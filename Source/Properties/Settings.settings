@@ -41,5 +41,11 @@
     <Setting Name="MySQLInstancesList" Provider="MySql.Notifier.NotifierSettings" Type="System.Collections.Generic.List&lt;MySQLInstance&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="WorkbenchMigrationRetryDelay" Provider="MySql.Notifier.NotifierSettings" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="WorkbenchMigrationSucceeded" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

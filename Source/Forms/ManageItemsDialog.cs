@@ -119,7 +119,7 @@ namespace MySql.Notifier.Forms
     /// <param name="setPage">Flag indicating if the Instances tab must be focused.</param>
     private void AddInstance(MySQLInstance instance, bool setPage)
     {
-      ListViewItem newItem = new ListViewItem(instance.HostIdentifier) {Tag = instance};
+      ListViewItem newItem = new ListViewItem(instance.HostIdentifier) { Tag = instance };
       newItem.SubItems.Add(instance.WorkbenchConnection.DriverType.ToString());
       newItem.SubItems.Add(instance.ConnectionStatusText);
       MonitoredInstancesListView.Items.Add(newItem);
@@ -152,7 +152,7 @@ namespace MySql.Notifier.Forms
         service.SetServiceParameters(true);
       }
 
-      ListViewItem newItem = new ListViewItem(service.DisplayName) {Tag = service};
+      ListViewItem newItem = new ListViewItem(service.DisplayName) { Tag = service };
       newItem.SubItems.Add(machine.Name);
       newItem.SubItems.Add(service.Status.ToString());
       MonitoredServicesListView.Items.Add(newItem);

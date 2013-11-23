@@ -138,6 +138,11 @@ namespace MySql.Notifier
     /// </summary>
     private BackgroundWorker _worker;
 
+    /// <summary>
+    /// Indicates whether workbench is installed at the time the machine is created in memory.
+    /// </summary>
+    private bool _workbenchWasInstalled;
+
     #endregion Fields
 
     /// <summary>
@@ -167,6 +172,10 @@ namespace MySql.Notifier
       Services = new List<MySQLService>();
       UseAsynchronousWMI = true;
       WMIQueriesTimeoutInSeconds = 5;
+      if (IsLocal)
+      {
+        _workbenchWasInstalled = MySqlWorkbench.IsInstalled;
+      }
     }
 
     /// <summary>
@@ -284,6 +293,11 @@ namespace MySql.Notifier
     public delegate void ServiceStatusChangeErrorHandler(Machine machine, MySQLService service, Exception ex);
 
     /// <summary>
+    /// This event system handles the case where Workbench was installed or uninstalled on the machine.
+    /// </summary>
+    public delegate void WorkbenchInstallationChangedHandler(ManagementBaseObject remoteService);
+
+    /// <summary>
     /// Occurs when the machine status changes.
     /// </summary>
     public event MachineStatusChangedHandler MachineStatusChanged;
@@ -302,6 +316,11 @@ namespace MySql.Notifier
     /// Occurs when an error is thrown while attempting to change the status of a service in the services list.
     /// </summary>
     public event ServiceStatusChangeErrorHandler ServiceStatusChangeError;
+
+    /// <summary>
+    /// Occurs when Workbench was installed or uninstall on the local computer.
+    /// </summary>
+    public event WorkbenchInstallationChangedHandler WorkbenchInstallationChanged;
 
     #endregion Events
 
@@ -1377,7 +1396,7 @@ namespace MySql.Notifier
         return;
       }
 
-      _worker = new BackgroundWorker {WorkerSupportsCancellation = true, WorkerReportsProgress = false};
+      _worker = new BackgroundWorker { WorkerSupportsCancellation = true, WorkerReportsProgress = false };
       _worker.DoWork += TestConnectionWorkerDoWork;
       _worker.RunWorkerCompleted += TestConnectionWorkerCompleted;
     }
@@ -1392,6 +1411,10 @@ namespace MySql.Notifier
 
       if (IsOnline)
       {
+        if (IsLocal)
+        {
+          _wmiServicesWatcher.InstallationChanged += OnInstallationChanged;
+        }
         _wmiServicesWatcher.ServiceCreated += OnWmiServiceCreated;
         _wmiServicesWatcher.ServiceDeleted += OnWmiServiceDeleted;
         _wmiServicesWatcher.ServiceStatusChanged += OnWmiServiceStatusChanged;
@@ -1404,6 +1427,19 @@ namespace MySql.Notifier
         _wmiServicesWatcher.ServiceDeleted -= OnWmiServiceDeleted;
         _wmiServicesWatcher.ServiceStatusChanged -= OnWmiServiceStatusChanged;
         _wmiServicesWatcher.Stop(true);
+      }
+    }
+
+    /// <summary>
+    /// Event delegate method that is fired when Workbench installation changed.
+    /// </summary>
+    /// <param name="remoteService">The remote service.</param>
+    private void OnInstallationChanged(ManagementBaseObject remoteService)
+    {
+      if (WorkbenchInstallationChanged != null && MySqlWorkbench.IsInstalled != _workbenchWasInstalled)
+      {
+        _workbenchWasInstalled = MySqlWorkbench.IsInstalled;
+        WorkbenchInstallationChanged(remoteService);
       }
     }
 

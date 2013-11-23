@@ -188,5 +188,31 @@ namespace MySql.Notifier.Properties {
                 this["MySQLInstancesList"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int WorkbenchMigrationRetryDelay {
+            get {
+                return ((int)(this["WorkbenchMigrationRetryDelay"]));
+            }
+            set {
+                this["WorkbenchMigrationRetryDelay"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool WorkbenchMigrationSucceeded {
+            get {
+                return ((bool)(this["WorkbenchMigrationSucceeded"]));
+            }
+            set {
+                this["WorkbenchMigrationSucceeded"] = value;
+            }
+        }
     }
 }

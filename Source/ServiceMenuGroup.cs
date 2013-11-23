@@ -281,16 +281,47 @@ namespace MySql.Notifier
         }
 
         _boundService.FindMatchingWbConnections();
-        CreateEditorMenus();
 
         int index = FindMenuItemWithinMenuStrip(menu, _boundService.ServiceId);
-        if (index >= 0)
+        if (index < 0)
         {
-          menu.Items.RemoveAt(index + 2);
-          menu.Refresh();
+          return;
         }
 
-        menu.Items.Insert(index + 2, _editorMenu);
+        // We dispose of ConfigureInstance and SQLEditor items to recreate a clear menu.
+        if (menu.Items[index + 1].Text.Equals(Resources.ConfigureInstance))
+        {
+          menu.Items.RemoveAt(index + 1);
+        }
+
+        if (menu.Items[index + 1].Text.Equals(Resources.SQLEditor))
+        {
+          menu.Items.RemoveAt(index + 1);
+        }
+
+        // If Workbench is installed on the system, we add ConfigureInstance and SQLEditor items back.
+        if (MySqlWorkbench.AllowsExternalConnectionsManagement)
+        {
+          if (_configureMenu == null)
+          {
+            _configureMenu = new ToolStripMenuItem(Resources.ConfigureInstance);
+            _configureMenu.Click += configureInstanceItem_Click;
+          }
+
+          CreateEditorMenus();
+
+          if (_configureMenu != null)
+          {
+            menu.Items.Insert(++index, _configureMenu);
+          }
+
+          if (_editorMenu != null)
+          {
+            menu.Items.Insert(++index, _editorMenu);
+          }
+        }
+
+        menu.Refresh();
       }
     }
 

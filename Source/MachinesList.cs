@@ -74,6 +74,11 @@ namespace MySql.Notifier
     /// </summary>
     public event Machine.MachineStatusChangedHandler MachineStatusChanged;
 
+    /// <summary>
+    /// Occurs when Workbench was installed or uninstall on the local computer.
+    /// </summary>
+    public event Machine.WorkbenchInstallationChangedHandler WorkbenchInstallationChanged;
+
     #endregion Events
 
     /// <summary>
@@ -316,10 +321,12 @@ namespace MySql.Notifier
         machine.ServiceListChanged -= OnMachineServiceListChanged;
         machine.ServiceStatusChanged -= OnMachineServiceStatusChanged;
         machine.ServiceStatusChangeError -= OnMachineServiceStatusChangeError;
+        machine.WorkbenchInstallationChanged -= OnWorkbenchInstallationChanged;
         machine.MachineStatusChanged += OnMachineStatusChanged;
         machine.ServiceListChanged += OnMachineServiceListChanged;
         machine.ServiceStatusChanged += OnMachineServiceStatusChanged;
         machine.ServiceStatusChangeError += OnMachineServiceStatusChangeError;
+        machine.WorkbenchInstallationChanged += OnWorkbenchInstallationChanged;
       }
 
       if (MachineListChanged != null)
@@ -414,6 +421,18 @@ namespace MySql.Notifier
       if (MachineStatusChanged != null)
       {
         MachineStatusChanged(machine, oldConnectionStatus);
+      }
+    }
+
+    /// <summary>
+    /// Event delegate method that is fired when Workbench installation changed.
+    /// </summary>
+    /// <param name="remoteservice">The remoteservice.</param>
+    protected virtual void OnWorkbenchInstallationChanged(ManagementBaseObject remoteservice)
+    {
+      if (WorkbenchInstallationChanged != null)
+      {
+        WorkbenchInstallationChanged(remoteservice);
       }
     }
 

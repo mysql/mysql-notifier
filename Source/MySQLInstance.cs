@@ -710,7 +710,7 @@ namespace MySql.Notifier
         return;
       }
 
-      _worker = new BackgroundWorker {WorkerSupportsCancellation = true, WorkerReportsProgress = false};
+      _worker = new BackgroundWorker { WorkerSupportsCancellation = true, WorkerReportsProgress = false };
       _worker.DoWork += CheckInstanceStatusWorkerDoWork;
       _worker.RunWorkerCompleted += CheckInstanceStatusWorkerCompleted;
     }

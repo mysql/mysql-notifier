@@ -132,6 +132,11 @@ namespace MySql.Notifier
     /// </summary>
     public event ServiceEventHandler ServiceStatusChanged;
 
+    /// <summary>
+    /// Occurs when Workbench was installed or uninstall on the local computer.
+    /// </summary>
+    public event ServiceEventHandler InstallationChanged;
+
     #endregion Events
 
     #region Properties
@@ -320,6 +325,22 @@ namespace MySql.Notifier
       if (ServiceStatusChanged != null)
       {
         ServiceStatusChanged(remoteService);
+        if (remoteService["Name"].ToString().Contains("msiserver"))
+        {
+          OnInstallationChanged(remoteService);
+        }
+      }
+    }
+
+    /// <summary>
+    /// Fires the <see cref="InstallationChanged"/> event.
+    /// </summary>
+    /// <param name="remoteService">The remote service.</param>
+    private void OnInstallationChanged(ManagementBaseObject remoteService)
+    {
+      if (InstallationChanged != null)
+      {
+        InstallationChanged(remoteService);
       }
     }
 

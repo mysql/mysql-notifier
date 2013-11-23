@@ -362,7 +362,7 @@ namespace MySql.Notifier
         else
         {
           MySqlWorkbenchConnection connectionInDisk = MySqlWorkbench.Connections.GetConnectionForId(instance.WorkbenchConnection.Id);
-          if (!instance.WorkbenchConnection.Equals(connectionInDisk))
+          if (connectionInDisk != null && !instance.WorkbenchConnection.Equals(connectionInDisk))
           {
             instance.WorkbenchConnection.Sync(connectionInDisk, false);
           }
