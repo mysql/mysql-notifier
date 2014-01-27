@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012-2014, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -19,14 +19,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Management;
 using System.ServiceProcess;
 using System.Timers;
 using System.Xml.Serialization;
-using System.IO;
-using Microsoft.Win32;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQLWorkbench;
@@ -315,7 +312,7 @@ namespace MySql.Notifier
       }
 
       // Discover what StartupParameters we were started with for local connections
-      StartupParameters = GetStartupParameters();
+      StartupParameters = MySqlStartupParameters.GetStartupParameters(new ServiceController(ServiceName, Host.Name));
       if (string.IsNullOrEmpty(StartupParameters.HostName) || !IsRealMySqlService)
       {
         return;
@@ -528,7 +525,7 @@ namespace MySql.Notifier
     /// <param name="action">Action to perform on the service to change its status.</param>
     private void ChangeServiceStatus(int action)
     {
-      BackgroundWorker worker = new BackgroundWorker {WorkerSupportsCancellation = false, WorkerReportsProgress = false};
+      BackgroundWorker worker = new BackgroundWorker { WorkerSupportsCancellation = false, WorkerReportsProgress = false };
       worker.DoWork += WorkerDoWork;
       worker.RunWorkerCompleted += WorkerRunWorkerCompleted;
       worker.RunWorkerAsync(action);
@@ -574,66 +571,13 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Gets the parameters used to initialize a MySQL server instance.
-    /// </summary>
-    /// <returns></returns>
-    private MySqlStartupParameters GetStartupParameters()
-    {
-      MySqlStartupParameters parameters = new MySqlStartupParameters
-      {
-        PipeName = "mysql",
-        HostName = Host.Name == "." ? MySqlWorkbenchConnection.DEFAULT_HOSTNAME : Host.Name
-      };
-
-      // Get our host information
-      parameters.HostIPv4 = Utility.GetIPv4ForHostName(parameters.HostName);
-
-      RegistryKey key = Registry.LocalMachine.OpenSubKey(String.Format(@"SYSTEM\CurrentControlSet\Services\{0}", ServiceName));
-      if (key == null)
-      {
-        return parameters;
-      }
-
-      string imagepath = (string)key.GetValue("ImagePath", null);
-      key.Close();
-      if (imagepath == null)
-      {
-        return parameters;
-      }
-
-      string[] args = Utility.SplitArgs(imagepath);
-      IsRealMySqlService = args[0].EndsWith("mysqld.exe") || args[0].EndsWith("mysqld-nt.exe") || args[0].EndsWith("mysqld") || args[0].EndsWith("mysqld-nt");
-
-      // Parse our command line args
-      Mono.Options.OptionSet p = new Mono.Options.OptionSet()
-        .Add("defaults-file=", "", v => parameters.DefaultsFile = v)
-        .Add("port=|P=", "", v => Int32.TryParse(v, out parameters.Port))
-        .Add("enable-named-pipe", v => parameters.NamedPipesEnabled = true)
-        .Add("socket=", "", v => parameters.PipeName = v);
-      p.Parse(args);
-      if (parameters.DefaultsFile == null || !File.Exists(parameters.DefaultsFile))
-      {
-        return parameters;
-      }
-
-      // We have a valid defaults file
-      IniFile f = new IniFile(parameters.DefaultsFile);
-      Int32.TryParse(f.ReadValue("mysqld", "port", parameters.Port.ToString(CultureInfo.InvariantCulture)), out parameters.Port);
-      parameters.PipeName = f.ReadValue("mysqld", "socket", parameters.PipeName);
-
-      // Now see if named pipes are enabled
-      parameters.NamedPipesEnabled = parameters.NamedPipesEnabled || f.HasKey("mysqld", "enable-named-pipe");
-      return parameters;
-    }
-
-    /// <summary>
     /// Starts, stops or restarts this service.
     /// </summary>
     /// <param name="action">Action to perform on the service.</param>
     private void ProcessStatusService(string action)
     {
       ServiceController winService = new ServiceController(ServiceName);
-      Process proc = new Process {StartInfo = {Verb = "runas", WindowStyle = ProcessWindowStyle.Hidden}};
+      Process proc = new Process { StartInfo = { Verb = "runas", WindowStyle = ProcessWindowStyle.Hidden } };
 
       if (action == "restart")
       {
@@ -881,18 +825,5 @@ namespace MySql.Notifier
     /// The service is paused. This corresponds to the Win32 SERVICE_PAUSED constant, which is defined as 0x00000007.
     /// </summary>
     Paused = 7,
-  }
-
-  /// <summary>
-  /// Represents StartupParameters used to initialize a MySQL server instance.
-  /// </summary>
-  public struct MySqlStartupParameters
-  {
-    public string DefaultsFile;
-    public string HostIPv4;
-    public string HostName;
-    public bool NamedPipesEnabled;
-    public string PipeName;
-    public int Port;
   }
 }
