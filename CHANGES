@@ -1,3 +1,8 @@
+1.1.6
+- Added error handling code during the check for updates process. If the user cancels the UAC prompt (since the check for updates process requires
+  elevation) that is treated as an error, all errors are properly sent to the application log now.
+  (Bug #17858917 - IN CHECK FOR UPDATES. IF CLICK "CANCEL" ON UAC, RAISE AN "HIGH SEVERITY ERROR")
+
 1.1.5
 - Changed the way the Workbench connections and servers files are monitored, now the Notifier detects automatically when Workbench is installed or
   uninstalled and starts or stops monitoring its files on those events so the Notifier does not need to be restarted to setup the monitoring of the

@@ -17,6 +17,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
@@ -27,20 +28,70 @@ namespace MySql.Notifier
 {
   internal static class Program
   {
-    private static void MySQLNotifierHandler(Exception e, bool critical)
+    /// <summary>
+    /// Sends an error message to the application log and optionally shows it to the users.
+    /// </summary>
+    /// <param name="errorMessage">A custom error message.</param>
+    /// <param name="showErrorDialog">Flag indicating whether the error is shown to users.</param>
+    /// <param name="exception">An <see cref="Exception"/> object.</param>
+    /// <param name="errorLevel">The <see cref="SourceLevels"/> to describe the severity of the error.</param>
+    public static void MySQLNotifierErrorHandler(string errorMessage, bool showErrorDialog, Exception exception, SourceLevels errorLevel)
     {
-      InfoDialog.ShowErrorDialog(Resources.HighSeverityError, e.Message);
-      MySqlSourceTrace.WriteToLog("Unhandled Exception - " + e.Message + " " + e.InnerException, critical ? SourceLevels.Critical : SourceLevels.Error);
+      if (string.IsNullOrEmpty(errorMessage))
+      {
+        errorMessage = Resources.UnhandledExceptionText;
+      }
+
+      var errorBuilder = new StringBuilder(errorMessage);
+      if (exception.Message.Length > 0)
+      {
+        errorBuilder.Append(Environment.NewLine);
+        errorBuilder.Append(exception.Message);
+      }
+
+      if (exception.InnerException != null)
+      {
+        errorBuilder.Append(Environment.NewLine);
+        errorBuilder.Append(exception.InnerException.Message);
+      }
+
+      string completeErrorMessage = errorBuilder.ToString();
+      if (showErrorDialog)
+      {
+        InfoDialog.ShowErrorDialog(string.IsNullOrEmpty(errorMessage) ? Resources.HighSeverityError : errorMessage, exception.Message, null, exception.InnerException != null ? exception.InnerException.Message : null);
+      }
+
+      MySqlSourceTrace.WriteToLog(completeErrorMessage, errorLevel);
     }
 
+    /// <summary>
+    /// Shows an error message to the user and sends it to the application log.
+    /// </summary>
+    /// <param name="exception">An <see cref="Exception"/> object.</param>
+    /// <param name="critical">Flag indicating whether the error is treated as <see cref="SourceLevels.Critical"/> or <see cref="SourceLevels.Error"/>.</param>
+    public static void MySQLNotifierErrorHandler(Exception exception, bool critical)
+    {
+      MySQLNotifierErrorHandler(null, true, exception, critical ? SourceLevels.Critical : SourceLevels.Error);
+    }
+
+    /// <summary>
+    /// Shows an error message to the user and sends it to the application log.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="args"><see cref="ThreadExceptionEventArgs"/> arguments.</param>
     private static void MySQLNotifierThreadExceptionEventHandler(object sender, ThreadExceptionEventArgs args)
     {
-      MySQLNotifierHandler(args.Exception, true);
+      MySQLNotifierErrorHandler(args.Exception, true);
     }
 
+    /// <summary>
+    /// Shows an error message to the user and sends it to the application log.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="args"><see cref="UnhandledExceptionEventArgs"/> arguments.</param>
     private static void MySQLNotifierAppExceptionHandler(object sender, UnhandledExceptionEventArgs args)
     {
-      MySQLNotifierHandler((Exception)args.ExceptionObject, true);
+      MySQLNotifierErrorHandler((Exception)args.ExceptionObject, true);
     }
 
     /// <summary>

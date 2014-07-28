@@ -572,7 +572,12 @@ namespace MySql.Notifier
       }
     }
 
-    private void checkUpdatesItem_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Event delegate method fired when the <see cref="_checkForUpdatesMenuItem"/> is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments,.</param>
+    private void CheckUpdatesItem_Click(object sender, EventArgs e)
     {
       if (string.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || Convert.ToDouble(MySqlInstaller.GetInstallerVersion().Substring(0, 3)) < 1.1)
       {
@@ -580,14 +585,21 @@ namespace MySql.Notifier
         return;
       }
 
-      string path = @MySqlInstaller.GetInstallerPath();
-      ProcessStartInfo startInfo = new ProcessStartInfo
+      try
       {
-        FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path),
-        Arguments = "checkforupdates"
-      };
+        string path = @MySqlInstaller.GetInstallerPath();
+        var startInfo = new ProcessStartInfo
+        {
+          Arguments = "checkforupdates",
+          FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path)
+        };
 
-      Process.Start(startInfo);
+        Process.Start(startInfo);
+      }
+      catch (Exception ex)
+      {
+        Program.MySQLNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex, SourceLevels.Error);
+      }
     }
 
     /// <summary>
@@ -782,7 +794,7 @@ namespace MySql.Notifier
         }
         catch (IOException ex)
         {
-          MySqlSourceTrace.WriteToLog(Resources.SettingsFileFailedToLoad + " - " + ex.Message + " " + ex.InnerException, SourceLevels.Warning);
+          Program.MySQLNotifierErrorHandler(Resources.SettingsFileFailedToLoad, false, ex, SourceLevels.Warning);
           Thread.Sleep(1000);
         }
       }
@@ -914,7 +926,7 @@ namespace MySql.Notifier
     {
       string errorText = string.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, Environment.NewLine + ex.Message + Environment.NewLine + Resources.AskRestartApplication);
       ShowTooltip(true, Resources.BalloonTitleFailedStatusChange, errorText);
-      MySqlSourceTrace.WriteToLog("Critical Error when trying to update the service status - " + ex.Message + " " + ex.InnerException, SourceLevels.Critical);
+      Program.MySQLNotifierErrorHandler(Resources.UpdateServiceStatusError, false, ex, SourceLevels.Critical);
     }
 
     /// <summary>
@@ -1010,7 +1022,7 @@ namespace MySql.Notifier
     private void MySqlInstanceConnectionStatusTestErrorThrown(object sender, InstanceConnectionStatusTestErrorThrownArgs args)
     {
       ShowTooltip(true, Resources.ErrorTitle, string.Format(Resources.BalloonTextFailedStatusCheck, args.Instance.HostIdentifier, args.ErrorException.Message));
-      MySqlSourceTrace.WriteToLog("Critical Error when trying to update the instance status - " + args.ErrorException.Message + " " + args.ErrorException.InnerException, SourceLevels.Critical);
+      Program.MySQLNotifierErrorHandler(Resources.UpdateInstanceStatusError, false, args.ErrorException, SourceLevels.Critical);
     }
 
     /// <summary>
@@ -1131,7 +1143,7 @@ namespace MySql.Notifier
       _launchInstallerMenuItem.Click += LaunchInstallerItem_Click;
       _launchInstallerMenuItem.Image = Resources.StartInstallerIcon;
       _checkForUpdatesMenuItem = new ToolStripMenuItem(Resources.CheckUpdatesMenuText);
-      _checkForUpdatesMenuItem.Click += checkUpdatesItem_Click;
+      _checkForUpdatesMenuItem.Click += CheckUpdatesItem_Click;
       _checkForUpdatesMenuItem.Image = Resources.CheckForUpdatesIcon;
       _launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem(Resources.UtilitiesShellMenuText);
       _launchWorkbenchUtilitiesMenuItem.Click += LaunchWorkbenchUtilities_Click;
@@ -1439,9 +1451,7 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void StatusRefreshWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      MySqlSourceTrace.WriteToLog(
-        e.Cancelled ? "Notifier status refresh was cancelled." : "Notifier status refresh completed successfully.",
-        SourceLevels.Information);
+      MySqlSourceTrace.WriteToLog(e.Cancelled ? Resources.StatusRefreshCancelledText : Resources.StatusRefreshCompleteText, SourceLevels.Information);
       _refreshStatusMenuItem.Text = Resources.RefreshStatusMenuText;
       _refreshStatusMenuItem.Image = Resources.RefreshStatus;
       StatusRefreshInProgress = false;
