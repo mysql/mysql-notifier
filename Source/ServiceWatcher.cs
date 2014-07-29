@@ -433,7 +433,7 @@ namespace MySql.Notifier
         null,
         e.Error.Message,
         false,
-        InfoDialog.DefaultButtonType.AcceptButton,
+        InfoDialog.DefaultButtonType.Button1,
         30);
     }
 
@@ -641,7 +641,7 @@ namespace MySql.Notifier
         null,
         e.Error.Message,
         false,
-        InfoDialog.DefaultButtonType.AcceptButton,
+        InfoDialog.DefaultButtonType.Button1,
         30);
     }
 
@@ -845,7 +845,7 @@ namespace MySql.Notifier
         null,
         e.Error.Message,
         false,
-        InfoDialog.DefaultButtonType.AcceptButton,
+        InfoDialog.DefaultButtonType.Button1,
         30);
     }
 

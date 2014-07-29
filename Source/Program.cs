@@ -128,7 +128,7 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        InfoDialog.ShowErrorDialog(Resources.HighSeverityError, ex.Message, null, ex.StackTrace, false, InfoDialog.DefaultButtonType.AcceptButton, 60);
+        InfoDialog.ShowErrorDialog(Resources.HighSeverityError, ex.Message, null, ex.StackTrace, false, InfoDialog.DefaultButtonType.Button1, 60);
         MySqlSourceTrace.WriteAppErrorToLog(ex);
       }
 

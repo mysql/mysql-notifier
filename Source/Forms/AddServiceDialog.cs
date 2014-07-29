@@ -54,7 +54,7 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void DeleteButton_Click(object sender, EventArgs e)
     {
-      DialogResult dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.DeleteMachineConfirmationTitle, Resources.DeleteMachineConfirmationText, null, null, true, InfoDialog.DefaultButtonType.CancelButton, 30);
+      var dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.DeleteMachineConfirmationTitle, Resources.DeleteMachineConfirmationText, null, null, true, InfoDialog.DefaultButtonType.Button2, 30);
       if (dr != DialogResult.Yes)
       {
         return;
@@ -225,7 +225,7 @@ namespace MySql.Notifier.Forms
           NewMachine = (Machine)MachineSelectionComboBox.SelectedItem;
           if (!NewMachine.IsOnline)
           {
-            dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.MachineUnavailableTitle, Resources.MachineUnavailableYesNoDetail, null, Resources.MachineUnavailableExtendedMessage, true, InfoDialog.DefaultButtonType.CancelButton, 30);
+            dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.MachineUnavailableTitle, Resources.MachineUnavailableYesNoDetail, null, Resources.MachineUnavailableExtendedMessage, true, InfoDialog.DefaultButtonType.Button2, 30);
             if (dr == DialogResult.Yes)
             {
               NewMachine.TestConnection(true, false);

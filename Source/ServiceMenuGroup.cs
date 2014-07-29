@@ -233,7 +233,7 @@ namespace MySql.Notifier
         index++;
         menu.Items.Insert(index, _statusMenu);
         MenuItemsQuantity++;
-        if (_boundService.IsRealMySqlService)
+        if (_boundService.StartupParameters.IsRealMySqlService)
         {
           if (_configureMenu != null)
           {
@@ -275,7 +275,7 @@ namespace MySql.Notifier
       }
       else
       {
-        if (!_boundService.IsRealMySqlService)
+        if (!_boundService.StartupParameters.IsRealMySqlService)
         {
           return;
         }
@@ -339,7 +339,7 @@ namespace MySql.Notifier
       {
         string[] menuItems = new string[4];
 
-        if (_boundService.IsRealMySqlService && MySqlWorkbench.AllowsExternalConnectionsManagement)
+        if (_boundService.StartupParameters.IsRealMySqlService && MySqlWorkbench.AllowsExternalConnectionsManagement)
         {
           menuItems[0] = Resources.ConfigureInstance;
           menuItems[1] = Resources.SQLEditor;

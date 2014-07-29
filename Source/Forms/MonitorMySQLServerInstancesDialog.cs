@@ -313,7 +313,7 @@ namespace MySql.Notifier.Forms
         Resources.ConnectionAlreadyInInstancesSubDetail,
         null,
         true,
-        InfoDialog.DefaultButtonType.CancelButton,
+        InfoDialog.DefaultButtonType.Button2,
         10);
       if (dr == DialogResult.Yes)
       {

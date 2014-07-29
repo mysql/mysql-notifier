@@ -669,7 +669,7 @@ namespace MySql.Notifier
         return workbenchConnectionsLoadSuccessful;
       }
 
-      InfoDialog.ShowErrorDialog(Resources.ConnectionsFileLoadingErrorTitle, Resources.ConnectionsFileLoadingErrorDetail, null, Resources.ConnectionsFileLoadingErrorMoreInfo, true, InfoDialog.DefaultButtonType.AcceptButton, 30);
+      InfoDialog.ShowErrorDialog(Resources.ConnectionsFileLoadingErrorTitle, Resources.ConnectionsFileLoadingErrorDetail, null, Resources.ConnectionsFileLoadingErrorMoreInfo, true, InfoDialog.DefaultButtonType.Button1, 30);
       MySqlSourceTrace.WriteAppErrorToLog(loadException);
       return workbenchConnectionsLoadSuccessful;
     }

@@ -197,12 +197,6 @@ namespace MySql.Notifier
     public Machine Host { get; set; }
 
     /// <summary>
-    /// Gets a flag indicating if this service is bound to a MySQL server service.
-    /// </summary>
-    [XmlIgnore]
-    public bool IsRealMySqlService { get; private set; }
-
-    /// <summary>
     /// Gets the group of ToolStripMenuItem controls for each of the corresponding instance's context menu items.
     /// </summary>
     [XmlIgnore]
@@ -313,7 +307,7 @@ namespace MySql.Notifier
 
       // Discover what StartupParameters we were started with for local connections
       StartupParameters = MySqlStartupParameters.GetStartupParameters(new ServiceController(ServiceName, Host.Name));
-      if (string.IsNullOrEmpty(StartupParameters.HostName) || !IsRealMySqlService)
+      if (string.IsNullOrEmpty(StartupParameters.HostName) || !StartupParameters.IsRealMySqlService)
       {
         return;
       }
@@ -539,7 +533,6 @@ namespace MySql.Notifier
     /// <returns>true if a matching enumeration value is found for the given status text, false otherwise.</returns>
     private static bool GetStatusFromText(string statusText, out MySqlServiceStatus convertedStatus)
     {
-      convertedStatus = MySqlServiceStatus.Unavailable;
       statusText = statusText.Replace(" ", string.Empty);
       bool parsed = Enum.TryParse(statusText, out convertedStatus);
       return parsed;

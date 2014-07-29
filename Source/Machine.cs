@@ -911,7 +911,7 @@ namespace MySql.Notifier
           null,
           ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + connectionException.Message : null,
           true,
-          InfoDialog.DefaultButtonType.AcceptButton,
+          InfoDialog.DefaultButtonType.Button1,
           30);
       }
 
@@ -1527,7 +1527,7 @@ namespace MySql.Notifier
             null,
             Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + ex.Message,
             true,
-            InfoDialog.DefaultButtonType.AcceptButton, 30);
+            InfoDialog.DefaultButtonType.Button1, 30);
         }
       }
       finally
