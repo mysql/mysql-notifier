@@ -1,4 +1,6 @@
 1.1.6
+- Fixed code that detected changes in the Workbench connections file to clear connections before attempting to load them again from disk.
+  (Bug #18163378 - REMOVED CONNECTIONS NOT DETECTED FOR SQL EDITOR...)
 - Added error handling code during the check for updates process. If the user cancels the UAC prompt (since the check for updates process requires
   elevation) that is treated as an error, all errors are properly sent to the application log now.
   (Bug #17858917 - IN CHECK FOR UPDATES. IF CLICK "CANCEL" ON UAC, RAISE AN "HIGH SEVERITY ERROR")
