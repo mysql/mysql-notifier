@@ -248,7 +248,7 @@
     <value>Check for updates did not find any new version</value>
   </data>
   <data name="HasUpdatesLaunchInstaller" xml:space="preserve">
-    <value>There are updates to your installed MySQL software.   Please launch the MySQL Installer to apply them.</value>
+    <value>There are {0} available updates to your installed MySQL software.   Please launch the MySQL Installer to apply them.</value>
   </data>
   <data name="SoftwareUpdate" xml:space="preserve">
     <value>Software Update</value>
@@ -328,7 +328,7 @@
   <data name="MissingMySQLInstaller" xml:space="preserve">
     <value>Missing MySQL Installer</value>
   </data>
-  <data name="BaloonTextServiceNotFound" xml:space="preserve">
+  <data name="BalloonTextServiceNotFound" xml:space="preserve">
     <value>The service {0} was not found in the Windows Services</value>
   </data>
   <data name="AskRestartApplication" xml:space="preserve">
@@ -545,5 +545,11 @@ Please make sure the connections.xml file is not open by another program.</value
   </data>
   <data name="UpdateServiceStatusError" xml:space="preserve">
     <value>Critical error when trying to update the service's status:</value>
+  </data>
+  <data name="CheckCommercialUpdatesMenuText" xml:space="preserve">
+    <value>Check for Commercial Updates...</value>
+  </data>
+  <data name="CheckCommunityUpdatesMenuText" xml:space="preserve">
+    <value>Check for Community Updates...</value>
   </data>
 </root>

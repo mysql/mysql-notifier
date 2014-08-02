@@ -734,7 +734,7 @@ namespace MySql.Notifier
     {
       if (!Service.ExistsServiceInstance(ServiceName))
       {
-        throw new Exception(String.Format(Resources.BaloonTextServiceNotFound, ServiceName));
+        throw new Exception(String.Format(Resources.BalloonTextServiceNotFound, ServiceName));
       }
 
       int action = (int)e.Argument;

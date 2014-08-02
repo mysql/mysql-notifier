@@ -1,4 +1,6 @@
 1.1.6
+- Fixed error that prevented notifier from showing the balloon when updates are available.
+  (Bug #19219905 - FAILS TO SHOW UPDATES WHEN UPDATES ARE AVAILABLE)
 - Fixed code that detected changes in the Workbench connections file to clear connections before attempting to load them again from disk.
   (Bug #18163378 - REMOVED CONNECTIONS NOT DETECTED FOR SQL EDITOR...)
 - Added error handling code during the check for updates process. If the user cancels the UAC prompt (since the check for updates process requires

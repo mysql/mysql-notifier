@@ -200,6 +200,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The service {0} was not found in the Windows Services.
+        /// </summary>
+        internal static string BalloonTextServiceNotFound {
+            get {
+                return ResourceManager.GetString("BalloonTextServiceNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The service {0} has been removed from the monitoring list.  .
         /// </summary>
         internal static string BalloonTextServiceRemoved {
@@ -272,15 +281,6 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The service {0} was not found in the Windows Services.
-        /// </summary>
-        internal static string BaloonTextServiceNotFound {
-            get {
-                return ResourceManager.GetString("BaloonTextServiceNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap CancelRefresh {
@@ -314,6 +314,24 @@ namespace MySql.Notifier.Properties {
         internal static string CannotAddLocalhostTitle {
             get {
                 return ResourceManager.GetString("CannotAddLocalhostTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check for Commercial Updates....
+        /// </summary>
+        internal static string CheckCommercialUpdatesMenuText {
+            get {
+                return ResourceManager.GetString("CheckCommercialUpdatesMenuText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check for Community Updates....
+        /// </summary>
+        internal static string CheckCommunityUpdatesMenuText {
+            get {
+                return ResourceManager.GetString("CheckCommunityUpdatesMenuText", resourceCulture);
             }
         }
         
@@ -529,7 +547,7 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are updates to your installed MySQL software.   Please launch the MySQL Installer to apply them..
+        ///   Looks up a localized string similar to There are {0} available updates to your installed MySQL software.   Please launch the MySQL Installer to apply them..
         /// </summary>
         internal static string HasUpdatesLaunchInstaller {
             get {

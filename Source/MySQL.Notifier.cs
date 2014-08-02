@@ -22,6 +22,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
@@ -142,6 +143,8 @@ namespace MySql.Notifier
     private ToolStripMenuItem _refreshStatusMenuItem;
     private ToolStripMenuItem _manageServicesMenuItem;
     private ToolStripMenuItem _checkForUpdatesMenuItem;
+    private ToolStripMenuItem _checkForCommunityUpdatesMenuItem;
+    private ToolStripMenuItem _checkForCommercialUpdatesMenuItem;
     private ToolStripMenuItem _optionsMenuItem;
     private ToolStripMenuItem _aboutMenuItem;
     private ToolStripMenuItem _exitMenuItem;
@@ -186,6 +189,8 @@ namespace MySql.Notifier
       _refreshStatusMenuItem = null;
       _manageServicesMenuItem = null;
       _checkForUpdatesMenuItem = null;
+      _checkForCommunityUpdatesMenuItem = null;
+      _checkForCommercialUpdatesMenuItem = null;
       _optionsMenuItem = null;
       _aboutMenuItem = null;
       _exitMenuItem = null;
@@ -390,7 +395,20 @@ namespace MySql.Notifier
 
         if (_checkForUpdatesMenuItem != null)
         {
+          _checkForUpdatesMenuItem.Click -= CheckUpdatesItem_Click;
           _checkForUpdatesMenuItem.Dispose();
+        }
+
+        if (_checkForCommercialUpdatesMenuItem != null)
+        {
+          _checkForCommercialUpdatesMenuItem.Click -= CheckCommercialUpdatesItem_Click;
+          _checkForCommercialUpdatesMenuItem.Dispose();
+        }
+
+        if (_checkForCommunityUpdatesMenuItem != null)
+        {
+          _checkForCommunityUpdatesMenuItem.Click -= CheckCommunityUpdatesItem_Click;
+          _checkForCommunityUpdatesMenuItem.Dispose();
         }
 
         if (_optionsMenuItem != null)
@@ -579,7 +597,7 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments,.</param>
     private void CheckUpdatesItem_Click(object sender, EventArgs e)
     {
-      if (string.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || Convert.ToDouble(MySqlInstaller.GetInstallerVersion().Substring(0, 3)) < 1.1)
+      if (string.IsNullOrEmpty(MySqlInstaller.Path) || Convert.ToDouble(MySqlInstaller.Version.Substring(0, 3)) < 1.1)
       {
         InfoDialog.ShowErrorDialog(Resources.MissingMySQLInstaller, string.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine));
         return;
@@ -587,11 +605,56 @@ namespace MySql.Notifier
 
       try
       {
-        string path = @MySqlInstaller.GetInstallerPath();
         var startInfo = new ProcessStartInfo
         {
           Arguments = "checkforupdates",
-          FileName = @String.Format(@"{0}\MySQLInstaller.exe", @path)
+          FileName = @String.Format(@"{0}MySQLInstaller.exe", MySqlInstaller.Path)
+        };
+
+        Process.Start(startInfo);
+      }
+      catch (Exception ex)
+      {
+        Program.MySQLNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex, SourceLevels.Error);
+      }
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="_checkForCommercialUpdatesMenuItem"/> is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments,.</param>
+    private void CheckCommercialUpdatesItem_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var startInfo = new ProcessStartInfo
+        {
+          Arguments = "Commercial",
+          FileName = MySqlInstaller.ExeFilePath
+        };
+
+        Process.Start(startInfo);
+      }
+      catch (Exception ex)
+      {
+        Program.MySQLNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex, SourceLevels.Error);
+      }
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="_checkForCommunityUpdatesMenuItem"/> is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments,.</param>
+    private void CheckCommunityUpdatesItem_Click(object sender, EventArgs e)
+    {
+      try
+      {
+        var startInfo = new ProcessStartInfo
+        {
+          Arguments = "Community",
+          FileName = MySqlInstaller.ExeFilePath
         };
 
         Process.Start(startInfo);
@@ -767,7 +830,7 @@ namespace MySql.Notifier
 
     private void LaunchInstallerItem_Click(object sender, EventArgs e)
     {
-      string path = MySqlInstaller.GetInstallerPath();
+      string path = MySqlInstaller.Path;
       if (string.IsNullOrEmpty(path))
       {
         // This should not happen since our menu itemText is enabled
@@ -1142,9 +1205,16 @@ namespace MySql.Notifier
       _launchInstallerMenuItem = new ToolStripMenuItem(Resources.LaunchInstallerMenuText);
       _launchInstallerMenuItem.Click += LaunchInstallerItem_Click;
       _launchInstallerMenuItem.Image = Resources.StartInstallerIcon;
+      _checkForCommercialUpdatesMenuItem = new ToolStripMenuItem(Resources.CheckCommercialUpdatesMenuText);
+      _checkForCommercialUpdatesMenuItem.Click += CheckCommercialUpdatesItem_Click;
+      _checkForCommercialUpdatesMenuItem.Image = Resources.CheckForUpdatesIcon;
+      _checkForCommunityUpdatesMenuItem = new ToolStripMenuItem(Resources.CheckCommunityUpdatesMenuText);
+      _checkForCommunityUpdatesMenuItem.Click += CheckCommunityUpdatesItem_Click;
+      _checkForCommunityUpdatesMenuItem.Image = Resources.CheckForUpdatesIcon;
       _checkForUpdatesMenuItem = new ToolStripMenuItem(Resources.CheckUpdatesMenuText);
       _checkForUpdatesMenuItem.Click += CheckUpdatesItem_Click;
       _checkForUpdatesMenuItem.Image = Resources.CheckForUpdatesIcon;
+
       _launchWorkbenchUtilitiesMenuItem = new ToolStripMenuItem(Resources.UtilitiesShellMenuText);
       _launchWorkbenchUtilitiesMenuItem.Click += LaunchWorkbenchUtilities_Click;
       _launchWorkbenchUtilitiesMenuItem.Image = Resources.LaunchUtilities;
@@ -1163,7 +1233,10 @@ namespace MySql.Notifier
 
       _staticMenu.Items.Add(_manageServicesMenuItem);
       _staticMenu.Items.Add(_launchInstallerMenuItem);
+      _staticMenu.Items.Add(_checkForCommercialUpdatesMenuItem);
+      _staticMenu.Items.Add(_checkForCommunityUpdatesMenuItem);
       _staticMenu.Items.Add(_checkForUpdatesMenuItem);
+
       _staticMenu.Items.Add(_launchWorkbenchUtilitiesMenuItem);
       _staticMenu.Items.Add(_refreshStatusSeparator);
       _staticMenu.Items.Add(_refreshStatusMenuItem);
@@ -1280,24 +1353,72 @@ namespace MySql.Notifier
       }
 
       // If we are supposed to check forupdates but the installer is too old then notify the user and exit
-      if (string.IsNullOrEmpty(MySqlInstaller.GetInstallerPath()) || !MySqlInstaller.GetInstallerVersion().StartsWith("1.1"))
+      if (string.IsNullOrEmpty(MySqlInstaller.Path) || Convert.ToDouble(MySqlInstaller.Version.Substring(0, 3)) < 1.1)
       {
         ShowTooltip(false, Resources.SoftwareUpdate, Resources.ScheduledCheckRequiresInstaller11);
         settingsUpdateCheck = 0;
       }
 
       // Let them know we are checking for updates
+      int availableLegacyUpdatesCount = 0;
+      int availableCommercialUpdatesCount = 0;
+      int availableCommunityUpdatesCount = 0;
       if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Checking) != 0)
       {
         ShowTooltip(false, Resources.SoftwareUpdate, Resources.CheckingForUpdates);
-        bool hasUpdates = MySqlInstaller.HasUpdates(10 * 1000);
+        if (MySqlInstaller.License == MySqlInstaller.LicenseType.Legacy)
+        {
+          availableLegacyUpdatesCount = MySqlInstaller.CheckForUpdates(MySqlInstaller.LicenseType.Legacy);
+        }
+
+        if (MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Commercial))
+        {
+          availableCommercialUpdatesCount = MySqlInstaller.CheckForUpdates(MySqlInstaller.LicenseType.Commercial);
+        }
+
+        if (MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Community))
+        {
+          availableCommunityUpdatesCount = MySqlInstaller.CheckForUpdates(MySqlInstaller.LicenseType.Community);
+        }
+
+        bool hasUpdates = availableLegacyUpdatesCount + availableCommercialUpdatesCount + availableCommunityUpdatesCount > 0;
         Settings.Default.UpdateCheck = hasUpdates ? (int)SoftwareUpdateStaus.HasUpdates : 0;
         settingsUpdateCheck = Settings.Default.UpdateCheck;
       }
 
       if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0)
       {
-        ShowTooltip(false, Resources.SoftwareUpdate, Resources.HasUpdatesLaunchInstaller);
+        if (MySqlInstaller.License == MySqlInstaller.LicenseType.Legacy)
+        {
+          ShowTooltip(false, Resources.SoftwareUpdate,
+            string.Format(Resources.HasUpdatesLaunchInstaller, availableLegacyUpdatesCount));
+        }
+        else
+        {
+          var updatesInfoFragment = new StringBuilder();
+          if (MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Commercial) ||
+              MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Community))
+          {
+            if (availableCommercialUpdatesCount > 0)
+            {
+              updatesInfoFragment.Append(availableCommercialUpdatesCount);
+              updatesInfoFragment.Append(" Commercial ");
+            }
+
+            if (availableCommercialUpdatesCount > 0 && availableCommunityUpdatesCount > 0)
+            {
+              updatesInfoFragment.Append(" and ");
+            }
+
+            if (availableCommunityUpdatesCount > 0)
+            {
+              updatesInfoFragment.Append(availableCommunityUpdatesCount);
+              updatesInfoFragment.Append(" Community ");
+            }
+
+            ShowTooltip(false, Resources.SoftwareUpdate, string.Format(Resources.HasUpdatesLaunchInstaller, updatesInfoFragment));
+          }
+        }
       }
 
       // Set that we have notified our user
@@ -1580,6 +1701,9 @@ namespace MySql.Notifier
     private void UpdateStaticMenuItems()
     {
       bool hasUpdates = (Settings.Default.UpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0;
+      _checkForCommercialUpdatesMenuItem.Visible = MySqlInstaller.IsNewer && MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Commercial);
+      _checkForCommunityUpdatesMenuItem.Visible = MySqlInstaller.IsNewer && (MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Community));
+      _checkForUpdatesMenuItem.Visible = MySqlInstaller.IsInstalled && !MySqlInstaller.IsNewer;
       _hasUpdatesSeparator.Visible = hasUpdates;
       _installAvailablelUpdatesMenuItem.Visible = hasUpdates;
       _ignoreAvailableUpdateMenuItem.Visible = hasUpdates;
