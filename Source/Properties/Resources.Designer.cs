@@ -547,7 +547,7 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are {0} available updates to your installed MySQL software.   Please launch the MySQL Installer to apply them..
+        ///   Looks up a localized string similar to There are {0} available updates for your installed MySQL software. Please launch the MySQL Installer to apply them..
         /// </summary>
         internal static string HasUpdatesLaunchInstaller {
             get {

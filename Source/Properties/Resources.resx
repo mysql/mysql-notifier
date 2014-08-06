@@ -248,7 +248,7 @@
     <value>Check for updates did not find any new version</value>
   </data>
   <data name="HasUpdatesLaunchInstaller" xml:space="preserve">
-    <value>There are {0} available updates to your installed MySQL software.   Please launch the MySQL Installer to apply them.</value>
+    <value>There are {0} available updates for your installed MySQL software. Please launch the MySQL Installer to apply them.</value>
   </data>
   <data name="SoftwareUpdate" xml:space="preserve">
     <value>Software Update</value>

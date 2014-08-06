@@ -1338,92 +1338,103 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Handles the change and creation events in the Notifier's settings file.
+    /// Handles the change and creation events in the Notifier's settings file, sometimes this event will be triggered by the scheduled task from notifier to check for updates.
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
     private void SettingsFileChanged(object sender, FileSystemEventArgs e)
     {
-      int settingsUpdateCheck = LoadUpdateCheck();
+      var settingsUpdateCheck = LoadUpdateCheck();
 
-      // If we have already notified our user or the file could not be loaded then noting more to do
-      if (settingsUpdateCheck <= 0 || (settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0)
+      // If the settings file could not be loaded or we had already notified the user of updates we have nothing else to do.
+      if (settingsUpdateCheck <= (int)SoftwareUpdateStaus.NotAvailable || (settingsUpdateCheck & (int)SoftwareUpdateStaus.Notified) != 0)
       {
         return;
       }
 
-      // If we are supposed to check forupdates but the installer is too old then notify the user and exit
-      if (string.IsNullOrEmpty(MySqlInstaller.Path) || Convert.ToDouble(MySqlInstaller.Version.Substring(0, 3)) < 1.1)
+      var pathIsNullOrEmpty = string.IsNullOrEmpty(MySqlInstaller.Path);
+      var installerIsObsolete = Convert.ToDouble(MySqlInstaller.Version.Substring(0, 3)) < 1.1;
+
+      // If the installer is not located in the right path or is too old to check for updates, notify the user and quit.
+      if (pathIsNullOrEmpty || installerIsObsolete)
       {
         ShowTooltip(false, Resources.SoftwareUpdate, Resources.ScheduledCheckRequiresInstaller11);
-        settingsUpdateCheck = 0;
+        Settings.Default.UpdateCheck = (int)SoftwareUpdateStaus.NotAvailable;
+        Settings.Default.Save();
+        return;
       }
 
-      // Let them know we are checking for updates
-      int availableLegacyUpdatesCount = 0;
-      int availableCommercialUpdatesCount = 0;
-      int availableCommunityUpdatesCount = 0;
-      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.Checking) != 0)
+      // Let the user know we are checking for updates.
+      ShowTooltip(false, Resources.SoftwareUpdate, Resources.CheckingForUpdates);
+
+      //Initialize available update count variables.
+      var availableLegacyUpdatesCount = 0;
+      var availableCommercialUpdatesCount = 0;
+      var availableCommunityUpdatesCount = 0;
+
+      // Call the corresponding methods and log the results into their corresponding local variables.
+      switch (MySqlInstaller.License)
       {
-        ShowTooltip(false, Resources.SoftwareUpdate, Resources.CheckingForUpdates);
-        if (MySqlInstaller.License == MySqlInstaller.LicenseType.Legacy)
-        {
+        case MySqlInstaller.LicenseType.Legacy:
           availableLegacyUpdatesCount = MySqlInstaller.CheckForUpdates(MySqlInstaller.LicenseType.Legacy);
-        }
-
-        if (MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Commercial))
-        {
-          availableCommercialUpdatesCount = MySqlInstaller.CheckForUpdates(MySqlInstaller.LicenseType.Commercial);
-        }
-
-        if (MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Community))
-        {
-          availableCommunityUpdatesCount = MySqlInstaller.CheckForUpdates(MySqlInstaller.LicenseType.Community);
-        }
-
-        bool hasUpdates = availableLegacyUpdatesCount + availableCommercialUpdatesCount + availableCommunityUpdatesCount > 0;
-        Settings.Default.UpdateCheck = hasUpdates ? (int)SoftwareUpdateStaus.HasUpdates : 0;
-        settingsUpdateCheck = Settings.Default.UpdateCheck;
+          break;
+        default:
+          if (MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Commercial))
+          {
+            availableCommercialUpdatesCount = MySqlInstaller.CheckForUpdates(MySqlInstaller.LicenseType.Commercial);
+          }
+          if (MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Community))
+          {
+            availableCommunityUpdatesCount = MySqlInstaller.CheckForUpdates(MySqlInstaller.LicenseType.Community);
+          }
+          break;
       }
 
-      if ((settingsUpdateCheck & (int)SoftwareUpdateStaus.HasUpdates) != 0)
+      var totalUpdatesCount = availableLegacyUpdatesCount + availableCommercialUpdatesCount + availableCommunityUpdatesCount;
+      Settings.Default.UpdateCheck = totalUpdatesCount > 0 ? (int)SoftwareUpdateStaus.HasUpdates : 0;
+
+      // Depending on the available updates count we got from the external API calls, we construct the right message to be displayed to the user.
+      if (totalUpdatesCount > 0)
       {
-        if (MySqlInstaller.License == MySqlInstaller.LicenseType.Legacy)
+        var updatesInfoFragment = new StringBuilder();
+
+        if (availableLegacyUpdatesCount > 0)
         {
-          ShowTooltip(false, Resources.SoftwareUpdate,
-            string.Format(Resources.HasUpdatesLaunchInstaller, availableLegacyUpdatesCount));
+          updatesInfoFragment.Append(availableLegacyUpdatesCount);
         }
         else
         {
-          var updatesInfoFragment = new StringBuilder();
-          if (MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Commercial) ||
-              MySqlInstaller.License.HasFlag(MySqlInstaller.LicenseType.Community))
+          if (availableCommercialUpdatesCount > 0)
           {
-            if (availableCommercialUpdatesCount > 0)
-            {
-              updatesInfoFragment.Append(availableCommercialUpdatesCount);
-              updatesInfoFragment.Append(" Commercial ");
-            }
+            updatesInfoFragment.Append(availableCommercialUpdatesCount);
+            updatesInfoFragment.Append(" Commercial");
+          }
 
-            if (availableCommercialUpdatesCount > 0 && availableCommunityUpdatesCount > 0)
-            {
-              updatesInfoFragment.Append(" and ");
-            }
+          if (availableCommercialUpdatesCount > 0 && availableCommunityUpdatesCount > 0)
+          {
+            updatesInfoFragment.Append(" and ");
+          }
 
-            if (availableCommunityUpdatesCount > 0)
-            {
-              updatesInfoFragment.Append(availableCommunityUpdatesCount);
-              updatesInfoFragment.Append(" Community ");
-            }
-
-            ShowTooltip(false, Resources.SoftwareUpdate, string.Format(Resources.HasUpdatesLaunchInstaller, updatesInfoFragment));
+          if (availableCommunityUpdatesCount > 0)
+          {
+            updatesInfoFragment.Append(availableCommunityUpdatesCount);
+            updatesInfoFragment.Append(" Community");
           }
         }
+
+        ShowTooltip(false, Resources.SoftwareUpdate, string.Format(Resources.HasUpdatesLaunchInstaller, updatesInfoFragment));
+      }
+      else if (totalUpdatesCount == 0) // MySql Software is up to date, no new updates are available.
+      {
+        ShowTooltip(false, Resources.SoftwareUpdate, Resources.NoUpdatesFound);
+      }
+      else // Something failed while checking for updates, totalUpdatesCount will be less than 0.
+      {
+        ShowTooltip(true, Resources.SoftwareUpdate, Resources.CheckForUpdatesProcessError);
       }
 
-      // Set that we have notified our user
+      // Set that we have notified the user.
       Settings.Default.UpdateCheck |= (int)SoftwareUpdateStaus.Notified;
-
       Settings.Default.Save();
       RefreshNotifierIcon();
     }
@@ -1827,8 +1838,24 @@ namespace MySql.Notifier
 
   public enum SoftwareUpdateStaus
   {
+    /// <summary>
+    /// Not Available means the check for updates cannot be performed or failed when attempted.
+    /// </summary>
+    NotAvailable = 0,
+
+    /// <summary>
+    /// The check for updates is being performed.
+    /// </summary>
     Checking = 1,
+
+    /// <summary>
+    /// There are available software updates online.
+    /// </summary>
     HasUpdates = 2,
+
+    /// <summary>
+    /// The user has been notified if updates are available or if its software is up to date.
+    /// </summary>
     Notified = 4
   }
 }
