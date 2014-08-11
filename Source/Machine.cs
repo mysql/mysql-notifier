@@ -1302,24 +1302,18 @@ namespace MySql.Notifier
     /// <param name="remoteService">Remote service firing the status changed event.</param>
     private void OnWmiServiceCreated(ManagementBaseObject remoteService)
     {
-      if (!Settings.Default.AutoAddServicesToMonitor)
+      var serviceName = remoteService == null ? string.Empty : remoteService["Name"].ToString().ToLowerInvariant();
+      if (!Settings.Default.AutoAddServicesToMonitor || GetServiceByName(serviceName) != null || !serviceName.Contains(Settings.Default.AutoAddPattern))
       {
         return;
       }
 
-      if (remoteService == null || !remoteService["Name"].ToString().ToLowerInvariant().Contains(Settings.Default.AutoAddPattern))
+      var service = new MySQLService(serviceName, Settings.Default.NotifyOfStatusChange, Settings.Default.NotifyOfStatusChange, this);
+      if (!Service.IsRealMySqlService(serviceName))
       {
         return;
       }
 
-      string serviceName = remoteService["Name"].ToString().Trim();
-      MySQLService service = GetServiceByName(serviceName);
-      if (service != null)
-      {
-        return;
-      }
-
-      service = new MySQLService(serviceName, Settings.Default.NotifyOfStatusChange, Settings.Default.NotifyOfStatusChange, this);
       service.SetServiceParameters(true);
       ChangeService(service, ChangeType.AutoAdd);
     }
