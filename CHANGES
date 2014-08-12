@@ -1,4 +1,6 @@
 1.1.6
+- Added extra condition to handle the case where the my.ini file doesn't exist so no High Severity Exception error is thrown.
+  (MySQL Bug #73539, Bug #19422802 HIGH SEVERITY ERROR IF SERVER\'S MY.INI FILE IS DELETED)
 - Added further validation to ensure only true MySQL services are added to the watched list.
   (MySQL Bug #73135, Bug #19078684 - MYSQL NOTIFIER OPENS AND GIVES AN ERROR MESSAGE "HIGH SEVERITY ERROR")
 - Fixed error that prevented notifier from showing the balloon when updates are available.
