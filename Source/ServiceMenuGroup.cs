@@ -339,6 +339,11 @@ namespace MySql.Notifier
       {
         string[] menuItems = new string[4];
 
+        if (_boundService == null || _boundService.StartupParameters == null)
+        {
+          return;
+        }
+
         if (_boundService.StartupParameters.IsRealMySqlService && MySqlWorkbench.AllowsExternalConnectionsManagement)
         {
           menuItems[0] = Resources.ConfigureInstance;
