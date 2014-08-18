@@ -200,6 +200,8 @@ namespace MySql.Notifier
       StatusRefreshInProgress = false;
 
       // Static initializations.
+      MySqlInstaller.InstallerLegacyDllPath = Utility.GetInstallLocation(AssemblyInfo.AssemblyTitle);
+      MySqlInstaller.LoadData();
       CustomizeInfoDialog();
       InitializeMySqlWorkbenchStaticSettings();
 

@@ -40,6 +40,7 @@
               <File Id='MySqlNotifierEXE' Name='MySQLNotifier.exe' Source='..\Source\bin\Release\MySqlNotifier.exe' Vital='yes' />
               <File Id='MySQLUtilityDll' Name='MySQL.Utility.dll' Source='..\Source\Lib\MySQL.Utility.dll' Vital='yes' />
               <File Id='MySqlDataDll' Name='MySql.Data.dll' Source='..\Source\Lib\MySql.Data.dll' Vital='yes' />
+              <File Id='WexInstallerCore' Name='WexInstaller.Core.dll' Source='..\Source\Lib\WexInstaller.Core.dll' Vital='yes' />
               <File Id='ReleaseNotes' Name='Release Notes.txt' Source='Release Notes.txt'/>
               <?if $(var.IsGPL) = 1?>
               <File Id='ReadMe' Name='README' Source='README'/>
