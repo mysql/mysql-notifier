@@ -444,7 +444,7 @@ namespace MySql.Notifier
       // Verify if MySQL services are present on the local machine
       string autoAddPattern = Settings.Default.AutoAddPattern;
       ManagementObjectCollection localServicesList = LocalMachine.GetWmiServices(autoAddPattern, true, false);
-      List<ManagementObject> servicesToAddList = localServicesList.Cast<ManagementObject>().Where(mo => mo != null).ToList();
+      List<ManagementObject> servicesToAddList = localServicesList.Cast<ManagementObject>().Where(mo => mo != null && Service.IsRealMySqlService(mo.Properties["Name"].Value.ToString())).ToList();
 
       // If we found some services we will try to add the local machine to the list...
       if (servicesToAddList.Count <= 0)
