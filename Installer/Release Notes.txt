@@ -1,3 +1,18 @@
+MySQL Notifier 1.1.6 Release Notes
+------------------------------------
+
+Welcome to the release notes for MySQL Notifier 1.1.6
+
+* Changed the way Notifier loaded local instances information making that process now independent from my.ini files.
+* Changed the way Notifier detected changes in the Workbench connections file. This fixes the problem of not removing connections that were deleted
+  from workbench and still apeared in notifier. Now we perform a data scrubbing so that list excludes connections that were deleted in workbench.
+* Changed the way Notifier auto adds services to the monitored list, now the Notifier verifies if a potencial MySql service (one that matches the
+  name filter criteria) is running from one of the mysql executable files, Demonstrating it is a real MySql service.
+* Check for updates functionality has been fixed, Notifier is now able to check for updates periodically thru the creation of system task.
+  This functionality was reported to be broken in previous versions of notifier.
+
+
+
 MySQL Notifier 1.1.5 Release Notes
 ------------------------------------
 

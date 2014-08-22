@@ -538,6 +538,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Fabric Managed.
+        /// </summary>
+        internal static string FabricManaged {
+            get {
+                return ResourceManager.GetString("FabricManaged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Workbench failed to launch with an error (see more information for details)..
         /// </summary>
         internal static string FailureToLaunchWorkbench {

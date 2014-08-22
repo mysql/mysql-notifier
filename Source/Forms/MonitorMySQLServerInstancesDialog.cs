@@ -144,7 +144,7 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      ListViewItem newItem = new ListViewItem(workbenchConnection.DriverType.ToString());
+      var newItem = new ListViewItem(workbenchConnection.IsFabricManaged ? Resources.FabricManaged : workbenchConnection.DriverType.ToString());
       newItem.SubItems.Add(workbenchConnection.Name);
       newItem.SubItems.Add(workbenchConnection.Host);
       newItem.SubItems.Add(workbenchConnection.Port.ToString(CultureInfo.InvariantCulture));
@@ -384,7 +384,7 @@ namespace MySql.Notifier.Forms
       WorkbenchConnectionsListView.Items.Clear();
       WorkbenchConnectionsListView.BeginUpdate();
 
-      foreach (var connection in MySqlWorkbench.Connections.OrderBy(conn => conn.Name).Where(connection => string.IsNullOrEmpty(connectionNameFilter) || connection.Name.ToLowerInvariant().Contains(connectionNameFilter)))
+      foreach (var connection in MySqlWorkbench.Connections.OrderBy(conn => conn.Name).Where(connection => connection.IsListable && connectionNameFilter != null && (string.IsNullOrEmpty(connectionNameFilter) || connection.Name.ToLowerInvariant().Contains(connectionNameFilter))))
       {
         AddWorkbenchConnectionToConnectionsList(connection, showNonMonitoredConnections);
       }

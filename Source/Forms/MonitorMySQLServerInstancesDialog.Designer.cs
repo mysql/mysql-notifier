@@ -85,7 +85,7 @@ namespace MySql.Notifier.Forms
       this.ContentAreaPanel.Controls.Add(this.MySQLConnectionsHelpLabel);
       this.ContentAreaPanel.Controls.Add(this.MySQLConnectionsHyperTitleLabel);
       this.ContentAreaPanel.Controls.Add(this.WorkbenchConnectionsListView);
-      this.ContentAreaPanel.Size = new System.Drawing.Size(604, 572);
+      this.ContentAreaPanel.Size = new System.Drawing.Size(709, 572);
       this.ContentAreaPanel.Controls.SetChildIndex(this.WorkbenchConnectionsListView, 0);
       this.ContentAreaPanel.Controls.SetChildIndex(this.MySQLConnectionsHyperTitleLabel, 0);
       this.ContentAreaPanel.Controls.SetChildIndex(this.MySQLConnectionsHelpLabel, 0);
@@ -101,7 +101,7 @@ namespace MySql.Notifier.Forms
       this.CommandAreaPanel.Controls.Add(this.AddConnectionButton);
       this.CommandAreaPanel.Controls.Add(this.DialogOKButton);
       this.CommandAreaPanel.Location = new System.Drawing.Point(0, 527);
-      this.CommandAreaPanel.Size = new System.Drawing.Size(604, 45);
+      this.CommandAreaPanel.Size = new System.Drawing.Size(709, 45);
       this.CommandAreaPanel.TabIndex = 6;
       // 
       // ConnectionNameLabel
@@ -117,7 +117,7 @@ namespace MySql.Notifier.Forms
       // 
       this.ShowMonitoredInstancesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.ShowMonitoredInstancesCheckBox.AutoSize = true;
-      this.ShowMonitoredInstancesCheckBox.Location = new System.Drawing.Point(293, 108);
+      this.ShowMonitoredInstancesCheckBox.Location = new System.Drawing.Point(398, 108);
       this.ShowMonitoredInstancesCheckBox.Name = "ShowMonitoredInstancesCheckBox";
       this.ShowMonitoredInstancesCheckBox.Size = new System.Drawing.Size(286, 19);
       this.ShowMonitoredInstancesCheckBox.TabIndex = 4;
@@ -131,7 +131,7 @@ namespace MySql.Notifier.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
       this.FilterTextBox.Location = new System.Drawing.Point(67, 106);
       this.FilterTextBox.Name = "FilterTextBox";
-      this.FilterTextBox.Size = new System.Drawing.Size(214, 23);
+      this.FilterTextBox.Size = new System.Drawing.Size(319, 23);
       this.FilterTextBox.TabIndex = 3;
       this.FilterTextBox.TextChanged += new System.EventHandler(this.FilterTextBox_TextChanged);
       this.FilterTextBox.Validated += new System.EventHandler(this.FilterTextBox_Validated);
@@ -142,7 +142,7 @@ namespace MySql.Notifier.Forms
             | System.Windows.Forms.AnchorStyles.Right)));
       this.MySQLConnectionsHelpLabel.Location = new System.Drawing.Point(24, 53);
       this.MySQLConnectionsHelpLabel.Name = "MySQLConnectionsHelpLabel";
-      this.MySQLConnectionsHelpLabel.Size = new System.Drawing.Size(555, 38);
+      this.MySQLConnectionsHelpLabel.Size = new System.Drawing.Size(660, 38);
       this.MySQLConnectionsHelpLabel.TabIndex = 1;
       this.MySQLConnectionsHelpLabel.Text = "Select a connection from MySQL Workbench that you want to monitor. You can filter" +
     " the list by typing into the filter control.";
@@ -176,7 +176,7 @@ namespace MySql.Notifier.Forms
       this.WorkbenchConnectionsListView.Location = new System.Drawing.Point(25, 135);
       this.WorkbenchConnectionsListView.MultiSelect = false;
       this.WorkbenchConnectionsListView.Name = "WorkbenchConnectionsListView";
-      this.WorkbenchConnectionsListView.Size = new System.Drawing.Size(554, 364);
+      this.WorkbenchConnectionsListView.Size = new System.Drawing.Size(659, 364);
       this.WorkbenchConnectionsListView.Sorting = System.Windows.Forms.SortOrder.Ascending;
       this.WorkbenchConnectionsListView.TabIndex = 5;
       this.WorkbenchConnectionsListView.UseCompatibleStateImageBehavior = false;
@@ -186,18 +186,18 @@ namespace MySql.Notifier.Forms
       // 
       // MethodColumnHeader
       // 
-      this.MethodColumnHeader.Text = "Method";
-      this.MethodColumnHeader.Width = 78;
+      this.MethodColumnHeader.Text = "Type";
+      this.MethodColumnHeader.Width = 101;
       // 
       // ConnectionNameColumnHeader
       // 
       this.ConnectionNameColumnHeader.Text = "Name";
-      this.ConnectionNameColumnHeader.Width = 186;
+      this.ConnectionNameColumnHeader.Width = 235;
       // 
       // HostnameColumnHeader
       // 
       this.HostnameColumnHeader.Text = "Host";
-      this.HostnameColumnHeader.Width = 145;
+      this.HostnameColumnHeader.Width = 195;
       // 
       // PortColumnHeader
       // 
@@ -248,7 +248,7 @@ namespace MySql.Notifier.Forms
       this.DialogCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
       this.DialogCancelButton.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogCancelButton.Location = new System.Drawing.Point(504, 11);
+      this.DialogCancelButton.Location = new System.Drawing.Point(609, 11);
       this.DialogCancelButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.DialogCancelButton.Name = "DialogCancelButton";
       this.DialogCancelButton.Size = new System.Drawing.Size(75, 23);
@@ -273,7 +273,7 @@ namespace MySql.Notifier.Forms
       this.DialogOKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
       this.DialogOKButton.Enabled = false;
       this.DialogOKButton.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogOKButton.Location = new System.Drawing.Point(423, 11);
+      this.DialogOKButton.Location = new System.Drawing.Point(528, 11);
       this.DialogOKButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.DialogOKButton.Name = "DialogOKButton";
       this.DialogOKButton.Size = new System.Drawing.Size(75, 23);
@@ -292,7 +292,7 @@ namespace MySql.Notifier.Forms
       this.AcceptButton = this.DialogOKButton;
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
       this.CancelButton = this.DialogCancelButton;
-      this.ClientSize = new System.Drawing.Size(604, 572);
+      this.ClientSize = new System.Drawing.Size(709, 572);
       this.CommandAreaVisible = true;
       this.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
       this.FootnoteAreaHeight = 0;

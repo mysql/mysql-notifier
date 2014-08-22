@@ -552,4 +552,7 @@ Please make sure the connections.xml file is not open by another program.</value
   <data name="CheckCommunityUpdatesMenuText" xml:space="preserve">
     <value>Check for Community Updates...</value>
   </data>
+  <data name="FabricManaged" xml:space="preserve">
+    <value>Fabric Managed</value>
+  </data>
 </root>

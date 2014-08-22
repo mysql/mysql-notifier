@@ -43,7 +43,7 @@
               <File Id='WexInstallerCore' Name='WexInstaller.Core.dll' Source='..\Source\Lib\WexInstaller.Core.dll' Vital='yes' />
               <File Id='ReleaseNotes' Name='Release Notes.txt' Source='Release Notes.txt'/>
               <?if $(var.IsGPL) = 1?>
-              <File Id='ReadMe' Name='README' Source='README'/>
+              <File Id='ReadMe' Name='README' Source='README' DiskId="1"/>
               <File Id="COPYING" Name="COPYING" Source="COPYING" DiskId="1" />
               <?else?>
               <File Id="README2" Name="README" Source="README-Commercial" DiskId="1"/>
