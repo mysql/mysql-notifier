@@ -19,6 +19,7 @@ using System;
 using System.Reflection;
 using System.Windows.Forms;
 using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQLInstaller;
 
 namespace MySql.Notifier.Forms
 {
@@ -36,6 +37,11 @@ namespace MySql.Notifier.Forms
     {
       InitializeComponent();
       NotifierVersionLabel.Text = string.Format("{0} {1}.{2}.{3}", AssemblyInfo.AssemblyTitle, Version[0], Version[1], Version[2]);
+      if (MySqlInstaller.IsInstalled)
+      {
+        var installerVersion = MySqlInstaller.Version.Split('.');
+        InstallerVersionLabel.Text = string.Format("MySQL Installer {0}.{1}", installerVersion[0], installerVersion[1]);
+      }
     }
 
     private void AboutDialog_Load(object sender, EventArgs e)
