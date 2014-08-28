@@ -11,7 +11,7 @@
 
     <Upgrade Id="9e9fb57a-62e3-45cf-a896-686e33407606">
       <UpgradeVersion OnlyDetect="yes" Minimum="$(var.Version)" Property="NEWERVERSIONDETECTED" IncludeMinimum="no" />
-      <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND" Minimum="1.0.0" IncludeMinimum="yes" Maximum="$(var.Version)" IncludeMaximum="no" />
+      <UpgradeVersion OnlyDetect="no" Property="PREVIOUSFOUND" Minimum="1.0.0" IncludeMinimum="yes" Maximum="$(var.Version)" IncludeMaximum="yes" />
     </Upgrade>
 
     <Media Id="1" Cabinet="MySqlNotifier.cab" EmbedCab="yes" CompressionLevel="high"/>
