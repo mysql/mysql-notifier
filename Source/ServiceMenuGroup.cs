@@ -74,7 +74,7 @@ namespace MySql.Notifier
 
       _separator = new ToolStripSeparator();
 
-      Font menuItemFont = new Font(_statusMenu.Font, FontStyle.Bold);
+      var menuItemFont = new Font(_statusMenu.Font, FontStyle.Bold);
       _statusMenu.Font = menuItemFont;
 
       _startMenu = new ToolStripMenuItem(Resources.StartText, Resources.play);
@@ -531,25 +531,20 @@ namespace MySql.Notifier
 
       // If there are no connections then we disable the SQL Editor menu.
       _editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && _boundService.WorkbenchConnections != null && _boundService.WorkbenchConnections.Count > 0;
-      if (!_editorMenu.Enabled)
+      if (!_editorMenu.Enabled || _boundService.WorkbenchConnections == null)
       {
         return;
       }
 
       // If there is only 1 connection then we open Workbench directly from the SQL Editor menu.
-      if (_boundService.WorkbenchConnections != null && _boundService.WorkbenchConnections.Count == 1)
+      if (_boundService.WorkbenchConnections.Count == 1)
       {
         _editorMenu.Click += workbenchConnection_Clicked;
         return;
       }
 
       // We have more than 1 connection so we create a submenu
-      if (_boundService.WorkbenchConnections == null)
-      {
-        return;
-      }
-
-      foreach (ToolStripMenuItem menu in _boundService.WorkbenchConnections.Select(c => new ToolStripMenuItem(c.Name)))
+      foreach (var menu in _boundService.WorkbenchConnections.Select(c => new ToolStripMenuItem(c.Name)))
       {
         menu.Click += workbenchConnection_Clicked;
         _editorMenu.DropDownItems.Add(menu);

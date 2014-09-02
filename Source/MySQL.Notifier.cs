@@ -103,7 +103,7 @@ namespace MySql.Notifier
     {
       get
       {
-        return Utility.GetInstallLocation(AssemblyInfo.AssemblyTitle) + Assembly.GetExecutingAssembly().ManifestModule.Name;
+        return !string.IsNullOrEmpty(InstallLocation) ? InstallLocation + Assembly.GetExecutingAssembly().ManifestModule.Name : string.Empty;
       }
     }
 
@@ -117,6 +117,11 @@ namespace MySql.Notifier
         return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
       }
     }
+
+    /// <summary>
+    /// Gets the installation path where the MySQL Notifier executable is located.
+    /// </summary>
+    public static string InstallLocation { get; private set; }
 
     #endregion Static Properties
 
@@ -200,7 +205,8 @@ namespace MySql.Notifier
       StatusRefreshInProgress = false;
 
       // Static initializations.
-      MySqlInstaller.InstallerLegacyDllPath = Utility.GetInstallLocation(AssemblyInfo.AssemblyTitle);
+      InstallLocation = Utility.GetMySqlAppInstallLocation(AssemblyInfo.AssemblyTitle);
+      MySqlInstaller.InstallerLegacyDllPath = InstallLocation;
       MySqlInstaller.LoadData();
       CustomizeInfoDialog();
       InitializeMySqlWorkbenchStaticSettings();
@@ -674,6 +680,10 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void ConnectionsFileChanged(object sender, FileSystemEventArgs e)
     {
+      // Wait 3 seconds after being notified the connections file changed since at the moment of the notification Workbench may not have finished regenerating its contents which
+      // causes the reload below not to catch any connections at all.  In very slow systems like VMs the full 3 seconds may be needed.
+      Thread.Sleep(3000);
+
       // If the Workbench's connections file is not able to being load, Or the application is exiting (so the Notifier icon was hidden), then don't continue refreshing services and instances in the popup menu.
       if (!ReloadWorkbenchConnectionsFile() || !_notifyIcon.Visible)
       {

@@ -65,7 +65,7 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      if (Settings.Default.AutoCheckForUpdates && !String.IsNullOrEmpty(Utility.GetInstallLocation(AssemblyInfo.AssemblyTitle)))
+      if (Settings.Default.AutoCheckForUpdates && !string.IsNullOrEmpty(Notifier.InstallLocation))
       {
         Utility.CreateScheduledTask(Notifier.DefaultTaskName, Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
       }
