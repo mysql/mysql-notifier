@@ -14,3 +14,4 @@ obj
 bin
 *.suo
 *.diff
+*.py
