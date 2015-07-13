@@ -1,3 +1,5 @@
+1.1.7
+
 1.1.6
 - Added extra validation to avoid High Severity Error while restarting when watched MySQL products were uninstalled while Notifier was not running.
   (MySQL Bug #73576, Bug #19439604 - NOTIFIER THROWS ERROR ON RESTART WHEN UNINSTALLING EVERY OTHER MYSQL PRODUCT)
