@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013-2014, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -259,7 +259,7 @@ namespace MySql.Notifier
     /// </summary>
     public void LoadMachinesServices()
     {
-      var machineIdsList = Machines.ConvertAll<string>(machine => machine.MachineId);
+      var machineIdsList = Machines.ConvertAll(machine => machine.MachineId);
       foreach (Machine machine in machineIdsList.Select(GetMachineById).Where(machine => machine != null))
       {
         OnMachineListChanged(machine, ChangeType.AddByLoad);
@@ -341,7 +341,7 @@ namespace MySql.Notifier
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="changeType">Service list change type.</param>
-    protected virtual void OnMachineServiceListChanged(Machine machine, MySQLService service, ChangeType changeType)
+    protected virtual void OnMachineServiceListChanged(Machine machine, MySqlService service, ChangeType changeType)
     {
       switch (changeType)
       {
@@ -389,7 +389,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
-    protected virtual void OnMachineServiceStatusChanged(Machine machine, MySQLService service)
+    protected virtual void OnMachineServiceStatusChanged(Machine machine, MySqlService service)
     {
       if (MachineServiceStatusChanged != null)
       {
@@ -403,7 +403,7 @@ namespace MySql.Notifier
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="ex">Exception thrown while trying to change the service's status.</param>
-    protected virtual void OnMachineServiceStatusChangeError(Machine machine, MySQLService service, Exception ex)
+    protected virtual void OnMachineServiceStatusChangeError(Machine machine, MySqlService service, Exception ex)
     {
       if (MachineServiceStatusChangeError != null)
       {
@@ -455,7 +455,7 @@ namespace MySql.Notifier
       ChangeMachine(LocalMachine, ChangeType.AutoAdd);
 
       // Try to add the services we found on it.
-      foreach (MySQLService service in servicesToAddList.Select(mo => new MySQLService(mo.Properties["Name"].Value.ToString(), true, true, LocalMachine)))
+      foreach (MySqlService service in servicesToAddList.Select(mo => new MySqlService(mo.Properties["Name"].Value.ToString(), true, true, LocalMachine)))
       {
         service.SetServiceParameters(true);
         LocalMachine.ChangeService(service, ChangeType.AutoAdd);
@@ -468,7 +468,7 @@ namespace MySql.Notifier
     private void MigrateOldServices()
     {
       // Load old services schema
-      List<MySQLService> services = Settings.Default.ServiceList;
+      List<MySqlService> services = Settings.Default.ServiceList;
 
       // Attempt migration only if services were found
       if (services == null || services.Count <= 0)
@@ -479,7 +479,7 @@ namespace MySql.Notifier
       ChangeMachine(LocalMachine, ChangeType.AutoAdd);
 
       // Copy services from old schema to the Local machine
-      foreach (MySQLService service in services)
+      foreach (MySqlService service in services)
       {
         service.Host = LocalMachine;
         service.SetServiceParameters(true);
@@ -512,6 +512,11 @@ namespace MySql.Notifier
 
       using (var process = Process.Start(schtasks))
       {
+        if (process == null)
+        {
+          return false;
+        }
+
         using (var reader = process.StandardOutput)
         {
           var stdout = reader.ReadToEnd();

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2014, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -47,7 +47,7 @@ namespace MySql.Notifier.Forms
     private void AboutDialog_Load(object sender, EventArgs e)
     {
       KeyPreview = true;
-      KeyDown += new System.Windows.Forms.KeyEventHandler(AboutDialog_KeyDown);
+      KeyDown += AboutDialog_KeyDown;
     }
 
     private void AboutDialog_KeyDown(object sender, KeyEventArgs e)

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013-2014, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Management;
@@ -169,9 +170,9 @@ namespace MySql.Notifier
       Password = string.Empty;
       RefreshingStatus = false;
       SecondsToAutoTestConnection = AutoTestConnectionIntervalInSeconds;
-      Services = new List<MySQLService>();
-      UseAsynchronousWMI = true;
-      WMIQueriesTimeoutInSeconds = 5;
+      Services = new List<MySqlService>();
+      UseAsynchronousWmi = true;
+      WmiQueriesTimeoutInSeconds = 5;
       if (IsLocal)
       {
         _workbenchWasInstalled = MySqlWorkbench.IsInstalled;
@@ -275,14 +276,14 @@ namespace MySql.Notifier
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="changeType">Service list change type.</param>
-    public delegate void ServiceListChangedHandler(Machine machine, MySQLService service, ChangeType changeType);
+    public delegate void ServiceListChangedHandler(Machine machine, MySqlService service, ChangeType changeType);
 
     /// <summary>
     /// Notifies that the status of one of the services in the list has changed.
     /// </summary>
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
-    public delegate void ServiceStatusChangedHandler(Machine machine, MySQLService service);
+    public delegate void ServiceStatusChangedHandler(Machine machine, MySqlService service);
 
     /// <summary>
     /// This event system handles the case where the remote machine is unavailable, and a service has failed to connect to the host.
@@ -290,7 +291,7 @@ namespace MySql.Notifier
     /// <param name="machine">Machine instance.</param>
     /// <param name="service">MySQLService instance.</param>
     /// <param name="ex">Exception thrown while trying to change the service's status.</param>
-    public delegate void ServiceStatusChangeErrorHandler(Machine machine, MySQLService service, Exception ex);
+    public delegate void ServiceStatusChangeErrorHandler(Machine machine, MySqlService service, Exception ex);
 
     /// <summary>
     /// This event system handles the case where Workbench was installed or uninstalled on the machine.
@@ -383,13 +384,13 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Gets the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWmiServices"/> method.
+    /// Gets the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="o:GetWmiServices"/> method.
     /// </summary>
     [XmlIgnore]
     public ConnectionProblemType ConnectionProblem { get; private set; }
 
     /// <summary>
-    /// Gets a long description about the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWmiServices"/> method.
+    /// Gets a long description about the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="o:GetWmiServices"/> method.
     /// </summary>
     [XmlIgnore]
     public string ConnectionProblemLongDescription
@@ -411,7 +412,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Gets a short description about the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWMIServices"/> method.
+    /// Gets a short description about the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="o:GetWmiServices"/> method.
     /// </summary>
     [XmlIgnore]
     public string ConnectionProblemShortDescription
@@ -433,7 +434,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Gets the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="GetWmiServices"/> method.
+    /// Gets the current status of this machine, refreshed by calling the <see cref="TestConnection"/> or the <see cref="o:GetWmiServices"/> method.
     /// </summary>
     [XmlIgnore]
     public ConnectionStatusType ConnectionStatus
@@ -600,8 +601,8 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets or sets the list of services associated with this machine.
     /// </summary>
-    [XmlElement(ElementName = "ServicesList", Type = typeof(List<MySQLService>))]
-    public List<MySQLService> Services { get; set; }
+    [XmlElement(ElementName = "ServicesList", Type = typeof(List<MySqlService>))]
+    public List<MySqlService> Services { get; set; }
 
     /// <summary>
     /// Gets the password as an unencrypted string.
@@ -619,7 +620,7 @@ namespace MySql.Notifier
     /// Gets or sets a value indicating whether asynchronous or synchronous WMI watchers are used by the machine.
     /// </summary>
     [XmlIgnore]
-    public bool UseAsynchronousWMI { get; set; }
+    public bool UseAsynchronousWmi { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the user to connect to this machine.
@@ -631,12 +632,12 @@ namespace MySql.Notifier
     /// Gets or sets the timeout in seconds for WMI queries.
     /// </summary>
     [XmlAttribute("WMIQueriesTimeoutInSeconds")]
-    public ushort WMIQueriesTimeoutInSeconds { get; set; }
+    public ushort WmiQueriesTimeoutInSeconds { get; set; }
 
     /// <summary>
     /// Gets an object that contains the settings to perform a WMI connection.
     /// </summary>
-    private ConnectionOptions WMIConnectionOptions
+    private ConnectionOptions WmiConnectionOptions
     {
       get
       {
@@ -659,7 +660,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the scope (namespace) used for WMI operations.
     /// </summary>
-    private ManagementScope WMIManagementScope
+    private ManagementScope WmiManagementScope
     {
       get
       {
@@ -670,16 +671,16 @@ namespace MySql.Notifier
 
         if (IsLocal)
         {
-          if (_wmiManagementScope.Path == null || _wmiManagementScope.Path.NamespacePath != WMI_LOCAL_NAMESPACE)
+          if (_wmiManagementScope.Path.NamespacePath != WMI_LOCAL_NAMESPACE)
           {
             _wmiManagementScope = new ManagementScope(WMI_LOCAL_NAMESPACE);
           }
         }
         else
         {
-          if (_wmiManagementScope.Path == null || _wmiManagementScope.Path.Server != Name || _wmiManagementScope.Options != WMIConnectionOptions)
+          if (_wmiManagementScope.Path.Server != Name || _wmiManagementScope.Options != WmiConnectionOptions)
           {
-            _wmiManagementScope = new ManagementScope(string.Format(WMI_REMOTE_NAMESPACE, Name), WMIConnectionOptions);
+            _wmiManagementScope = new ManagementScope(string.Format(WMI_REMOTE_NAMESPACE, Name), WmiConnectionOptions);
           }
         }
 
@@ -709,7 +710,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">The MySQL service involved on the change.</param>
     /// <param name="changeType">Change type (addition, removal, update) related to a MySQL service.</param>
-    public void ChangeService(MySQLService service, ChangeType changeType)
+    public void ChangeService(MySqlService service, ChangeType changeType)
     {
       switch (changeType)
       {
@@ -750,7 +751,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">MySQLService instance to look for.</param>
     /// <returns>True if current machine contains it already.</returns>
-    public bool ContainsService(MySQLService service)
+    public bool ContainsService(MySqlService service)
     {
       if (Services == null || Services.Count == 0)
       {
@@ -803,7 +804,7 @@ namespace MySql.Notifier
 
         if (Services != null)
         {
-          foreach (MySQLService service in Services.Where(service => service != null))
+          foreach (MySqlService service in Services.Where(service => service != null))
           {
             service.Dispose();
           }
@@ -819,7 +820,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="name">MySQLService instance name</param>
     /// <returns>MySQLService instance</returns>
-    public MySQLService GetServiceByName(string name)
+    public MySqlService GetServiceByName(string name)
     {
       return Services.FirstOrDefault(service => string.Compare(service.ServiceName, name, StringComparison.OrdinalIgnoreCase) == 0);
     }
@@ -848,9 +849,9 @@ namespace MySql.Notifier
 
       try
       {
-        if (!WMIManagementScope.IsConnected)
+        if (!WmiManagementScope.IsConnected)
         {
-          WMIManagementScope.Connect();
+          WmiManagementScope.Connect();
         }
 
         if (_connectionTestCancelled)
@@ -861,7 +862,7 @@ namespace MySql.Notifier
 
         string filterQuery = useDisplayName ? WMI_QUERY_SELECT_DISPLAY_NAME_CONTAINING : WMI_QUERY_SELECT_NAME_CONTAINING;
         WqlObjectQuery query = string.IsNullOrEmpty(serviceNameFilter) ? new WqlObjectQuery(WMI_QUERY_SELECT_ALL) : new WqlObjectQuery(string.Format(filterQuery, serviceNameFilter));
-        ManagementObjectSearcher searcher = new ManagementObjectSearcher(WMIManagementScope, query);
+        ManagementObjectSearcher searcher = new ManagementObjectSearcher(WmiManagementScope, query);
         wmiServicesCollection = searcher.Get();
         if (_connectionTestCancelled)
         {
@@ -874,6 +875,7 @@ namespace MySql.Notifier
         foreach (var mo in wmiServicesCollection)
         {
           string serviceDisplayName = mo["DisplayName"].ToString();
+          Debug.Write(serviceDisplayName);
           break;
         }
 
@@ -901,7 +903,7 @@ namespace MySql.Notifier
         return wmiServicesCollection;
       }
 
-      MySqlSourceTrace.WriteToLog(ConnectionProblemLongDescription, System.Diagnostics.SourceLevels.Information);
+      MySqlSourceTrace.WriteToLog(ConnectionProblemLongDescription, SourceLevels.Information);
       MySqlSourceTrace.WriteAppErrorToLog(connectionException);
       if (displayMessageOnError)
       {
@@ -933,8 +935,8 @@ namespace MySql.Notifier
       // Set services StartupParameters and subscribe to service events.
       if (Services != null && Services.Count > 0)
       {
-        var serviceNamesList = Services.ConvertAll<string>(service => service.ServiceName);
-        foreach (MySQLService service in serviceNamesList.Select(GetServiceByName).Where(service => service != null))
+        var serviceNamesList = Services.ConvertAll(service => service.ServiceName);
+        foreach (MySqlService service in serviceNamesList.Select(GetServiceByName).Where(service => service != null))
         {
           ChangeService(service, InitialLoadDone ? ChangeType.Updated : ChangeType.AddByLoad);
         }
@@ -1025,8 +1027,8 @@ namespace MySql.Notifier
         return removedServicesQuantity;
       }
 
-      var serviceNamesList = Services.ConvertAll<string>(service => service.ServiceName);
-      foreach (MySQLService service in serviceNamesList.Select(GetServiceByName))
+      var serviceNamesList = Services.ConvertAll(service => service.ServiceName);
+      foreach (MySqlService service in serviceNamesList.Select(GetServiceByName))
       {
         ChangeService(service, ChangeType.Cleared);
         removedServicesQuantity++;
@@ -1047,7 +1049,7 @@ namespace MySql.Notifier
       }
       else
       {
-        foreach (MySQLService service in Services)
+        foreach (MySqlService service in Services)
         {
           service.MenuGroup.RemoveFromContextMenu(menu);
         }
@@ -1200,7 +1202,7 @@ namespace MySql.Notifier
         return;
       }
 
-      foreach (MySQLService service in Services)
+      foreach (MySqlService service in Services)
       {
         service.SetServiceParameters(true);
       }
@@ -1218,7 +1220,7 @@ namespace MySql.Notifier
       }
 
       if (OldConnectionStatus == ConnectionStatus ||
-          (!IsOnline && ConnectionStatus != Machine.ConnectionStatusType.Unavailable))
+          (!IsOnline && ConnectionStatus != ConnectionStatusType.Unavailable))
       {
         return;
       }
@@ -1236,7 +1238,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">Service that caused the services list change.</param>
     /// <param name="changeType">List change type.</param>
-    protected virtual void OnServiceListChanged(MySQLService service, ChangeType changeType)
+    protected virtual void OnServiceListChanged(MySqlService service, ChangeType changeType)
     {
       if (ServiceListChanged != null)
       {
@@ -1248,7 +1250,7 @@ namespace MySql.Notifier
     /// Fires the <see cref="ServiceStatusChanged"/> event.
     /// </summary>
     /// <param name="service">Service whose status changed.</param>
-    protected virtual void OnServiceStatusChanged(MySQLService service)
+    protected virtual void OnServiceStatusChanged(MySqlService service)
     {
       if (ServiceStatusChanged != null)
       {
@@ -1261,7 +1263,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">Service to initialize.</param>
     /// <param name="changeType">Change type (addition, removal, update) related to a MySQL service.</param>
-    private void LoadServiceParameters(MySQLService service, ChangeType changeType)
+    private void LoadServiceParameters(MySqlService service, ChangeType changeType)
     {
       service.Host = this;
       service.SetServiceParameters(changeType == ChangeType.Updated);
@@ -1288,7 +1290,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="service">Service whose status changed.</param>
     /// <param name="ex">Exception error thrown while trying to change service status.</param>
-    private void OnServiceStatusChangeError(MySQLService service, Exception ex)
+    private void OnServiceStatusChangeError(MySqlService service, Exception ex)
     {
       if (ServiceStatusChangeError != null)
       {
@@ -1308,7 +1310,7 @@ namespace MySql.Notifier
         return;
       }
 
-      var service = new MySQLService(serviceName, Settings.Default.NotifyOfStatusChange, Settings.Default.NotifyOfStatusChange, this);
+      var service = new MySqlService(serviceName, Settings.Default.NotifyOfStatusChange, Settings.Default.NotifyOfStatusChange, this);
       if (!Service.IsRealMySqlService(serviceName))
       {
         return;
@@ -1330,7 +1332,7 @@ namespace MySql.Notifier
       }
 
       string serviceName = remoteService["Name"].ToString().Trim();
-      MySQLService service = GetServiceByName(serviceName);
+      MySqlService service = GetServiceByName(serviceName);
       if (service != null)
       {
         ChangeService(service, ChangeType.RemoveByEvent);
@@ -1350,7 +1352,7 @@ namespace MySql.Notifier
 
       string serviceName = remoteService["Name"].ToString().Trim();
       string state = remoteService["State"].ToString();
-      MySQLService service = GetServiceByName(serviceName);
+      MySqlService service = GetServiceByName(serviceName);
       if (service != null)
       {
         service.SetStatus(state);
@@ -1400,8 +1402,8 @@ namespace MySql.Notifier
     /// </summary>
     private void SetupWmiEvents()
     {
-      _wmiServicesWatcher = _wmiServicesWatcher ?? new ServiceWatcher(true, true, true, UseAsynchronousWMI, IsOnline);
-      _wmiServicesWatcher.WmiQueriesTimeoutInSeconds = WMIQueriesTimeoutInSeconds;
+      _wmiServicesWatcher = _wmiServicesWatcher ?? new ServiceWatcher(true, true, true, UseAsynchronousWmi, IsOnline);
+      _wmiServicesWatcher.WmiQueriesTimeoutInSeconds = WmiQueriesTimeoutInSeconds;
 
       if (IsOnline)
       {
@@ -1412,7 +1414,7 @@ namespace MySql.Notifier
         _wmiServicesWatcher.ServiceCreated += OnWmiServiceCreated;
         _wmiServicesWatcher.ServiceDeleted += OnWmiServiceDeleted;
         _wmiServicesWatcher.ServiceStatusChanged += OnWmiServiceStatusChanged;
-        _wmiServicesWatcher.Start(WMIManagementScope);
+        _wmiServicesWatcher.Start(WmiManagementScope);
       }
       else
       {
@@ -1464,7 +1466,7 @@ namespace MySql.Notifier
     /// <param name="e">Event arguments.</param>
     private void TestConnectionWorkerDoWork(object sender, DoWorkEventArgs e)
     {
-      BackgroundWorker worker = sender is BackgroundWorker ? sender as BackgroundWorker : null;
+      var worker = sender as BackgroundWorker;
 
       // Try to see if we can connect to the remote computer and retrieve its services
       bool displayMessageOnError = (bool)e.Argument;
@@ -1474,7 +1476,7 @@ namespace MySql.Notifier
         return;
       }
 
-      ManagementObjectCollection wmiServicesCollection = GetWmiServices("eventlog", false, displayMessageOnError);
+      GetWmiServices("eventlog", false, displayMessageOnError);
       if (worker != null && worker.CancellationPending)
       {
         e.Cancel = true;
@@ -1482,7 +1484,7 @@ namespace MySql.Notifier
       }
 
       // If services could be retrieved, try to subscribe to WMI events using a dummy watcher (ONLY if using asynchronous mode).
-      if (!UseAsynchronousWMI || ConnectionProblem != ConnectionProblemType.None)
+      if (!UseAsynchronousWmi || ConnectionProblem != ConnectionProblemType.None)
       {
         return;
       }
@@ -1490,9 +1492,9 @@ namespace MySql.Notifier
       ServiceWatcher dummyWatcher = null;
       try
       {
-        if (!WMIManagementScope.IsConnected)
+        if (!WmiManagementScope.IsConnected)
         {
-          WMIManagementScope.Connect();
+          WmiManagementScope.Connect();
         }
 
         if (worker != null && worker.CancellationPending)
@@ -1501,17 +1503,17 @@ namespace MySql.Notifier
           return;
         }
 
-        dummyWatcher = new ServiceWatcher(false, false, true, UseAsynchronousWMI, true)
+        dummyWatcher = new ServiceWatcher(false, false, true, UseAsynchronousWmi, true)
         {
-          WmiQueriesTimeoutInSeconds = WMIQueriesTimeoutInSeconds
+          WmiQueriesTimeoutInSeconds = WmiQueriesTimeoutInSeconds
         };
 
-        dummyWatcher.Start(WMIManagementScope);
+        dummyWatcher.Start(WmiManagementScope);
       }
       catch (Exception ex)
       {
         ConnectionProblem = ConnectionProblemType.InsufficientAccessPermissions;
-        MySqlSourceTrace.WriteToLog(ConnectionProblemLongDescription, System.Diagnostics.SourceLevels.Information);
+        MySqlSourceTrace.WriteToLog(ConnectionProblemLongDescription, SourceLevels.Information);
         MySqlSourceTrace.WriteAppErrorToLog(ex);
         if (displayMessageOnError)
         {

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -26,7 +26,7 @@ namespace MySql.Notifier
   /// <remarks>
   /// This class is just a wrapper for various WinAPI functions.
   /// </remarks>
-  static public class WinAPI
+  public static class WinApi
   {
     [DllImport("user32")]
     public static extern int RegisterWindowMessage(string message);

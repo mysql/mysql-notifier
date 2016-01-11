@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2014, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -134,7 +134,7 @@ namespace MySql.Notifier
     private ToolStripMenuItem _launchInstallerMenuItem;
     private ToolStripMenuItem _launchWorkbenchUtilitiesMenuItem;
     private readonly MachinesList _machinesList;
-    private readonly MySQLInstancesList _mySqlInstancesList;
+    private readonly MySqlInstancesList _mySqlInstancesList;
     private readonly NotifyIcon _notifyIcon;
     private OptionsDialog _optionsDialog;
     private ManageItemsDialog _manageItemsDialog;
@@ -227,7 +227,7 @@ namespace MySql.Notifier
       _machinesList.WorkbenchInstallationChanged += MySqlWorkbenchInstallationChanged;
 
       // Setup instances list
-      _mySqlInstancesList = new MySQLInstancesList();
+      _mySqlInstancesList = new MySqlInstancesList();
       _mySqlInstancesList.InstanceStatusChanged += MySqlInstanceStatusChanged;
       _mySqlInstancesList.InstancesListChanged += MySqlInstancesListChanged;
       _mySqlInstancesList.InstanceConnectionStatusTestErrorThrown += MySqlInstanceConnectionStatusTestErrorThrown;
@@ -796,8 +796,8 @@ namespace MySql.Notifier
       var updateIconInstancesList = _mySqlInstancesList.InstancesList.Where(instance => instance.UpdateTrayIconOnStatusChange);
 
       // Stopped or update+stopped notifier icon.
-      var iconServicesList = updateIconServicesList as MySQLService[] ?? updateIconServicesList.ToArray();
-      var iconInstancesList = updateIconInstancesList as MySQLInstance[] ?? updateIconInstancesList.ToArray();
+      var iconServicesList = updateIconServicesList as MySqlService[] ?? updateIconServicesList.ToArray();
+      var iconInstancesList = updateIconInstancesList as MySqlInstance[] ?? updateIconInstancesList.ToArray();
       if (iconServicesList.Count(t => t.Status == MySqlServiceStatus.Stopped || t.Status == MySqlServiceStatus.Unavailable) + iconInstancesList.Count(i => i.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections) > 0)
       {
         return useColorfulIcon ? (hasUpdates ? Resources.NotifierIconStoppedAlertStrong : Resources.NotifierIconStoppedStrong) : (hasUpdates ? Resources.NotifierIconStoppedAlert : Resources.NotifierIconStopped);
@@ -928,7 +928,7 @@ namespace MySql.Notifier
     /// <param name="machine">Machine with an added or removed service.</param>
     /// <param name="service">Service added or removed.</param>
     /// <param name="changeType">List change type.</param>
-    private void machinesList_MachineServiceListChanged(Machine machine, MySQLService service, ChangeType changeType)
+    private void machinesList_MachineServiceListChanged(Machine machine, MySqlService service, ChangeType changeType)
     {
       ResetContextMenuStructure(changeType == ChangeType.RemoveByEvent || changeType == ChangeType.RemoveByUser);
       switch (changeType)
@@ -973,7 +973,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="machine">Machine with a service whose status changed.</param>
     /// <param name="service">Service whose status changed.</param>
-    private void machinesList_MachineServiceStatusChanged(Machine machine, MySQLService service)
+    private void machinesList_MachineServiceStatusChanged(Machine machine, MySqlService service)
     {
       if (service.NotifyOnStatusChange && Settings.Default.NotifyOfStatusChange && service.PreviousStatus != MySqlServiceStatus.Unavailable && service.Status != MySqlServiceStatus.Unavailable)
       {
@@ -997,7 +997,7 @@ namespace MySql.Notifier
     /// <param name="machine">Machine containing the service with a status change.</param>
     /// <param name="service">Service with a status change.</param>
     /// <param name="ex">Exception thrown by the service status change.</param>
-    private void machinesList_MachineServiceStatusChangeError(Machine machine, MySQLService service, Exception ex)
+    private void machinesList_MachineServiceStatusChangeError(Machine machine, MySqlService service, Exception ex)
     {
       string errorText = string.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, Environment.NewLine + ex.Message + Environment.NewLine + Resources.AskRestartApplication);
       ShowTooltip(true, Resources.BalloonTitleFailedStatusChange, errorText);
@@ -1695,7 +1695,7 @@ namespace MySql.Notifier
       }
 
       // Stop MySQL Instances connection checks.
-      foreach (MySQLInstance instance in _mySqlInstancesList)
+      foreach (MySqlInstance instance in _mySqlInstancesList)
       {
         instance.CancelAsynchronousStatusCheck();
       }

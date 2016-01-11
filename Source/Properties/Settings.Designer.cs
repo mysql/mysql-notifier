@@ -129,9 +129,9 @@ namespace MySql.Notifier.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<MySQLService> ServiceList {
+        public global::System.Collections.Generic.List<MySqlService> ServiceList {
             get {
-                return ((global::System.Collections.Generic.List<MySQLService>)(this["ServiceList"]));
+                return ((global::System.Collections.Generic.List<MySqlService>)(this["ServiceList"]));
             }
             set {
                 this["ServiceList"] = value;
@@ -180,9 +180,9 @@ namespace MySql.Notifier.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Collections.Generic.List<MySQLInstance> MySQLInstancesList {
+        public global::System.Collections.Generic.List<MySqlInstance> MySQLInstancesList {
             get {
-                return ((global::System.Collections.Generic.List<MySQLInstance>)(this["MySQLInstancesList"]));
+                return ((global::System.Collections.Generic.List<MySqlInstance>)(this["MySQLInstancesList"]));
             }
             set {
                 this["MySQLInstancesList"] = value;

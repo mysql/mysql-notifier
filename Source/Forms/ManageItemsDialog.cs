@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -50,9 +50,9 @@ namespace MySql.Notifier.Forms
     /// <summary>
     /// Initializes a new instance of the <see cref="ManageItemsDialog"/> class.
     /// </summary>
-    /// <param name="instancesList">List of <see cref="MySQLInstance"/> objects.</param>
+    /// <param name="instancesList">List of <see cref="MySqlInstance"/> objects.</param>
     /// <param name="machineslist">List of <see cref="Machine"/> objects.</param>
-    public ManageItemsDialog(MySQLInstancesList instancesList, MachinesList machineslist)
+    public ManageItemsDialog(MySqlInstancesList instancesList, MachinesList machineslist)
     {
       _selectedItem = null;
       _instancesHaveChanges = false;
@@ -68,7 +68,7 @@ namespace MySql.Notifier.Forms
     /// <summary>
     /// Specifies the monitored item type.
     /// </summary>
-    public enum MonitoredItemType : int
+    public enum MonitoredItemType
     {
       /// <summary>
       /// Local or remote Windows service.
@@ -87,10 +87,10 @@ namespace MySql.Notifier.Forms
     }
 
     /// <summary>
-    /// Gets an object representing a list of <see cref="MySQLInstance"/> objects used to monitor MySQL Server instances.
+    /// Gets an object representing a list of <see cref="MySqlInstance"/> objects used to monitor MySQL Server instances.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public MySQLInstancesList InstancesList { get; private set; }
+    public MySqlInstancesList InstancesList { get; private set; }
 
     /// <summary>
     /// Gets a value indicating whether the instances list changed.
@@ -117,7 +117,7 @@ namespace MySql.Notifier.Forms
     /// </summary>
     /// <param name="instance">Instance to add.</param>
     /// <param name="setPage">Flag indicating if the Instances tab must be focused.</param>
-    private void AddInstance(MySQLInstance instance, bool setPage)
+    private void AddInstance(MySqlInstance instance, bool setPage)
     {
       ListViewItem newItem = new ListViewItem(instance.HostIdentifier) { Tag = instance };
       newItem.SubItems.Add(instance.WorkbenchConnection.DriverType.ToString());
@@ -139,7 +139,7 @@ namespace MySql.Notifier.Forms
     /// <param name="service">Service to add.</param>
     /// <param name="machine">Machine containing the service.</param>
     /// <param name="setPage">Flag indicating if the Services tab must be focused.</param>
-    private void AddService(MySQLService service, Machine machine, bool setPage)
+    private void AddService(MySqlService service, Machine machine, bool setPage)
     {
       if (service == null)
       {
@@ -178,16 +178,16 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      if (_selectedItem is MySQLService)
+      if (_selectedItem is MySqlService)
       {
-        MySQLService selectedService = _selectedItem as MySQLService;
+        MySqlService selectedService = _selectedItem as MySqlService;
         Machine machine = MachinesList.GetMachineById(selectedService.Host.MachineId);
         machine.ChangeService(selectedService, ChangeType.RemoveByUser);
         MonitoredServicesListView.Items.RemoveAt(MonitoredServicesListView.SelectedIndices[0]);
       }
-      else if (_selectedItem is MySQLInstance)
+      else if (_selectedItem is MySqlInstance)
       {
-        MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
+        MySqlInstance selectedInstance = _selectedItem as MySqlInstance;
         if (InstancesList.Remove(selectedInstance))
         {
           MonitoredInstancesListView.Items.RemoveAt(MonitoredInstancesListView.SelectedIndices[0]);
@@ -202,7 +202,7 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void ManageItemsDialog_FormClosed(object sender, FormClosedEventArgs e)
     {
-      if (DialogResult != System.Windows.Forms.DialogResult.OK)
+      if (DialogResult != DialogResult.OK)
       {
         return;
       }
@@ -225,12 +225,12 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void InstanceMonitorIntervalNumericUpDown_ValueChanged(object sender, EventArgs e)
     {
-      if (_selectedItem == null || !(_selectedItem is MySQLInstance))
+      if (_selectedItem == null || !(_selectedItem is MySqlInstance))
       {
         return;
       }
 
-      MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
+      MySqlInstance selectedInstance = _selectedItem as MySqlInstance;
       selectedInstance.MonitoringInterval = (uint)InstanceMonitorIntervalNumericUpDown.Value;
       _instancesHaveChanges = true;
     }
@@ -242,12 +242,12 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void InstanceMonitorIntervalUOMComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
-      if (_selectedItem == null || !(_selectedItem is MySQLInstance))
+      if (_selectedItem == null || !(_selectedItem is MySqlInstance))
       {
         return;
       }
 
-      MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
+      MySqlInstance selectedInstance = _selectedItem as MySqlInstance;
       selectedInstance.MonitoringIntervalUnitOfMeasure = (TimeUtilities.IntervalUnitOfMeasure)InstanceMonitorIntervalUOMComboBox.SelectedIndex;
       _instancesHaveChanges = true;
     }
@@ -332,7 +332,7 @@ namespace MySql.Notifier.Forms
               connectionAlreadyInInstance = true;
               foreach (ListViewItem lvi in MonitoredInstancesListView.Items)
               {
-                MySQLInstance existingInstance = lvi.Tag as MySQLInstance;
+                MySqlInstance existingInstance = lvi.Tag as MySqlInstance;
                 if (existingInstance != instance)
                 {
                   continue;
@@ -349,7 +349,7 @@ namespace MySql.Notifier.Forms
 
             if (!connectionAlreadyInInstance)
             {
-              MySQLInstance newInstance = new MySQLInstance(selectedConnection);
+              MySqlInstance newInstance = new MySqlInstance(selectedConnection);
               InstancesList.Add(newInstance);
               AddInstance(newInstance, true);
               InstancesList.SaveToFile();
@@ -360,7 +360,7 @@ namespace MySql.Notifier.Forms
         // Workbench connections may have been edited so we may need to refresh the items in the list.
         foreach (ListViewItem lvi in MonitoredInstancesListView.Items)
         {
-          var existingInstance = lvi.Tag as MySQLInstance;
+          var existingInstance = lvi.Tag as MySqlInstance;
           if (existingInstance == null || (selectedConnection != null && existingInstance.WorkbenchConnection.Id == selectedConnection.Id))
           {
             continue;
@@ -396,15 +396,15 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      if (_selectedItem is MySQLService)
+      if (_selectedItem is MySqlService)
       {
-        MySQLService selectedService = _selectedItem as MySQLService;
+        MySqlService selectedService = _selectedItem as MySqlService;
         selectedService.NotifyOnStatusChange = NotifyOnStatusChangeCheckBox.Checked;
         _servicesHaveChanges = true;
       }
-      else if (_selectedItem is MySQLInstance)
+      else if (_selectedItem is MySqlInstance)
       {
-        MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
+        MySqlInstance selectedInstance = _selectedItem as MySqlInstance;
         selectedInstance.MonitorAndNotifyStatus = NotifyOnStatusChangeCheckBox.Checked;
         _instancesHaveChanges = true;
       }
@@ -425,7 +425,7 @@ namespace MySql.Notifier.Forms
       // Add monitored services.
       foreach (Machine machine in MachinesList.Machines)
       {
-        foreach (MySQLService service in machine.Services)
+        foreach (MySqlService service in machine.Services)
         {
           AddService(service, machine, false);
         }
@@ -475,7 +475,7 @@ namespace MySql.Notifier.Forms
               NewMachine = dialog.NewMachine;
             }
 
-            foreach (MySQLService service in dialog.ServicesToAdd)
+            foreach (MySqlService service in dialog.ServicesToAdd)
             {
               if (NewMachine.ContainsService(service))
               {
@@ -515,9 +515,9 @@ namespace MySql.Notifier.Forms
         InstanceMonitorIntervalUOMComboBox.Text = string.Empty;
         InstanceMonitorIntervalUOMComboBox.Enabled = false;
       }
-      else if (_selectedItem is MySQLService)
+      else if (_selectedItem is MySqlService)
       {
-        MySQLService service = _selectedItem as MySQLService;
+        MySqlService service = _selectedItem as MySqlService;
         NotifyOnStatusChangeCheckBox.Checked = service.NotifyOnStatusChange;
         UpdateTrayIconCheckBox.Checked = service.UpdateTrayIconOnStatusChange;
         InstanceMonitorIntervalNumericUpDown.Value = 0;
@@ -525,9 +525,9 @@ namespace MySql.Notifier.Forms
         InstanceMonitorIntervalUOMComboBox.Text = string.Empty;
         InstanceMonitorIntervalUOMComboBox.Enabled = false;
       }
-      else if (_selectedItem is MySQLInstance)
+      else if (_selectedItem is MySqlInstance)
       {
-        MySQLInstance instance = _selectedItem as MySQLInstance;
+        MySqlInstance instance = _selectedItem as MySqlInstance;
         NotifyOnStatusChangeCheckBox.Checked = instance.MonitorAndNotifyStatus;
         UpdateTrayIconCheckBox.Checked = instance.UpdateTrayIconOnStatusChange;
         InstanceMonitorIntervalNumericUpDown.Enabled = true;
@@ -549,15 +549,15 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      if (_selectedItem is MySQLService)
+      if (_selectedItem is MySqlService)
       {
-        MySQLService selectedService = _selectedItem as MySQLService;
+        MySqlService selectedService = _selectedItem as MySqlService;
         selectedService.UpdateTrayIconOnStatusChange = UpdateTrayIconCheckBox.Checked;
         _servicesHaveChanges = true;
       }
-      else if (_selectedItem is MySQLInstance)
+      else if (_selectedItem is MySqlInstance)
       {
-        MySQLInstance selectedInstance = _selectedItem as MySQLInstance;
+        MySqlInstance selectedInstance = _selectedItem as MySqlInstance;
         selectedInstance.UpdateTrayIconOnStatusChange = UpdateTrayIconCheckBox.Checked;
         _instancesHaveChanges = true;
       }

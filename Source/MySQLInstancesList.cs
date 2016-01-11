@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -26,9 +26,9 @@ using MySQL.Utility.Classes.MySQLWorkbench;
 namespace MySql.Notifier
 {
   /// <summary>
-  /// List of <see cref="MySQLInstance"/> objects used to monitor MySQL Server instances.
+  /// List of <see cref="MySqlInstance"/> objects used to monitor MySQL Server instances.
   /// </summary>
-  public class MySQLInstancesList : IList<MySQLInstance>, IDisposable
+  public class MySqlInstancesList : IList<MySqlInstance>, IDisposable
   {
     #region Fields
 
@@ -45,17 +45,17 @@ namespace MySql.Notifier
     #endregion Fields
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MySQLInstancesList"/> class.
+    /// Initializes a new instance of the <see cref="MySqlInstancesList"/> class.
     /// </summary>
-    public MySQLInstancesList()
+    public MySqlInstancesList()
     {
       _instancesRefreshing = false;
-      InstancesList = Settings.Default.MySQLInstancesList ?? new List<MySQLInstance>();
+      InstancesList = Settings.Default.MySQLInstancesList ?? new List<MySqlInstance>();
       RefreshInstances(false);
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MySQLInstancesList"/> class
+    /// Releases all resources used by the <see cref="MySqlInstancesList"/> class
     /// </summary>
     public void Dispose()
     {
@@ -64,7 +64,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="MySQLInstancesList"/> class
+    /// Releases all resources used by the <see cref="MySqlInstancesList"/> class
     /// </summary>
     /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
     protected virtual void Dispose(bool disposing)
@@ -74,7 +74,7 @@ namespace MySql.Notifier
         // Free managed resources
         if (InstancesList != null)
         {
-          foreach (MySQLInstance instance in InstancesList.Where(instance => instance != null))
+          foreach (MySqlInstance instance in InstancesList.Where(instance => instance != null))
           {
             instance.Dispose();
           }
@@ -99,21 +99,21 @@ namespace MySql.Notifier
     /// <summary>
     /// Event ocurring when the status of the current instance changes.
     /// </summary>
-    public event MySQLInstance.InstanceStatusChangedEventHandler InstanceStatusChanged;
+    public event MySqlInstance.InstanceStatusChangedEventHandler InstanceStatusChanged;
 
     /// <summary>
     /// Event ocurring when an error ocurred during a connection status test.
     /// </summary>
-    public event MySQLInstance.InstanceConnectionStatusTestErrorEventHandler InstanceConnectionStatusTestErrorThrown;
+    public event MySqlInstance.InstanceConnectionStatusTestErrorEventHandler InstanceConnectionStatusTestErrorThrown;
 
     #endregion Events
 
     #region Properties
 
     /// <summary>
-    /// Gets or sets a list of <see cref="MySQLInstance"/> objects representing instances being monitored.
+    /// Gets or sets a list of <see cref="MySqlInstance"/> objects representing instances being monitored.
     /// </summary>
-    public List<MySQLInstance> InstancesList { get; private set; }
+    public List<MySqlInstance> InstancesList { get; private set; }
 
     #endregion Properties
 
@@ -145,8 +145,8 @@ namespace MySql.Notifier
     /// Gets or sets the element at the specified index.
     /// </summary>
     /// <param name="index">The zero-based index of the element to get or set.</param>
-    /// <returns>A <see cref="MySQLInstance"/> object at the given index position.</returns>
-    public MySQLInstance this[int index]
+    /// <returns>A <see cref="MySqlInstance"/> object at the given index position.</returns>
+    public MySqlInstance this[int index]
     {
       get
       {
@@ -161,10 +161,10 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Adds a <see cref="MySQLInstance"/> object to the end of the list.
+    /// Adds a <see cref="MySqlInstance"/> object to the end of the list.
     /// </summary>
-    /// <param name="item">A <see cref="MySQLInstance"/> object to add.</param>
-    public void Add(MySQLInstance item)
+    /// <param name="item">A <see cref="MySqlInstance"/> object to add.</param>
+    public void Add(MySqlInstance item)
     {
       InstancesList.Add(item);
       item.InstanceStatusChanged += SingleInstanceStatusChanged;
@@ -191,9 +191,9 @@ namespace MySql.Notifier
     /// <summary>
     /// Determines whether an element is in the list.
     /// </summary>
-    /// <param name="item">A <see cref="MySQLInstance"/> object.</param>
+    /// <param name="item">A <see cref="MySqlInstance"/> object.</param>
     /// <returns><c>true</c> if <seealso cref="item"/> is found in the list; otherwise, <c>false</c>.</returns>
-    public bool Contains(MySQLInstance item)
+    public bool Contains(MySqlInstance item)
     {
       return InstancesList.Contains(item);
     }
@@ -203,7 +203,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="array">The one-dimensional <see cref="Array"/> that is the destination of the elements copied from list. The <see cref="Array"/> must have zero-based indexing.</param>
     /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
-    public void CopyTo(MySQLInstance[] array, int arrayIndex)
+    public void CopyTo(MySqlInstance[] array, int arrayIndex)
     {
       InstancesList.CopyTo(array, arrayIndex);
     }
@@ -212,7 +212,7 @@ namespace MySql.Notifier
     /// Returns an enumerator that iterates through the list.
     /// </summary>
     /// <returns>An <see cref="IEnumerator"/> for the list.</returns>
-    public IEnumerator<MySQLInstance> GetEnumerator()
+    public IEnumerator<MySqlInstance> GetEnumerator()
     {
       return InstancesList.GetEnumerator();
     }
@@ -229,9 +229,9 @@ namespace MySql.Notifier
     /// <summary>
     /// Determines the index of a specific itemText in the list.
     /// </summary>
-    /// <param name="item">The <see cref="MySQLInstance"/> object to locate in the list.</param>
+    /// <param name="item">The <see cref="MySqlInstance"/> object to locate in the list.</param>
     /// <returns>The index of <seealso cref="item"/> if found in the list; otherwise, <c>-1</c>.</returns>
-    public int IndexOf(MySQLInstance item)
+    public int IndexOf(MySqlInstance item)
     {
       return InstancesList.IndexOf(item);
     }
@@ -240,8 +240,8 @@ namespace MySql.Notifier
     /// Inserts an itemText to the list at the specified index.
     /// </summary>
     /// <param name="index">The zero-based index at which <seealso cref="item"/> should be inserted.</param>
-    /// <param name="item">The <see cref="MySQLInstance"/> object to insert to the list.</param>
-    public void Insert(int index, MySQLInstance item)
+    /// <param name="item">The <see cref="MySqlInstance"/> object to insert to the list.</param>
+    public void Insert(int index, MySqlInstance item)
     {
       InstancesList.Insert(index, item);
       item.InstanceStatusChanged += SingleInstanceStatusChanged;
@@ -252,11 +252,11 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Removes the first occurrence of a specific <see cref="MySQLInstance"/> object from the list.
+    /// Removes the first occurrence of a specific <see cref="MySqlInstance"/> object from the list.
     /// </summary>
-    /// <param name="item">The <see cref="MySQLInstance"/> object to remove from the list.</param>
+    /// <param name="item">The <see cref="MySqlInstance"/> object to remove from the list.</param>
     /// <returns><c>true</c> if <seealso cref="item"/> is successfully removed; otherwise, <c>false</c>. This method also returns <c>false</c> if <seealso cref="item"/> was not found in the list.</returns>
-    public bool Remove(MySQLInstance item)
+    public bool Remove(MySqlInstance item)
     {
       int index = IndexOf(item);
       bool success = index >= 0;
@@ -278,7 +278,7 @@ namespace MySql.Notifier
     }
 
     /// <summary>
-    /// Removes the first occurrence of a specific <see cref="MySQLInstance"/> object with the given id from the list.
+    /// Removes the first occurrence of a specific <see cref="MySqlInstance"/> object with the given id from the list.
     /// </summary>
     /// <param name="connectionId">Id if the connection linked to the instance to remove.</param>
     /// <returns><c>true</c> if the instance is successfully removed; otherwise, <c>false</c>. This method also returns <c>false</c> if the instance was not found in the list.</returns>
@@ -309,7 +309,7 @@ namespace MySql.Notifier
     /// <param name="index">The zero-based index of the element to remove.</param>
     public void RemoveAt(int index)
     {
-      MySQLInstance instance = InstancesList[index];
+      MySqlInstance instance = InstancesList[index];
       InstancesList.RemoveAt(index);
       SaveToFile();
       OnInstancesListChanged(instance, ListChangedType.ItemDeleted);
@@ -426,7 +426,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance that caused the list change.</param>
     /// <param name="listChange">Type of change done to the list.</param>
-    protected virtual void OnInstancesListChanged(MySQLInstance instance, ListChangedType listChange)
+    protected virtual void OnInstancesListChanged(MySqlInstance instance, ListChangedType listChange)
     {
       if (InstancesListChanged != null)
       {
@@ -439,7 +439,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance with a changed status.</param>
     /// <param name="oldInstanceStatus">Old instance status.</param>
-    protected virtual void OnInstanceStatusChanged(MySQLInstance instance, MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
+    protected virtual void OnInstanceStatusChanged(MySqlInstance instance, MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
     {
       if (InstanceStatusChanged != null)
       {
@@ -452,7 +452,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance with a changed status.</param>
     /// <param name="ex">Exception thrown by a connection status test.</param>
-    protected virtual void OnInstanceConnectionStatusTestErrorThrown(MySQLInstance instance, Exception ex)
+    protected virtual void OnInstanceConnectionStatusTestErrorThrown(MySqlInstance instance, Exception ex)
     {
       if (InstanceConnectionStatusTestErrorThrown != null)
       {
@@ -467,7 +467,7 @@ namespace MySql.Notifier
     /// <param name="args">Event arguments.</param>
     private void SingleInstancePropertyChanged(object sender, PropertyChangedEventArgs args)
     {
-      MySQLInstance instance = sender as MySQLInstance;
+      MySqlInstance instance = sender as MySqlInstance;
       switch (args.PropertyName)
       {
         case "MonitorAndNotifyStatus":
@@ -511,7 +511,7 @@ namespace MySql.Notifier
     /// </summary>
     /// <param name="instance">MySQL instance that caused the list change.</param>
     /// <param name="listChange">Type of change done to the list.</param>
-    public InstancesListChangedArgs(MySQLInstance instance, ListChangedType listChange)
+    public InstancesListChangedArgs(MySqlInstance instance, ListChangedType listChange)
     {
       Instance = instance;
       ListChange = listChange;
@@ -520,7 +520,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the MySQL instance that caused the list change.
     /// </summary>
-    public MySQLInstance Instance { get; private set; }
+    public MySqlInstance Instance { get; private set; }
 
     /// <summary>
     /// Gets the type of change done to the list.

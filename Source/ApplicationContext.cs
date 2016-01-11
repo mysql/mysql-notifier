@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -19,10 +19,12 @@ using System;
 using System.Security.Principal;
 using System.Windows.Forms;
 using MySql.Notifier.Forms;
+using MySQL.Utility.Classes;
+using MySQL.Utility.Forms;
 
 namespace MySql.Notifier
 {
-  internal class NotifierApplicationContext : ApplicationContext, IDisposable
+  internal class NotifierApplicationContext : ApplicationContext
   {
     private bool _disposeDone;
     private readonly Notifier _notifierApp;
@@ -33,12 +35,36 @@ namespace MySql.Notifier
     public NotifierApplicationContext()
     {
       _disposeDone = false;
-      WindowsPrincipal principal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-      bool hasAdminPrivileges = principal.IsInRole(WindowsBuiltInRole.Administrator);
-
       _notifierApp = new Notifier();
       MainForm = new DumbForm();
       _notifierApp.Exit += NotifierApp_Exit;
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the user running this application has administrator privileges.
+    /// </summary>
+    public bool HasAdminPrivileges
+    {
+      get
+      {
+        bool isAdmin = false;
+        try
+        {
+          var identity = WindowsIdentity.GetCurrent();
+          if (identity != null)
+          {
+            var principal = new WindowsPrincipal(identity);
+            isAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
+          }
+        }
+        catch (Exception ex)
+        {
+          InfoDialog.ShowErrorDialog(Properties.Resources.HighSeverityError, ex.Message);
+          MySqlSourceTrace.WriteAppErrorToLog(ex);
+        }
+
+        return isAdmin;
+      }
     }
 
     protected override void OnMainFormClosed(object sender, EventArgs e)
@@ -50,7 +76,7 @@ namespace MySql.Notifier
     private void NotifierApp_Exit(object sender, EventArgs e)
     {
       Dispose(true);
-      this.ExitThread();
+      ExitThread();
     }
 
     /// <summary>

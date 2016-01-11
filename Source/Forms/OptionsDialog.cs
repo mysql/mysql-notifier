@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2014, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -44,16 +44,15 @@ namespace MySql.Notifier.Forms
 
     private void DialogApplyButton_Click(object sender, EventArgs e)
     {
-      var updateTask = AutoCheckUpdatesCheckBox.Checked != Settings.Default.AutoCheckForUpdates ? true : false;
-      var deleteTask = !AutoCheckUpdatesCheckBox.Checked && Settings.Default.AutoCheckForUpdates ? true : false;
-      var deleteIfPrevious = !AutoCheckUpdatesCheckBox.Checked || Settings.Default.AutoCheckForUpdates;
+      var updateTask = AutoCheckUpdatesCheckBox.Checked != Settings.Default.AutoCheckForUpdates;
+      var deleteTask = !AutoCheckUpdatesCheckBox.Checked && Settings.Default.AutoCheckForUpdates;
 
-      if (Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(this.CheckUpdatesWeeksNumericUpDown.Value)) updateTask = true;
+      if (Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(CheckUpdatesWeeksNumericUpDown.Value)) updateTask = true;
 
       Settings.Default.NotifyOfAutoServiceAddition = NotifyOfAutoAddCheckBox.Checked;
       Settings.Default.NotifyOfStatusChange = NotifyOfStatusChangeCheckBox.Checked;
       Settings.Default.AutoCheckForUpdates = AutoCheckUpdatesCheckBox.Checked;
-      Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(this.CheckUpdatesWeeksNumericUpDown.Value);
+      Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(CheckUpdatesWeeksNumericUpDown.Value);
       Settings.Default.AutoAddServicesToMonitor = AutoAddServicesCheckBox.Checked;
       Settings.Default.AutoAddPattern = AutoAddRegexTextBox.Text.Trim();
       Settings.Default.UseColorfulStatusIcons = UseColorfulIconsCheckBox.Checked;
@@ -78,7 +77,7 @@ namespace MySql.Notifier.Forms
 
     private void AutoCheckUpdatesCheckBox_CheckedChanged(object sender, EventArgs e)
     {
-      this.CheckUpdatesWeeksNumericUpDown.Enabled = this.AutoCheckUpdatesCheckBox.Checked;
+      CheckUpdatesWeeksNumericUpDown.Enabled = AutoCheckUpdatesCheckBox.Checked;
     }
 
     private void AutoAddServicesCheckBox_CheckedChanged(object sender, EventArgs e)

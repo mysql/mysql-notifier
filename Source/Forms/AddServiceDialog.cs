@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2014, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -38,14 +38,14 @@ namespace MySql.Notifier.Forms
       HasChanges = false;
 
       InitializeComponent();
-      ServicesListView.ColumnClick += new ColumnClickEventHandler(ServicesListView_ColumnClick);
+      ServicesListView.ColumnClick += ServicesListView_ColumnClick;
       InsertMachinesIntoComboBox();
       MachineSelectionComboBox.SelectedIndex = 0;
     }
 
     public Machine.LocationType MachineLocationType { get; set; }
 
-    public List<MySQLService> ServicesToAdd { get; set; }
+    public List<MySqlService> ServicesToAdd { get; set; }
 
     /// <summary>
     /// Event delegate method fired when the <see cref="DeleteButton"/> is clicked.
@@ -70,10 +70,10 @@ namespace MySql.Notifier.Forms
     private void DialogOKButton_Click(object sender, EventArgs e)
     {
       Cursor.Current = Cursors.WaitCursor;
-      ServicesToAdd = new List<MySQLService>();
+      ServicesToAdd = new List<MySqlService>();
       foreach (ListViewItem lvi in ServicesListView.SelectedItems)
       {
-        ServicesToAdd.Add(new MySQLService(lvi.Tag as string, true, true, NewMachine));
+        ServicesToAdd.Add(new MySqlService(lvi.Tag as string, true, true, NewMachine));
       }
 
       Cursor.Current = Cursors.Default;
@@ -145,7 +145,7 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void MachineSelectionComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
-      DialogResult dr = DialogResult.None;
+      DialogResult dr;
       EditButton.Enabled = MachineSelectionComboBox.SelectedIndex > 2;
       DeleteButton.Enabled = MachineSelectionComboBox.SelectedIndex > 2;
       switch (MachineSelectionComboBox.SelectedIndex)
@@ -323,31 +323,19 @@ namespace MySql.Notifier.Forms
 
     private class ListViewItemComparer : IComparer
     {
-      private int _col;
-      private SortOrder _order;
-
-      public ListViewItemComparer()
-      {
-        _col = 0;
-        _order = SortOrder.Ascending;
-      }
+      private readonly int _col;
+      private readonly SortOrder _order;
 
       public ListViewItemComparer(int column, SortOrder order)
       {
         _col = column;
-        this._order = order;
+        _order = order;
       }
 
       public int Compare(object x, object y)
       {
-        int returnVal = -1;
-
-        returnVal = string.CompareOrdinal(((ListViewItem)x).SubItems[_col].Text, ((ListViewItem)y).SubItems[_col].Text);
-
-        if (_order == SortOrder.Descending)
-          returnVal *= -1;
-
-        return returnVal;
+        var returnVal = string.CompareOrdinal(((ListViewItem)x).SubItems[_col].Text, ((ListViewItem)y).SubItems[_col].Text);
+        return _order == SortOrder.Descending ? returnVal * -1 : returnVal;
       }
     }
   }

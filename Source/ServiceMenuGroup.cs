@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012-2014, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -33,7 +33,7 @@ namespace MySql.Notifier
   {
     #region Fields
 
-    private MySQLService _boundService;
+    private MySqlService _boundService;
 
     private ToolStripMenuItem _configureMenu;
 
@@ -55,7 +55,7 @@ namespace MySql.Notifier
     /// Initializes a new instance of the <see cref="ServiceMenuGroup"/> class.
     /// </summary>
     /// <param name="mySqlBoundService">The service this menu group is bound to.</param>
-    public ServiceMenuGroup(MySQLService mySqlBoundService)
+    public ServiceMenuGroup(MySqlService mySqlBoundService)
     {
       MenuItemsQuantity = 0;
       _boundService = mySqlBoundService;

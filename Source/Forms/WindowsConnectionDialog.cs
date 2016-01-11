@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -138,7 +138,7 @@ namespace MySql.Notifier.Forms
       }
       else if (!testConnection && (connectionSuccessful || editMode))
       {
-        DialogOKButton.DialogResult = this.DialogResult = DialogResult.OK;
+        DialogOKButton.DialogResult = DialogResult = DialogResult.OK;
       }
 
       Cursor = Cursors.Default;
@@ -228,7 +228,7 @@ namespace MySql.Notifier.Forms
       // Validate Host name
       if (!string.IsNullOrEmpty(HostTextBox.Text))
       {
-        bool validName = true;
+        bool validName;
         string hostname = HostTextBox.Text.Trim();
         if (hostname.ToLowerInvariant() == MySqlWorkbenchConnection.DEFAULT_HOSTNAME || hostname == MySqlWorkbenchConnection.LOCAL_IP || hostname == ".")
         {

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -35,7 +35,7 @@ namespace MySql.Notifier
     /// Initializes a new instance of the <see cref="MySqlInstanceMenuGroup"/> class.
     /// </summary>
     /// <param name="boundInstance">The MySQL instance that this menu group is associated to.</param>
-    public MySqlInstanceMenuGroup(MySQLInstance boundInstance)
+    public MySqlInstanceMenuGroup(MySqlInstance boundInstance)
     {
       BoundInstance = boundInstance;
       InstanceMenuItem = new ToolStripMenuItem();
@@ -111,7 +111,7 @@ namespace MySql.Notifier
     /// <summary>
     /// Gets the MySQL instance that this menu group is associated to.
     /// </summary>
-    public MySQLInstance BoundInstance { get; private set; }
+    public MySqlInstance BoundInstance { get; private set; }
 
     /// <summary>
     /// Gets the Configure Instance menu itemText that opens the instance's configuration page in MySQL Workbench.
