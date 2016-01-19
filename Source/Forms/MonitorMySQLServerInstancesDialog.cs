@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, 2014, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -22,6 +22,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
+using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQLWorkbench;
 using MySQL.Utility.Forms;
 
@@ -306,18 +307,18 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      DialogResult dr = InfoDialog.ShowYesNoDialog(
+      using (var yesNoDialog = new InfoDialog(InfoDialogProperties.GetYesNoDialogProperties(
         InfoDialog.InfoType.Info,
         Resources.ConnectionAlreadyInInstancesTitle,
         Resources.ConnectionAlreadyInInstancesDetail,
-        Resources.ConnectionAlreadyInInstancesSubDetail,
-        null,
-        true,
-        InfoDialog.DefaultButtonType.Button2,
-        10);
-      if (dr == DialogResult.Yes)
+        Resources.ConnectionAlreadyInInstancesSubDetail)))
       {
-        return;
+        yesNoDialog.DefaultButton = InfoDialog.DefaultButtonType.Button2;
+        yesNoDialog.DefaultButtonTimeout = 10;
+        if (yesNoDialog.ShowDialog() == DialogResult.Yes)
+        {
+          return;
+        }
       }
 
       SelectedWorkbenchConnection = null;

@@ -607,7 +607,11 @@ namespace MySql.Notifier
     {
       if (string.IsNullOrEmpty(MySqlInstaller.Path) || Convert.ToDouble(MySqlInstaller.Version.Substring(0, 3)) < 1.1)
       {
-        InfoDialog.ShowErrorDialog(Resources.MissingMySQLInstaller, string.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine));
+        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.MissingMySQLInstaller, string.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine))))
+        {
+          errorDialog.ShowDialog();
+        }
+
         return;
       }
 
@@ -616,7 +620,7 @@ namespace MySql.Notifier
         var startInfo = new ProcessStartInfo
         {
           Arguments = "checkforupdates",
-          FileName = @String.Format(@"{0}MySQLInstaller.exe", MySqlInstaller.Path)
+          FileName = string.Format(@"{0}MySQLInstaller.exe", MySqlInstaller.Path)
         };
 
         Process.Start(startInfo);
@@ -744,7 +748,16 @@ namespace MySql.Notifier
         return workbenchConnectionsLoadSuccessful;
       }
 
-      InfoDialog.ShowErrorDialog(Resources.ConnectionsFileLoadingErrorTitle, Resources.ConnectionsFileLoadingErrorDetail, null, Resources.ConnectionsFileLoadingErrorMoreInfo, true, InfoDialog.DefaultButtonType.Button1, 30);
+      using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
+        Resources.ConnectionsFileLoadingErrorTitle,
+        Resources.ConnectionsFileLoadingErrorDetail,
+        null,
+        Resources.ConnectionsFileLoadingErrorMoreInfo)))
+      {
+        errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+        errorDialog.DefaultButtonTimeout = 30;
+        errorDialog.ShowDialog();
+      }
       MySqlSourceTrace.WriteAppErrorToLog(loadException);
       return workbenchConnectionsLoadSuccessful;
     }
@@ -821,10 +834,12 @@ namespace MySql.Notifier
 
     private void IgnoreAvailableUpdateItem_Click(object sender, EventArgs e)
     {
-      DialogResult result = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, "Available Updates", Resources.IgnoreAvailableUpdatesText);
-      if (result != DialogResult.Yes)
+      using (var yesNoDialog = new InfoDialog(InfoDialogProperties.GetYesNoDialogProperties(InfoDialog.InfoType.Warning, "Available Updates", Resources.IgnoreAvailableUpdatesText)))
       {
-        return;
+        if (yesNoDialog.ShowDialog() != DialogResult.Yes)
+        {
+          return;
+        }
       }
 
       Settings.Default.UpdateCheck = 0;
@@ -874,7 +889,11 @@ namespace MySql.Notifier
         }
       }
 
-      InfoDialog.ShowErrorDialog(Resources.HighSeverityError, Resources.SettingsFileFailedToLoad);
+      using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.HighSeverityError, Resources.SettingsFileFailedToLoad)))
+      {
+        errorDialog.ShowDialog();
+      }
+
       return -1;
     }
 

@@ -385,8 +385,11 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        InfoDialog.ShowErrorDialog(Resources.ErrorTitle, string.Format(Resources.FailureToLaunchWorkbench, ex.Message));
         MySqlSourceTrace.WriteAppErrorToLog(ex);
+        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.ErrorTitle, string.Format(Resources.FailureToLaunchWorkbench, ex.Message))))
+        {
+          errorDialog.ShowDialog();
+        }
       }
     }
 
@@ -420,8 +423,11 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        InfoDialog.ShowErrorDialog(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench);
         MySqlSourceTrace.WriteAppErrorToLog(ex);
+        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench)))
+        {
+          errorDialog.ShowDialog();
+        }
       }
     }
 

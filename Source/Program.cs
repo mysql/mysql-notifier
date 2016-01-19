@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -58,7 +58,15 @@ namespace MySql.Notifier
       string completeErrorMessage = errorBuilder.ToString();
       if (showErrorDialog)
       {
-        InfoDialog.ShowErrorDialog(string.IsNullOrEmpty(errorMessage) ? Resources.HighSeverityError : errorMessage, exception.Message, null, exception.InnerException != null ? exception.InnerException.Message : null);
+        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
+          string.IsNullOrEmpty(errorMessage) ? Resources.HighSeverityError : errorMessage,
+          exception.Message,
+          null,
+          exception.InnerException != null ? exception.InnerException.Message : null)))
+        {
+          errorDialog.WordWrapMoreInfo = false;
+          errorDialog.ShowDialog();
+        }
       }
 
       MySqlSourceTrace.WriteToLog(completeErrorMessage, errorLevel);
@@ -128,8 +136,18 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        InfoDialog.ShowErrorDialog(Resources.HighSeverityError, ex.Message, null, ex.StackTrace, false, InfoDialog.DefaultButtonType.Button1, 60);
         MySqlSourceTrace.WriteAppErrorToLog(ex);
+        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
+          Resources.HighSeverityError,
+          ex.Message,
+          null,
+          ex.StackTrace)))
+        {
+          errorDialog.WordWrapMoreInfo = false;
+          errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+          errorDialog.DefaultButtonTimeout = 60;
+          errorDialog.ShowDialog();
+        }
       }
 
       SingleInstance.Stop();

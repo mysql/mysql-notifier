@@ -479,7 +479,8 @@ namespace MySql.Notifier.Forms
             {
               if (NewMachine.ContainsService(service))
               {
-                InfoDialog.ShowWarningDialog(Resources.WarningText, Resources.ServiceAlreadyInListWarningText);
+                var warningDialog = new InfoDialog(InfoDialogProperties.GetWarningDialogProperties(Resources.WarningText, Resources.ServiceAlreadyInListWarningText));
+                warningDialog.ShowDialog();
               }
               else
               {

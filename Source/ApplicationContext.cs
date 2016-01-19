@@ -59,8 +59,11 @@ namespace MySql.Notifier
         }
         catch (Exception ex)
         {
-          InfoDialog.ShowErrorDialog(Properties.Resources.HighSeverityError, ex.Message);
           MySqlSourceTrace.WriteAppErrorToLog(ex);
+          using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Properties.Resources.HighSeverityError, ex.Message, null, ex.StackTrace)))
+          {
+            errorDialog.ShowDialog();
+          }
         }
 
         return isAdmin;

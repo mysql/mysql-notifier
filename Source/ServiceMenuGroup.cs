@@ -511,13 +511,16 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        InfoDialog.ShowErrorDialog(
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
+        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
           Resources.ErrorTitle,
           Resources.FailureToLaunchWorkbench,
           null,
-          ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace,
-          false);
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
+          ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace)))
+        {
+          errorDialog.WordWrapMoreInfo = false;
+          errorDialog.ShowDialog();
+        }
       }
     }
 
@@ -591,13 +594,16 @@ namespace MySql.Notifier
       }
       catch (Exception ex)
       {
-        InfoDialog.ShowErrorDialog(
+        MySqlSourceTrace.WriteAppErrorToLog(ex);
+        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
           Resources.ErrorTitle,
           Resources.FailureToLaunchWorkbench,
           null,
-          ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace,
-          false);
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
+          ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace)))
+        {
+          errorDialog.WordWrapMoreInfo = false;
+          errorDialog.ShowDialog();
+        }
       }
     }
   }

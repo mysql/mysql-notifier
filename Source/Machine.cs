@@ -907,14 +907,19 @@ namespace MySql.Notifier
       MySqlSourceTrace.WriteAppErrorToLog(connectionException);
       if (displayMessageOnError)
       {
-        InfoDialog.ShowErrorDialog(
+        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
           ConnectionProblemShortDescription,
           ConnectionProblemLongDescription,
           null,
-          ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions ? Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + connectionException.Message : null,
-          true,
-          InfoDialog.DefaultButtonType.Button1,
-          30);
+          ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions
+            ? Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine +
+              connectionException.Message
+            : null)))
+        {
+          errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+          errorDialog.DefaultButtonTimeout = 30;
+          errorDialog.ShowDialog();
+        }
       }
 
       return null;
@@ -1517,13 +1522,16 @@ namespace MySql.Notifier
         MySqlSourceTrace.WriteAppErrorToLog(ex);
         if (displayMessageOnError)
         {
-          InfoDialog.ShowErrorDialog(
+          using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
             ConnectionProblemShortDescription,
             ConnectionProblemLongDescription,
             null,
-            Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + ex.Message,
-            true,
-            InfoDialog.DefaultButtonType.Button1, 30);
+            Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + ex.Message)))
+          {
+            errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+            errorDialog.DefaultButtonTimeout = 30;
+            errorDialog.ShowDialog();
+          }
         }
       }
       finally

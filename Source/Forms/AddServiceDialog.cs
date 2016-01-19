@@ -54,10 +54,17 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void DeleteButton_Click(object sender, EventArgs e)
     {
-      var dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.DeleteMachineConfirmationTitle, Resources.DeleteMachineConfirmationText, null, null, true, InfoDialog.DefaultButtonType.Button2, 30);
-      if (dr != DialogResult.Yes)
+      using (var infoDialog = new InfoDialog(InfoDialogProperties.GetYesNoDialogProperties(
+        InfoDialog.InfoType.Warning,
+        Resources.DeleteMachineConfirmationTitle,
+        Resources.DeleteMachineConfirmationText)))
       {
-        return;
+        infoDialog.DefaultButton = InfoDialog.DefaultButtonType.Button2;
+        infoDialog.DefaultButtonTimeout = 30;
+        if (infoDialog.ShowDialog() != DialogResult.Yes)
+        {
+          return;
+        }
       }
 
       HasChanges = true;
@@ -145,7 +152,6 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void MachineSelectionComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
-      DialogResult dr;
       EditButton.Enabled = MachineSelectionComboBox.SelectedIndex > 2;
       DeleteButton.Enabled = MachineSelectionComboBox.SelectedIndex > 2;
       switch (MachineSelectionComboBox.SelectedIndex)
@@ -167,8 +173,7 @@ namespace MySql.Notifier.Forms
           MachineLocationType = Machine.LocationType.Remote;
           using (var windowsConnectionDialog = new WindowsConnectionDialog(MachinesList, null))
           {
-            dr = windowsConnectionDialog.ShowDialog();
-            if (dr == DialogResult.Cancel)
+            if (windowsConnectionDialog.ShowDialog() == DialogResult.Cancel)
             {
               MachineSelectionComboBox.SelectedIndex = 0;
             }
@@ -225,10 +230,19 @@ namespace MySql.Notifier.Forms
           NewMachine = (Machine)MachineSelectionComboBox.SelectedItem;
           if (!NewMachine.IsOnline)
           {
-            dr = InfoDialog.ShowYesNoDialog(InfoDialog.InfoType.Warning, Resources.MachineUnavailableTitle, Resources.MachineUnavailableYesNoDetail, null, Resources.MachineUnavailableExtendedMessage, true, InfoDialog.DefaultButtonType.Button2, 30);
-            if (dr == DialogResult.Yes)
+            using (var warningDialog = new InfoDialog(InfoDialogProperties.GetYesNoDialogProperties(
+              InfoDialog.InfoType.Warning,
+              Resources.MachineUnavailableTitle,
+              Resources.MachineUnavailableYesNoDetail,
+              null,
+              Resources.MachineUnavailableExtendedMessage)))
             {
-              NewMachine.TestConnection(true, false);
+              warningDialog.DefaultButton = InfoDialog.DefaultButtonType.Button2;
+              warningDialog.DefaultButtonTimeout = 30;
+              if (warningDialog.ShowDialog() == DialogResult.Yes)
+              {
+                NewMachine.TestConnection(true, false);
+              }
             }
 
             if (!NewMachine.IsOnline)

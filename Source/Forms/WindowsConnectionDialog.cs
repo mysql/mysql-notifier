@@ -132,7 +132,8 @@ namespace MySql.Notifier.Forms
 
       if (testConnection && connectionSuccessful)
       {
-        InfoDialog.ShowSuccessDialog(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage);
+        var infoDialog = new InfoDialog(InfoDialogProperties.GetSuccessDialogProperties(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage));
+        infoDialog.ShowDialog();
         DialogOKButton.Enabled = EntriesAreValid;
         DialogOKButton.Focus();
       }
@@ -234,13 +235,15 @@ namespace MySql.Notifier.Forms
         {
           // Host name is invalid if is a local machine
           validName = false;
-          InfoDialog.ShowErrorDialog(Resources.CannotAddLocalhostTitle, Resources.CannotAddLocalhostMessage);
+          var infoDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.CannotAddLocalhostTitle, Resources.CannotAddLocalhostMessage));
+          infoDialog.ShowDialog();
         }
         else if (!EditMode && MachinesList.HasMachineWithName(hostname))
         {
           // Host name already exists on the list of added remote machines
           validName = false;
-          InfoDialog.ShowErrorDialog(Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage);
+          var infoDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage));
+          infoDialog.ShowDialog();
         }
         else
         {

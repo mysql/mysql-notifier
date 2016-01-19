@@ -437,9 +437,12 @@ namespace MySql.Notifier
       }
       catch (InvalidOperationException ioEx)
       {
-        InfoDialog.ShowErrorDialog(Resources.HighSeverityError, ioEx.Message);
-        MySqlSourceTrace.WriteAppErrorToLog(ioEx);
         _managementObject = null;
+        MySqlSourceTrace.WriteAppErrorToLog(ioEx);
+        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.HighSeverityError, ioEx.Message, null, ioEx.StackTrace)))
+        {
+          errorDialog.ShowDialog();
+        }
       }
     }
 
