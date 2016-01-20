@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Management;
 using System.Windows.Forms;
+using MySql.Notifier.Classes;
+using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
 using MySQL.Utility.Forms;
@@ -68,7 +70,7 @@ namespace MySql.Notifier.Forms
       }
 
       HasChanges = true;
-      MachinesList.ChangeMachine(NewMachine, ChangeType.RemoveByUser);
+      MachinesList.ChangeMachine(NewMachine, ListChangeType.RemoveByUser);
       int removedMachineIndex = MachineSelectionComboBox.SelectedIndex;
       MachineSelectionComboBox.SelectedIndex = 0;
       MachineSelectionComboBox.Items.RemoveAt(removedMachineIndex);
@@ -107,7 +109,7 @@ namespace MySql.Notifier.Forms
         NewMachine.CopyMachineData(windowsConnectionDialog.NewMachine,
           oldUser != windowsConnectionDialog.NewMachine.User ||
           MySqlSecurity.DecryptPassword(oldPassword) != windowsConnectionDialog.NewMachine.UnprotectedPassword);
-        MachinesList.ChangeMachine(NewMachine, ChangeType.Updated);
+        MachinesList.ChangeMachine(NewMachine, ListChangeType.Updated);
         RefreshList();
       }
     }

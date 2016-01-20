@@ -18,6 +18,7 @@
 using System;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using MySql.Notifier.Classes;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQLWorkbench;

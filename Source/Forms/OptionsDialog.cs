@@ -64,14 +64,14 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      if (Settings.Default.AutoCheckForUpdates && !string.IsNullOrEmpty(Notifier.InstallLocation))
+      if (Settings.Default.AutoCheckForUpdates && !string.IsNullOrEmpty(Classes.Notifier.InstallLocation))
       {
-        Utility.CreateScheduledTask(Notifier.DefaultTaskName, Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
+        Utility.CreateScheduledTask(Classes.Notifier.DefaultTaskName, Classes.Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
       }
 
       if (deleteTask)
       {
-        Utility.DeleteScheduledTask(Notifier.DefaultTaskName);
+        Utility.DeleteScheduledTask(Classes.Notifier.DefaultTaskName);
       }
     }
 

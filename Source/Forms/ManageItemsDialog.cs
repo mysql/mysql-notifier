@@ -20,6 +20,8 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using MySql.Notifier.Classes;
+using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQLWorkbench;
@@ -182,7 +184,7 @@ namespace MySql.Notifier.Forms
       {
         MySqlService selectedService = _selectedItem as MySqlService;
         Machine machine = MachinesList.GetMachineById(selectedService.Host.MachineId);
-        machine.ChangeService(selectedService, ChangeType.RemoveByUser);
+        machine.ChangeService(selectedService, ListChangeType.RemoveByUser);
         MonitoredServicesListView.Items.RemoveAt(MonitoredServicesListView.SelectedIndices[0]);
       }
       else if (_selectedItem is MySqlInstance)
@@ -471,7 +473,7 @@ namespace MySql.Notifier.Forms
             NewMachine = MachinesList.GetMachineById(dialog.NewMachine.MachineId);
             if (NewMachine == null)
             {
-              MachinesList.ChangeMachine(dialog.NewMachine, ChangeType.AddByUser);
+              MachinesList.ChangeMachine(dialog.NewMachine, ListChangeType.AddByUser);
               NewMachine = dialog.NewMachine;
             }
 
@@ -484,7 +486,7 @@ namespace MySql.Notifier.Forms
               }
               else
               {
-                NewMachine.ChangeService(service, ChangeType.AddByUser);
+                NewMachine.ChangeService(service, ListChangeType.AddByUser);
                 AddService(service, NewMachine, true);
               }
             }

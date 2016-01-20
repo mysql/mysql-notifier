@@ -8,6 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using MySql.Notifier.Classes;
+
 namespace MySql.Notifier.Properties {
     
     
@@ -24,7 +26,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("4")]
         public int CheckForUpdatesFrequency {
@@ -37,7 +39,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool AutoAddServicesToMonitor {
@@ -50,7 +52,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool NotifyOfAutoServiceAddition {
@@ -63,7 +65,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("mysql")]
         public string AutoAddPattern {
@@ -76,7 +78,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool NotifyOfStatusChange {
@@ -89,7 +91,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool FirstRun {
@@ -102,7 +104,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool AutoCheckForUpdates {
@@ -115,7 +117,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         public global::System.Collections.Generic.List<Machine> MachineList {
             get {
@@ -127,7 +129,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         public global::System.Collections.Generic.List<MySqlService> ServiceList {
             get {
@@ -139,7 +141,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
         public string ServiceSettingsList {
@@ -152,7 +154,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int UpdateCheck {
@@ -165,7 +167,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool UseColorfulStatusIcons {
@@ -178,7 +180,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         public global::System.Collections.Generic.List<MySqlInstance> MySQLInstancesList {
             get {
@@ -190,7 +192,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("10")]
         public int WorkbenchMigrationRetryDelay {
@@ -203,7 +205,7 @@ namespace MySql.Notifier.Properties {
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.NotifierSettings))]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool WorkbenchMigrationSucceeded {

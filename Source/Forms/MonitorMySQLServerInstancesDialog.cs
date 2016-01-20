@@ -21,6 +21,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
+using MySql.Notifier.Classes;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQLWorkbench;
@@ -87,7 +88,7 @@ namespace MySql.Notifier.Forms
     {
       get
       {
-        return Notifier.EnvironmentApplicationDataDirectory + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
+        return Classes.Notifier.EnvironmentApplicationDataDirectory + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
       }
     }
 
