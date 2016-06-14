@@ -31,6 +31,7 @@ using MySql.Notifier.Enumerations;
 using MySql.Notifier.Forms;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQL;
 using MySQL.Utility.Classes.MySQLInstaller;
 using MySQL.Utility.Classes.MySQLWorkbench;
 using MySQL.Utility.Forms;
@@ -1073,8 +1074,7 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Attempts to migrate connections created in the Notifier's connections file to the Workbench's one.
     /// </summary>
-    /// <returns><c>true</c> if the Notifier connections were successfully migrated to the Workbench connections file, <c>false</c> otherwise.</returns>
-    private bool MigrateExternalConnectionsToWorkbench()
+    private void MigrateExternalConnectionsToWorkbench()
     {
       // Turn off the watcher monitoring the %APPDATA% directory and save its state.
       bool workbechAppDataDirWatcherRaisingEvents = false;
@@ -1093,7 +1093,7 @@ namespace MySql.Notifier.Classes
       }
 
       // Perform the migration and save its result.
-      bool migrationSuccessful = MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
+      MySqlWorkbench.MigrateExternalConnectionsToWorkbench();
 
       // Revert the status of the watcher monitoring the %APPDATA% directory if needed.
       if (_workbechAppDataDirWatcher != null && workbechAppDataDirWatcherRaisingEvents)
@@ -1106,8 +1106,6 @@ namespace MySql.Notifier.Classes
       {
         _connectionsFileWatcher.EnableRaisingEvents = true;
       }
-
-      return migrationSuccessful;
     }
 
     /// <summary>
@@ -1822,11 +1820,11 @@ namespace MySql.Notifier.Classes
       }
 
       _migratingWorkbenchConnections = true;
-      bool migrationSucceeded = MigrateExternalConnectionsToWorkbench();
+      MigrateExternalConnectionsToWorkbench();
       _migratingWorkbenchConnections = false;
 
       // Try to migrate connections on the spot, if this fails the background worker is launch for periodical retry.
-      if (migrationSucceeded)
+      if (MySqlWorkbench.ConnectionsMigrationStatus != MySqlWorkbench.ConnectionsMigrationStatusType.MigrationNeededButNotMigrated)
       {
         Settings.Default.WorkbenchMigrationSucceeded = true;
         Settings.Default.Save();
@@ -1851,7 +1849,8 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private void OnWorkbenchConnectionsMigratorTimerElapsedEvent(object sender, ElapsedEventArgs e)
     {
-      if (MigrateExternalConnectionsToWorkbench())
+      MigrateExternalConnectionsToWorkbench();
+      if (MySqlWorkbench.ConnectionsMigrationStatus != MySqlWorkbench.ConnectionsMigrationStatusType.MigrationNeededButNotMigrated)
       {
         _workbenchConnectionsMigratorTimer.Stop();
         Settings.Default.WorkbenchMigrationSucceeded = true;

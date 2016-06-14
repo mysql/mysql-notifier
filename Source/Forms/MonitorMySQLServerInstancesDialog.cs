@@ -119,7 +119,7 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void AddConnectionButton_Click(object sender, EventArgs e)
     {
-      using (var instanceConnectionDialog = new MySqlWorkbenchConnectionDialog(null))
+      using (var instanceConnectionDialog = new MySqlWorkbenchConnectionDialog(null, false))
       {
         instanceConnectionDialog.Icon = Resources.MySqlNotifierIcon;
         instanceConnectionDialog.ShowIcon = true;
@@ -146,7 +146,7 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      var newItem = new ListViewItem(workbenchConnection.IsFabricManaged ? Resources.FabricManaged : workbenchConnection.DriverType.ToString());
+      var newItem = new ListViewItem(workbenchConnection.ConnectionMethod.GetDescription());
       newItem.SubItems.Add(workbenchConnection.Name);
       newItem.SubItems.Add(workbenchConnection.Host);
       newItem.SubItems.Add(workbenchConnection.Port.ToString(CultureInfo.InvariantCulture));
@@ -220,7 +220,7 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      using (var instanceConnectionDialog = new MySqlWorkbenchConnectionDialog(workbenchConnection))
+      using (var instanceConnectionDialog = new MySqlWorkbenchConnectionDialog(workbenchConnection, false))
       {
         instanceConnectionDialog.Icon = Resources.MySqlNotifierIcon;
         instanceConnectionDialog.ShowIcon = true;
@@ -386,7 +386,7 @@ namespace MySql.Notifier.Forms
       WorkbenchConnectionsListView.Items.Clear();
       WorkbenchConnectionsListView.BeginUpdate();
 
-      foreach (var connection in MySqlWorkbench.Connections.OrderBy(conn => conn.Name).Where(connection => connection.IsListable && connectionNameFilter != null && (string.IsNullOrEmpty(connectionNameFilter) || connection.Name.ToLowerInvariant().Contains(connectionNameFilter))))
+      foreach (var connection in MySqlWorkbench.Connections.OrderBy(conn => conn.Name).Where(connection => connectionNameFilter != null && (string.IsNullOrEmpty(connectionNameFilter) || connection.Name.ToLowerInvariant().Contains(connectionNameFilter))))
       {
         AddWorkbenchConnectionToConnectionsList(connection, showNonMonitoredConnections);
       }

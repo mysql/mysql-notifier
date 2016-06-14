@@ -27,6 +27,7 @@ using System.Xml.Serialization;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQL;
 using MySQL.Utility.Classes.MySQLWorkbench;
 using MySQL.Utility.Forms;
 
@@ -325,24 +326,26 @@ namespace MySql.Notifier.Classes
       var filteredConnections = MySqlWorkbench.WorkbenchConnections.Where(t => !String.IsNullOrEmpty(t.Name) && t.Port == StartupParameters.Port).ToList();
       foreach (MySqlWorkbenchConnection c in filteredConnections)
       {
-        switch (c.DriverType)
+        switch (c.ConnectionMethod)
         {
-          case MySqlWorkbenchConnectionType.NamedPipes:
-            if (!StartupParameters.NamedPipesEnabled || string.Compare(c.Socket, StartupParameters.PipeName, StringComparison.OrdinalIgnoreCase) != 0)
+          case MySqlWorkbenchConnection.ConnectionMethodType.LocalUnixSocketOrWindowsPipe:
+            if (!StartupParameters.NamedPipesEnabled || string.Compare(c.UnixSocketOrWindowsPipe, StartupParameters.PipeName, StringComparison.OrdinalIgnoreCase) != 0)
             {
               continue;
             }
             break;
 
-          case MySqlWorkbenchConnectionType.Tcp:
+          case MySqlWorkbenchConnection.ConnectionMethodType.Tcp:
+          case MySqlWorkbenchConnection.ConnectionMethodType.XProtocol:
             if (c.Port != StartupParameters.Port)
             {
               continue;
             }
             break;
 
-          case MySqlWorkbenchConnectionType.Ssh:
-          case MySqlWorkbenchConnectionType.Unknown:
+          case MySqlWorkbenchConnection.ConnectionMethodType.Ssh:
+          case MySqlWorkbenchConnection.ConnectionMethodType.FabricManaged:
+          case MySqlWorkbenchConnection.ConnectionMethodType.Unknown:
             continue;
         }
 

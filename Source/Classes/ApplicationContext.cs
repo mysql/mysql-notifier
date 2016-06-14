@@ -20,6 +20,7 @@ using System.Security.Principal;
 using System.Windows.Forms;
 using MySql.Notifier.Forms;
 using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQL;
 using MySQL.Utility.Forms;
 
 namespace MySql.Notifier.Classes
@@ -51,11 +52,8 @@ namespace MySql.Notifier.Classes
         try
         {
           var identity = WindowsIdentity.GetCurrent();
-          if (identity != null)
-          {
-            var principal = new WindowsPrincipal(identity);
-            isAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
-          }
+          var principal = new WindowsPrincipal(identity);
+          isAdmin = principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
         catch (Exception ex)
         {

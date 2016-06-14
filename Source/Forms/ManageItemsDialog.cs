@@ -122,7 +122,7 @@ namespace MySql.Notifier.Forms
     private void AddInstance(MySqlInstance instance, bool setPage)
     {
       ListViewItem newItem = new ListViewItem(instance.HostIdentifier) { Tag = instance };
-      newItem.SubItems.Add(instance.WorkbenchConnection.DriverType.ToString());
+      newItem.SubItems.Add(instance.WorkbenchConnection.ConnectionMethod.GetDescription());
       newItem.SubItems.Add(instance.ConnectionStatusText);
       MonitoredInstancesListView.Items.Add(newItem);
 
@@ -341,7 +341,7 @@ namespace MySql.Notifier.Forms
                 }
 
                 lvi.Text = instance.HostIdentifier;
-                lvi.SubItems[1].Text = instance.WorkbenchConnection.DriverType.ToString();
+                lvi.SubItems[1].Text = instance.WorkbenchConnection.ConnectionMethod.GetDescription();
                 lvi.SubItems[2].Text = instance.ConnectionStatusText;
                 break;
               }
@@ -375,7 +375,7 @@ namespace MySql.Notifier.Forms
           }
 
           lvi.Text = connectionInDisk.HostIdentifier;
-          lvi.SubItems[1].Text = connectionInDisk.DriverType.ToString();
+          lvi.SubItems[1].Text = connectionInDisk.ConnectionMethod.GetDescription();
           lvi.SubItems[2].Text = connectionInDisk.ConnectionStatusText;
         }
 
