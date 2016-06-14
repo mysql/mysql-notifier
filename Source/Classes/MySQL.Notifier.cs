@@ -208,11 +208,11 @@ namespace MySql.Notifier.Classes
       StatusRefreshInProgress = false;
 
       // Static initializations.
+      InitializeMySqlWorkbenchStaticSettings();
       InstallLocation = Utility.GetMySqlAppInstallLocation(AssemblyInfo.AssemblyTitle);
       MySqlInstaller.InstallerLegacyDllPath = InstallLocation;
       MySqlInstaller.LoadData();
       CustomizeInfoDialog();
-      InitializeMySqlWorkbenchStaticSettings();
 
       _components = new Container();
       _notifyIcon = new NotifyIcon(_components) { Visible = true };
@@ -522,11 +522,11 @@ namespace MySql.Notifier.Classes
     /// </summary>
     public static void InitializeMySqlWorkbenchStaticSettings()
     {
+      MySqlSourceTrace.LogFilePath = EnvironmentApplicationDataDirectory + ERROR_LOG_FILE_RELATIVE_PATH;
+      MySqlSourceTrace.SourceTraceClass = "MySqlNotifier";
       MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
       MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = EnvironmentApplicationDataDirectory + PASSWORDS_VAULT_FILE_RELATIVE_PATH;
       MySqlWorkbench.ExternalApplicationConnectionsFilePath = EnvironmentApplicationDataDirectory + CONNECTIONS_FILE_RELATIVE_PATH;
-      MySqlSourceTrace.LogFilePath = EnvironmentApplicationDataDirectory + ERROR_LOG_FILE_RELATIVE_PATH;
-      MySqlSourceTrace.SourceTraceClass = "MySqlNotifier";
     }
 
     /// <summary>
