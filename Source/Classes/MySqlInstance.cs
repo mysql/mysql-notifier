@@ -665,9 +665,9 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void CheckInstanceStatusWorkerDoWork(object sender, DoWorkEventArgs e)
     {
-      BackgroundWorker worker = sender is BackgroundWorker ? sender as BackgroundWorker : null;
+      BackgroundWorker worker = sender as BackgroundWorker;
       Exception ex;
-      WorkbenchConnection.TestConnection(out ex);
+      WorkbenchConnection.TestConnectionSilently(out ex);
       if (worker != null && worker.CancellationPending)
       {
         e.Cancel = true;

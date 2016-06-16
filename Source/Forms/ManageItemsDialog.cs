@@ -327,7 +327,8 @@ namespace MySql.Notifier.Forms
             {
               if (selectedConnection.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.Unknown)
               {
-                selectedConnection.TestConnection();
+                Exception ex;
+                selectedConnection.TestConnectionSilently(out ex);
               }
 
               instance.WorkbenchConnection = selectedConnection;

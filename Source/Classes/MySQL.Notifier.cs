@@ -535,9 +535,10 @@ namespace MySql.Notifier.Classes
     public void SetNotifyIconToolTip()
     {
       var version = Assembly.GetExecutingAssembly().GetName().Version.ToString().Split('.');
-      string toolTipText = string.Format("{0} ({1})\n{2}.",
+      string toolTipText = string.Format("{0} ({1}){2}{3}.",
                                          Resources.AppName,
                                          string.Format("{0}.{1}.{2}", version[0], version[1], version[2]),
+                                         Environment.NewLine,
                                          string.Format(Resources.ToolTipText, _machinesList.ServicesCount, _mySqlInstancesList.Count));
       _notifyIcon.Text = (toolTipText.Length >= MAX_TOOLTIP_LENGHT ? toolTipText.Substring(0, MAX_TOOLTIP_LENGHT - 3) + "..." : toolTipText);
     }
