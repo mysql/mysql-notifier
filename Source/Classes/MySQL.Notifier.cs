@@ -526,6 +526,8 @@ namespace MySql.Notifier.Classes
       MySqlSourceTrace.SourceTraceClass = "MySqlNotifier";
       MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
       MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = EnvironmentApplicationDataDirectory + PASSWORDS_VAULT_FILE_RELATIVE_PATH;
+      MySqlWorkbench.ExternalConnections.CreateDefaultConnections = !MySqlWorkbench.ConnectionsFileExists && MySqlWorkbench.Connections.Count == 0;
+      MySqlWorkbench.ExternalApplicationsConnectionsFileRetryLoadOrRecreate = true;
       MySqlWorkbench.ExternalApplicationConnectionsFilePath = EnvironmentApplicationDataDirectory + CONNECTIONS_FILE_RELATIVE_PATH;
     }
 
@@ -1751,7 +1753,7 @@ namespace MySql.Notifier.Classes
       _installAvailablelUpdatesMenuItem.Visible = hasUpdates;
       _ignoreAvailableUpdateMenuItem.Visible = hasUpdates;
       _launchInstallerMenuItem.Enabled = MySqlInstaller.IsInstalled;
-      _launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySqlUtilitiesInstalled();
+      _launchWorkbenchUtilitiesMenuItem.Visible = MySqlWorkbench.IsMySqlUtilitiesInstalled;
       _refreshStatusSeparator.Visible = CurrentServicesAndInstancesCount > 0;
       _refreshStatusMenuItem.Visible = CurrentServicesAndInstancesCount > 0;
       _actionsMenuItem.Visible = CurrentServicesAndInstancesCount > 0;

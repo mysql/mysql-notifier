@@ -360,7 +360,7 @@ namespace MySql.Notifier.Forms
       _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
       if (forceRefresh)
       {
-        MySqlWorkbench.Connections.Load();
+        MySqlWorkbench.Connections.Load(MySqlWorkbench.Connections == MySqlWorkbench.ExternalConnections && MySqlWorkbench.ExternalApplicationsConnectionsFileRetryLoadOrRecreate);
       }
 
       RefreshMySqlInstancesList(_lastServicesNameFilter, _lastShowMonitoredServices);
