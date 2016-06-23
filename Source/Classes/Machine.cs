@@ -863,7 +863,9 @@ namespace MySql.Notifier.Classes
         }
 
         string filterQuery = useDisplayName ? WMI_QUERY_SELECT_DISPLAY_NAME_CONTAINING : WMI_QUERY_SELECT_NAME_CONTAINING;
-        WqlObjectQuery query = string.IsNullOrEmpty(serviceNameFilter) ? new WqlObjectQuery(WMI_QUERY_SELECT_ALL) : new WqlObjectQuery(string.Format(filterQuery, serviceNameFilter));
+        WqlObjectQuery query = string.IsNullOrEmpty(serviceNameFilter)
+          ? new WqlObjectQuery(WMI_QUERY_SELECT_ALL)
+          : new WqlObjectQuery(string.Format(filterQuery, serviceNameFilter));
         ManagementObjectSearcher searcher = new ManagementObjectSearcher(WmiManagementScope, query);
         wmiServicesCollection = searcher.Get();
         if (_connectionTestCancelled)
@@ -1090,7 +1092,7 @@ namespace MySql.Notifier.Classes
           return;
         }
 
-        MenuGroup = new ToolStripMenuItem(string.Format("{0} ({1})", Name, ConnectionStatus.ToString()))
+        MenuGroup = new ToolStripMenuItem(string.Format("{0} ({1})", Name, ConnectionStatus))
         {
           Tag = MachineId
         };
@@ -1178,7 +1180,7 @@ namespace MySql.Notifier.Classes
       }
       else
       {
-        MenuGroup.Text = string.Format("{0} ({1}){2}", Name, ConnectionStatus.ToString(), RefreshingStatus ? Resources.RefreshingStatusText : string.Empty);
+        MenuGroup.Text = string.Format("{0} ({1}){2}", Name, ConnectionStatus, RefreshingStatus ? Resources.RefreshingStatusText : string.Empty);
         if (ConnectionStatus == ConnectionStatusType.Unavailable && MenuGroup.DropDownItems.Count == 0)
         {
           ToolStripMenuItem reconnectMenu = new ToolStripMenuItem(Resources.ReconnectMenuText, Resources.refresh, ReconnectMenu_Click);
@@ -1311,8 +1313,8 @@ namespace MySql.Notifier.Classes
     /// <param name="remoteService">Remote service firing the status changed event.</param>
     private void OnWmiServiceCreated(ManagementBaseObject remoteService)
     {
-      var serviceName = remoteService == null ? string.Empty : remoteService["Name"].ToString().ToLowerInvariant();
-      if (!Settings.Default.AutoAddServicesToMonitor || GetServiceByName(serviceName) != null || !serviceName.Contains(Settings.Default.AutoAddPattern))
+      var serviceName = remoteService == null ? string.Empty : remoteService["Name"].ToString();
+      if (!Settings.Default.AutoAddServicesToMonitor || GetServiceByName(serviceName) != null || !serviceName.Contains(Settings.Default.AutoAddPattern, StringComparison.InvariantCultureIgnoreCase))
       {
         return;
       }
@@ -1338,7 +1340,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      string serviceName = remoteService["Name"].ToString().Trim();
+      string serviceName = remoteService["Name"].ToString();
       MySqlService service = GetServiceByName(serviceName);
       if (service != null)
       {
@@ -1357,7 +1359,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      string serviceName = remoteService["Name"].ToString().Trim();
+      string serviceName = remoteService["Name"].ToString();
       string state = remoteService["State"].ToString();
       MySqlService service = GetServiceByName(serviceName);
       if (service != null)
@@ -1399,7 +1401,11 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      _worker = new BackgroundWorker { WorkerSupportsCancellation = true, WorkerReportsProgress = false };
+      _worker = new BackgroundWorker
+      {
+        WorkerSupportsCancellation = true,
+        WorkerReportsProgress = false
+      };
       _worker.DoWork += TestConnectionWorkerDoWork;
       _worker.RunWorkerCompleted += TestConnectionWorkerCompleted;
     }
@@ -1439,11 +1445,13 @@ namespace MySql.Notifier.Classes
     /// <param name="remoteService">The remote service.</param>
     private void OnInstallationChanged(ManagementBaseObject remoteService)
     {
-      if (WorkbenchInstallationChanged != null && MySqlWorkbench.IsInstalled != _workbenchWasInstalled)
+      if (WorkbenchInstallationChanged == null || MySqlWorkbench.IsInstalled == _workbenchWasInstalled)
       {
-        _workbenchWasInstalled = MySqlWorkbench.IsInstalled;
-        WorkbenchInstallationChanged(remoteService);
+        return;
       }
+
+      _workbenchWasInstalled = MySqlWorkbench.IsInstalled;
+      WorkbenchInstallationChanged(remoteService);
     }
 
     /// <summary>
