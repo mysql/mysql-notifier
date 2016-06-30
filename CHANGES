@@ -1,4 +1,6 @@
 1.1.7
+- Fixed the WMI query that retrieves the Windows Services in a local or remote computer to filter by the class appropriate to services shown in
+  the Windows Services console. (MySQL Bug #82000, Bug #23667056 - UNHANDLED EXCEPTION THROWN WHEN LISTING REMOTE SERVICES)
 - Fixed code so that when a new Windows Service for a MySQL Server is added, its name is recognized with its casing as is.
   (MySQL Bug #74516, Bug #19881188 - WINDOWS SERVICE NOT RECOGNIZED BY MYSQL NOTIFIER)
 - Added code to let users retry the loading of a connections information XML file, and re-create the file from scratch if loading fails. This is

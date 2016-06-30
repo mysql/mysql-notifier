@@ -277,42 +277,54 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      string currentFilter = FilterCheckBox.Checked ? Settings.Default.AutoAddPattern.Trim() : FilterTextBox.Text.ToLower();
-
-      ServicesListView.BeginUpdate();
-      List<ManagementObject> services = new List<ManagementObject>();
-      if (NewMachine != null && MachineLocationType == Machine.LocationType.Remote)
+      Cursor = Cursors.WaitCursor;
+      try
       {
-        ManagementObjectCollection machineServicesCollection = NewMachine.GetWmiServices(true);
-        if (machineServicesCollection != null)
+        string currentFilter = FilterCheckBox.Checked
+          ? Settings.Default.AutoAddPattern.Trim()
+          : FilterTextBox.Text.ToLower();
+        ServicesListView.BeginUpdate();
+        List<ManagementObject> services = new List<ManagementObject>();
+        if (NewMachine != null && MachineLocationType == Machine.LocationType.Remote)
         {
-          services.AddRange(machineServicesCollection.Cast<ManagementObject>());
+          ManagementObjectCollection machineServicesCollection = NewMachine.GetWmiServices(true);
+          if (machineServicesCollection != null)
+          {
+            services.AddRange(machineServicesCollection.Cast<ManagementObject>());
+          }
+        }
+        else
+        {
+          services = Service.GetInstances(string.Empty);
+        }
+
+        services = services.OrderBy(x => x.Properties["DisplayName"].Value).ToList();
+        if (!string.IsNullOrEmpty(currentFilter))
+        {
+          services =
+            services.Where(f => f.Properties["DisplayName"].Value.ToString().ToLowerInvariant().Contains(currentFilter))
+              .ToList();
+        }
+
+        foreach (ManagementObject item in services)
+        {
+          string serviceName = item.Properties["Name"].Value.ToString();
+          var displayName = item.Properties["DisplayName"].Value;
+          var newItem = new ListViewItem
+          {
+            Text = displayName != null ? displayName.ToString() : serviceName,
+            Tag = serviceName
+          };
+
+          newItem.SubItems.Add(item.Properties["State"].Value.ToString());
+          ServicesListView.Items.Add(newItem);
         }
       }
-      else
+      finally
       {
-        services = Service.GetInstances(String.Empty);
+        ServicesListView.EndUpdate();
+        Cursor = Cursors.Default;
       }
-
-      services = services.OrderBy(x => x.Properties["DisplayName"].Value).ToList();
-      if (!string.IsNullOrEmpty(currentFilter))
-      {
-        services = services.Where(f => f.Properties["DisplayName"].Value.ToString().ToLowerInvariant().Contains(currentFilter)).ToList();
-      }
-
-      foreach (ManagementObject item in services)
-      {
-        ListViewItem newItem = new ListViewItem
-        {
-          Text = item.Properties["DisplayName"].Value.ToString(),
-          Tag = item.Properties["Name"].Value.ToString()
-        };
-
-        newItem.SubItems.Add(item.Properties["State"].Value.ToString());
-        ServicesListView.Items.Add(newItem);
-      }
-
-      ServicesListView.EndUpdate();
     }
 
     private void ServicesListView_ColumnClick(object sender, ColumnClickEventArgs e)

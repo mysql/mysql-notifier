@@ -70,17 +70,17 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// WMI query to retrieve all services.
     /// </summary>
-    public const string WMI_QUERY_SELECT_ALL = "SELECT * FROM Win32_Service";
+    public const string WMI_QUERY_SELECT_ALL = "SELECT * FROM Win32_Service WHERE __CLASS = \"Win32_Service\"";
 
     /// <summary>
     /// WMI query to retrieve all services where their display name matches a given filter.
     /// </summary>
-    public const string WMI_QUERY_SELECT_DISPLAY_NAME_CONTAINING = "SELECT * FROM Win32_Service WHERE DisplayName LIKE '%{0}%'";
+    public const string WMI_QUERY_SELECT_DISPLAY_NAME_CONTAINING = WMI_QUERY_SELECT_ALL + " AND DisplayName LIKE '%{0}%'";
 
     /// <summary>
     /// WMI query to retrieve all services where their name matches a given filter.
     /// </summary>
-    public const string WMI_QUERY_SELECT_NAME_CONTAINING = "SELECT * FROM Win32_Service WHERE Name LIKE '%{0}%'";
+    public const string WMI_QUERY_SELECT_NAME_CONTAINING = WMI_QUERY_SELECT_ALL + " AND Name LIKE '%{0}%'";
 
     /// <summary>
     /// Represents the WMI namespace for a remote computer containing a placeholder for the remote machine name.
