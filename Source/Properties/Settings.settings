@@ -2,49 +2,49 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="MySql.Notifier.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="CheckForUpdatesFrequency" Provider="MySql.Notifier.NotifierSettings" Type="System.Int32" Scope="User">
+    <Setting Name="CheckForUpdatesFrequency" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">4</Value>
     </Setting>
-    <Setting Name="AutoAddServicesToMonitor" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
+    <Setting Name="AutoAddServicesToMonitor" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="NotifyOfAutoServiceAddition" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
+    <Setting Name="NotifyOfAutoServiceAddition" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="AutoAddPattern" Provider="MySql.Notifier.NotifierSettings" Type="System.String" Scope="User">
+    <Setting Name="AutoAddPattern" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.String" Scope="User">
       <Value Profile="(Default)">mysql</Value>
     </Setting>
-    <Setting Name="NotifyOfStatusChange" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
+    <Setting Name="NotifyOfStatusChange" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="FirstRun" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
+    <Setting Name="FirstRun" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="AutoCheckForUpdates" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
+    <Setting Name="AutoCheckForUpdates" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="MachineList" Provider="MySql.Notifier.NotifierSettings" Type="System.Collections.Generic.List&lt;Machine&gt;" Scope="User">
+    <Setting Name="MachineList" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Collections.Generic.List&lt;Machine&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="ServiceList" Provider="MySql.Notifier.NotifierSettings" Type="System.Collections.Generic.List&lt;MySQLService&gt;" Scope="User">
+    <Setting Name="ServiceList" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Collections.Generic.List&lt;MySQLService&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="ServiceSettingsList" Provider="MySql.Notifier.NotifierSettings" Type="System.String" Scope="User">
+    <Setting Name="ServiceSettingsList" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="UpdateCheck" Provider="MySql.Notifier.NotifierSettings" Type="System.Int32" Scope="User">
+    <Setting Name="UpdateCheck" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="UseColorfulStatusIcons" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
+    <Setting Name="UseColorfulStatusIcons" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="MySQLInstancesList" Provider="MySql.Notifier.NotifierSettings" Type="System.Collections.Generic.List&lt;MySQLInstance&gt;" Scope="User">
+    <Setting Name="MySQLInstancesList" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Collections.Generic.List&lt;MySQLInstance&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="WorkbenchMigrationRetryDelay" Provider="MySql.Notifier.NotifierSettings" Type="System.Int32" Scope="User">
+    <Setting Name="WorkbenchMigrationRetryDelay" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">10</Value>
     </Setting>
-    <Setting Name="WorkbenchMigrationSucceeded" Provider="MySql.Notifier.NotifierSettings" Type="System.Boolean" Scope="User">
+    <Setting Name="WorkbenchMigrationSucceeded" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
