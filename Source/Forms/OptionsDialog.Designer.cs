@@ -59,7 +59,7 @@ namespace MySql.Notifier.Forms
       this.NotifyOfAutoAddCheckBox = new System.Windows.Forms.CheckBox();
       this.AutoAddRegexTextBox = new System.Windows.Forms.TextBox();
       this.AutoAddServicesCheckBox = new System.Windows.Forms.CheckBox();
-      this.lblWeeks = new System.Windows.Forms.Label();
+      this.WeeksLabel = new System.Windows.Forms.Label();
       this.CheckUpdatesWeeksNumericUpDown = new System.Windows.Forms.NumericUpDown();
       this.AutoCheckUpdatesCheckBox = new System.Windows.Forms.CheckBox();
       this.RunAtStartupCheckBox = new System.Windows.Forms.CheckBox();
@@ -67,13 +67,17 @@ namespace MySql.Notifier.Forms
       this.TitleLabel = new System.Windows.Forms.Label();
       this.HelpToolTip = new System.Windows.Forms.ToolTip(this.components);
       this.MigrateWorkbenchConnectionsButton = new System.Windows.Forms.Button();
+      this.PingMonitoredInstancesNumericUpDown = new System.Windows.Forms.NumericUpDown();
       this.ConnectionsOptionsLabel = new System.Windows.Forms.Label();
       this.ResetToDefaultsButton = new System.Windows.Forms.Button();
       this.AutomaticMigrationDelayLabel = new System.Windows.Forms.Label();
       this.AutomaticMigrationDelayValueLabel = new System.Windows.Forms.Label();
+      this.PingMonitoredInstancesLabel = new System.Windows.Forms.Label();
+      this.SecondsLabel = new System.Windows.Forms.Label();
       this.ContentAreaPanel.SuspendLayout();
       this.CommandAreaPanel.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.CheckUpdatesWeeksNumericUpDown)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.PingMonitoredInstancesNumericUpDown)).BeginInit();
       this.SuspendLayout();
       // 
       // FootnoteAreaPanel
@@ -83,6 +87,9 @@ namespace MySql.Notifier.Forms
       // 
       // ContentAreaPanel
       // 
+      this.ContentAreaPanel.Controls.Add(this.SecondsLabel);
+      this.ContentAreaPanel.Controls.Add(this.PingMonitoredInstancesLabel);
+      this.ContentAreaPanel.Controls.Add(this.PingMonitoredInstancesNumericUpDown);
       this.ContentAreaPanel.Controls.Add(this.AutomaticMigrationDelayValueLabel);
       this.ContentAreaPanel.Controls.Add(this.AutomaticMigrationDelayLabel);
       this.ContentAreaPanel.Controls.Add(this.MigrateWorkbenchConnectionsButton);
@@ -98,23 +105,23 @@ namespace MySql.Notifier.Forms
       this.ContentAreaPanel.Controls.Add(this.AutoAddRegexTextBox);
       this.ContentAreaPanel.Controls.Add(this.CheckUpdatesWeeksNumericUpDown);
       this.ContentAreaPanel.Controls.Add(this.AutoAddServicesCheckBox);
-      this.ContentAreaPanel.Controls.Add(this.lblWeeks);
-      this.ContentAreaPanel.Size = new System.Drawing.Size(452, 476);
+      this.ContentAreaPanel.Controls.Add(this.WeeksLabel);
+      this.ContentAreaPanel.Size = new System.Drawing.Size(464, 501);
       // 
       // CommandAreaPanel
       // 
       this.CommandAreaPanel.Controls.Add(this.ResetToDefaultsButton);
       this.CommandAreaPanel.Controls.Add(this.DialogCancelButton);
       this.CommandAreaPanel.Controls.Add(this.DialogAcceptButton);
-      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 431);
-      this.CommandAreaPanel.Size = new System.Drawing.Size(452, 45);
+      this.CommandAreaPanel.Location = new System.Drawing.Point(0, 456);
+      this.CommandAreaPanel.Size = new System.Drawing.Size(464, 45);
       // 
       // DialogCancelButton
       // 
       this.DialogCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
       this.DialogCancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogCancelButton.Location = new System.Drawing.Point(362, 10);
+      this.DialogCancelButton.Location = new System.Drawing.Point(374, 10);
       this.DialogCancelButton.Name = "DialogCancelButton";
       this.DialogCancelButton.Size = new System.Drawing.Size(78, 23);
       this.DialogCancelButton.TabIndex = 1;
@@ -126,7 +133,7 @@ namespace MySql.Notifier.Forms
       this.DialogAcceptButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogAcceptButton.DialogResult = System.Windows.Forms.DialogResult.OK;
       this.DialogAcceptButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogAcceptButton.Location = new System.Drawing.Point(278, 11);
+      this.DialogAcceptButton.Location = new System.Drawing.Point(290, 11);
       this.DialogAcceptButton.Name = "DialogAcceptButton";
       this.DialogAcceptButton.Size = new System.Drawing.Size(78, 23);
       this.DialogAcceptButton.TabIndex = 0;
@@ -147,22 +154,24 @@ namespace MySql.Notifier.Forms
       // 
       // NotificationsOptionsLabel
       // 
+      this.NotificationsOptionsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.NotificationsOptionsLabel.AutoSize = true;
       this.NotificationsOptionsLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.NotificationsOptionsLabel.Location = new System.Drawing.Point(24, 228);
+      this.NotificationsOptionsLabel.Location = new System.Drawing.Point(24, 253);
       this.NotificationsOptionsLabel.Name = "NotificationsOptionsLabel";
       this.NotificationsOptionsLabel.Size = new System.Drawing.Size(131, 17);
-      this.NotificationsOptionsLabel.TabIndex = 9;
+      this.NotificationsOptionsLabel.TabIndex = 12;
       this.NotificationsOptionsLabel.Text = "Notifications Options";
       // 
       // NotifyOfStatusChangeCheckBox
       // 
+      this.NotifyOfStatusChangeCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.NotifyOfStatusChangeCheckBox.AutoSize = true;
       this.NotifyOfStatusChangeCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.NotifyOfStatusChangeCheckBox.Location = new System.Drawing.Point(50, 282);
+      this.NotifyOfStatusChangeCheckBox.Location = new System.Drawing.Point(50, 307);
       this.NotifyOfStatusChangeCheckBox.Name = "NotifyOfStatusChangeCheckBox";
       this.NotifyOfStatusChangeCheckBox.Size = new System.Drawing.Size(304, 19);
-      this.NotifyOfStatusChangeCheckBox.TabIndex = 11;
+      this.NotifyOfStatusChangeCheckBox.TabIndex = 14;
       this.NotifyOfStatusChangeCheckBox.Text = "Notify me when a service or instance changes status.";
       this.HelpToolTip.SetToolTip(this.NotifyOfStatusChangeCheckBox, "When checked, a notification balloon is shown when the status of a monitored Wind" +
         "ows Service or MySQL Server instance changes.");
@@ -170,12 +179,13 @@ namespace MySql.Notifier.Forms
       // 
       // NotifyOfAutoAddCheckBox
       // 
+      this.NotifyOfAutoAddCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.NotifyOfAutoAddCheckBox.AutoSize = true;
       this.NotifyOfAutoAddCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.NotifyOfAutoAddCheckBox.Location = new System.Drawing.Point(51, 257);
+      this.NotifyOfAutoAddCheckBox.Location = new System.Drawing.Point(51, 282);
       this.NotifyOfAutoAddCheckBox.Name = "NotifyOfAutoAddCheckBox";
       this.NotifyOfAutoAddCheckBox.Size = new System.Drawing.Size(284, 19);
-      this.NotifyOfAutoAddCheckBox.TabIndex = 10;
+      this.NotifyOfAutoAddCheckBox.TabIndex = 13;
       this.NotifyOfAutoAddCheckBox.Text = "Notify me when a service is automatically added.";
       this.HelpToolTip.SetToolTip(this.NotifyOfAutoAddCheckBox, "When checked, a notification balloon is shown when a Windows Service is automatic" +
         "ally added to the list of monitored services.");
@@ -188,7 +198,7 @@ namespace MySql.Notifier.Forms
       this.AutoAddRegexTextBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.AutoAddRegexTextBox.Location = new System.Drawing.Point(67, 185);
       this.AutoAddRegexTextBox.Name = "AutoAddRegexTextBox";
-      this.AutoAddRegexTextBox.Size = new System.Drawing.Size(330, 23);
+      this.AutoAddRegexTextBox.Size = new System.Drawing.Size(342, 23);
       this.AutoAddRegexTextBox.TabIndex = 8;
       // 
       // AutoAddServicesCheckBox
@@ -205,26 +215,27 @@ namespace MySql.Notifier.Forms
       this.AutoAddServicesCheckBox.UseVisualStyleBackColor = true;
       this.AutoAddServicesCheckBox.CheckedChanged += new System.EventHandler(this.AutoAddServicesCheckBox_CheckedChanged);
       // 
-      // lblWeeks
+      // WeeksLabel
       // 
-      this.lblWeeks.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.lblWeeks.AutoSize = true;
-      this.lblWeeks.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.lblWeeks.Location = new System.Drawing.Point(355, 136);
-      this.lblWeeks.Name = "lblWeeks";
-      this.lblWeeks.Size = new System.Drawing.Size(42, 15);
-      this.lblWeeks.TabIndex = 6;
-      this.lblWeeks.Text = "weeks.";
+      this.WeeksLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.WeeksLabel.AutoSize = true;
+      this.WeeksLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.WeeksLabel.Location = new System.Drawing.Point(366, 136);
+      this.WeeksLabel.Name = "WeeksLabel";
+      this.WeeksLabel.Size = new System.Drawing.Size(42, 15);
+      this.WeeksLabel.TabIndex = 6;
+      this.WeeksLabel.Text = "weeks.";
       // 
       // CheckUpdatesWeeksNumericUpDown
       // 
       this.CheckUpdatesWeeksNumericUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.CheckUpdatesWeeksNumericUpDown.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.CheckUpdatesWeeksNumericUpDown.Location = new System.Drawing.Point(283, 134);
+      this.CheckUpdatesWeeksNumericUpDown.Location = new System.Drawing.Point(322, 134);
       this.CheckUpdatesWeeksNumericUpDown.Name = "CheckUpdatesWeeksNumericUpDown";
-      this.CheckUpdatesWeeksNumericUpDown.Size = new System.Drawing.Size(66, 23);
+      this.CheckUpdatesWeeksNumericUpDown.Size = new System.Drawing.Size(42, 23);
       this.CheckUpdatesWeeksNumericUpDown.TabIndex = 5;
+      this.HelpToolTip.SetToolTip(this.CheckUpdatesWeeksNumericUpDown, "Number of weeks to check for updates for installed MySQL products.");
       // 
       // AutoCheckUpdatesCheckBox
       // 
@@ -232,9 +243,9 @@ namespace MySql.Notifier.Forms
       this.AutoCheckUpdatesCheckBox.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.AutoCheckUpdatesCheckBox.Location = new System.Drawing.Point(51, 135);
       this.AutoCheckUpdatesCheckBox.Name = "AutoCheckUpdatesCheckBox";
-      this.AutoCheckUpdatesCheckBox.Size = new System.Drawing.Size(228, 19);
+      this.AutoCheckUpdatesCheckBox.Size = new System.Drawing.Size(269, 19);
       this.AutoCheckUpdatesCheckBox.TabIndex = 4;
-      this.AutoCheckUpdatesCheckBox.Text = "Automatically check for updates every";
+      this.AutoCheckUpdatesCheckBox.Text = "Automatically check for MySQL updates every";
       this.HelpToolTip.SetToolTip(this.AutoCheckUpdatesCheckBox, "When checked updates for installed MySQL products are checked periodically.");
       this.AutoCheckUpdatesCheckBox.UseVisualStyleBackColor = true;
       this.AutoCheckUpdatesCheckBox.CheckedChanged += new System.EventHandler(this.AutoCheckUpdatesCheckBox_CheckedChanged);
@@ -280,26 +291,54 @@ namespace MySql.Notifier.Forms
       // 
       // MigrateWorkbenchConnectionsButton
       // 
-      this.MigrateWorkbenchConnectionsButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.MigrateWorkbenchConnectionsButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.MigrateWorkbenchConnectionsButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.MigrateWorkbenchConnectionsButton.Location = new System.Drawing.Point(50, 368);
+      this.MigrateWorkbenchConnectionsButton.Location = new System.Drawing.Point(50, 393);
       this.MigrateWorkbenchConnectionsButton.Name = "MigrateWorkbenchConnectionsButton";
-      this.MigrateWorkbenchConnectionsButton.Size = new System.Drawing.Size(346, 23);
-      this.MigrateWorkbenchConnectionsButton.TabIndex = 13;
+      this.MigrateWorkbenchConnectionsButton.Size = new System.Drawing.Size(358, 23);
+      this.MigrateWorkbenchConnectionsButton.TabIndex = 18;
       this.MigrateWorkbenchConnectionsButton.Text = "Migrate stored connections to MySQL Workbench now";
       this.HelpToolTip.SetToolTip(this.MigrateWorkbenchConnectionsButton, resources.GetString("MigrateWorkbenchConnectionsButton.ToolTip"));
       this.MigrateWorkbenchConnectionsButton.UseVisualStyleBackColor = true;
       this.MigrateWorkbenchConnectionsButton.Click += new System.EventHandler(this.MigrateWorkbenchConnectionsButton_Click);
       // 
+      // PingMonitoredInstancesNumericUpDown
+      // 
+      this.PingMonitoredInstancesNumericUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.PingMonitoredInstancesNumericUpDown.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.PingMonitoredInstancesNumericUpDown.Location = new System.Drawing.Point(301, 214);
+      this.PingMonitoredInstancesNumericUpDown.Maximum = new decimal(new int[] {
+            2419200,
+            0,
+            0,
+            0});
+      this.PingMonitoredInstancesNumericUpDown.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+      this.PingMonitoredInstancesNumericUpDown.Name = "PingMonitoredInstancesNumericUpDown";
+      this.PingMonitoredInstancesNumericUpDown.Size = new System.Drawing.Size(42, 23);
+      this.PingMonitoredInstancesNumericUpDown.TabIndex = 10;
+      this.HelpToolTip.SetToolTip(this.PingMonitoredInstancesNumericUpDown, "Interval for pinging monitored MySQL Server instances to check for status updates" +
+        ".");
+      this.PingMonitoredInstancesNumericUpDown.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+      // 
       // ConnectionsOptionsLabel
       // 
+      this.ConnectionsOptionsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.ConnectionsOptionsLabel.AutoSize = true;
       this.ConnectionsOptionsLabel.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.ConnectionsOptionsLabel.Location = new System.Drawing.Point(24, 321);
+      this.ConnectionsOptionsLabel.Location = new System.Drawing.Point(24, 346);
       this.ConnectionsOptionsLabel.Name = "ConnectionsOptionsLabel";
       this.ConnectionsOptionsLabel.Size = new System.Drawing.Size(215, 17);
-      this.ConnectionsOptionsLabel.TabIndex = 12;
+      this.ConnectionsOptionsLabel.TabIndex = 15;
       this.ConnectionsOptionsLabel.Text = "MySQL Server Connections Options";
       // 
       // ResetToDefaultsButton
@@ -316,24 +355,47 @@ namespace MySql.Notifier.Forms
       // 
       // AutomaticMigrationDelayLabel
       // 
+      this.AutomaticMigrationDelayLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.AutomaticMigrationDelayLabel.AutoSize = true;
       this.AutomaticMigrationDelayLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.AutomaticMigrationDelayLabel.Location = new System.Drawing.Point(51, 350);
+      this.AutomaticMigrationDelayLabel.Location = new System.Drawing.Point(47, 375);
       this.AutomaticMigrationDelayLabel.Name = "AutomaticMigrationDelayLabel";
       this.AutomaticMigrationDelayLabel.Size = new System.Drawing.Size(263, 15);
-      this.AutomaticMigrationDelayLabel.TabIndex = 14;
+      this.AutomaticMigrationDelayLabel.TabIndex = 16;
       this.AutomaticMigrationDelayLabel.Text = "Automatic connections migration delayed until: ";
       // 
       // AutomaticMigrationDelayValueLabel
       // 
+      this.AutomaticMigrationDelayValueLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.AutomaticMigrationDelayValueLabel.AutoSize = true;
       this.AutomaticMigrationDelayValueLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
       this.AutomaticMigrationDelayValueLabel.ForeColor = System.Drawing.SystemColors.GrayText;
-      this.AutomaticMigrationDelayValueLabel.Location = new System.Drawing.Point(311, 350);
+      this.AutomaticMigrationDelayValueLabel.Location = new System.Drawing.Point(311, 375);
       this.AutomaticMigrationDelayValueLabel.Name = "AutomaticMigrationDelayValueLabel";
       this.AutomaticMigrationDelayValueLabel.Size = new System.Drawing.Size(67, 15);
-      this.AutomaticMigrationDelayValueLabel.TabIndex = 15;
+      this.AutomaticMigrationDelayValueLabel.TabIndex = 17;
       this.AutomaticMigrationDelayValueLabel.Text = "Delay Value";
+      // 
+      // PingMonitoredInstancesLabel
+      // 
+      this.PingMonitoredInstancesLabel.AutoSize = true;
+      this.PingMonitoredInstancesLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.PingMonitoredInstancesLabel.Location = new System.Drawing.Point(48, 216);
+      this.PingMonitoredInstancesLabel.Name = "PingMonitoredInstancesLabel";
+      this.PingMonitoredInstancesLabel.Size = new System.Drawing.Size(249, 15);
+      this.PingMonitoredInstancesLabel.TabIndex = 9;
+      this.PingMonitoredInstancesLabel.Text = "Ping monitored MySQL Server instances every";
+      // 
+      // SecondsLabel
+      // 
+      this.SecondsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.SecondsLabel.AutoSize = true;
+      this.SecondsLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.SecondsLabel.Location = new System.Drawing.Point(346, 216);
+      this.SecondsLabel.Name = "SecondsLabel";
+      this.SecondsLabel.Size = new System.Drawing.Size(53, 15);
+      this.SecondsLabel.TabIndex = 11;
+      this.SecondsLabel.Text = "seconds.";
       // 
       // OptionsDialog
       // 
@@ -341,7 +403,7 @@ namespace MySql.Notifier.Forms
       this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.CancelButton = this.DialogCancelButton;
-      this.ClientSize = new System.Drawing.Size(452, 476);
+      this.ClientSize = new System.Drawing.Size(464, 501);
       this.CommandAreaVisible = true;
       this.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel, ((byte)(0)));
       this.FootnoteAreaHeight = 0;
@@ -354,6 +416,7 @@ namespace MySql.Notifier.Forms
       this.ContentAreaPanel.PerformLayout();
       this.CommandAreaPanel.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.CheckUpdatesWeeksNumericUpDown)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.PingMonitoredInstancesNumericUpDown)).EndInit();
       this.ResumeLayout(false);
 
     }
@@ -371,7 +434,7 @@ namespace MySql.Notifier.Forms
     private System.Windows.Forms.TextBox AutoAddRegexTextBox;
     private System.Windows.Forms.NumericUpDown CheckUpdatesWeeksNumericUpDown;
     private System.Windows.Forms.CheckBox AutoAddServicesCheckBox;
-    private System.Windows.Forms.Label lblWeeks;
+    private System.Windows.Forms.Label WeeksLabel;
     private System.Windows.Forms.Button DialogCancelButton;
     private System.Windows.Forms.Button DialogAcceptButton;
     private System.Windows.Forms.ToolTip HelpToolTip;
@@ -380,5 +443,8 @@ namespace MySql.Notifier.Forms
     private System.Windows.Forms.Button ResetToDefaultsButton;
     private System.Windows.Forms.Label AutomaticMigrationDelayLabel;
     private System.Windows.Forms.Label AutomaticMigrationDelayValueLabel;
+    private System.Windows.Forms.Label SecondsLabel;
+    private System.Windows.Forms.Label PingMonitoredInstancesLabel;
+    private System.Windows.Forms.NumericUpDown PingMonitoredInstancesNumericUpDown;
   }
 }

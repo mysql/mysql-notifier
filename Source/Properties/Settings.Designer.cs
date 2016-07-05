@@ -226,5 +226,18 @@ namespace MySql.Notifier.Properties {
                 this["WorkbenchMigrationLastAttempt"] = value;
             }
         }
+		
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.Classes.NotifierSettings))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
+        public int PingServicesIntervalInSeconds {
+            get {
+                return ((int)(this["PingServicesIntervalInSeconds"]));
+            }
+            set {
+                this["PingServicesIntervalInSeconds"] = value;
+            }
+        }
     }
 }

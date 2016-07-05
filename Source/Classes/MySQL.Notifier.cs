@@ -78,6 +78,11 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private const int MAX_TOOLTIP_LENGHT = 63;
 
+    /// <summary>
+    /// The number of milliseconds in a second.
+    /// </summary>
+    private const int MILLISECONDS_IN_SECOND = 1000;
+
     #endregion Constants
 
     #region Static Properties
@@ -342,7 +347,7 @@ namespace MySql.Notifier.Classes
           catch (IOException ex)
           {
             Program.MySQLNotifierErrorHandler(Resources.SettingsFileFailedToLoad, false, ex, SourceLevels.Warning);
-            Thread.Sleep(1000);
+            Thread.Sleep(MILLISECONDS_IN_SECOND);
           }
         }
 
@@ -529,9 +534,10 @@ namespace MySql.Notifier.Classes
     {
       if (_globalTimer == null)
       {
+        var pingInterval = Settings.Default.PingServicesIntervalInSeconds;
         _globalTimer = new Timer { AutoReset = true };
         _globalTimer.Elapsed += UpdateMachinesAndInstancesConnectionTimeouts;
-        _globalTimer.Interval = 1000;
+        _globalTimer.Interval = (pingInterval > 0 ? Settings.Default.PingServicesIntervalInSeconds : 1) * MILLISECONDS_IN_SECOND;
       }
 
       if (!_globalTimer.Enabled)
@@ -1912,8 +1918,8 @@ namespace MySql.Notifier.Classes
       }
 
       // Update checks for connections migration
-      _globalEllapsedSeconds += Convert.ToInt32(_globalTimer.Interval / 1000);
-      if (_globalEllapsedSeconds >= 30) //SECONDS_IN_HOUR)
+      _globalEllapsedSeconds += Convert.ToInt32(_globalTimer.Interval / MILLISECONDS_IN_SECOND);
+      if (_globalEllapsedSeconds >= SECONDS_IN_HOUR)
       {
         // Reset the counter for ellapsed seconds.
         _globalEllapsedSeconds = 0;

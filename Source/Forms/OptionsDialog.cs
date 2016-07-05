@@ -158,6 +158,7 @@ namespace MySql.Notifier.Forms
       Settings.Default.NotifyOfStatusChange = NotifyOfStatusChangeCheckBox.Checked;
       Settings.Default.AutoCheckForUpdates = AutoCheckUpdatesCheckBox.Checked;
       Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(CheckUpdatesWeeksNumericUpDown.Value);
+      Settings.Default.PingServicesIntervalInSeconds = Convert.ToInt32(PingMonitoredInstancesNumericUpDown.Value);
       Settings.Default.AutoAddServicesToMonitor = AutoAddServicesCheckBox.Checked;
       Settings.Default.AutoAddPattern = AutoAddRegexTextBox.Text.Trim();
       Settings.Default.UseColorfulStatusIcons = UseColorfulIconsCheckBox.Checked;
@@ -193,6 +194,7 @@ namespace MySql.Notifier.Forms
         NotifyOfStatusChangeCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("NotifyOfStatusChange");
         AutoCheckUpdatesCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("AutoCheckForUpdates");
         CheckUpdatesWeeksNumericUpDown.Value = settings.GetPropertyDefaultValueByName<int>("CheckForUpdatesFrequency");
+        PingMonitoredInstancesNumericUpDown.Value = settings.GetPropertyDefaultValueByName<int>("PingServicesIntervalInSeconds");
         AutoAddServicesCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("AutoAddServicesToMonitor");
         AutoAddRegexTextBox.Text = settings.GetPropertyDefaultValueByName<string>("AutoAddPattern");
         UseColorfulIconsCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("UseColorfulStatusIcons");
@@ -203,6 +205,7 @@ namespace MySql.Notifier.Forms
         NotifyOfStatusChangeCheckBox.Checked = settings.NotifyOfStatusChange;
         AutoCheckUpdatesCheckBox.Checked = settings.AutoCheckForUpdates;
         CheckUpdatesWeeksNumericUpDown.Value = settings.CheckForUpdatesFrequency;
+        PingMonitoredInstancesNumericUpDown.Value = settings.PingServicesIntervalInSeconds;
         AutoAddServicesCheckBox.Checked = settings.AutoAddServicesToMonitor;
         AutoAddRegexTextBox.Text = settings.AutoAddPattern;
         UseColorfulIconsCheckBox.Checked = settings.UseColorfulStatusIcons;
