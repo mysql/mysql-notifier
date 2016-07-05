@@ -117,15 +117,6 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to MySQL Notifier.
-        /// </summary>
-        internal static string AppName {
-            get {
-                return ResourceManager.GetString("AppName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to If problem persists please restart MySQL Notifier.
         /// </summary>
         internal static string AskRestartApplication {
@@ -442,6 +433,33 @@ namespace MySql.Notifier.Properties {
         internal static string ConnectionsFileLoadingErrorTitle {
             get {
                 return ResourceManager.GetString("ConnectionsFileLoadingErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Already migrated.
+        /// </summary>
+        internal static string ConnectionsMigrationAlreadyText {
+            get {
+                return ResourceManager.GetString("ConnectionsMigrationAlreadyText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Indefinite, migrate manually.
+        /// </summary>
+        internal static string ConnectionsMigrationIndefiniteText {
+            get {
+                return ResourceManager.GetString("ConnectionsMigrationIndefiniteText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No migration needed.
+        /// </summary>
+        internal static string ConnectionsMigrationNotNeededText {
+            get {
+                return ResourceManager.GetString("ConnectionsMigrationNotNeededText", resourceCulture);
             }
         }
         

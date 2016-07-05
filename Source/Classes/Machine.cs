@@ -1319,7 +1319,8 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      var service = new MySqlService(serviceName, Settings.Default.NotifyOfStatusChange, Settings.Default.NotifyOfStatusChange, this);
+      var notifyChange = Settings.Default.NotifyOfStatusChange;
+      var service = new MySqlService(serviceName, notifyChange, notifyChange, this);
       if (!Service.IsRealMySqlService(serviceName))
       {
         return;

@@ -17,9 +17,11 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
@@ -157,12 +159,22 @@ namespace MySql.Notifier.Classes
 
     private static void UpdateSettingsFile()
     {
+      // Fix the error where Notifier file had main element as MySQLForExcel
+      var settingsFilePath = NotifierSettings.SettingsFilePath;
+      XDocument xdoc = XDocument.Load(settingsFilePath);
+      var element = xdoc.Elements("MySQLForExcel").FirstOrDefault();
+      if (element != null)
+      {
+        element.Name = AssemblyInfo.AssemblyTitle.Replace(" ", string.Empty);
+        xdoc.Save(settingsFilePath);
+      }
+
+      // Change the default value for AutoAddPattern
       if (Settings.Default.AutoAddPattern == ".*mysqld.*")
       {
         Settings.Default.AutoAddPattern = "mysql";
+        Settings.Default.Save();
       }
-
-      Settings.Default.Save();
     }
 
     private static void CheckForUpdates(string arg)

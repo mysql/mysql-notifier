@@ -42,10 +42,13 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="WorkbenchMigrationRetryDelay" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">10</Value>
+      <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="WorkbenchMigrationSucceeded" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="WorkbenchMigrationLastAttempt" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.DateTime" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

@@ -15,18 +15,25 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 // 02110-1301  USA
 
-using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
 
 namespace MySql.Notifier.Classes
 {
   public class NotifierSettings : CustomSettingsProvider
   {
+    public static string SettingsFilePath
+    {
+      get
+      {
+        return Notifier.EnvironmentApplicationDataDirectory + Notifier.SETTINGS_FILE_RELATIVE_PATH;
+      }
+    }
+
     public override string ApplicationName
     {
       get
       {
-        return Resources.AppName;
+        return AssemblyInfo.AssemblyTitle;
       }
 
       set { }
@@ -36,7 +43,7 @@ namespace MySql.Notifier.Classes
     {
       get
       {
-        return Notifier.EnvironmentApplicationDataDirectory + Notifier.SETTINGS_FILE_RELATIVE_PATH;
+        return SettingsFilePath;
       }
     }
   }

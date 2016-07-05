@@ -117,10 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AppName" xml:space="preserve">
-    <value>MySQL Notifier</value>
-    <comment>Application name with a placeholder for the version</comment>
-  </data>
   <data name="ToolTipText" xml:space="preserve">
     <value>Monitoring {0} services and {1} instances</value>
     <comment>ToolTip Text appended to the AppName</comment>
@@ -551,5 +547,14 @@ Please make sure the connections.xml file is not open by another program.</value
   </data>
   <data name="CheckCommunityUpdatesMenuText" xml:space="preserve">
     <value>Check for Community Updates...</value>
+  </data>
+  <data name="ConnectionsMigrationIndefiniteText" xml:space="preserve">
+    <value>Indefinite, migrate manually</value>
+  </data>
+  <data name="ConnectionsMigrationAlreadyText" xml:space="preserve">
+    <value>Already migrated</value>
+  </data>
+  <data name="ConnectionsMigrationNotNeededText" xml:space="preserve">
+    <value>No migration needed</value>
   </data>
 </root>

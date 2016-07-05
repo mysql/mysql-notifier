@@ -25,29 +25,134 @@ namespace MySql.Notifier.Forms
 {
   public partial class OptionsDialog : AutoStyleableBaseDialog
   {
+    #region Constants
+
+    /// <summary>
+    /// The spacing in pixels defined for the inner panel of the dialog from controls.
+    /// </summary>
+    public const int DIALOG_BORDER_WIDTH = 8;
+
+    /// <summary>
+    /// The spacing in pixels defined for the inner panel of the dialog from controls.
+    /// </summary>
+    public const int DIALOG_RIGHT_SPACING_TO_CONTROLS = 80;
+
+    #endregion Constants
+
+    #region Fields
+
+    /// <summary>
+    /// The dialog's initial width.
+    /// </summary>
+    private int _initialWidth;
+
+    /// <summary>
+    /// A <see cref="Classes.Notifier"/> instance.
+    /// </summary>
+    private Classes.Notifier _notifierInstance;
+
+    #endregion Fields
+
     /// <summary>
     /// Contains options for users to customize the Notifier's behavior.
     /// </summary>
-    internal OptionsDialog()
+    /// <param name="notifierInstance">A <see cref="Classes.Notifier"/> instance.</param>
+    internal OptionsDialog(Classes.Notifier notifierInstance)
     {
       InitializeComponent();
 
-      NotifyOfAutoAddCheckBox.Checked = Settings.Default.NotifyOfAutoServiceAddition;
-      NotifyOfStatusChangeCheckBox.Checked = Settings.Default.NotifyOfStatusChange;
-      RunAtStartupCheckBox.Checked = Utility.GetRunAtStartUp(Application.ProductName);
-      AutoCheckUpdatesCheckBox.Checked = Settings.Default.AutoCheckForUpdates;
-      CheckUpdatesWeeksNumericUpDown.Value = Settings.Default.CheckForUpdatesFrequency;
-      AutoAddServicesCheckBox.Checked = Settings.Default.AutoAddServicesToMonitor;
-      AutoAddRegexTextBox.Text = Settings.Default.AutoAddPattern;
-      UseColorfulIconsCheckBox.Checked = Settings.Default.UseColorfulStatusIcons;
+      _initialWidth = Width;
+      _notifierInstance = notifierInstance;
+      RefreshControlValues(false);
+      SetAutomaticMigrationDelayText();
     }
 
-    private void DialogApplyButton_Click(object sender, EventArgs e)
+    /// <summary>
+    /// Gets a value indicating whether the <see cref="MigrateWorkbenchConnectionsButton"/> should be enabled.
+    /// </summary>
+    private bool MigrateConnectionsButtonEnabled
     {
-      var updateTask = AutoCheckUpdatesCheckBox.Checked != Settings.Default.AutoCheckForUpdates;
-      var deleteTask = !AutoCheckUpdatesCheckBox.Checked && Settings.Default.AutoCheckForUpdates;
+      get
+      {
+        return !Settings.Default.WorkbenchMigrationSucceeded &&
+               Settings.Default.WorkbenchMigrationLastAttempt != DateTime.MinValue &&
+               Settings.Default.WorkbenchMigrationRetryDelay != 0;
+      }
+    }
 
-      if (Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(CheckUpdatesWeeksNumericUpDown.Value)) updateTask = true;
+    /// <summary>
+    /// Icnreases the width of the dialog in case the <see cref="AutomaticMigrationDelayLabel"/> gets too big.
+    /// </summary>
+    private void SetAutomaticMigrationDelayText()
+    {
+      SuspendLayout();
+
+      var nextMigration = _notifierInstance.NextAutomaticConnectionsMigration;
+      string nextMigrationDate = nextMigration.Equals(DateTime.MaxValue)
+        ? Resources.ConnectionsMigrationIndefiniteText
+        : (nextMigration.Equals(DateTime.MinValue)
+            ? (Settings.Default.WorkbenchMigrationSucceeded ? Resources.ConnectionsMigrationAlreadyText : Resources.ConnectionsMigrationNotNeededText)
+            : nextMigration.ToLongDateString() + " " + nextMigration.ToShortTimeString());
+      AutomaticMigrationDelayValueLabel.Text = nextMigrationDate;
+      MigrateWorkbenchConnectionsButton.Enabled = MigrateConnectionsButtonEnabled;
+      Width = _initialWidth;
+      var spacingDelta = AutomaticMigrationDelayValueLabel.Location.X + AutomaticMigrationDelayValueLabel.Size.Width + DIALOG_RIGHT_SPACING_TO_CONTROLS + (DIALOG_BORDER_WIDTH * 2) - Width;
+      if (spacingDelta > 0)
+      {
+        Width += spacingDelta;
+      }
+
+      ResumeLayout();
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="AutoCheckUpdatesCheckBox"/> is checked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void AutoCheckUpdatesCheckBox_CheckedChanged(object sender, EventArgs e)
+    {
+      CheckUpdatesWeeksNumericUpDown.Enabled = AutoCheckUpdatesCheckBox.Checked;
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="AutoAddServicesCheckBox"/> is checked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void AutoAddServicesCheckBox_CheckedChanged(object sender, EventArgs e)
+    {
+      bool enableRelated = AutoAddServicesCheckBox.Checked;
+      AutoAddRegexTextBox.Enabled = enableRelated;
+      NotifyOfAutoAddCheckBox.Enabled = enableRelated;
+      if (!enableRelated)
+      {
+        AutoAddRegexTextBox.Text = string.Empty;
+        NotifyOfAutoAddCheckBox.Checked = false;
+      }
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="MigrateWorkbenchConnectionsButton"/> is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void MigrateWorkbenchConnectionsButton_Click(object sender, EventArgs e)
+    {
+      _notifierInstance.MigrateExternalConnectionsToWorkbench(false);
+      SetAutomaticMigrationDelayText();
+    }
+
+    /// <summary>
+    /// Event delegate method fired when the <see cref="OptionsDialog"/> is being closed.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void OptionsDialog_FormClosing(object sender, FormClosingEventArgs e)
+    {
+      var updateTask = AutoCheckUpdatesCheckBox.Checked != Settings.Default.AutoCheckForUpdates
+                        || Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(CheckUpdatesWeeksNumericUpDown.Value);
+      var deleteTask = !AutoCheckUpdatesCheckBox.Checked && Settings.Default.AutoCheckForUpdates;
 
       Settings.Default.NotifyOfAutoServiceAddition = NotifyOfAutoAddCheckBox.Checked;
       Settings.Default.NotifyOfStatusChange = NotifyOfStatusChangeCheckBox.Checked;
@@ -75,14 +180,46 @@ namespace MySql.Notifier.Forms
       }
     }
 
-    private void AutoCheckUpdatesCheckBox_CheckedChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Refreshes the dialog controls' values.
+    /// </summary>
+    /// <param name="useDefaultValues">Controls are set to their default values if <c>true</c>. Current stored values in application settings are used otherwise.</param>
+    private void RefreshControlValues(bool useDefaultValues)
     {
-      CheckUpdatesWeeksNumericUpDown.Enabled = AutoCheckUpdatesCheckBox.Checked;
+      var settings = Settings.Default;
+      if (useDefaultValues)
+      {
+        NotifyOfAutoAddCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("NotifyOfAutoServiceAddition");
+        NotifyOfStatusChangeCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("NotifyOfStatusChange");
+        AutoCheckUpdatesCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("AutoCheckForUpdates");
+        CheckUpdatesWeeksNumericUpDown.Value = settings.GetPropertyDefaultValueByName<int>("CheckForUpdatesFrequency");
+        AutoAddServicesCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("AutoAddServicesToMonitor");
+        AutoAddRegexTextBox.Text = settings.GetPropertyDefaultValueByName<string>("AutoAddPattern");
+        UseColorfulIconsCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("UseColorfulStatusIcons");
+      }
+      else
+      {
+        NotifyOfAutoAddCheckBox.Checked = settings.NotifyOfAutoServiceAddition;
+        NotifyOfStatusChangeCheckBox.Checked = settings.NotifyOfStatusChange;
+        AutoCheckUpdatesCheckBox.Checked = settings.AutoCheckForUpdates;
+        CheckUpdatesWeeksNumericUpDown.Value = settings.CheckForUpdatesFrequency;
+        AutoAddServicesCheckBox.Checked = settings.AutoAddServicesToMonitor;
+        AutoAddRegexTextBox.Text = settings.AutoAddPattern;
+        UseColorfulIconsCheckBox.Checked = settings.UseColorfulStatusIcons;
+      }
+
+      RunAtStartupCheckBox.Checked = Utility.GetRunAtStartUp(Application.ProductName);
     }
 
-    private void AutoAddServicesCheckBox_CheckedChanged(object sender, EventArgs e)
+    /// <summary>
+    /// Event delegate method fired when the <see cref="ResetToDefaultsButton"/> is clicked.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void ResetToDefaultsButton_Click(object sender, EventArgs e)
     {
-      AutoAddRegexTextBox.Enabled = AutoAddServicesCheckBox.Checked;
+      RefreshControlValues(true);
+      Refresh();
     }
   }
 }
