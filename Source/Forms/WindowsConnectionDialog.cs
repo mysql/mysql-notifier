@@ -28,15 +28,24 @@ namespace MySql.Notifier.Forms
 {
   public partial class WindowsConnectionDialog : MachineAwareForm
   {
+    #region Constants
+
     /// <summary>
     /// Regular Expresion for a valid computer's IP address.
     /// </summary>
-    private const string VALID_IP_REGEX = @"^([01]?[\d][\d]?|2[0-4][\d]|25[0-5])(\.([01]?[\d][\d]?|2[0-4][\d]|25[0-5])){3}$";
+    private const string VALID_IP_REGEX = @"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
 
     /// <summary>
-    /// Regular Expresion for a valid Host/User name.
+    /// Regular Expression for a valid Host name.
     /// </summary>
-    private const string VALID_NAME_REGEX = @"^[\w\.\-_]{1,64}$";
+    private const string VALID_HOSTNAME_REGEX = @"^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$";
+
+    /// <summary>
+    /// Regular Expresion for a valid User name.
+    /// </summary>
+    private const string VALID_DOMAIN_USERNAME_REGEX = @"^(([a-z][a-z0-9.-]+)\\)?(?![\x20.]+$)([^\\/""[\]:|<>+=;,?*@]+)$";
+
+    #endregion Constants
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WindowsConnectionDialog"/> class.
@@ -228,20 +237,20 @@ namespace MySql.Notifier.Forms
     private void ValidateEntries()
     {
       // Validate Host name
-      if (!string.IsNullOrEmpty(HostTextBox.Text))
+    if (!string.IsNullOrEmpty(HostTextBox.Text))
       {
         bool validName;
         string hostname = HostTextBox.Text.Trim();
         if (hostname.ToLowerInvariant() == MySqlWorkbenchConnection.DEFAULT_HOSTNAME || hostname == MySqlWorkbenchConnection.LOCAL_IP || hostname == ".")
         {
-          // Host name is invalid if is a local machine
+          // Since we are attempting to add a remote computer, we deem the Host name as invalid if it resolves to a local machine.
           validName = false;
           var infoDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.CannotAddLocalhostTitle, Resources.CannotAddLocalhostMessage));
           infoDialog.ShowDialog();
         }
         else if (!EditMode && MachinesList.HasMachineWithName(hostname))
         {
-          // Host name already exists on the list of added remote machines
+          // Host name already exists on the list of added remote machines.
           validName = false;
           var infoDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage));
           infoDialog.ShowDialog();
@@ -249,14 +258,14 @@ namespace MySql.Notifier.Forms
         else
         {
           // Host name is also invalid if has non allowed characters or if is not a proper formated IP address.
-          validName = Regex.IsMatch(hostname, VALID_NAME_REGEX) || Regex.IsMatch(hostname, VALID_IP_REGEX);
+          validName = Regex.IsMatch(hostname, VALID_HOSTNAME_REGEX) || Regex.IsMatch(hostname, VALID_IP_REGEX);
         }
 
         hostErrorSign.Visible = !validName;
       }
 
       // Username is invalid if if has non allowed characters.
-      userErrorSign.Visible = !string.IsNullOrEmpty(UserTextBox.Text) && !Regex.IsMatch(UserTextBox.Text, VALID_NAME_REGEX);
+      userErrorSign.Visible = !string.IsNullOrEmpty(UserTextBox.Text) && !Regex.IsMatch(UserTextBox.Text, VALID_DOMAIN_USERNAME_REGEX);
 
       // Enable DialogOKButton if entries seem valid.
       DialogOKButton.Enabled = EntriesAreValid;
