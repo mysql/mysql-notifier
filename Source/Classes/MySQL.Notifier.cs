@@ -226,10 +226,8 @@ namespace MySql.Notifier.Classes
       StatusRefreshInProgress = false;
 
       // Static initializations.
-      InitializeMySqlWorkbenchStaticSettings();
       InstallLocation = Utility.GetMySqlAppInstallLocation(AssemblyInfo.AssemblyTitle);
-      MySqlInstaller.InstallerLegacyDllPath = InstallLocation;
-      MySqlInstaller.LoadData();
+      InitializeStaticSettings();
       CustomizeInfoDialog();
 
       _components = new Container();
@@ -363,9 +361,9 @@ namespace MySql.Notifier.Classes
     #endregion Properties
 
     /// <summary>
-    /// Initializes settings for the <see cref="MySqlWorkbench"/> and <see cref="MySqlWorkbenchPasswordVault"/> classes.
+    /// Initializes settings for the <see cref="MySqlWorkbench"/>, <see cref="MySqlSourceTrace"/>, <see cref="MySqlWorkbenchPasswordVault"/> and <see cref="MySqlInstaller"/> classes.
     /// </summary>
-    public static void InitializeMySqlWorkbenchStaticSettings()
+    public static void InitializeStaticSettings()
     {
       MySqlSourceTrace.LogFilePath = EnvironmentApplicationDataDirectory + ERROR_LOG_FILE_RELATIVE_PATH;
       MySqlSourceTrace.SourceTraceClass = "MySqlNotifier";
@@ -374,6 +372,10 @@ namespace MySql.Notifier.Classes
       MySqlWorkbench.ExternalConnections.CreateDefaultConnections = !MySqlWorkbench.ConnectionsFileExists && MySqlWorkbench.Connections.Count == 0;
       MySqlWorkbench.ExternalApplicationsConnectionsFileRetryLoadOrRecreate = true;
       MySqlWorkbench.ExternalApplicationConnectionsFilePath = EnvironmentApplicationDataDirectory + CONNECTIONS_FILE_RELATIVE_PATH;
+      MySqlWorkbench.LoadData();
+      MySqlWorkbench.LoadServers();
+      MySqlInstaller.InstallerLegacyDllPath = InstallLocation;
+      MySqlInstaller.LoadData();
     }
 
     /// <summary>
