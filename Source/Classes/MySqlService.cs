@@ -185,7 +185,7 @@ namespace MySql.Notifier.Classes
 
       set
       {
-        if (!String.IsNullOrEmpty(value))
+        if (!string.IsNullOrEmpty(value))
         {
           _displayName = value;
         }
@@ -197,6 +197,20 @@ namespace MySql.Notifier.Classes
     /// </summary>
     [XmlIgnore]
     public Machine Host { get; set; }
+
+    /// <summary>
+    /// Gets a value indicating whether this service is bound to a real MySQL service.
+    /// </summary>
+    [XmlIgnore]
+    public bool IsRealMySqlService
+    {
+      get
+      {
+        return StartupParameters != null
+          ? StartupParameters.IsRealMySqlService
+          : _managementObject != null && Service.IsMySqlExecutable(_managementObject.Properties["PathName"].Value.ToString());
+      }
+    }
 
     /// <summary>
     /// Gets the group of ToolStripMenuItem controls for each of the corresponding instance's context menu items.
@@ -323,7 +337,7 @@ namespace MySql.Notifier.Classes
         WorkbenchConnections.Clear();
       }
 
-      var filteredConnections = MySqlWorkbench.WorkbenchConnections.Where(t => !String.IsNullOrEmpty(t.Name) && t.Port == StartupParameters.Port).ToList();
+      var filteredConnections = MySqlWorkbench.WorkbenchConnections.Where(t => !string.IsNullOrEmpty(t.Name) && t.Port == StartupParameters.Port).ToList();
       foreach (MySqlWorkbenchConnection c in filteredConnections)
       {
         switch (c.ConnectionMethod)
@@ -741,7 +755,7 @@ namespace MySql.Notifier.Classes
     {
       if (!Service.ExistsServiceInstance(ServiceName))
       {
-        throw new Exception(String.Format(Resources.BalloonTextServiceNotFound, ServiceName));
+        throw new Exception(string.Format(Resources.BalloonTextServiceNotFound, ServiceName));
       }
 
       int action = (int)e.Argument;

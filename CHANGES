@@ -5,6 +5,9 @@
   offers a way to postpone the migration 1 hour, 1 day, 1 week, 1 month or indefinitely. If the migration is postponed the dialog is shown again
   after that time elapses, although if it is postponed indefinitely an option was added to the Options dialog that permits the migration of
   connections to be done manually, as long as MySQL Workbench is installed.
+- Fixed code that checks if a Windows Service to be monitored is actually one for a MySQL Server. Previous checks were relying on the Windows
+  Registry which is only valid for local computers. For remote computers the information can be queried through WMI.
+  (MySQL Bug #75319, Bug #20389122 - MYSQL NOTIFIER 1.1.6 HIGH SEVERITY ERROR WHEN ACCESSING REMOTE SERVERS)
 - Fixed the regular expression used for the user names validation so that a user name in a "<domain>\<username>" format is treated as valid.
   Updated the regular expressions that validate a host name or IP address as well.
   (MySQL Bug #82120, Bug #23746334 - DOMAIN USERS TREATED AS INVALID WHEN ADDING REMOTE WINDOWS SERVICES)
