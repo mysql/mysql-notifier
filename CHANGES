@@ -23,7 +23,6 @@
 - Added code to let users retry the loading of a connections information XML file, and re-create the file from scratch if loading fails. This is
   in case the connections.xml file gets corrupted for any reason. The only way to get the "Root element is missing" error is if the XML file
   got corrupted. (MySQL Bug #73540, Bug #22160640 - HIGH SEVERITY ERROR: ROOT ELEMENT IS MISSING)
-- Allowed the retry of external connections. (Source/Forms/MonitorMySQLServerInstancesDialog.cs)
 - Fixed code so that the initialization of the errors handler is initialized before any code that uses it.
   (Bug #17825477 - LOG FILE PATH MAST BE DEFINED BEFORE CALLING THE WRITETOLOG METHOD ERROR)
 
