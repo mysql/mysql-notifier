@@ -46,17 +46,17 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// The relative path of the Notifier's connections file under the application data directory.
     /// </summary>
-    public const string CONNECTIONS_FILE_RELATIVE_PATH = @"\Oracle\MySQL Notifier\connections.xml";
+    public const string CONNECTIONS_FILE_RELATIVE_PATH = SETTINGS_DIRECTORY_RELATIVE_PATH + @"\connections.xml";
 
     /// <summary>
     /// The relative path of the Notifier's error log file under the application data directory.
     /// </summary>
-    public const string ERROR_LOG_FILE_RELATIVE_PATH = @"\Oracle\MySQL Notifier\MySQLNotifier.log";
+    public const string ERROR_LOG_FILE_RELATIVE_PATH = SETTINGS_DIRECTORY_RELATIVE_PATH + @"\MySQLNotifier.log";
 
     /// <summary>
     /// The relative path of the Notifier's passwords vault file under the application data directory.
     /// </summary>
-    public const string PASSWORDS_VAULT_FILE_RELATIVE_PATH = @"\Oracle\MySQL Notifier\user_data.dat";
+    public const string PASSWORDS_VAULT_FILE_RELATIVE_PATH = SETTINGS_DIRECTORY_RELATIVE_PATH + @"\user_data.dat";
 
     /// <summary>
     /// The number of seconds in 1 hour.
@@ -64,9 +64,14 @@ namespace MySql.Notifier.Classes
     public const int SECONDS_IN_HOUR = 3600;
 
     /// <summary>
+    /// The relative path of the settings directory under the application data directory.
+    /// </summary>
+    public const string SETTINGS_DIRECTORY_RELATIVE_PATH = @"\Oracle\MySQL Notifier";
+
+    /// <summary>
     /// The relative path of the Notifier's settings file under the application data directory.
     /// </summary>
-    public const string SETTINGS_FILE_RELATIVE_PATH = @"\Oracle\MySQL Notifier\settings.config";
+    public const string SETTINGS_FILE_RELATIVE_PATH = SETTINGS_DIRECTORY_RELATIVE_PATH + @"\settings.config";
 
     /// <summary>
     /// Default connections file load retry wait interval in milliseconds.
@@ -460,13 +465,20 @@ namespace MySql.Notifier.Classes
         MySqlWorkbench.MigrateExternalConnectionsToWorkbench(showDelayOptions);
       }
 
+      // Update settings depending on the migration outcome.
       Settings.Default.WorkbenchMigrationSucceeded = MySqlWorkbench.ConnectionsMigrationStatus == MySqlWorkbench.ConnectionsMigrationStatusType.MigrationNeededAlreadyMigrated;
-      Settings.Default.WorkbenchMigrationLastAttempt = MySqlWorkbench.ConnectionsMigrationStatus == MySqlWorkbench.ConnectionsMigrationStatusType.MigrationNeededButNotMigrated
-        ? DateTime.Now
-        : DateTime.MinValue;
-      if (showDelayOptions)
+      if (MySqlWorkbench.ConnectionsMigrationStatus == MySqlWorkbench.ConnectionsMigrationStatusType.MigrationNeededButNotMigrated)
       {
-        Settings.Default.WorkbenchMigrationRetryDelay = MySqlWorkbench.ConnectionsMigrationDelay.ToHours();
+        Settings.Default.WorkbenchMigrationLastAttempt = DateTime.Now;
+        if (showDelayOptions)
+        {
+          Settings.Default.WorkbenchMigrationRetryDelay = MySqlWorkbench.ConnectionsMigrationDelay.ToHours();
+        }
+      }
+      else
+      {
+        Settings.Default.WorkbenchMigrationLastAttempt = DateTime.MinValue;
+        Settings.Default.WorkbenchMigrationRetryDelay = 0;
       }
 
       Settings.Default.Save();
@@ -530,25 +542,6 @@ namespace MySql.Notifier.Classes
     }
 
     /// <summary>
-    /// Starts the global timer that fires connection status checks.
-    /// </summary>
-    public void StartGlobalTimer()
-    {
-      if (_globalTimer == null)
-      {
-        var pingInterval = Settings.Default.PingServicesIntervalInSeconds;
-        _globalTimer = new Timer { AutoReset = true };
-        _globalTimer.Elapsed += UpdateMachinesAndInstancesConnectionTimeouts;
-        _globalTimer.Interval = (pingInterval > 0 ? Settings.Default.PingServicesIntervalInSeconds : 1) * MILLISECONDS_IN_SECOND;
-      }
-
-      if (!_globalTimer.Enabled)
-      {
-        _globalTimer.Start();
-      }
-    }
-
-    /// <summary>
     /// Releases all resources used by the <see cref="Notifier"/> class
     /// </summary>
     /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
@@ -560,6 +553,16 @@ namespace MySql.Notifier.Classes
         if (_components != null)
         {
           _components.Dispose();
+        }
+
+        if (_globalTimer != null)
+        {
+          if (_globalTimer.Enabled)
+          {
+            _globalTimer.Enabled = false;
+          }
+
+          _globalTimer.Dispose();
         }
 
         if (_hasUpdatesSeparator != null)
@@ -1744,6 +1747,25 @@ namespace MySql.Notifier.Classes
       _notifyIcon.BalloonTipTitle = title;
       _notifyIcon.BalloonTipText = text;
       _notifyIcon.ShowBalloonTip(delay);
+    }
+
+    /// <summary>
+    /// Starts the global timer that fires connection status checks.
+    /// </summary>
+    private void StartGlobalTimer()
+    {
+      if (_globalTimer == null)
+      {
+        var pingInterval = Settings.Default.PingServicesIntervalInSeconds;
+        _globalTimer = new Timer { AutoReset = true };
+        _globalTimer.Elapsed += UpdateMachinesAndInstancesConnectionTimeouts;
+        _globalTimer.Interval = (pingInterval > 0 ? Settings.Default.PingServicesIntervalInSeconds : 1) * MILLISECONDS_IN_SECOND;
+      }
+
+      if (!_globalTimer.Enabled)
+      {
+        _globalTimer.Start();
+      }
     }
 
     /// <summary>

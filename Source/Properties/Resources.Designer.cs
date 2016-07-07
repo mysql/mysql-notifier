@@ -437,33 +437,6 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Already migrated.
-        /// </summary>
-        internal static string ConnectionsMigrationAlreadyText {
-            get {
-                return ResourceManager.GetString("ConnectionsMigrationAlreadyText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Indefinite, migrate manually.
-        /// </summary>
-        internal static string ConnectionsMigrationIndefiniteText {
-            get {
-                return ResourceManager.GetString("ConnectionsMigrationIndefiniteText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No migration needed.
-        /// </summary>
-        internal static string ConnectionsMigrationNotNeededText {
-            get {
-                return ResourceManager.GetString("ConnectionsMigrationNotNeededText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to You are able to monitor services in this remote machine..
         /// </summary>
         internal static string ConnectionSuccessfulMessage {

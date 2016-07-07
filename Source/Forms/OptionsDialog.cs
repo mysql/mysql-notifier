@@ -19,6 +19,7 @@ using System;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQLWorkbench;
 using MySQL.Utility.Forms;
 
 namespace MySql.Notifier.Forms
@@ -87,13 +88,7 @@ namespace MySql.Notifier.Forms
     {
       SuspendLayout();
 
-      var nextMigration = _notifierInstance.NextAutomaticConnectionsMigration;
-      string nextMigrationDate = nextMigration.Equals(DateTime.MaxValue)
-        ? Resources.ConnectionsMigrationIndefiniteText
-        : (nextMigration.Equals(DateTime.MinValue)
-            ? (Settings.Default.WorkbenchMigrationSucceeded ? Resources.ConnectionsMigrationAlreadyText : Resources.ConnectionsMigrationNotNeededText)
-            : nextMigration.ToLongDateString() + " " + nextMigration.ToShortTimeString());
-      AutomaticMigrationDelayValueLabel.Text = nextMigrationDate;
+      AutomaticMigrationDelayValueLabel.Text = MySqlWorkbench.GetConnectionsMigrationDelayText(_notifierInstance.NextAutomaticConnectionsMigration, Settings.Default.WorkbenchMigrationSucceeded);
       MigrateWorkbenchConnectionsButton.Enabled = MigrateConnectionsButtonEnabled;
       Width = _initialWidth;
       var spacingDelta = AutomaticMigrationDelayValueLabel.Location.X + AutomaticMigrationDelayValueLabel.Size.Width + DIALOG_RIGHT_SPACING_TO_CONTROLS + (DIALOG_BORDER_WIDTH * 2) - Width;

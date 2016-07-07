@@ -548,13 +548,4 @@ Please make sure the connections.xml file is not open by another program.</value
   <data name="CheckCommunityUpdatesMenuText" xml:space="preserve">
     <value>Check for Community Updates...</value>
   </data>
-  <data name="ConnectionsMigrationIndefiniteText" xml:space="preserve">
-    <value>Indefinite, migrate manually</value>
-  </data>
-  <data name="ConnectionsMigrationAlreadyText" xml:space="preserve">
-    <value>Already migrated</value>
-  </data>
-  <data name="ConnectionsMigrationNotNeededText" xml:space="preserve">
-    <value>No migration needed</value>
-  </data>
 </root>

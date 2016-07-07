@@ -19,8 +19,14 @@ using MySQL.Utility.Classes;
 
 namespace MySql.Notifier.Classes
 {
+  /// <summary>
+  /// A settings provider customized for MySQL Notifier.
+  /// </summary>
   public class NotifierSettings : CustomSettingsProvider
   {
+    /// <summary>
+    /// Gets the fle path for the settings file.
+    /// </summary>
     public static string SettingsFilePath
     {
       get
@@ -29,6 +35,9 @@ namespace MySql.Notifier.Classes
       }
     }
 
+    /// <summary>
+    /// Gets the name of this application.
+    /// </summary>
     public override string ApplicationName
     {
       get
@@ -36,9 +45,14 @@ namespace MySql.Notifier.Classes
         return AssemblyInfo.AssemblyTitle;
       }
 
-      set { }
+      set
+      {
+      }
     }
 
+    /// <summary>
+    /// Gets the custom path where the settings file is saved.
+    /// </summary>
     public override string SettingsPath
     {
       get
