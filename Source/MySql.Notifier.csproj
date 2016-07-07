@@ -263,6 +263,7 @@
     <None Include="Resources\signal-red.gif" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\SplashScreen.png" />
     <None Include="Resources\RefreshStatus.png" />
     <None Include="Resources\refresh.png" />
     <None Include="Resources\NotifierSplashWindow.png" />

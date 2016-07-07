@@ -225,9 +225,6 @@
   <data name="UnSupportedWBXMLVersion" xml:space="preserve">
     <value>Unsupported XML File Version</value>
   </data>
-  <data name="logo_mysql" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\logo-mysql.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="BalloonTextFailedStatusChange" xml:space="preserve">
     <value>The service {0} failed the most recent status change request with the message {1}.</value>
   </data>
@@ -284,9 +281,6 @@
   </data>
   <data name="LaunchUtilities" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\LaunchUtilities.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="AboutBackGroundDialog" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\NotifierSplashWindow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Installer11RequiredForCheckForUpdates" xml:space="preserve">
     <value>MySQL Installer For Windows 1.1 or later must be installed{0}to enable check for updates.</value>
@@ -547,5 +541,8 @@ Please make sure the connections.xml file is not open by another program.</value
   </data>
   <data name="CheckCommunityUpdatesMenuText" xml:space="preserve">
     <value>Check for Community Updates...</value>
+  </data>
+  <data name="SplashScreen" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SplashScreen.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

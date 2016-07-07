@@ -61,16 +61,6 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap AboutBackGroundDialog {
-            get {
-                object obj = ResourceManager.GetObject("AboutBackGroundDialog", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to About....
         /// </summary>
         internal static string AboutMenuText {
@@ -639,16 +629,6 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap logo_mysql {
-            get {
-                object obj = ResourceManager.GetObject("logo_mysql", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The machine you&apos;re attempting to add already exists on the list of machines monitoring services..
         /// </summary>
         internal static string MachineAlreadyExistMessage {
@@ -1073,6 +1053,16 @@ namespace MySql.Notifier.Properties {
         internal static string SoftwareUpdate {
             get {
                 return ResourceManager.GetString("SoftwareUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SplashScreen {
+            get {
+                object obj = ResourceManager.GetObject("SplashScreen", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
