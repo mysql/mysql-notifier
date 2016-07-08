@@ -28,7 +28,6 @@ using System.Xml.Serialization;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQL;
 using MySQL.Utility.Classes.MySQLWorkbench;
 using MySQL.Utility.Forms;
 
@@ -907,23 +906,18 @@ namespace MySql.Notifier.Classes
         return wmiServicesCollection;
       }
 
-      MySqlSourceTrace.WriteToLog(ConnectionProblemLongDescription, SourceLevels.Information);
-      MySqlSourceTrace.WriteAppErrorToLog(connectionException);
+      Program.MySqlNotifierErrorHandler(ConnectionProblemLongDescription, false, connectionException, SourceLevels.Information);
       if (displayMessageOnError)
       {
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-          ConnectionProblemShortDescription,
+        var infoProperties = InfoDialogProperties.GetErrorDialogProperties(ConnectionProblemShortDescription,
           ConnectionProblemLongDescription,
           null,
           ConnectionProblem == ConnectionProblemType.InsufficientAccessPermissions
-            ? Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine +
-              connectionException.Message
-            : null)))
-        {
-          errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
-          errorDialog.DefaultButtonTimeout = 30;
-          errorDialog.ShowDialog();
-        }
+            ? string.Format("{0}{1}{1}{2}", Resources.MachineUnavailableExtendedMessage, Environment.NewLine, connectionException.Message)
+            : null);
+        infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+        infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
+        InfoDialog.ShowDialog(infoProperties);
       }
 
       return null;
@@ -1529,20 +1523,17 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         ConnectionProblem = ConnectionProblemType.InsufficientAccessPermissions;
-        MySqlSourceTrace.WriteToLog(ConnectionProblemLongDescription, SourceLevels.Information);
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
+        Program.MySqlNotifierErrorHandler(ConnectionProblemLongDescription, false, ex, SourceLevels.Information);
         if (displayMessageOnError)
         {
-          using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
+          var infoProperties = InfoDialogProperties.GetErrorDialogProperties(
             ConnectionProblemShortDescription,
             ConnectionProblemLongDescription,
             null,
-            Resources.MachineUnavailableExtendedMessage + Environment.NewLine + Environment.NewLine + ex.Message)))
-          {
-            errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
-            errorDialog.DefaultButtonTimeout = 30;
-            errorDialog.ShowDialog();
-          }
+            string.Format("{0}{1}{1}{2}", Resources.MachineUnavailableExtendedMessage, Environment.NewLine, ex.Message));
+          infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+          infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
+          InfoDialog.ShowDialog(infoProperties);
         }
       }
       finally

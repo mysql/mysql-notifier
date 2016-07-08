@@ -20,9 +20,7 @@ using System.ComponentModel;
 using System.Management;
 using System.Threading;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQL;
-using MySQL.Utility.Forms;
 
 namespace MySql.Notifier.Classes
 {
@@ -408,15 +406,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-          Resources.WMIEventsSubscriptionErrorTitle,
-          Resources.WMIEventsSubscriptionErrorDetail,
-          null,
-          ex.Message)))
-        {
-          errorDialog.ShowDialog();
-        }
+        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, true, ex);
       }
 
       return success;
@@ -434,18 +424,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      MySqlSourceTrace.WriteAppErrorToLog(e.Error);
-      using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-        Resources.WMISemiSyncEventsErrorTitle,
-        string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncCreationWatcher.Scope.Path.Server),
-        null,
-        e.Error.Message)))
-      {
-        errorDialog.WordWrapMoreInfo = false;
-        errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
-        errorDialog.DefaultButtonTimeout = 30;
-        errorDialog.ShowDialog();
-      }
+      Program.MySqlNotifierErrorHandler(Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncCreationWatcher.Scope.Path.Server), true, e.Error);
     }
 
     /// <summary>
@@ -554,18 +533,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
-        if (displayErrors)
-        {
-          using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-            Resources.WMIEventsSubscriptionErrorTitle,
-            Resources.WMIEventsSubscriptionErrorDetail,
-            null,
-            ex.Message)))
-          {
-            errorDialog.ShowDialog();
-          }
-        }
+        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors, ex);
       }
 
       return success;
@@ -634,15 +602,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-          Resources.WMIEventsSubscriptionErrorTitle,
-          Resources.WMIEventsSubscriptionErrorDetail,
-          null,
-          ex.Message)))
-        {
-          errorDialog.ShowDialog();
-        }
+        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, true, ex);
       }
 
       return success;
@@ -660,18 +620,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      MySqlSourceTrace.WriteAppErrorToLog(e.Error);
-      using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-        Resources.WMISemiSyncEventsErrorTitle,
-        string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncDeletionWatcher.Scope.Path.Server),
-        null,
-        e.Error.Message)))
-      {
-        errorDialog.WordWrapMoreInfo = false;
-        errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
-        errorDialog.DefaultButtonTimeout = 30;
-        errorDialog.ShowDialog();
-      }
+      Program.MySqlNotifierErrorHandler(Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncDeletionWatcher.Scope.Path.Server), true, e.Error);
     }
 
     /// <summary>
@@ -776,18 +725,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
-        if (displayErrors)
-        {
-          using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-            Resources.WMIEventsSubscriptionErrorTitle,
-            Resources.WMIEventsSubscriptionErrorDetail,
-            null,
-            ex.Message)))
-          {
-            errorDialog.ShowDialog();
-          }
-        }
+        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors, ex);
       }
 
       return success;
@@ -856,15 +794,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-          Resources.WMIEventsSubscriptionErrorTitle,
-          Resources.WMIEventsSubscriptionErrorDetail,
-          null,
-          ex.Message)))
-        {
-          errorDialog.ShowDialog();
-        }
+        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, true, ex);
       }
 
       return success;
@@ -882,18 +812,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      MySqlSourceTrace.WriteAppErrorToLog(e.Error);
-      using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-        Resources.WMISemiSyncEventsErrorTitle,
-        string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncStatusChangeWatcher.Scope.Path.Server),
-        null,
-        e.Error.Message)))
-      {
-        errorDialog.WordWrapMoreInfo = false;
-        errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
-        errorDialog.DefaultButtonTimeout = 30;
-        errorDialog.ShowDialog();
-      }
+      Program.MySqlNotifierErrorHandler(Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncStatusChangeWatcher.Scope.Path.Server), true, e.Error);
     }
 
     /// <summary>
@@ -998,18 +917,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
-        if (displayErrors)
-        {
-          using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-            Resources.WMIEventsSubscriptionErrorTitle,
-            Resources.WMIEventsSubscriptionErrorDetail,
-            null,
-            ex.Message)))
-          {
-            errorDialog.ShowDialog();
-          }
-        }
+        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors, ex);
       }
 
       return success;

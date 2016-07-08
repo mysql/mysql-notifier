@@ -20,10 +20,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQL;
 using MySQL.Utility.Classes.MySQLWorkbench;
-using MySQL.Utility.Forms;
 
 namespace MySql.Notifier.Classes
 {
@@ -386,11 +383,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.ErrorTitle, string.Format(Resources.FailureToLaunchWorkbench, ex.Message))))
-        {
-          errorDialog.ShowDialog();
-        }
+        Program.MySqlNotifierErrorHandler(Resources.FailureToLaunchWorkbench, true, ex);
       }
     }
 
@@ -424,11 +417,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.ErrorTitle, Resources.FailureToLaunchWorkbench)))
-        {
-          errorDialog.ShowDialog();
-        }
+        Program.MySqlNotifierErrorHandler(Resources.FailureToLaunchWorkbench, true, ex);
       }
     }
 

@@ -17,6 +17,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -35,45 +36,67 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Sends an error message to the application log and optionally shows it to the users.
     /// </summary>
+    /// <param name="errorTitle">The title displayed on the error dialog.</param>
     /// <param name="errorMessage">A custom error message.</param>
     /// <param name="showErrorDialog">Flag indicating whether the error is shown to users.</param>
     /// <param name="exception">An <see cref="Exception"/> object.</param>
     /// <param name="errorLevel">The <see cref="SourceLevels"/> to describe the severity of the error.</param>
-    public static void MySQLNotifierErrorHandler(string errorMessage, bool showErrorDialog, Exception exception, SourceLevels errorLevel)
+    public static void MySqlNotifierErrorHandler(string errorTitle, string errorMessage, bool showErrorDialog, Exception exception, SourceLevels errorLevel = SourceLevels.Error)
     {
-      if (string.IsNullOrEmpty(errorMessage))
+      bool emptyErrorMessage = string.IsNullOrEmpty(errorMessage);
+      if (string.IsNullOrEmpty(errorTitle))
+      {
+        errorTitle = errorLevel == SourceLevels.Critical || emptyErrorMessage ? Resources.HighSeverityError : Resources.ErrorTitle;
+      }
+
+      if (emptyErrorMessage)
       {
         errorMessage = Resources.UnhandledExceptionText;
       }
 
+      string exceptionMessage = null;
+      string exceptionMoreInfo = null;
       var errorBuilder = new StringBuilder(errorMessage);
-      if (exception.Message.Length > 0)
+      if (exception != null)
       {
-        errorBuilder.Append(Environment.NewLine);
-        errorBuilder.Append(exception.Message);
-      }
+        if (exception.Message.Length > 0)
+        {
+          exceptionMessage = exception.Message;
+          errorBuilder.AppendLine(exception.Message);
+        }
 
-      if (exception.InnerException != null)
-      {
-        errorBuilder.Append(Environment.NewLine);
-        errorBuilder.Append(exception.InnerException.Message);
+        if (exception.InnerException != null)
+        {
+          errorBuilder.AppendLine(exception.InnerException.Message);
+          exceptionMoreInfo = exception.InnerException != null ? string.Format("{0}{1}{1}", exception.InnerException.Message, Environment.NewLine) : string.Empty;
+        }
+
+        exceptionMoreInfo += exception.StackTrace;
       }
 
       string completeErrorMessage = errorBuilder.ToString();
       if (showErrorDialog)
       {
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-          string.IsNullOrEmpty(errorMessage) ? Resources.HighSeverityError : errorMessage,
-          exception.Message,
-          null,
-          exception.InnerException != null ? exception.InnerException.Message : null)))
-        {
-          errorDialog.WordWrapMoreInfo = false;
-          errorDialog.ShowDialog();
-        }
+        var infoProperties = InfoDialogProperties.GetErrorDialogProperties(errorTitle, errorMessage, exceptionMessage, exceptionMoreInfo);
+        infoProperties.WordWrapMoreInfo = false;
+        infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+        infoProperties.CommandAreaProperties.DefaultButtonTimeout = 60;
+        InfoDialog.ShowDialog(infoProperties);
       }
 
       MySqlSourceTrace.WriteToLog(completeErrorMessage, errorLevel);
+    }
+
+    /// <summary>
+    /// Sends an error message to the application log and optionally shows it to the users.
+    /// </summary>
+    /// <param name="errorMessage">A custom error message.</param>
+    /// <param name="showErrorDialog">Flag indicating whether the error is shown to users.</param>
+    /// <param name="exception">An <see cref="Exception"/> object.</param>
+    /// <param name="errorLevel">The <see cref="SourceLevels"/> to describe the severity of the error.</param>
+    public static void MySqlNotifierErrorHandler(string errorMessage, bool showErrorDialog, Exception exception, SourceLevels errorLevel = SourceLevels.Error)
+    {
+      MySqlNotifierErrorHandler(null, errorMessage, showErrorDialog, exception, errorLevel);
     }
 
     /// <summary>
@@ -81,9 +104,9 @@ namespace MySql.Notifier.Classes
     /// </summary>
     /// <param name="exception">An <see cref="Exception"/> object.</param>
     /// <param name="critical">Flag indicating whether the error is treated as <see cref="SourceLevels.Critical"/> or <see cref="SourceLevels.Error"/>.</param>
-    public static void MySQLNotifierErrorHandler(Exception exception, bool critical)
+    public static void MySqlNotifierErrorHandler(Exception exception, bool critical)
     {
-      MySQLNotifierErrorHandler(null, true, exception, critical ? SourceLevels.Critical : SourceLevels.Error);
+      MySqlNotifierErrorHandler(null, true, exception, critical ? SourceLevels.Critical : SourceLevels.Error);
     }
 
     /// <summary>
@@ -93,7 +116,7 @@ namespace MySql.Notifier.Classes
     /// <param name="args"><see cref="ThreadExceptionEventArgs"/> arguments.</param>
     private static void MySQLNotifierThreadExceptionEventHandler(object sender, ThreadExceptionEventArgs args)
     {
-      MySQLNotifierErrorHandler(args.Exception, true);
+      MySqlNotifierErrorHandler(args.Exception, true);
     }
 
     /// <summary>
@@ -103,7 +126,7 @@ namespace MySql.Notifier.Classes
     /// <param name="args"><see cref="UnhandledExceptionEventArgs"/> arguments.</param>
     private static void MySQLNotifierAppExceptionHandler(object sender, UnhandledExceptionEventArgs args)
     {
-      MySQLNotifierErrorHandler((Exception)args.ExceptionObject, true);
+      MySqlNotifierErrorHandler((Exception)args.ExceptionObject, true);
     }
 
     /// <summary>
@@ -112,6 +135,10 @@ namespace MySql.Notifier.Classes
     [STAThread]
     private static void Main(params string[] args)
     {
+      // Initialize error handler settings
+      MySqlSourceTrace.LogFilePath = Notifier.EnvironmentApplicationDataDirectory + Notifier.ERROR_LOG_FILE_RELATIVE_PATH;
+      MySqlSourceTrace.SourceTraceClass = "MySqlNotifier";
+
       if (args.Length > 0 && (args[0] == "--c" || args[0] == "--x"))
       {
         CheckForUpdates(args[0]);
@@ -140,18 +167,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
-          Resources.HighSeverityError,
-          ex.Message,
-          null,
-          ex.StackTrace)))
-        {
-          errorDialog.WordWrapMoreInfo = false;
-          errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
-          errorDialog.DefaultButtonTimeout = 60;
-          errorDialog.ShowDialog();
-        }
+        MySqlNotifierErrorHandler(ex, false);
       }
 
       SingleInstance.Stop();
@@ -161,12 +177,15 @@ namespace MySql.Notifier.Classes
     {
       // Fix the error where Notifier file had main element as MySQLForExcel
       var settingsFilePath = NotifierSettings.SettingsFilePath;
-      XDocument xdoc = XDocument.Load(settingsFilePath);
-      var element = xdoc.Elements("MySQLForExcel").FirstOrDefault();
-      if (element != null)
+      if (File.Exists(settingsFilePath))
       {
-        element.Name = AssemblyInfo.AssemblyTitle.Replace(" ", string.Empty);
-        xdoc.Save(settingsFilePath);
+        XDocument xdoc = XDocument.Load(settingsFilePath);
+        var element = xdoc.Elements("MySQLForExcel").FirstOrDefault();
+        if (element != null)
+        {
+          element.Name = AssemblyInfo.AssemblyTitle.Replace(" ", string.Empty);
+          xdoc.Save(settingsFilePath);
+        }
       }
 
       // Change the default value for AutoAddPattern

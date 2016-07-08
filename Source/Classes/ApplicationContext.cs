@@ -57,11 +57,7 @@ namespace MySql.Notifier.Classes
         }
         catch (Exception ex)
         {
-          MySqlSourceTrace.WriteAppErrorToLog(ex);
-          using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Properties.Resources.HighSeverityError, ex.Message, null, ex.StackTrace)))
-          {
-            errorDialog.ShowDialog();
-          }
+          Program.MySqlNotifierErrorHandler(ex, true);
         }
 
         return isAdmin;

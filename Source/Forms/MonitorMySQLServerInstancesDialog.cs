@@ -308,18 +308,17 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      using (var yesNoDialog = new InfoDialog(InfoDialogProperties.GetYesNoDialogProperties(
+      var infoProperties = InfoDialogProperties.GetYesNoDialogProperties(
         InfoDialog.InfoType.Info,
         Resources.ConnectionAlreadyInInstancesTitle,
         Resources.ConnectionAlreadyInInstancesDetail,
-        Resources.ConnectionAlreadyInInstancesSubDetail)))
+        Resources.ConnectionAlreadyInInstancesSubDetail);
+      infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button2;
+      infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
+      var infoResult = InfoDialog.ShowDialog(infoProperties);
+      if (infoResult.DialogResult == DialogResult.Yes)
       {
-        yesNoDialog.DefaultButton = InfoDialog.DefaultButtonType.Button2;
-        yesNoDialog.DefaultButtonTimeout = 10;
-        if (yesNoDialog.ShowDialog() == DialogResult.Yes)
-        {
-          return;
-        }
+        return;
       }
 
       SelectedWorkbenchConnection = null;

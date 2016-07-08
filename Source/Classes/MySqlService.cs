@@ -29,7 +29,6 @@ using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQL;
 using MySQL.Utility.Classes.MySQLWorkbench;
-using MySQL.Utility.Forms;
 
 namespace MySql.Notifier.Classes
 {
@@ -456,11 +455,7 @@ namespace MySql.Notifier.Classes
       catch (InvalidOperationException ioEx)
       {
         _managementObject = null;
-        MySqlSourceTrace.WriteAppErrorToLog(ioEx);
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.HighSeverityError, ioEx.Message, null, ioEx.StackTrace)))
-        {
-          errorDialog.ShowDialog();
-        }
+        Program.MySqlNotifierErrorHandler(ioEx, true);
       }
     }
 

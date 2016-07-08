@@ -349,16 +349,12 @@ namespace MySql.Notifier.Classes
           }
           catch (IOException ex)
           {
-            Program.MySQLNotifierErrorHandler(Resources.SettingsFileFailedToLoad, false, ex, SourceLevels.Warning);
+            Program.MySqlNotifierErrorHandler(Resources.SettingsFileFailedToLoad, false, ex, SourceLevels.Warning);
             Thread.Sleep(MILLISECONDS_IN_SECOND);
           }
         }
 
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.HighSeverityError, Resources.SettingsFileFailedToLoad)))
-        {
-          errorDialog.ShowDialog();
-        }
-
+        InfoDialog.ShowDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.HighSeverityError, Resources.SettingsFileFailedToLoad));
         return -1;
       }
     }
@@ -370,8 +366,6 @@ namespace MySql.Notifier.Classes
     /// </summary>
     public static void InitializeStaticSettings()
     {
-      MySqlSourceTrace.LogFilePath = EnvironmentApplicationDataDirectory + ERROR_LOG_FILE_RELATIVE_PATH;
-      MySqlSourceTrace.SourceTraceClass = "MySqlNotifier";
       MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
       MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = EnvironmentApplicationDataDirectory + PASSWORDS_VAULT_FILE_RELATIVE_PATH;
       MySqlWorkbench.ExternalConnections.CreateDefaultConnections = !MySqlWorkbench.ConnectionsFileExists && MySqlWorkbench.Connections.Count == 0;
@@ -744,12 +738,12 @@ namespace MySql.Notifier.Classes
     {
       if (_aboutDialog == null)
       {
-        using (AboutDialog aboutDialog = new AboutDialog())
+        using (_aboutDialog = new AboutDialog())
         {
-          _aboutDialog = aboutDialog;
-          aboutDialog.ShowDialog();
-          _aboutDialog = null;
+          _aboutDialog.ShowDialog();
         }
+
+        _aboutDialog = null;
       }
       else
       {
@@ -776,7 +770,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        Program.MySQLNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex, SourceLevels.Error);
+        Program.MySqlNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex);
       }
     }
 
@@ -799,7 +793,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        Program.MySQLNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex, SourceLevels.Error);
+        Program.MySqlNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex);
       }
     }
 
@@ -858,11 +852,7 @@ namespace MySql.Notifier.Classes
     {
       if (string.IsNullOrEmpty(MySqlInstaller.Path) || Convert.ToDouble(MySqlInstaller.Version.Substring(0, 3)) < 1.1)
       {
-        using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.MissingMySQLInstaller, string.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine))))
-        {
-          errorDialog.ShowDialog();
-        }
-
+        InfoDialog.ShowDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.MissingMySQLInstaller, string.Format(Resources.Installer11RequiredForCheckForUpdates, Environment.NewLine)));
         return;
       }
 
@@ -878,7 +868,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        Program.MySQLNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex, SourceLevels.Error);
+        Program.MySqlNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex);
       }
     }
 
@@ -989,12 +979,10 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void IgnoreAvailableUpdateItem_Click(object sender, EventArgs e)
     {
-      using (var yesNoDialog = new InfoDialog(InfoDialogProperties.GetYesNoDialogProperties(InfoDialog.InfoType.Warning, "Available Updates", Resources.IgnoreAvailableUpdatesText)))
+      var infoResult = InfoDialog.ShowDialog(InfoDialogProperties.GetYesNoDialogProperties(InfoDialog.InfoType.Warning, "Available Updates", Resources.IgnoreAvailableUpdatesText));
+      if (infoResult.DialogResult != DialogResult.Yes)
       {
-        if (yesNoDialog.ShowDialog() != DialogResult.Yes)
-        {
-          return;
-        }
+        return;
       }
 
       Settings.Default.UpdateCheck = 0;
@@ -1166,7 +1154,7 @@ namespace MySql.Notifier.Classes
     {
       string errorText = string.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, Environment.NewLine + ex.Message + Environment.NewLine + Resources.AskRestartApplication);
       ShowTooltip(true, Resources.BalloonTitleFailedStatusChange, errorText);
-      Program.MySQLNotifierErrorHandler(Resources.UpdateServiceStatusError, false, ex, SourceLevels.Critical);
+      Program.MySqlNotifierErrorHandler(Resources.UpdateServiceStatusError, false, ex, SourceLevels.Critical);
     }
 
     /// <summary>
@@ -1198,14 +1186,13 @@ namespace MySql.Notifier.Classes
         StopBackgroundActions();
 
         bool instancesListChanged;
-        using (ManageItemsDialog manageItemsDialog = new ManageItemsDialog(_mySqlInstancesList, _machinesList))
+        using (_manageItemsDialog = new ManageItemsDialog(_mySqlInstancesList, _machinesList))
         {
-          _manageItemsDialog = manageItemsDialog;
-          manageItemsDialog.ShowDialog();
-          instancesListChanged = manageItemsDialog.InstancesListChanged;
-          _manageItemsDialog = null;
+          _manageItemsDialog.ShowDialog();
+          instancesListChanged = _manageItemsDialog.InstancesListChanged;
         }
 
+        _manageItemsDialog = null;
         ResumeBackgroundActions(instancesListChanged);
       }
       else
@@ -1234,7 +1221,7 @@ namespace MySql.Notifier.Classes
     private void MySqlInstanceConnectionStatusTestErrorThrown(object sender, InstanceConnectionStatusTestErrorThrownArgs args)
     {
       ShowTooltip(true, Resources.ErrorTitle, string.Format(Resources.BalloonTextFailedStatusCheck, args.Instance.HostIdentifier, args.ErrorException.Message));
-      Program.MySQLNotifierErrorHandler(Resources.UpdateInstanceStatusError, false, args.ErrorException, SourceLevels.Critical);
+      Program.MySqlNotifierErrorHandler(Resources.UpdateInstanceStatusError, false, args.ErrorException, SourceLevels.Critical);
     }
 
     /// <summary>
@@ -1344,12 +1331,12 @@ namespace MySql.Notifier.Classes
       var usecolorfulIcons = Settings.Default.UseColorfulStatusIcons;
       if (_optionsDialog == null)
       {
-        using (var optionsDialog = new OptionsDialog(this))
+        using (_optionsDialog = new OptionsDialog(this))
         {
-          _optionsDialog = optionsDialog;
-          optionsDialog.ShowDialog();
-          _optionsDialog = null;
+          _optionsDialog.ShowDialog();
         }
+
+        _optionsDialog = null;
 
         // If there was a change in the setting for the icons then refresh Icon
         if (usecolorfulIcons != Settings.Default.UseColorfulStatusIcons)
@@ -1412,18 +1399,15 @@ namespace MySql.Notifier.Classes
         return workbenchConnectionsLoadSuccessful;
       }
 
-      using (var errorDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(
+      Program.MySqlNotifierErrorHandler(null, false, loadException);
+      var infoProperties = InfoDialogProperties.GetErrorDialogProperties(
         Resources.ConnectionsFileLoadingErrorTitle,
         Resources.ConnectionsFileLoadingErrorDetail,
         null,
-        Resources.ConnectionsFileLoadingErrorMoreInfo)))
-      {
-        errorDialog.DefaultButton = InfoDialog.DefaultButtonType.Button1;
-        errorDialog.DefaultButtonTimeout = 30;
-        errorDialog.ShowDialog();
-      }
-
-      MySqlSourceTrace.WriteAppErrorToLog(loadException);
+        Resources.ConnectionsFileLoadingErrorMoreInfo);
+      infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+      infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
+      InfoDialog.ShowDialog(infoProperties);
       return workbenchConnectionsLoadSuccessful;
     }
 
@@ -1810,7 +1794,7 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void StatusRefreshWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      MySqlSourceTrace.WriteToLog(e.Cancelled ? Resources.StatusRefreshCancelledText : Resources.StatusRefreshCompleteText, SourceLevels.Information);
+      Program.MySqlNotifierErrorHandler(e.Cancelled ? Resources.StatusRefreshCancelledText : Resources.StatusRefreshCompleteText, false, null, SourceLevels.Information);
       _refreshStatusMenuItem.Text = Resources.RefreshStatusMenuText;
       _refreshStatusMenuItem.Image = Resources.RefreshStatus;
       StatusRefreshInProgress = false;

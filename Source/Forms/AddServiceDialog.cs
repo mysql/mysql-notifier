@@ -56,17 +56,16 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void DeleteButton_Click(object sender, EventArgs e)
     {
-      using (var infoDialog = new InfoDialog(InfoDialogProperties.GetYesNoDialogProperties(
+      var infoProperties = InfoDialogProperties.GetYesNoDialogProperties(
         InfoDialog.InfoType.Warning,
         Resources.DeleteMachineConfirmationTitle,
-        Resources.DeleteMachineConfirmationText)))
+        Resources.DeleteMachineConfirmationText);
+      infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button2;
+      infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
+      var infoResult = InfoDialog.ShowDialog(infoProperties);
+      if (infoResult.DialogResult != DialogResult.Yes)
       {
-        infoDialog.DefaultButton = InfoDialog.DefaultButtonType.Button2;
-        infoDialog.DefaultButtonTimeout = 30;
-        if (infoDialog.ShowDialog() != DialogResult.Yes)
-        {
-          return;
-        }
+        return;
       }
 
       HasChanges = true;
@@ -99,8 +98,7 @@ namespace MySql.Notifier.Forms
       string oldPassword = NewMachine.Password;
       using (var windowsConnectionDialog = new WindowsConnectionDialog(MachinesList, NewMachine))
       {
-        DialogResult dr = windowsConnectionDialog.ShowDialog();
-        if (dr == DialogResult.Cancel)
+        if (windowsConnectionDialog.ShowDialog() == DialogResult.Cancel)
         {
           return;
         }
@@ -232,19 +230,18 @@ namespace MySql.Notifier.Forms
           NewMachine = (Machine)MachineSelectionComboBox.SelectedItem;
           if (!NewMachine.IsOnline)
           {
-            using (var warningDialog = new InfoDialog(InfoDialogProperties.GetYesNoDialogProperties(
+            var infoProperties = InfoDialogProperties.GetYesNoDialogProperties(
               InfoDialog.InfoType.Warning,
               Resources.MachineUnavailableTitle,
               Resources.MachineUnavailableYesNoDetail,
               null,
-              Resources.MachineUnavailableExtendedMessage)))
+              Resources.MachineUnavailableExtendedMessage);
+            infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button2;
+            infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
+            var infoResult = InfoDialog.ShowDialog(infoProperties);
+            if (infoResult.DialogResult == DialogResult.Yes)
             {
-              warningDialog.DefaultButton = InfoDialog.DefaultButtonType.Button2;
-              warningDialog.DefaultButtonTimeout = 30;
-              if (warningDialog.ShowDialog() == DialogResult.Yes)
-              {
-                NewMachine.TestConnection(true, false);
-              }
+              NewMachine.TestConnection(true, false);
             }
 
             if (!NewMachine.IsOnline)

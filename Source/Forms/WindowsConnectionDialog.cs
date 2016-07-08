@@ -142,8 +142,7 @@ namespace MySql.Notifier.Forms
 
       if (testConnection && connectionSuccessful)
       {
-        var infoDialog = new InfoDialog(InfoDialogProperties.GetSuccessDialogProperties(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage));
-        infoDialog.ShowDialog();
+        InfoDialog.ShowDialog(InfoDialogProperties.GetSuccessDialogProperties(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage));
         DialogOKButton.Enabled = EntriesAreValid;
         DialogOKButton.Focus();
       }
@@ -245,15 +244,13 @@ namespace MySql.Notifier.Forms
         {
           // Since we are attempting to add a remote computer, we deem the Host name as invalid if it resolves to a local machine.
           validName = false;
-          var infoDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.CannotAddLocalhostTitle, Resources.CannotAddLocalhostMessage));
-          infoDialog.ShowDialog();
+          InfoDialog.ShowDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.CannotAddLocalhostTitle, Resources.CannotAddLocalhostMessage));
         }
         else if (!EditMode && MachinesList.HasMachineWithName(hostname))
         {
           // Host name already exists on the list of added remote machines.
           validName = false;
-          var infoDialog = new InfoDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage));
-          infoDialog.ShowDialog();
+          InfoDialog.ShowDialog(InfoDialogProperties.GetErrorDialogProperties(Resources.MachineAlreadyExistTitle, Resources.MachineAlreadyExistMessage));
         }
         else
         {

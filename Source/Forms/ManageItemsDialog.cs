@@ -465,7 +465,7 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void ServiceToolStripMenuItem_Click(object sender, EventArgs e)
     {
-      using (AddServiceDialog dialog = new AddServiceDialog(MachinesList))
+      using (var dialog = new AddServiceDialog(MachinesList))
       {
         if (dialog.ShowDialog() == DialogResult.OK)
         {
@@ -482,8 +482,7 @@ namespace MySql.Notifier.Forms
             {
               if (NewMachine.ContainsService(service))
               {
-                var warningDialog = new InfoDialog(InfoDialogProperties.GetWarningDialogProperties(Resources.WarningText, Resources.ServiceAlreadyInListWarningText));
-                warningDialog.ShowDialog();
+                InfoDialog.ShowDialog(InfoDialogProperties.GetWarningDialogProperties(Resources.WarningText, Resources.ServiceAlreadyInListWarningText));
               }
               else
               {
