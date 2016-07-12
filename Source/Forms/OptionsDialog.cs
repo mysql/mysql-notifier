@@ -17,6 +17,7 @@
 
 using System;
 using System.Windows.Forms;
+using MySql.Notifier.Classes;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQLWorkbench;
@@ -47,23 +48,16 @@ namespace MySql.Notifier.Forms
     /// </summary>
     private int _initialWidth;
 
-    /// <summary>
-    /// A <see cref="Classes.Notifier"/> instance.
-    /// </summary>
-    private Classes.Notifier _notifierInstance;
-
     #endregion Fields
 
     /// <summary>
     /// Contains options for users to customize the Notifier's behavior.
     /// </summary>
-    /// <param name="notifierInstance">A <see cref="Classes.Notifier"/> instance.</param>
-    internal OptionsDialog(Classes.Notifier notifierInstance)
+    internal OptionsDialog()
     {
       InitializeComponent();
 
       _initialWidth = Width;
-      _notifierInstance = notifierInstance;
       RefreshControlValues(false);
       SetAutomaticMigrationDelayText();
     }
@@ -88,7 +82,7 @@ namespace MySql.Notifier.Forms
     {
       SuspendLayout();
 
-      AutomaticMigrationDelayValueLabel.Text = MySqlWorkbench.GetConnectionsMigrationDelayText(_notifierInstance.NextAutomaticConnectionsMigration, Settings.Default.WorkbenchMigrationSucceeded);
+      AutomaticMigrationDelayValueLabel.Text = MySqlWorkbench.GetConnectionsMigrationDelayText(Program.Notifier.NextAutomaticConnectionsMigration, Settings.Default.WorkbenchMigrationSucceeded);
       MigrateWorkbenchConnectionsButton.Enabled = MigrateConnectionsButtonEnabled;
       Width = _initialWidth;
       var spacingDelta = AutomaticMigrationDelayValueLabel.Location.X + AutomaticMigrationDelayValueLabel.Size.Width + DIALOG_RIGHT_SPACING_TO_CONTROLS + (DIALOG_BORDER_WIDTH * 2) - Width;
@@ -134,7 +128,7 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void MigrateWorkbenchConnectionsButton_Click(object sender, EventArgs e)
     {
-      _notifierInstance.MigrateExternalConnectionsToWorkbench(false);
+      Program.Notifier.MigrateExternalConnectionsToWorkbench(false);
       SetAutomaticMigrationDelayText();
     }
 

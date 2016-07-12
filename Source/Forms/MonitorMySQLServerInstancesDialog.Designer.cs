@@ -247,8 +247,8 @@ namespace MySql.Notifier.Forms
       // 
       this.DialogCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogCancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.DialogCancelButton.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogCancelButton.Location = new System.Drawing.Point(609, 11);
+      this.DialogCancelButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.DialogCancelButton.Location = new System.Drawing.Point(622, 11);
       this.DialogCancelButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.DialogCancelButton.Name = "DialogCancelButton";
       this.DialogCancelButton.Size = new System.Drawing.Size(75, 23);
@@ -259,7 +259,8 @@ namespace MySql.Notifier.Forms
       // AddConnectionButton
       // 
       this.AddConnectionButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-      this.AddConnectionButton.Location = new System.Drawing.Point(25, 11);
+      this.AddConnectionButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.AddConnectionButton.Location = new System.Drawing.Point(12, 11);
       this.AddConnectionButton.Name = "AddConnectionButton";
       this.AddConnectionButton.Size = new System.Drawing.Size(157, 23);
       this.AddConnectionButton.TabIndex = 0;
@@ -272,8 +273,8 @@ namespace MySql.Notifier.Forms
       this.DialogOKButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
       this.DialogOKButton.DialogResult = System.Windows.Forms.DialogResult.OK;
       this.DialogOKButton.Enabled = false;
-      this.DialogOKButton.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.DialogOKButton.Location = new System.Drawing.Point(528, 11);
+      this.DialogOKButton.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.DialogOKButton.Location = new System.Drawing.Point(541, 11);
       this.DialogOKButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
       this.DialogOKButton.Name = "DialogOKButton";
       this.DialogOKButton.Size = new System.Drawing.Size(75, 23);

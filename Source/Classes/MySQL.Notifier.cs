@@ -364,13 +364,14 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Initializes settings for the <see cref="MySqlWorkbench"/>, <see cref="MySqlSourceTrace"/>, <see cref="MySqlWorkbenchPasswordVault"/> and <see cref="MySqlInstaller"/> classes.
     /// </summary>
-    public static void InitializeStaticSettings()
+    public void InitializeStaticSettings()
     {
       MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
       MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = EnvironmentApplicationDataDirectory + PASSWORDS_VAULT_FILE_RELATIVE_PATH;
       MySqlWorkbench.ExternalConnections.CreateDefaultConnections = !MySqlWorkbench.ConnectionsFileExists && MySqlWorkbench.Connections.Count == 0;
       MySqlWorkbench.ExternalApplicationsConnectionsFileRetryLoadOrRecreate = true;
       MySqlWorkbench.ExternalApplicationConnectionsFilePath = EnvironmentApplicationDataDirectory + CONNECTIONS_FILE_RELATIVE_PATH;
+      SetChangeCursorDelegate();
       MySqlWorkbench.LoadData();
       MySqlWorkbench.LoadServers();
       MySqlInstaller.InstallerLegacyDllPath = InstallLocation;
@@ -519,6 +520,16 @@ namespace MySql.Notifier.Classes
         StatusRefreshWorkerCompleted(this, new RunWorkerCompletedEventArgs(null, null, false));
         Cursor.Current = Cursors.Default;
       }
+    }
+
+    /// <summary>
+    /// Sets the delegate used when the MySQL.Utility needs to change the current cursor.
+    /// </summary>
+    public void SetChangeCursorDelegate()
+    {
+      MySqlWorkbench.ChangeCurrentCursor = delegate (Cursor cursor)
+      {
+      };
     }
 
     /// <summary>
@@ -1331,7 +1342,7 @@ namespace MySql.Notifier.Classes
       var usecolorfulIcons = Settings.Default.UseColorfulStatusIcons;
       if (_optionsDialog == null)
       {
-        using (_optionsDialog = new OptionsDialog(this))
+        using (_optionsDialog = new OptionsDialog())
         {
           _optionsDialog.ShowDialog();
         }

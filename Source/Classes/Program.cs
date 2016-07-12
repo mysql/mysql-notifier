@@ -34,6 +34,22 @@ namespace MySql.Notifier.Classes
   internal static class Program
   {
     /// <summary>
+    /// An instance of the <see cref="NotifierApplicationContext"/> class.
+    /// </summary>
+    private static NotifierApplicationContext _applicationContext;
+
+    /// <summary>
+    /// Gets an instance of the <see cref="Notifier"/> class.
+    /// </summary>
+    public static Notifier Notifier
+    {
+      get
+      {
+        return _applicationContext.NotifierInstance;
+      }
+    }
+
+    /// <summary>
     /// Sends an error message to the application log and optionally shows it to the users.
     /// </summary>
     /// <param name="errorTitle">The title displayed on the error dialog.</param>
@@ -162,8 +178,8 @@ namespace MySql.Notifier.Classes
       try
       {
         UpdateSettingsFile();
-        var applicationContext = new NotifierApplicationContext();
-        Application.Run(applicationContext);
+        _applicationContext = new NotifierApplicationContext();
+        Application.Run(_applicationContext);
       }
       catch (Exception ex)
       {

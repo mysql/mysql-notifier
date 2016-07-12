@@ -19,16 +19,12 @@ using System;
 using System.Security.Principal;
 using System.Windows.Forms;
 using MySql.Notifier.Forms;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQL;
-using MySQL.Utility.Forms;
 
 namespace MySql.Notifier.Classes
 {
   internal class NotifierApplicationContext : ApplicationContext
   {
     private bool _disposeDone;
-    private readonly Notifier _notifierApp;
 
     /// <summary>
     /// This class should be created and passed into Application.Run( ... )
@@ -36,10 +32,15 @@ namespace MySql.Notifier.Classes
     public NotifierApplicationContext()
     {
       _disposeDone = false;
-      _notifierApp = new Notifier();
+      NotifierInstance = new Notifier();
       MainForm = new DumbForm();
-      _notifierApp.Exit += NotifierApp_Exit;
+      NotifierInstance.Exit += NotifierApp_Exit;
     }
+
+    /// <summary>
+    /// Gets an instance of the <see cref="Notifier"/> class.
+    /// </summary>
+    internal Notifier NotifierInstance { get; private set; }
 
     /// <summary>
     /// Gets a value indicating whether the user running this application has administrator privileges.
@@ -66,7 +67,7 @@ namespace MySql.Notifier.Classes
 
     protected override void OnMainFormClosed(object sender, EventArgs e)
     {
-      _notifierApp.ForceExit();
+      NotifierInstance.ForceExit();
       base.OnMainFormClosed(sender, e);
     }
 
@@ -99,7 +100,7 @@ namespace MySql.Notifier.Classes
       {
         // Free managed resources
         MainForm.Dispose();
-        _notifierApp.Dispose();
+        NotifierInstance.Dispose();
         GC.SuppressFinalize(this);
       }
 

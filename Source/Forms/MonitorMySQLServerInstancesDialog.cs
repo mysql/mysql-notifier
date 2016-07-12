@@ -70,6 +70,7 @@ namespace MySql.Notifier.Forms
       MachinesList = machinesList;
       MySqlInstancesList = instancesList ?? new MySqlInstancesList();
       InstancesListChanged = false;
+      ResetChangeCursorDelegate(true);
     }
 
     #region Properties
@@ -305,6 +306,7 @@ namespace MySql.Notifier.Forms
     {
       if (DialogResult != DialogResult.OK || SelectedWorkbenchConnection == null || WorkbenchConnectionsListView.SelectedItems.Count <= 0 || WorkbenchConnectionsListView.SelectedItems[0].Checked)
       {
+        ResetChangeCursorDelegate(false);
         return;
       }
 
@@ -318,6 +320,7 @@ namespace MySql.Notifier.Forms
       var infoResult = InfoDialog.ShowDialog(infoProperties);
       if (infoResult.DialogResult == DialogResult.Yes)
       {
+        ResetChangeCursorDelegate(false);
         return;
       }
 
@@ -392,6 +395,25 @@ namespace MySql.Notifier.Forms
 
       WorkbenchConnectionsListView.EndUpdate();
       DialogOKButton.Enabled = false;
+    }
+
+    /// <summary>
+    /// Sets a delegate for the MySQL Utility to change the cursor on top of caller windows.
+    /// </summary>
+    /// <param name="set">Flag indicating whether the delegate is set for this form, or reset to be empty.</param>
+    private void ResetChangeCursorDelegate(bool set)
+    {
+      if (set)
+      {
+        MySqlWorkbench.ChangeCurrentCursor = delegate (Cursor cursor)
+        {
+          Cursor = cursor;
+        };
+      }
+      else
+      {
+        Program.Notifier.SetChangeCursorDelegate();
+      }
     }
 
     /// <summary>
