@@ -31,19 +31,57 @@ namespace MySql.Notifier.Forms
     #region Constants
 
     /// <summary>
-    /// Regular Expresion for a valid computer's IP address.
+    /// Regular expresion for a valid computer's IP address.
     /// </summary>
-    private const string VALID_IP_REGEX = @"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
+    private const string VALID_IP_REGEX = @"^((?<FirstToThird>2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(?<Last>2[0-4]\d|25[0-5]|[01]?\d\d?)$";
 
     /// <summary>
-    /// Regular Expression for a valid Host name.
+    /// Regular expression for a valid Host name.
     /// </summary>
-    private const string VALID_HOSTNAME_REGEX = @"^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*$";
+    /// <remarks>
+    /// Rules as per this link:
+    /// https://en.wikipedia.org/wiki/Hostname
+    /// </remarks>
+    private const string VALID_HOSTNAME_REGEX = @"^" + VALID_HOSTNAME_PLAIN_REGEX + "$";
 
     /// <summary>
-    /// Regular Expresion for a valid User name.
+    /// Regular expression for a valid Host name.
     /// </summary>
-    private const string VALID_DOMAIN_USERNAME_REGEX = @"^(([a-z][a-z0-9.-]+)\\)?(?![\x20.]+$)([^\\/""[\]:|<>+=;,?*@]+)$";
+    /// <remarks>
+    /// Rules as per this link:
+    /// https://en.wikipedia.org/wiki/Hostname
+    /// </remarks>
+    private const string VALID_HOSTNAME_PLAIN_REGEX = @"(?<FirstComponent>[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])(?<OtherComponentWithLeadingDot>\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]{0,61}[a-zA-Z0-9]))*";
+
+    /// <summary>
+    /// Regular expression
+    /// </summary>
+    /// <remarks>
+    /// Rules as per these links:
+    /// https://support.microsoft.com/en-us/kb/909264
+    /// https://msdn.microsoft.com/en-us/library/windows/desktop/aa380525(v=vs.85).aspx
+    /// </remarks>
+    private const string VALID_LOGON_NAME_REGEX = @"(?<LogonName>(?![\x20.]+$)([^\\@]{1,64}))";
+
+    /// <summary>
+    /// Regular expresion for a valid down-level logon name.
+    /// </summary>
+    /// <remarks>
+    /// Rules as per these links:
+    /// https://support.microsoft.com/en-us/kb/909264
+    /// https://msdn.microsoft.com/en-us/library/windows/desktop/aa380525(v=vs.85).aspx
+    /// </remarks>
+    private const string VALID_DOWN_LEVEL_LOGON_NAME_REGEX = @"^(?<NetBiosDomainName>(?![\x20.]+$)([^\\/:\*\?""<>|\.]{1,15})(?<Separator>\\))?" + VALID_LOGON_NAME_REGEX + "$";
+
+    /// <summary>
+    /// Regular expresion for a valid user principal name.
+    /// </summary>
+    /// <remarks>
+    /// Rules as per these links:
+    /// https://support.microsoft.com/en-us/kb/909264
+    /// https://msdn.microsoft.com/en-us/library/windows/desktop/aa380525(v=vs.85).aspx
+    /// </remarks>
+    private const string VALID_USER_PRINCIPAL_NAME_REGEX = @"^" + VALID_LOGON_NAME_REGEX + @"(?<UpnSuffix>(?<Separator>@)" + VALID_HOSTNAME_PLAIN_REGEX + ")?$";
 
     #endregion Constants
 
@@ -262,7 +300,10 @@ namespace MySql.Notifier.Forms
       }
 
       // Username is invalid if if has non allowed characters.
-      userErrorSign.Visible = !string.IsNullOrEmpty(UserTextBox.Text) && !Regex.IsMatch(UserTextBox.Text, VALID_DOMAIN_USERNAME_REGEX);
+      var userName = UserTextBox.Text;
+      userErrorSign.Visible = !string.IsNullOrEmpty(userName)
+                              && !Regex.IsMatch(userName, VALID_DOWN_LEVEL_LOGON_NAME_REGEX)
+                              && !Regex.IsMatch(userName, VALID_USER_PRINCIPAL_NAME_REGEX);
 
       // Enable DialogOKButton if entries seem valid.
       DialogOKButton.Enabled = EntriesAreValid;
