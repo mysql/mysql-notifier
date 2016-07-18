@@ -94,6 +94,7 @@ namespace MySql.Notifier.Classes
       if (showErrorDialog)
       {
         var infoProperties = InfoDialogProperties.GetErrorDialogProperties(errorTitle, errorMessage, exceptionMessage, exceptionMoreInfo);
+        infoProperties.FitTextStrategy = InfoDialog.FitTextsAction.IncreaseDialogWidth;
         infoProperties.WordWrapMoreInfo = false;
         infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
         infoProperties.CommandAreaProperties.DefaultButtonTimeout = 60;

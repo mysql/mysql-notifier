@@ -163,36 +163,6 @@ namespace MySql.Notifier.Forms
     }
 
     /// <summary>
-    /// Handles the click event for both TestConnectionButton and DialogOKButton
-    /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="e">Event arguments.</param>
-    private void Button_Click(object sender, EventArgs e)
-    {
-      Cursor = Cursors.WaitCursor;
-      DialogOKButton.Enabled = false;
-      NewMachine.Name = HostTextBox.Text.Trim();
-      NewMachine.User = UserTextBox.Text.Trim();
-      NewMachine.Password = MySqlSecurity.EncryptPassword(PasswordTextBox.Text);
-      bool editMode = Text.Equals(Resources.EditMachineText);
-      bool testConnection = sender.Equals(TestConnectionButton);
-      bool connectionSuccessful = (testConnection || !editMode) && TestConnectionAndPermissionsSet(testConnection);
-
-      if (testConnection && connectionSuccessful)
-      {
-        InfoDialog.ShowDialog(InfoDialogProperties.GetSuccessDialogProperties(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage));
-        DialogOKButton.Enabled = EntriesAreValid;
-        DialogOKButton.Focus();
-      }
-      else if (!testConnection && (connectionSuccessful || editMode))
-      {
-        DialogOKButton.DialogResult = DialogResult = DialogResult.OK;
-      }
-
-      Cursor = Cursors.Default;
-    }
-
-    /// <summary>
     /// Event delegate method fired when the <see cref="MachineAutoTestConnectionIntervalNumericUpDown"/> value changes.
     /// </summary>
     /// <param name="sender">Sender object.</param>
@@ -230,6 +200,27 @@ namespace MySql.Notifier.Forms
       }
 
       return NewMachine.IsOnline;
+    }
+
+    /// <summary>
+    /// Handles the click event for the <see cref="TestConnectionButton"/>.
+    /// </summary>
+    /// <param name="sender">Sender object.</param>
+    /// <param name="e">Event arguments.</param>
+    private void TestConnectionButton_Click(object sender, EventArgs e)
+    {
+      Cursor = Cursors.WaitCursor;
+      DialogOKButton.Enabled = false;
+      NewMachine.Name = HostTextBox.Text.Trim();
+      NewMachine.User = UserTextBox.Text.Trim();
+      NewMachine.Password = MySqlSecurity.EncryptPassword(PasswordTextBox.Text);
+      if (TestConnectionAndPermissionsSet(true))
+      {
+        InfoDialog.ShowDialog(InfoDialogProperties.GetSuccessDialogProperties(Resources.ConnectionSuccessfulTitle, Resources.ConnectionSuccessfulMessage));
+        DialogOKButton.Enabled = true;
+      }
+
+      Cursor = Cursors.Default;
     }
 
     /// <summary>
@@ -305,8 +296,12 @@ namespace MySql.Notifier.Forms
                               && !Regex.IsMatch(userName, VALID_DOWN_LEVEL_LOGON_NAME_REGEX)
                               && !Regex.IsMatch(userName, VALID_USER_PRINCIPAL_NAME_REGEX);
 
-      // Enable DialogOKButton if entries seem valid.
-      DialogOKButton.Enabled = EntriesAreValid;
+      // Enable or dissable buttons if entries seem valid.
+      TestConnectionButton.Enabled = EntriesAreValid;
+      if (!EntriesAreValid)
+      {
+        DialogOKButton.Enabled = false;
+      }
     }
   }
 }

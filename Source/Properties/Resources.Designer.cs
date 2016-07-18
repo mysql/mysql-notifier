@@ -900,6 +900,18 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This message can be displayed for one of the following reasons at the remote machine:
+        ///   * The remote machine is NATed
+        ///   * WMI/DCOM access permissions are insufficient for user attempting to connect
+        ///   * Windows Firewall is not configured for WMI communication.
+        /// </summary>
+        internal static string ObjectExporterSpecifierNotFoundExtendedMessage {
+            get {
+                return ResourceManager.GetString("ObjectExporterSpecifierNotFoundExtendedMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Options....
         /// </summary>
         internal static string OptionsMenuText {

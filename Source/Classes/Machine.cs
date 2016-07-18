@@ -1518,7 +1518,10 @@ namespace MySql.Notifier.Classes
           WmiQueriesTimeoutInSeconds = WmiQueriesTimeoutInSeconds
         };
 
-        dummyWatcher.Start(WmiManagementScope);
+        if (!dummyWatcher.Start(WmiManagementScope))
+        {
+          ConnectionProblem = ConnectionProblemType.InsufficientAccessPermissions;
+        }
       }
       catch (Exception ex)
       {
@@ -1526,11 +1529,11 @@ namespace MySql.Notifier.Classes
         Program.MySqlNotifierErrorHandler(ConnectionProblemLongDescription, false, ex, SourceLevels.Information);
         if (displayMessageOnError)
         {
-          var infoProperties = InfoDialogProperties.GetErrorDialogProperties(
+          var infoProperties = InfoDialogProperties.GetWarningDialogProperties(
             ConnectionProblemShortDescription,
             ConnectionProblemLongDescription,
             null,
-            string.Format("{0}{1}{1}{2}", Resources.MachineUnavailableExtendedMessage, Environment.NewLine, ex.Message));
+            string.Format("{0}{1}{1}Error message:{1}{1}{2}", Resources.MachineUnavailableExtendedMessage, Environment.NewLine, ex.Message));
           infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
           infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
           InfoDialog.ShowDialog(infoProperties);

@@ -25,6 +25,9 @@
   got corrupted. (MySQL Bug #73540, Bug #22160640 - HIGH SEVERITY ERROR: ROOT ELEMENT IS MISSING)
 - Fixed code so that the initialization of the errors handler is initialized before any code that uses it.
   (Bug #17825477 - LOG FILE PATH MAST BE DEFINED BEFORE CALLING THE WRITETOLOG METHOD ERROR)
+- Fixed code that tests a connection and WMI service subscription to a remote machine that was giving a false positive in some scenarios. Also
+  changed the "Add New Machine" dialog so the connection to the remote machine is tested before the OK button is enabled.
+  (Bug #24305736 - NOTIFIER SHOWS AN ERROR WHEN A REMOTE SERVER SERVICE IS ADDED)
 
 1.1.6
 - Added extra validation to avoid High Severity Error while restarting when watched MySQL products were uninstalled while Notifier was not running.

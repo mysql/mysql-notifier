@@ -17,10 +17,13 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Management;
 using System.Threading;
 using MySql.Notifier.Properties;
+using MySQL.Utility.Classes;
 using MySQL.Utility.Classes.MySQL;
+using MySQL.Utility.Forms;
 
 namespace MySql.Notifier.Classes
 {
@@ -794,9 +797,24 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, true, ex);
-      }
+        bool showSpecializedInfoDialog = false;
+        string title = Resources.WMIEventsSubscriptionErrorTitle;
+        string detail = Resources.WMIEventsSubscriptionErrorDetail;
+        if (ex.Message.Contains("0x80070776"))
+        {
+          showSpecializedInfoDialog = true;
+          var infoProperties = InfoDialogProperties.GetWarningDialogProperties(
+            title,
+            detail,
+            null,
+            string.Format("{0}{1}{1}Error message:{1}{1}{2}", Resources.ObjectExporterSpecifierNotFoundExtendedMessage, Environment.NewLine, ex.Message));
+          infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+          infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
+          InfoDialog.ShowDialog(infoProperties);
+        }
 
+        Program.MySqlNotifierErrorHandler(title, detail, !showSpecializedInfoDialog, ex, SourceLevels.Information);
+      }
       return success;
     }
 
