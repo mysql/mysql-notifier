@@ -409,7 +409,16 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, true, ex);
+        string title = Resources.WMIEventsSubscriptionErrorTitle;
+        string detail = Resources.WMIEventsSubscriptionErrorDetail;
+        string moreInfo = ex.Message.Contains("0x80070776")
+          ? Resources.ObjectExporterSpecifierNotFoundExtendedMessage
+          : null;
+        var infoProperties = InfoDialogProperties.GetWarningDialogProperties(title, detail, null, moreInfo);
+        infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+        infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
+        InfoDialog.ShowDialog(infoProperties);
+        Program.MySqlNotifierErrorHandler(title, detail, false, ex, SourceLevels.Information);
       }
 
       return success;
@@ -605,7 +614,16 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, true, ex);
+        string title = Resources.WMIEventsSubscriptionErrorTitle;
+        string detail = Resources.WMIEventsSubscriptionErrorDetail;
+        string moreInfo = ex.Message.Contains("0x80070776")
+          ? Resources.ObjectExporterSpecifierNotFoundExtendedMessage
+          : null;
+        var infoProperties = InfoDialogProperties.GetWarningDialogProperties(title, detail, null, moreInfo);
+        infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+        infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
+        InfoDialog.ShowDialog(infoProperties);
+        Program.MySqlNotifierErrorHandler(title, detail, false, ex, SourceLevels.Information);
       }
 
       return success;
@@ -797,24 +815,18 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        bool showSpecializedInfoDialog = false;
         string title = Resources.WMIEventsSubscriptionErrorTitle;
         string detail = Resources.WMIEventsSubscriptionErrorDetail;
-        if (ex.Message.Contains("0x80070776"))
-        {
-          showSpecializedInfoDialog = true;
-          var infoProperties = InfoDialogProperties.GetWarningDialogProperties(
-            title,
-            detail,
-            null,
-            string.Format("{0}{1}{1}Error message:{1}{1}{2}", Resources.ObjectExporterSpecifierNotFoundExtendedMessage, Environment.NewLine, ex.Message));
-          infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
-          infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
-          InfoDialog.ShowDialog(infoProperties);
-        }
-
-        Program.MySqlNotifierErrorHandler(title, detail, !showSpecializedInfoDialog, ex, SourceLevels.Information);
+        string moreInfo = ex.Message.Contains("0x80070776")
+          ? Resources.ObjectExporterSpecifierNotFoundExtendedMessage
+          : null;
+        var infoProperties = InfoDialogProperties.GetWarningDialogProperties(title, detail, null, moreInfo);
+        infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
+        infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
+        InfoDialog.ShowDialog(infoProperties);
+        Program.MySqlNotifierErrorHandler(title, detail, false, ex, SourceLevels.Information);
       }
+
       return success;
     }
 

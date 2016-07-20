@@ -124,7 +124,6 @@ namespace MySql.Notifier.Forms
       this.DialogOKButton.TabIndex = 1;
       this.DialogOKButton.Text = "OK";
       this.DialogOKButton.UseVisualStyleBackColor = true;
-      this.DialogOKButton.Click += new System.EventHandler(this.TestConnectionButton_Click);
       // 
       // TestConnectionButton
       // 
