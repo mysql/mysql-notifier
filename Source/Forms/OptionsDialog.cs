@@ -159,7 +159,7 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      if (Settings.Default.AutoCheckForUpdates && !string.IsNullOrEmpty(Classes.Notifier.InstallLocation))
+      if (Settings.Default.AutoCheckForUpdates && !string.IsNullOrEmpty(Program.InstallLocation))
       {
         Utility.CreateScheduledTask(Classes.Notifier.DefaultTaskName, Classes.Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
       }

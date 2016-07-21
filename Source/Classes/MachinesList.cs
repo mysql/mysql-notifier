@@ -38,6 +38,7 @@ namespace MySql.Notifier.Classes
     public MachinesList()
     {
       Machines = Settings.Default.MachineList ?? new List<Machine>();
+      ScrubMachinesWithNoServices();
       InitialLoad();
     }
 
@@ -460,6 +461,23 @@ namespace MySql.Notifier.Classes
       {
         service.SetServiceParameters(true);
         LocalMachine.ChangeService(service, ListChangeType.AutoAdd);
+      }
+    }
+
+    /// <summary>
+    /// Scrubs the machines that for some reasons have no services.
+    /// This may be caused by users removing services directly from the settings file.
+    /// </summary>
+    private void ScrubMachinesWithNoServices()
+    {
+      // We need to make a copy of the machines list since the original one will be modified.
+      var machinesListCopy = Machines.ToList();
+      foreach (var machine in machinesListCopy)
+      {
+        if (machine.Services.Count == 0)
+        {
+          ChangeMachine(machine, ListChangeType.RemoveByEvent);
+        }
       }
     }
 

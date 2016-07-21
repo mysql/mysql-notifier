@@ -31,7 +31,6 @@ using MySql.Notifier.Enumerations;
 using MySql.Notifier.Forms;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQL;
 using MySQL.Utility.Classes.MySQLInstaller;
 using MySQL.Utility.Classes.MySQLWorkbench;
 using MySQL.Utility.Forms;
@@ -44,34 +43,9 @@ namespace MySql.Notifier.Classes
     #region Constants
 
     /// <summary>
-    /// The relative path of the Notifier's connections file under the application data directory.
-    /// </summary>
-    public const string CONNECTIONS_FILE_RELATIVE_PATH = SETTINGS_DIRECTORY_RELATIVE_PATH + @"\connections.xml";
-
-    /// <summary>
-    /// The relative path of the Notifier's error log file under the application data directory.
-    /// </summary>
-    public const string ERROR_LOG_FILE_RELATIVE_PATH = SETTINGS_DIRECTORY_RELATIVE_PATH + @"\MySQLNotifier.log";
-
-    /// <summary>
-    /// The relative path of the Notifier's passwords vault file under the application data directory.
-    /// </summary>
-    public const string PASSWORDS_VAULT_FILE_RELATIVE_PATH = SETTINGS_DIRECTORY_RELATIVE_PATH + @"\user_data.dat";
-
-    /// <summary>
     /// The number of seconds in 1 hour.
     /// </summary>
     public const int SECONDS_IN_HOUR = 3600;
-
-    /// <summary>
-    /// The relative path of the settings directory under the application data directory.
-    /// </summary>
-    public const string SETTINGS_DIRECTORY_RELATIVE_PATH = @"\Oracle\MySQL Notifier";
-
-    /// <summary>
-    /// The relative path of the Notifier's settings file under the application data directory.
-    /// </summary>
-    public const string SETTINGS_FILE_RELATIVE_PATH = SETTINGS_DIRECTORY_RELATIVE_PATH + @"\settings.config";
 
     /// <summary>
     /// Default connections file load retry wait interval in milliseconds.
@@ -116,25 +90,9 @@ namespace MySql.Notifier.Classes
     {
       get
       {
-        return !string.IsNullOrEmpty(InstallLocation) ? InstallLocation + Assembly.GetExecutingAssembly().ManifestModule.Name : string.Empty;
+        return !string.IsNullOrEmpty(Program.InstallLocation) ? Program.InstallLocation + Assembly.GetExecutingAssembly().ManifestModule.Name : string.Empty;
       }
     }
-
-    /// <summary>
-    /// Gets the environment's application data directory.
-    /// </summary>
-    public static string EnvironmentApplicationDataDirectory
-    {
-      get
-      {
-        return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-      }
-    }
-
-    /// <summary>
-    /// Gets the installation path where the MySQL Notifier executable is located.
-    /// </summary>
-    public static string InstallLocation { get; private set; }
 
     #endregion Static Properties
 
@@ -230,10 +188,7 @@ namespace MySql.Notifier.Classes
       _worker = null;
       StatusRefreshInProgress = false;
 
-      // Static initializations.
-      InstallLocation = Utility.GetMySqlAppInstallLocation(AssemblyInfo.AssemblyTitle);
-      InitializeStaticSettings();
-      CustomizeInfoDialog();
+      SetChangeCursorDelegate();
 
       _components = new Container();
       _notifyIcon = new NotifyIcon(_components) { Visible = true };
@@ -269,14 +224,14 @@ namespace MySql.Notifier.Classes
       StartGlobalTimer();
 
       // Monitor creation/deletion of the Workbench application data directory
-      _workbechAppDataDirWatcher = StartWatcherForFile(EnvironmentApplicationDataDirectory + @"\MySQL\", WorkbenchAppDataDirectoryChanged);
+      _workbechAppDataDirWatcher = StartWatcherForFile(Program.EnvironmentApplicationDataDirectory + @"\MySQL\", WorkbenchAppDataDirectoryChanged);
 
       // Create watcher for Workbench servers.xml and connections.xml files
       FileSystemEventArgs wbDirArgs = new FileSystemEventArgs(MySqlWorkbench.IsInstalled ? WatcherChangeTypes.Created : WatcherChangeTypes.Deleted, MySqlWorkbench.WorkbenchDataDirectory, string.Empty);
       WorkbenchAppDataDirectoryChanged(_workbechAppDataDirWatcher, wbDirArgs);
 
       // Create watcher for Notifier settings.config file
-      _settingsFileWatcher = StartWatcherForFile(EnvironmentApplicationDataDirectory + SETTINGS_FILE_RELATIVE_PATH, SettingsFileChanged);
+      _settingsFileWatcher = StartWatcherForFile(Program.EnvironmentApplicationDataDirectory + Program.SETTINGS_FILE_RELATIVE_PATH, SettingsFileChanged);
 
       // Refresh the Notifier tray icon according to the status of services and instances.
       RefreshNotifierIcon();
@@ -360,23 +315,6 @@ namespace MySql.Notifier.Classes
     }
 
     #endregion Properties
-
-    /// <summary>
-    /// Initializes settings for the <see cref="MySqlWorkbench"/>, <see cref="MySqlSourceTrace"/>, <see cref="MySqlWorkbenchPasswordVault"/> and <see cref="MySqlInstaller"/> classes.
-    /// </summary>
-    public void InitializeStaticSettings()
-    {
-      MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
-      MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = EnvironmentApplicationDataDirectory + PASSWORDS_VAULT_FILE_RELATIVE_PATH;
-      MySqlWorkbench.ExternalConnections.CreateDefaultConnections = !MySqlWorkbench.ConnectionsFileExists && MySqlWorkbench.Connections.Count == 0;
-      MySqlWorkbench.ExternalApplicationsConnectionsFileRetryLoadOrRecreate = true;
-      MySqlWorkbench.ExternalApplicationConnectionsFilePath = EnvironmentApplicationDataDirectory + CONNECTIONS_FILE_RELATIVE_PATH;
-      SetChangeCursorDelegate();
-      MySqlWorkbench.LoadData();
-      MySqlWorkbench.LoadServers();
-      MySqlInstaller.InstallerLegacyDllPath = InstallLocation;
-      MySqlInstaller.LoadData();
-    }
 
     /// <summary>
     /// Cancels the asynchronous status refresh.
@@ -725,19 +663,6 @@ namespace MySql.Notifier.Classes
       {
         Exit(this, EventArgs.Empty);
       }
-    }
-
-    /// <summary>
-    /// Customizes the looks of the <see cref="MySQL.Utility.Forms.InfoDialog"/> form for the MySQL Notifier.
-    /// </summary>
-    private static void CustomizeInfoDialog()
-    {
-      InfoDialog.ApplicationName = AssemblyInfo.AssemblyTitle;
-      InfoDialog.SuccessLogo = Resources.ApplicationLogo;
-      InfoDialog.ErrorLogo = Resources.NotifierErrorImage;
-      InfoDialog.WarningLogo = Resources.NotifierWarningImage;
-      InfoDialog.InformationLogo = Resources.ApplicationLogo;
-      InfoDialog.ApplicationIcon = Resources.MySqlNotifierIcon;
     }
 
     /// <summary>

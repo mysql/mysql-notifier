@@ -31,7 +31,7 @@ namespace MySql.Notifier.Classes
     {
       get
       {
-        return Notifier.EnvironmentApplicationDataDirectory + Notifier.SETTINGS_FILE_RELATIVE_PATH;
+        return Program.EnvironmentApplicationDataDirectory + Program.SETTINGS_FILE_RELATIVE_PATH;
       }
     }
 

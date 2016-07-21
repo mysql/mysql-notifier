@@ -89,7 +89,7 @@ namespace MySql.Notifier.Forms
     {
       get
       {
-        return Classes.Notifier.EnvironmentApplicationDataDirectory + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
+        return Program.EnvironmentApplicationDataDirectory + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
       }
     }
 

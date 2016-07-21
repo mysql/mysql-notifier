@@ -182,14 +182,14 @@ namespace MySql.Notifier.Forms
 
       if (_selectedItem is MySqlService)
       {
-        MySqlService selectedService = _selectedItem as MySqlService;
+        var selectedService = (MySqlService)_selectedItem;
         Machine machine = MachinesList.GetMachineById(selectedService.Host.MachineId);
         machine.ChangeService(selectedService, ListChangeType.RemoveByUser);
         MonitoredServicesListView.Items.RemoveAt(MonitoredServicesListView.SelectedIndices[0]);
       }
       else if (_selectedItem is MySqlInstance)
       {
-        MySqlInstance selectedInstance = _selectedItem as MySqlInstance;
+        var selectedInstance = (MySqlInstance)_selectedItem;
         if (InstancesList.Remove(selectedInstance))
         {
           MonitoredInstancesListView.Items.RemoveAt(MonitoredInstancesListView.SelectedIndices[0]);
