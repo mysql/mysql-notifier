@@ -56,6 +56,11 @@ namespace MySql.Notifier.Classes
 
     public static void Stop()
     {
+      if (_mutex == null)
+      {
+        return;
+      }
+
       _mutex.ReleaseMutex();
     }
   }

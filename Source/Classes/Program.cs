@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -37,6 +38,8 @@ namespace MySql.Notifier.Classes
 {
   internal static class Program
   {
+    #region Constants
+
     /// <summary>
     /// The relative path of the Notifier's connections file under the application data directory.
     /// </summary>
@@ -61,6 +64,13 @@ namespace MySql.Notifier.Classes
     /// The relative path of the Notifier's settings file under the application data directory.
     /// </summary>
     public const string SETTINGS_FILE_RELATIVE_PATH = SETTINGS_DIRECTORY_RELATIVE_PATH + @"\settings.config";
+
+    /// <summary>
+    /// The root element name of the settings.config file used in versions prior 1.1.7 which is wrong.
+    /// </summary>
+    private const string WRONG_SETTINGS_FILE_ROOT_ELEMENT_NAME = "MySQLForExcel";
+
+    #endregion Constants
 
     /// <summary>
     /// An instance of the <see cref="NotifierApplicationContext"/> class.
@@ -296,7 +306,7 @@ namespace MySql.Notifier.Classes
       }
 
       var machineListElement = rootElement.Element("MachineList");
-      if (machineListElement == null)
+      if (machineListElement == null || string.IsNullOrEmpty(machineListElement.Value))
       {
         return;
       }
@@ -387,10 +397,11 @@ namespace MySql.Notifier.Classes
       }
 
       var mySqlInstancesListElement = rootElement.Element("MySQLInstancesList");
-      if (mySqlInstancesListElement == null)
+      if (mySqlInstancesListElement == null || string.IsNullOrEmpty(mySqlInstancesListElement.Value))
       {
         return;
       }
+
       var mySqlInstancesListDoc = new XmlDocument();
       mySqlInstancesListDoc.LoadXml(mySqlInstancesListElement.Value);
       if (mySqlInstancesListDoc.DocumentElement == null)
@@ -468,20 +479,41 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      XDocument xdoc = XDocument.Load(settingsFilePath);
-      var element = xdoc.Elements("MySQLForExcel").FirstOrDefault();
-      if (element == null)
+      var settingsCopyFileName = settingsFilePath + ".bak";
+      try
       {
-        return;
+        // Make a copy of the configuration file before attempting to fix the root element name from MySQLForExcel to MySQLNotifier
+        File.Copy(settingsFilePath, settingsCopyFileName, true);
+
+        XDocument xdoc = XDocument.Load(settingsFilePath);
+        var element = xdoc.Elements(WRONG_SETTINGS_FILE_ROOT_ELEMENT_NAME).FirstOrDefault();
+        if (element == null)
+        {
+          return;
+        }
+
+        // Change MySQLForExcel for MySQLNotifier
+        element.Name = AssemblyInfo.AssemblyTitle.Replace(" ", string.Empty);
+        xdoc.Save(settingsFilePath);
+        NotifierSettings.RootElementName = null;
+
+        // For some reason collections are not loaded from the modified file, so we need to read them manually and feed them again to the settings object
+        UpdateMachineServicesInSettingsFromXml(element);
+        UpdateMySqlInstancesInSettingsFromXml(element);
       }
+      catch (Exception ex)
+      {
+        MySqlNotifierErrorHandler(Resources.FixMySqlForExcelMainElementWarningText, false, ex, SourceLevels.Warning);
 
-      // Change MySQLForExcel for MySQLNotifier
-      element.Name = AssemblyInfo.AssemblyTitle.Replace(" ", string.Empty);
-      xdoc.Save(settingsFilePath);
-
-      // For some reason collections are not loaded from the modified file, so we need to read them manually and feed them again to the settings object
-      UpdateMachineServicesInSettingsFromXml(element);
-      UpdateMySqlInstancesInSettingsFromXml(element);
+        // Revert back the settings.config file from the copy we made.
+        NotifierSettings.RootElementName = WRONG_SETTINGS_FILE_ROOT_ELEMENT_NAME;
+        if (File.Exists(settingsCopyFileName))
+        {
+          File.Copy(settingsCopyFileName, settingsFilePath, true);
+          File.Delete(settingsCopyFileName);
+          Settings.Default.Save();
+        }
+      }
     }
 
     /// <summary>

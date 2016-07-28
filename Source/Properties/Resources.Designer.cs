@@ -528,6 +528,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not fix configuration file&apos;s root element name because of an Exception, reverting back to how it was..
+        /// </summary>
+        internal static string FixMySqlForExcelMainElementWarningText {
+            get {
+                return ResourceManager.GetString("FixMySqlForExcelMainElementWarningText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There are {0} available updates for your installed MySQL software. Please launch the MySQL Installer to apply them..
         /// </summary>
         internal static string HasUpdatesLaunchInstaller {
