@@ -121,8 +121,8 @@
     <value>Monitoring {0} services and {1} instances</value>
     <comment>ToolTip Text appended to the AppName</comment>
   </data>
-  <data name="ConfigureInstance" xml:space="preserve">
-    <value>Configure Instance...</value>
+  <data name="ManageInstance" xml:space="preserve">
+    <value>Manage Instance...</value>
   </data>
   <data name="SQLEditor" xml:space="preserve">
     <value>SQL Editor...</value>

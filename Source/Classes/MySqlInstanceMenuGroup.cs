@@ -43,7 +43,7 @@ namespace MySql.Notifier.Classes
 
       if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
-        ConfigureMenuItem = new ToolStripMenuItem(Resources.ConfigureInstance);
+        ConfigureMenuItem = new ToolStripMenuItem(Resources.ManageInstance);
         ConfigureMenuItem.Click += ConfigureMenuItem_Click;
       }
 
@@ -278,7 +278,7 @@ namespace MySql.Notifier.Classes
         }
 
         // if index + 1 is a ConfigureInstance item, we need to dispose of the whole item.
-        if (menu.Items[index + 1].Text.Equals(Resources.ConfigureInstance))
+        if (menu.Items[index + 1].Text.Equals(Resources.ManageInstance))
         {
           // The last itemText we delete is the service name itemText which is the reference for the others.
           menuItemTexts[0] = "Configure Menu";
@@ -440,7 +440,7 @@ namespace MySql.Notifier.Classes
         }
 
         // We dispose of ConfigureInstance and SQLEditor items to recreate a clear menu.
-        if (menu.Items[index + 1].Text.Equals(Resources.ConfigureInstance))
+        if (menu.Items[index + 1].Text.Equals(Resources.ManageInstance))
         {
           menu.Items.RemoveAt(index + 1);
         }
@@ -455,7 +455,7 @@ namespace MySql.Notifier.Classes
         {
           if (ConfigureMenuItem == null)
           {
-            ConfigureMenuItem = new ToolStripMenuItem(Resources.ConfigureInstance);
+            ConfigureMenuItem = new ToolStripMenuItem(Resources.ManageInstance);
             ConfigureMenuItem.Click += ConfigureMenuItem_Click;
             RecreateSqlEditorMenus();
           }

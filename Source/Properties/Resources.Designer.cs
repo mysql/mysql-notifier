@@ -363,15 +363,6 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Configure Instance....
-        /// </summary>
-        internal static string ConfigureInstance {
-            get {
-                return ResourceManager.GetString("ConfigureInstance", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to There is a MySQL instance already being monitored that this connection relates to..
         /// </summary>
         internal static string ConnectionAlreadyInInstancesDetail {
@@ -691,6 +682,15 @@ namespace MySql.Notifier.Properties {
         internal static string MachineUnavailableYesNoDetail {
             get {
                 return ResourceManager.GetString("MachineUnavailableYesNoDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manage Instance....
+        /// </summary>
+        internal static string ManageInstance {
+            get {
+                return ResourceManager.GetString("ManageInstance", resourceCulture);
             }
         }
         
