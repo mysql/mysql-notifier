@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -510,8 +509,15 @@ namespace MySql.Notifier.Classes
         if (File.Exists(settingsCopyFileName))
         {
           File.Copy(settingsCopyFileName, settingsFilePath, true);
-          File.Delete(settingsCopyFileName);
           Settings.Default.Save();
+        }
+      }
+      finally
+      {
+        // Delete the backup file.
+        if (File.Exists(settingsCopyFileName))
+        {
+          File.Delete(settingsCopyFileName);
         }
       }
     }
