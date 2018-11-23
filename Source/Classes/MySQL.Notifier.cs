@@ -35,6 +35,7 @@ using MySQL.Utility.Classes.MySQLInstaller;
 using MySQL.Utility.Classes.MySQLWorkbench;
 using MySQL.Utility.Forms;
 using Timer = System.Timers.Timer;
+using MySQL.Utility.Classes.MySQL;
 
 namespace MySql.Notifier.Classes
 {
@@ -304,7 +305,7 @@ namespace MySql.Notifier.Classes
           }
           catch (IOException ex)
           {
-            Program.MySqlNotifierErrorHandler(Resources.SettingsFileFailedToLoad, false, ex, SourceLevels.Warning);
+            MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.SettingsFileFailedToLoad, false, SourceLevels.Warning);
             Thread.Sleep(MILLISECONDS_IN_SECOND);
           }
         }
@@ -706,7 +707,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        Program.MySqlNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.CheckForUpdatesProcessError, false);
       }
     }
 
@@ -729,7 +730,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        Program.MySqlNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.CheckForUpdatesProcessError, false);
       }
     }
 
@@ -804,7 +805,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        Program.MySqlNotifierErrorHandler(Resources.CheckForUpdatesProcessError, false, ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.CheckForUpdatesProcessError, false);
       }
     }
 
@@ -1090,7 +1091,7 @@ namespace MySql.Notifier.Classes
     {
       string errorText = string.Format(Resources.BalloonTextFailedStatusChange, service.DisplayName, Environment.NewLine + ex.Message + Environment.NewLine + Resources.AskRestartApplication);
       ShowTooltip(true, Resources.BalloonTitleFailedStatusChange, errorText);
-      Program.MySqlNotifierErrorHandler(Resources.UpdateServiceStatusError, false, ex, SourceLevels.Critical);
+      MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.UpdateServiceStatusError, false, SourceLevels.Critical);
     }
 
     /// <summary>
@@ -1157,7 +1158,7 @@ namespace MySql.Notifier.Classes
     private void MySqlInstanceConnectionStatusTestErrorThrown(object sender, InstanceConnectionStatusTestErrorThrownArgs args)
     {
       ShowTooltip(true, Resources.ErrorTitle, string.Format(Resources.BalloonTextFailedStatusCheck, args.Instance.HostIdentifier, args.ErrorException.Message));
-      Program.MySqlNotifierErrorHandler(Resources.UpdateInstanceStatusError, false, args.ErrorException, SourceLevels.Critical);
+      MySqlSourceTrace.WriteAppErrorToLog(args.ErrorException, null, Resources.UpdateInstanceStatusError, false, SourceLevels.Critical);
     }
 
     /// <summary>
@@ -1335,7 +1336,7 @@ namespace MySql.Notifier.Classes
         return workbenchConnectionsLoadSuccessful;
       }
 
-      Program.MySqlNotifierErrorHandler(null, false, loadException);
+      MySqlSourceTrace.WriteAppErrorToLog(loadException, null, Resources.ConnectionsFileLoadingErrorDetail, false);
       var infoProperties = InfoDialogProperties.GetErrorDialogProperties(
         Resources.ConnectionsFileLoadingErrorTitle,
         Resources.ConnectionsFileLoadingErrorDetail,
@@ -1730,7 +1731,7 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void StatusRefreshWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      Program.MySqlNotifierErrorHandler(e.Cancelled ? Resources.StatusRefreshCancelledText : Resources.StatusRefreshCompleteText, false, null, SourceLevels.Information);
+      MySqlSourceTrace.WriteToLog(e.Cancelled ? Resources.StatusRefreshCancelledText : Resources.StatusRefreshCompleteText, false, SourceLevels.Information);
       _refreshStatusMenuItem.Text = Resources.RefreshStatusMenuText;
       _refreshStatusMenuItem.Image = Resources.RefreshStatus;
       StatusRefreshInProgress = false;

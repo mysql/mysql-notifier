@@ -28,6 +28,7 @@ using System.Xml.Serialization;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
 using MySQL.Utility.Classes;
+using MySQL.Utility.Classes.MySQL;
 using MySQL.Utility.Classes.MySQLWorkbench;
 using MySQL.Utility.Forms;
 
@@ -906,7 +907,7 @@ namespace MySql.Notifier.Classes
         return wmiServicesCollection;
       }
 
-      Program.MySqlNotifierErrorHandler(ConnectionProblemLongDescription, false, connectionException, SourceLevels.Information);
+      MySqlSourceTrace.WriteAppErrorToLog(connectionException, null, ConnectionProblemLongDescription, false, SourceLevels.Information);
       if (displayMessageOnError)
       {
         var infoProperties = InfoDialogProperties.GetErrorDialogProperties(ConnectionProblemShortDescription,
@@ -1526,7 +1527,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         ConnectionProblem = ConnectionProblemType.InsufficientAccessPermissions;
-        Program.MySqlNotifierErrorHandler(ConnectionProblemLongDescription, false, ex, SourceLevels.Information);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, null, ConnectionProblemLongDescription, false, SourceLevels.Information);
         if (displayMessageOnError)
         {
           var infoProperties = InfoDialogProperties.GetWarningDialogProperties(

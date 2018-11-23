@@ -418,7 +418,7 @@ namespace MySql.Notifier.Classes
         infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
         infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
         InfoDialog.ShowDialog(infoProperties);
-        Program.MySqlNotifierErrorHandler(title, detail, false, ex, SourceLevels.Information);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, title, detail, false, SourceLevels.Information);
       }
 
       return success;
@@ -436,7 +436,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      Program.MySqlNotifierErrorHandler(Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncCreationWatcher.Scope.Path.Server), true, e.Error);
+      MySqlSourceTrace.WriteAppErrorToLog(e.Error, Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncCreationWatcher.Scope.Path.Server), true);
     }
 
     /// <summary>
@@ -490,7 +490,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, false);
       }
 
       if (throwException != null)
@@ -545,7 +545,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors, ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors);
       }
 
       return success;
@@ -623,7 +623,7 @@ namespace MySql.Notifier.Classes
         infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
         infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
         InfoDialog.ShowDialog(infoProperties);
-        Program.MySqlNotifierErrorHandler(title, detail, false, ex, SourceLevels.Information);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, title, detail, false, SourceLevels.Information);
       }
 
       return success;
@@ -641,7 +641,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      Program.MySqlNotifierErrorHandler(Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncDeletionWatcher.Scope.Path.Server), true, e.Error);
+      MySqlSourceTrace.WriteAppErrorToLog(e.Error, Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncDeletionWatcher.Scope.Path.Server), true);
     }
 
     /// <summary>
@@ -691,7 +691,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, false);
       }
 
       if (throwException != null)
@@ -746,7 +746,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors, ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors);
       }
 
       return success;
@@ -824,7 +824,7 @@ namespace MySql.Notifier.Classes
         infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
         infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
         InfoDialog.ShowDialog(infoProperties);
-        Program.MySqlNotifierErrorHandler(title, detail, false, ex, SourceLevels.Information);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, title, detail, false, SourceLevels.Information);
       }
 
       return success;
@@ -842,7 +842,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      Program.MySqlNotifierErrorHandler(Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncStatusChangeWatcher.Scope.Path.Server), true, e.Error);
+      MySqlSourceTrace.WriteAppErrorToLog(e.Error, Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncStatusChangeWatcher.Scope.Path.Server), true);
     }
 
     /// <summary>
@@ -892,7 +892,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, false);
       }
 
       if (throwException != null)
@@ -947,7 +947,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        Program.MySqlNotifierErrorHandler(Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors, ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors);
       }
 
       return success;

@@ -686,6 +686,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot initialize main application..
+        /// </summary>
+        internal static string MainApplicationErrorDetail {
+            get {
+                return ResourceManager.GetString("MainApplicationErrorDetail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manage Instance....
         /// </summary>
         internal static string ManageInstance {
@@ -1056,6 +1065,15 @@ namespace MySql.Notifier.Properties {
         internal static string ServiceAlreadyInListWarningText {
             get {
                 return ResourceManager.GetString("ServiceAlreadyInListWarningText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error setting parameters for Service &apos;{0}&apos;..
+        /// </summary>
+        internal static string SetServiceErrorDetail {
+            get {
+                return ResourceManager.GetString("SetServiceErrorDetail", resourceCulture);
             }
         }
         

@@ -554,4 +554,10 @@ Please make sure the connections.xml file is not open by another program.</value
   <data name="FixMySqlForExcelMainElementWarningText" xml:space="preserve">
     <value>Could not fix configuration file's root element name because of an Exception, reverting back to how it was.</value>
   </data>
+  <data name="MainApplicationErrorDetail" xml:space="preserve">
+    <value>Cannot initialize main application.</value>
+  </data>
+  <data name="SetServiceErrorDetail" xml:space="preserve">
+    <value>Error setting parameters for Service '{0}'.</value>
+  </data>
 </root>

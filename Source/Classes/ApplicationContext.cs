@@ -16,9 +16,11 @@
 // 02110-1301  USA
 
 using System;
+using System.Diagnostics;
 using System.Security.Principal;
 using System.Windows.Forms;
 using MySql.Notifier.Forms;
+using MySQL.Utility.Classes.MySQL;
 
 namespace MySql.Notifier.Classes
 {
@@ -58,7 +60,7 @@ namespace MySql.Notifier.Classes
         }
         catch (Exception ex)
         {
-          Program.MySqlNotifierErrorHandler(ex, true);
+          MySqlSourceTrace.WriteAppErrorToLog(ex, null, null, true, SourceLevels.Critical);
         }
 
         return isAdmin;

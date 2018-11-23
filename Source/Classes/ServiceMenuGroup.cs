@@ -21,6 +21,7 @@ using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
+using MySQL.Utility.Classes.MySQL;
 using MySQL.Utility.Classes.MySQLWorkbench;
 
 namespace MySql.Notifier.Classes
@@ -510,7 +511,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        Program.MySqlNotifierErrorHandler(Resources.FailureToLaunchWorkbench, true, ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.FailureToLaunchWorkbench, true);
       }
     }
 
@@ -584,7 +585,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        Program.MySqlNotifierErrorHandler(Resources.FailureToLaunchWorkbench, true, ex);
+        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.FailureToLaunchWorkbench, true);
       }
     }
   }

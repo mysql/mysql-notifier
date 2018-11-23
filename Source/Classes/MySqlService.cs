@@ -455,7 +455,7 @@ namespace MySql.Notifier.Classes
       catch (InvalidOperationException ioEx)
       {
         _managementObject = null;
-        Program.MySqlNotifierErrorHandler(ioEx, true);
+        MySqlSourceTrace.WriteAppErrorToLog(ioEx, null, string.Format(Resources.SetServiceErrorDetail, DisplayName), true);
       }
     }
 
@@ -689,7 +689,7 @@ namespace MySql.Notifier.Classes
         {
           serviceUnavailable = true;
           errorException = ex;
-          MySqlSourceTrace.WriteAppErrorToLog(ex);
+          MySqlSourceTrace.WriteAppErrorToLog(ex, false);
         }
       }
 
