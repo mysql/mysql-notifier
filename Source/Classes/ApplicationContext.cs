@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -16,11 +16,10 @@
 // 02110-1301  USA
 
 using System;
-using System.Diagnostics;
 using System.Security.Principal;
 using System.Windows.Forms;
 using MySql.Notifier.Forms;
-using MySQL.Utility.Classes.MySQL;
+using MySql.Utility.Classes.Logging;
 
 namespace MySql.Notifier.Classes
 {
@@ -39,10 +38,12 @@ namespace MySql.Notifier.Classes
       NotifierInstance.Exit += NotifierApp_Exit;
     }
 
+    #region Properties
+
     /// <summary>
     /// Gets an instance of the <see cref="Notifier"/> class.
     /// </summary>
-    internal Notifier NotifierInstance { get; private set; }
+    internal Notifier NotifierInstance { get; }
 
     /// <summary>
     /// Gets a value indicating whether the user running this application has administrator privileges.
@@ -51,7 +52,7 @@ namespace MySql.Notifier.Classes
     {
       get
       {
-        bool isAdmin = false;
+        var isAdmin = false;
         try
         {
           var identity = WindowsIdentity.GetCurrent();
@@ -60,12 +61,14 @@ namespace MySql.Notifier.Classes
         }
         catch (Exception ex)
         {
-          MySqlSourceTrace.WriteAppErrorToLog(ex, null, null, true, SourceLevels.Critical);
+          Logger.LogException(ex, true);
         }
 
         return isAdmin;
       }
     }
+
+    #endregion Properties
 
     protected override void OnMainFormClosed(object sender, EventArgs e)
     {

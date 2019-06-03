@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -20,8 +20,8 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes.MySQL;
-using MySQL.Utility.Classes.MySQLWorkbench;
+using MySql.Utility.Classes.Logging;
+using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes
 {
@@ -38,10 +38,9 @@ namespace MySql.Notifier.Classes
     {
       BoundInstance = boundInstance;
       InstanceMenuItem = new ToolStripMenuItem();
-      Font menuItemFont = new Font(InstanceMenuItem.Font, FontStyle.Bold);
+      var menuItemFont = new Font(InstanceMenuItem.Font, FontStyle.Bold);
       InstanceMenuItem.Font = menuItemFont;
       InstanceMenuItem.Tag = boundInstance.InstanceId;
-
       if (MySqlWorkbench.AllowsExternalConnectionsManagement)
       {
         ConfigureMenuItem = new ToolStripMenuItem(Resources.ManageInstance);
@@ -73,25 +72,10 @@ namespace MySql.Notifier.Classes
         try
         {
           // Free managed resources
-          if (ConfigureMenuItem != null)
-          {
-            ConfigureMenuItem.Dispose();
-          }
-
-          if (InstanceMenuItem != null)
-          {
-            InstanceMenuItem.Dispose();
-          }
-
-          if (SqlEditorMenuItem != null)
-          {
-            SqlEditorMenuItem.Dispose();
-          }
-
-          if (Separator != null)
-          {
-            Separator.Dispose();
-          }
+          ConfigureMenuItem?.Dispose();
+          InstanceMenuItem?.Dispose();
+          SqlEditorMenuItem?.Dispose();
+          Separator?.Dispose();
         }
         catch
         {
@@ -110,7 +94,7 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Gets the MySQL instance that this menu group is associated to.
     /// </summary>
-    public MySqlInstance BoundInstance { get; private set; }
+    public MySqlInstance BoundInstance { get; }
 
     /// <summary>
     /// Gets the Configure Instance menu itemText that opens the instance's configuration page in MySQL Workbench.
@@ -120,7 +104,7 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Gets the main MySQL instance's menu itemText that shows the connection status.
     /// </summary>
-    public ToolStripMenuItem InstanceMenuItem { get; private set; }
+    public ToolStripMenuItem InstanceMenuItem { get; }
 
     /// <summary>
     /// Gets the SQL Editor menu itemText that opens the SQL Editor page in MySQL Workbench for related connections.
@@ -130,7 +114,7 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// The separator menu itemText at the end of all menu items.
     /// </summary>
-    private ToolStripSeparator Separator { get; set; }
+    private ToolStripSeparator Separator { get; }
 
     #endregion Properties
 
@@ -142,11 +126,12 @@ namespace MySql.Notifier.Classes
     /// <returns>Index of the found menu itemText, <c>-1</c> if  not found.</returns>
     public static int FindMenuItemWithinMenuStrip(ContextMenuStrip menu, string menuItemId)
     {
-      int index = -1;
+      var index = -1;
 
-      for (int i = 0; i < menu.Items.Count; i++)
+      for (var i = 0; i < menu.Items.Count; i++)
       {
-        if (menu.Items[i].Tag == null || !menu.Items[i].Tag.Equals(menuItemId))
+        if (menu.Items[i].Tag == null
+            || !menu.Items[i].Tag.Equals(menuItemId))
         {
           continue;
         }
@@ -170,7 +155,7 @@ namespace MySql.Notifier.Classes
       }
       else
       {
-        int index = FindMenuItemWithinMenuStrip(menu, Resources.Actions);
+        var index = FindMenuItemWithinMenuStrip(menu, Resources.Actions);
         if (index < 0)
         {
           index = 0;
@@ -245,10 +230,10 @@ namespace MySql.Notifier.Classes
         // We have more than 1 connection so we create a submenu.
         foreach (var conn in BoundInstance.RelatedConnections)
         {
-          ToolStripMenuItem menu = new ToolStripMenuItem(conn.Name);
+          var menu = new ToolStripMenuItem(conn.Name);
           if (conn == BoundInstance.WorkbenchConnection)
           {
-            Font boldFont = new Font(menu.Font, FontStyle.Bold);
+            var boldFont = new Font(menu.Font, FontStyle.Bold);
             menu.Font = boldFont;
           }
 
@@ -270,8 +255,8 @@ namespace MySql.Notifier.Classes
       }
       else
       {
-        string[] menuItemTexts = new string[4];
-        int index = FindInstanceMenuItemWithinMenuStrip(menu);
+        var menuItemTexts = new string[4];
+        var index = FindInstanceMenuItemWithinMenuStrip(menu);
 
         if (index < 0)
         {
@@ -324,7 +309,7 @@ namespace MySql.Notifier.Classes
     /// <param name="refreshing">Flag indicating if the instance is refreshing its status.</param>
     public void Update(bool refreshing)
     {
-      ToolStrip menu = InstanceMenuItem.GetCurrentParent();
+      var menu = InstanceMenuItem.GetCurrentParent();
       if (menu == null)
       {
         return;
@@ -355,7 +340,8 @@ namespace MySql.Notifier.Classes
 
         if (SqlEditorMenuItem != null)
         {
-          SqlEditorMenuItem.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && BoundInstance.WorkbenchConnection != null;
+          SqlEditorMenuItem.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement
+                                      && BoundInstance.WorkbenchConnection != null;
         }
 
         if (ConfigureMenuItem != null)
@@ -384,7 +370,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.FailureToLaunchWorkbench, true);
+        Logger.LogException(ex, true, Resources.FailureToLaunchWorkbench);
       }
     }
 
@@ -407,7 +393,7 @@ namespace MySql.Notifier.Classes
         }
         else
         {
-          for (int i = 0; i < SqlEditorMenuItem.DropDownItems.Count; i++)
+          for (var i = 0; i < SqlEditorMenuItem.DropDownItems.Count; i++)
           {
             if (sender == SqlEditorMenuItem.DropDownItems[i])
             {
@@ -418,7 +404,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.FailureToLaunchWorkbench, true);
+        Logger.LogException(ex, true, Resources.FailureToLaunchWorkbench);
       }
     }
 
@@ -434,7 +420,7 @@ namespace MySql.Notifier.Classes
       }
       else
       {
-        int index = FindMenuItemWithinMenuStrip(menu, BoundInstance.InstanceId);
+        var index = FindMenuItemWithinMenuStrip(menu, BoundInstance.InstanceId);
         if (index < 0)
         {
           return;

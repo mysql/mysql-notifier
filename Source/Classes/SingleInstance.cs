@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -17,7 +17,7 @@
 
 using System;
 using System.Threading;
-using MySQL.Utility.Classes;
+using MySql.Utility.Classes;
 
 namespace MySql.Notifier.Classes
 {
@@ -31,37 +31,30 @@ namespace MySql.Notifier.Classes
   /// </remarks>
   public static class SingleInstance
   {
-    public static readonly int WmShowfirstinstance = WinApi.RegisterWindowMessage("WM_SHOWFIRSTINSTANCE|{0}", AssemblyInfo.AssemblyGuid);
+    public static readonly int WmShowFirstInstance = WinApi.RegisterWindowMessage("WM_SHOWFIRSTINSTANCE|{0}", AssemblyInfo.AssemblyGuid);
     private static Mutex _mutex;
 
     public static bool Start()
     {
-      bool onlyInstance;
-
       // Below "Local" limits a single instance per session, if we want to limit to a single instance
       // across all sessions (multiple users and terminal services) we can change it to "Global".
-      string mutexName = string.Format("Local\\{0}", AssemblyInfo.AssemblyGuid);
+      string mutexName = $"Local\\{AssemblyInfo.AssemblyGuid}";
 
-      _mutex = new Mutex(true, mutexName, out onlyInstance);
+      _mutex = new Mutex(true, mutexName, out var onlyInstance);
       return onlyInstance;
     }
 
     public static void ShowFirstInstance()
     {
       WinApi.PostMessage((IntPtr)WinApi.HWND_BROADCAST,
-                         WmShowfirstinstance,
+                         WmShowFirstInstance,
                          IntPtr.Zero,
                          IntPtr.Zero);
     }
 
     public static void Stop()
     {
-      if (_mutex == null)
-      {
-        return;
-      }
-
-      _mutex.ReleaseMutex();
+      _mutex?.ReleaseMutex();
     }
   }
 }

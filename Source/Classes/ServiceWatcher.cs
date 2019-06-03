@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -17,13 +17,12 @@
 
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Management;
 using System.Threading;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQL;
-using MySQL.Utility.Forms;
+using MySql.Utility.Classes;
+using MySql.Utility.Classes.Logging;
+using MySql.Utility.Forms;
 
 namespace MySql.Notifier.Classes
 {
@@ -144,9 +143,9 @@ namespace MySql.Notifier.Classes
     #region Properties
 
     /// <summary>
-    /// Gets a value indicating whether the watcher uses asnynchronous or semi-synchronous operations.
+    /// Gets a value indicating whether the watcher uses asynchronous or semi-synchronous operations.
     /// </summary>
-    public bool Asynchronous { get; private set; }
+    public bool Asynchronous { get; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the consumer machine is online.
@@ -161,17 +160,17 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Get or sets a value indicating whether the watcher will monitor service creation.
     /// </summary>
-    public bool WatchForServiceCreation { get; private set; }
+    public bool WatchForServiceCreation { get; }
 
     /// <summary>
     /// Get or sets a value indicating whether the watcher will monitor service deletion.
     /// </summary>
-    public bool WatchForServiceDeletion { get; private set; }
+    public bool WatchForServiceDeletion { get; }
 
     /// <summary>
     /// Get or sets a value indicating whether the watcher will monitor service status changes.
     /// </summary>
-    public bool WatchForServiceStatusChange { get; private set; }
+    public bool WatchForServiceStatusChange { get; }
 
     /// <summary>
     /// Gets or sets the timeout in seconds for WMI queries.
@@ -196,7 +195,9 @@ namespace MySql.Notifier.Classes
     /// <returns>true if watchers were started successfully, false otherwise.</returns>
     public bool Start(ManagementScope wmiManagementScope)
     {
-      IsRunning = ServiceCreationWatcherStart(wmiManagementScope) && ServiceDeletionWatcherStart(wmiManagementScope) && ServiceStatusChangeWatcherStart(wmiManagementScope);
+      IsRunning = ServiceCreationWatcherStart(wmiManagementScope)
+                  && ServiceDeletionWatcherStart(wmiManagementScope)
+                  && ServiceStatusChangeWatcherStart(wmiManagementScope);
       return IsRunning;
     }
 
@@ -207,7 +208,9 @@ namespace MySql.Notifier.Classes
     /// <returns>true if watchers were stopped successfully, false otherwise.</returns>
     public bool Stop(bool displayErrors)
     {
-      bool success = ServiceCreationWatcherStop(displayErrors) && ServiceDeletionWatcherStop(displayErrors) && ServiceStatusChangeWatcherStop(displayErrors);
+      var success = ServiceCreationWatcherStop(displayErrors)
+                     && ServiceDeletionWatcherStop(displayErrors)
+                     && ServiceStatusChangeWatcherStop(displayErrors);
       IsRunning = !success;
       return success;
     }
@@ -222,11 +225,7 @@ namespace MySql.Notifier.Classes
       {
         // Free managed resources
         ServiceCreationWatcherStop(false);
-        if (_wmiAsyncCreationWatcher != null)
-        {
-          _wmiAsyncCreationWatcher.Dispose();
-        }
-
+        _wmiAsyncCreationWatcher?.Dispose();
         if (_wmiSemiSyncCreationWatcher != null)
         {
           if (_wmiSemiSyncCreationWatcher.IsBusy)
@@ -246,11 +245,7 @@ namespace MySql.Notifier.Classes
         }
 
         ServiceDeletionWatcherStop(false);
-        if (_wmiAsyncDeletionWatcher != null)
-        {
-          _wmiAsyncDeletionWatcher.Dispose();
-        }
-
+        _wmiAsyncDeletionWatcher?.Dispose();
         if (_wmiSemiSyncDeletionWatcher != null)
         {
           if (_wmiSemiSyncDeletionWatcher.IsBusy)
@@ -268,11 +263,7 @@ namespace MySql.Notifier.Classes
         }
 
         ServiceStatusChangeWatcherStop(false);
-        if (_wmiAsyncStatusChangeWatcher != null)
-        {
-          _wmiAsyncStatusChangeWatcher.Dispose();
-        }
-
+        _wmiAsyncStatusChangeWatcher?.Dispose();
         if (_wmiSemiSyncStatusChangeWatcher != null)
         {
           if (_wmiSemiSyncStatusChangeWatcher.IsBusy)
@@ -300,10 +291,7 @@ namespace MySql.Notifier.Classes
     /// <param name="remoteService">Remote service firing the creation event.</param>
     private void OnServiceCreated(ManagementBaseObject remoteService)
     {
-      if (ServiceCreated != null)
-      {
-        ServiceCreated(remoteService);
-      }
+      ServiceCreated?.Invoke(remoteService);
     }
 
     /// <summary>
@@ -312,10 +300,7 @@ namespace MySql.Notifier.Classes
     /// <param name="remoteService">Remote service firing the deletion event.</param>
     private void OnServiceDeleted(ManagementBaseObject remoteService)
     {
-      if (ServiceDeleted != null)
-      {
-        ServiceDeleted(remoteService);
-      }
+      ServiceDeleted?.Invoke(remoteService);
     }
 
     /// <summary>
@@ -324,13 +309,15 @@ namespace MySql.Notifier.Classes
     /// <param name="remoteService">Remote service firing the status changed event.</param>
     private void OnServiceStatusChanged(ManagementBaseObject remoteService)
     {
-      if (ServiceStatusChanged != null)
+      if (ServiceStatusChanged == null)
       {
-        ServiceStatusChanged(remoteService);
-        if (remoteService["Name"].ToString().Contains("msiserver"))
-        {
-          OnInstallationChanged(remoteService);
-        }
+        return;
+      }
+
+      ServiceStatusChanged(remoteService);
+      if (remoteService["Name"].ToString().Contains("msiserver"))
+      {
+        OnInstallationChanged(remoteService);
       }
     }
 
@@ -340,10 +327,7 @@ namespace MySql.Notifier.Classes
     /// <param name="remoteService">The remote service.</param>
     private void OnInstallationChanged(ManagementBaseObject remoteService)
     {
-      if (InstallationChanged != null)
-      {
-        InstallationChanged(remoteService);
-      }
+      InstallationChanged?.Invoke(remoteService);
     }
 
     /// <summary>
@@ -363,10 +347,10 @@ namespace MySql.Notifier.Classes
     /// Attempts to start the service creation watcher.
     /// </summary>
     /// <param name="wmiManagementScope">The scope (namespace) used for WMI operations.</param>
-    /// <returns>true if watcher was started successfull, false otherwise.</returns>
+    /// <returns>true if watcher was started successful, false otherwise.</returns>
     private bool ServiceCreationWatcherStart(ManagementScope wmiManagementScope)
     {
-      bool success = true;
+      var success = true;
       if (!WatchForServiceCreation)
       {
         return true;
@@ -409,16 +393,16 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        string title = Resources.WMIEventsSubscriptionErrorTitle;
-        string detail = Resources.WMIEventsSubscriptionErrorDetail;
-        string moreInfo = ex.Message.Contains("0x80070776")
+        var title = Resources.WMIEventsSubscriptionErrorTitle;
+        var detail = Resources.WMIEventsSubscriptionErrorDetail;
+        var moreInfo = ex.Message.Contains("0x80070776")
           ? Resources.ObjectExporterSpecifierNotFoundExtendedMessage
           : null;
         var infoProperties = InfoDialogProperties.GetWarningDialogProperties(title, detail, null, moreInfo);
         infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
         infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
         InfoDialog.ShowDialog(infoProperties);
-        MySqlSourceTrace.WriteAppErrorToLog(ex, title, detail, false, SourceLevels.Information);
+        Logger.LogException(ex, false, detail, title);
       }
 
       return success;
@@ -436,7 +420,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      MySqlSourceTrace.WriteAppErrorToLog(e.Error, Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncCreationWatcher.Scope.Path.Server), true);
+      Logger.LogException(e.Error, true, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncCreationWatcher.Scope.Path.Server), Resources.WMISemiSyncEventsErrorTitle);
     }
 
     /// <summary>
@@ -446,22 +430,26 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void ServiceCreationWatcherStartSemiSyncDoWork(object sender, DoWorkEventArgs e)
     {
-      BackgroundWorker worker = sender as BackgroundWorker;
-      Exception throwException = null;
-      if (worker != null && worker.CancellationPending)
+      if (!(sender is BackgroundWorker worker))
+      {
+        return;
+      }
+
+      if (worker.CancellationPending)
       {
         e.Cancel = true;
         return;
       }
 
+      Exception throwException = null;
       try
       {
-        int eventCount = 0;
-        ManagementScope scope = e.Argument as ManagementScope;
+        var eventCount = 0;
+        var scope = e.Argument as ManagementScope;
         _wmiAsyncCreationWatcher = _wmiAsyncCreationWatcher ?? new ManagementEventWatcher(scope, new WqlEventQuery("__InstanceCreationEvent", TimeSpan.FromSeconds(WmiQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
-        while (worker != null && !worker.CancellationPending)
+        while (!worker.CancellationPending)
         {
-          ManagementBaseObject remoteService = _wmiAsyncCreationWatcher.WaitForNextEvent();
+          var remoteService = _wmiAsyncCreationWatcher.WaitForNextEvent();
           if (remoteService != null)
           {
             worker.ReportProgress(++eventCount, remoteService);
@@ -473,7 +461,7 @@ namespace MySql.Notifier.Classes
         throwException = ex;
       }
 
-      if (worker != null && worker.CancellationPending)
+      if (worker.CancellationPending)
       {
         e.Cancel = true;
       }
@@ -490,7 +478,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex, false);
+        Logger.LogException(ex);
       }
 
       if (throwException != null)
@@ -506,7 +494,7 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void ServiceCreationWatcherStartSemiSynProgressChanged(object sender, ProgressChangedEventArgs e)
     {
-      ManagementBaseObject remoteService = e.UserState != null && e.UserState is ManagementBaseObject ? e.UserState as ManagementBaseObject : null;
+      var remoteService = e.UserState is ManagementBaseObject managementBaseObject ? managementBaseObject : null;
       if (remoteService != null)
       {
         OnServiceCreated(remoteService["TargetInstance"] as ManagementBaseObject);
@@ -517,18 +505,20 @@ namespace MySql.Notifier.Classes
     /// Attempts to stop the service creation watcher.
     /// </summary>
     /// <param name="displayErrors">Flag indicating whether errors are displayed to users or just logged.</param>
-    /// <returns>true if watcher was stopped successfull, false otherwise.</returns>
+    /// <returns>true if watcher was stopped successful, false otherwise.</returns>
     private bool ServiceCreationWatcherStop(bool displayErrors)
     {
-      bool success = true;
-      if (!WatchForServiceCreation && _wmiAsyncCreationWatcher == null)
+      var success = true;
+      if (!WatchForServiceCreation
+          && _wmiAsyncCreationWatcher == null)
       {
         return true;
       }
 
       try
       {
-        if (Asynchronous && _wmiAsyncCreationWatcher != null)
+        if (Asynchronous
+            && _wmiAsyncCreationWatcher != null)
         {
           _wmiAsyncCreationWatcher.EventArrived -= ServiceCreationWatcher_EventArrived;
           if (IsMachineOnline)
@@ -536,7 +526,9 @@ namespace MySql.Notifier.Classes
             _wmiAsyncCreationWatcher.Stop();
           }
         }
-        else if (!Asynchronous && _wmiSemiSyncCreationWatcher != null && _wmiSemiSyncCreationWatcher.IsBusy)
+        else if (!Asynchronous
+                 && _wmiSemiSyncCreationWatcher != null
+                 && _wmiSemiSyncCreationWatcher.IsBusy)
         {
           _wmiSemiSyncCreationWatcher.CancelAsync();
           Thread.Sleep(WMI_QUERIES_DEFAULT_TIMEOUT_IN_SECONDS * 1000);
@@ -545,7 +537,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        MySqlSourceTrace.WriteAppErrorToLog(ex, Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors);
+        Logger.LogException(ex, displayErrors, Resources.WMIEventsSubscriptionErrorDetail, Resources.WMIEventsSubscriptionErrorTitle);
       }
 
       return success;
@@ -568,10 +560,10 @@ namespace MySql.Notifier.Classes
     /// Attempts to start the service deletion watcher.
     /// </summary>
     /// <param name="wmiManagementScope">The scope (namespace) used for WMI operations.</param>
-    /// <returns>true if watcher was started successfull, false otherwise.</returns>
+    /// <returns>true if watcher was started successful, false otherwise.</returns>
     private bool ServiceDeletionWatcherStart(ManagementScope wmiManagementScope)
     {
-      bool success = true;
+      var success = true;
       if (!WatchForServiceDeletion)
       {
         return true;
@@ -614,16 +606,16 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        string title = Resources.WMIEventsSubscriptionErrorTitle;
-        string detail = Resources.WMIEventsSubscriptionErrorDetail;
-        string moreInfo = ex.Message.Contains("0x80070776")
+        var title = Resources.WMIEventsSubscriptionErrorTitle;
+        var detail = Resources.WMIEventsSubscriptionErrorDetail;
+        var moreInfo = ex.Message.Contains("0x80070776")
           ? Resources.ObjectExporterSpecifierNotFoundExtendedMessage
           : null;
         var infoProperties = InfoDialogProperties.GetWarningDialogProperties(title, detail, null, moreInfo);
         infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
         infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
         InfoDialog.ShowDialog(infoProperties);
-        MySqlSourceTrace.WriteAppErrorToLog(ex, title, detail, false, SourceLevels.Information);
+        Logger.LogException(ex, false, detail, title);
       }
 
       return success;
@@ -641,7 +633,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      MySqlSourceTrace.WriteAppErrorToLog(e.Error, Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncDeletionWatcher.Scope.Path.Server), true);
+      Logger.LogException(e.Error, true, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncDeletionWatcher.Scope.Path.Server), Resources.WMISemiSyncEventsErrorTitle);
     }
 
     /// <summary>
@@ -651,22 +643,26 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void ServiceDeletionWatcherStartSemiSyncDoWork(object sender, DoWorkEventArgs e)
     {
-      BackgroundWorker worker = sender as BackgroundWorker;
-      Exception throwException = null;
-      if (worker != null && worker.CancellationPending)
+      if (!(sender is BackgroundWorker worker))
+      {
+        return;
+      }
+
+      if (worker.CancellationPending)
       {
         e.Cancel = worker.CancellationPending;
         return;
       }
 
+      Exception throwException = null;
       try
       {
-        int eventCount = 0;
-        ManagementScope scope = e.Argument as ManagementScope;
+        var eventCount = 0;
+        var scope = e.Argument as ManagementScope;
         _wmiAsyncDeletionWatcher = new ManagementEventWatcher(scope, new WqlEventQuery("__InstanceDeletionEvent", TimeSpan.FromSeconds(WmiQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
-        while (worker != null && !worker.CancellationPending)
+        while (!worker.CancellationPending)
         {
-          ManagementBaseObject remoteService = _wmiAsyncDeletionWatcher.WaitForNextEvent();
+          var remoteService = _wmiAsyncDeletionWatcher.WaitForNextEvent();
           if (remoteService != null)
           {
             worker.ReportProgress(++eventCount, remoteService);
@@ -678,7 +674,7 @@ namespace MySql.Notifier.Classes
         throwException = ex;
       }
 
-      if (worker != null && worker.CancellationPending)
+      if (worker.CancellationPending)
       {
         e.Cancel = true;
       }
@@ -691,7 +687,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex, false);
+        Logger.LogException(ex);
       }
 
       if (throwException != null)
@@ -707,7 +703,7 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void ServiceDeletionWatcherStartSemiSynProgressChanged(object sender, ProgressChangedEventArgs e)
     {
-      ManagementBaseObject remoteService = e.UserState != null && e.UserState is ManagementBaseObject ? e.UserState as ManagementBaseObject : null;
+      var remoteService = e.UserState is ManagementBaseObject managementBaseObject ? managementBaseObject : null;
       if (remoteService != null)
       {
         OnServiceDeleted(remoteService["TargetInstance"] as ManagementBaseObject);
@@ -718,15 +714,16 @@ namespace MySql.Notifier.Classes
     /// Attempts to stop the service deletion watcher.
     /// </summary>
     /// <param name="displayErrors">Flag indicating whether errors are displayed to users or just logged.</param>
-    /// <returns>true if watcher was stopped successfull, false otherwise.</returns>
+    /// <returns>true if watcher was stopped successful, false otherwise.</returns>
     private bool ServiceDeletionWatcherStop(bool displayErrors)
     {
-      bool success = true;
-      if (!WatchForServiceDeletion && _wmiAsyncDeletionWatcher == null)
+      if (!WatchForServiceDeletion
+          && _wmiAsyncDeletionWatcher == null)
       {
         return true;
       }
 
+      var success = true;
       try
       {
         if (Asynchronous && _wmiAsyncDeletionWatcher != null)
@@ -737,7 +734,9 @@ namespace MySql.Notifier.Classes
             _wmiAsyncDeletionWatcher.Stop();
           }
         }
-        else if (!Asynchronous && _wmiSemiSyncDeletionWatcher != null && _wmiSemiSyncDeletionWatcher.IsBusy)
+        else if (!Asynchronous
+                 && _wmiSemiSyncDeletionWatcher != null
+                 && _wmiSemiSyncDeletionWatcher.IsBusy)
         {
           _wmiSemiSyncDeletionWatcher.CancelAsync();
           Thread.Sleep(WMI_QUERIES_DEFAULT_TIMEOUT_IN_SECONDS * 1000);
@@ -746,7 +745,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        MySqlSourceTrace.WriteAppErrorToLog(ex, Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors);
+        Logger.LogException(ex, displayErrors, Resources.WMIEventsSubscriptionErrorDetail, Resources.WMIEventsSubscriptionErrorTitle);
       }
 
       return success;
@@ -769,15 +768,15 @@ namespace MySql.Notifier.Classes
     /// Attempts to start the service deletion watcher.
     /// </summary>
     /// <param name="wmiManagementScope">The scope (namespace) used for WMI operations.</param>
-    /// <returns>true if watcher was started successfull, false otherwise.</returns>
+    /// <returns>true if watcher was started successful, false otherwise.</returns>
     private bool ServiceStatusChangeWatcherStart(ManagementScope wmiManagementScope)
     {
-      bool success = true;
       if (!WatchForServiceStatusChange)
       {
         return true;
       }
 
+      var success = true;
       try
       {
         if (!wmiManagementScope.IsConnected)
@@ -815,16 +814,16 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        string title = Resources.WMIEventsSubscriptionErrorTitle;
-        string detail = Resources.WMIEventsSubscriptionErrorDetail;
-        string moreInfo = ex.Message.Contains("0x80070776")
+        var title = Resources.WMIEventsSubscriptionErrorTitle;
+        var detail = Resources.WMIEventsSubscriptionErrorDetail;
+        var moreInfo = ex.Message.Contains("0x80070776")
           ? Resources.ObjectExporterSpecifierNotFoundExtendedMessage
           : null;
         var infoProperties = InfoDialogProperties.GetWarningDialogProperties(title, detail, null, moreInfo);
         infoProperties.CommandAreaProperties.DefaultButton = InfoDialog.DefaultButtonType.Button1;
         infoProperties.CommandAreaProperties.DefaultButtonTimeout = 30;
         InfoDialog.ShowDialog(infoProperties);
-        MySqlSourceTrace.WriteAppErrorToLog(ex, title, detail, false, SourceLevels.Information);
+        Logger.LogException(ex, false, detail, title);
       }
 
       return success;
@@ -842,7 +841,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      MySqlSourceTrace.WriteAppErrorToLog(e.Error, Resources.WMISemiSyncEventsErrorTitle, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncStatusChangeWatcher.Scope.Path.Server), true);
+      Logger.LogException(e.Error, true, string.Format(Resources.WMISemiSyncEventsErrorDetail, _wmiAsyncStatusChangeWatcher.Scope.Path.Server), Resources.WMISemiSyncEventsErrorTitle);
     }
 
     /// <summary>
@@ -852,22 +851,26 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void ServiceStatusChangeWatcherStartSemiSyncDoWork(object sender, DoWorkEventArgs e)
     {
-      BackgroundWorker worker = sender as BackgroundWorker;
-      Exception throwException = null;
-      if (worker != null && worker.CancellationPending)
+      if (!(sender is BackgroundWorker worker))
+      {
+        return;
+      }
+
+      if (worker.CancellationPending)
       {
         e.Cancel = true;
         return;
       }
 
+      Exception throwException = null;
       try
       {
-        int eventCount = 0;
-        ManagementScope scope = e.Argument as ManagementScope;
+        var eventCount = 0;
+        var scope = e.Argument as ManagementScope;
         _wmiAsyncStatusChangeWatcher = _wmiAsyncStatusChangeWatcher ?? new ManagementEventWatcher(scope, new WqlEventQuery("__InstanceModificationEvent", TimeSpan.FromSeconds(WmiQueriesTimeoutInSeconds), WMI_QUERIES_WHERE_CLAUSE));
-        while (worker != null && !worker.CancellationPending)
+        while (!worker.CancellationPending)
         {
-          ManagementBaseObject remoteService = _wmiAsyncStatusChangeWatcher.WaitForNextEvent();
+          var remoteService = _wmiAsyncStatusChangeWatcher.WaitForNextEvent();
           if (remoteService != null)
           {
             worker.ReportProgress(++eventCount, remoteService);
@@ -879,7 +882,7 @@ namespace MySql.Notifier.Classes
         throwException = ex;
       }
 
-      if (worker != null && worker.CancellationPending)
+      if (worker.CancellationPending)
       {
         e.Cancel = true;
       }
@@ -892,7 +895,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex, false);
+        Logger.LogException(ex);
       }
 
       if (throwException != null)
@@ -908,7 +911,7 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void ServiceStatusChangeWatcherStartSemiSynProgressChanged(object sender, ProgressChangedEventArgs e)
     {
-      ManagementBaseObject remoteService = e.UserState != null && e.UserState is ManagementBaseObject ? e.UserState as ManagementBaseObject : null;
+      var remoteService = e.UserState is ManagementBaseObject managementBaseObject ? managementBaseObject : null;
       if (remoteService != null)
       {
         OnServiceStatusChanged(remoteService["TargetInstance"] as ManagementBaseObject);
@@ -919,15 +922,15 @@ namespace MySql.Notifier.Classes
     /// Attempts to stop the service status change watcher.
     /// </summary>
     /// <param name="displayErrors">Flag indicating whether errors are displayed to users or just logged.</param>
-    /// <returns>true if watcher was stopped successfull, false otherwise.</returns>
+    /// <returns>true if watcher was stopped successful, false otherwise.</returns>
     private bool ServiceStatusChangeWatcherStop(bool displayErrors)
     {
-      bool success = true;
       if (!WatchForServiceStatusChange && _wmiAsyncStatusChangeWatcher == null)
       {
         return true;
       }
 
+      var success = true;
       try
       {
         if (Asynchronous && _wmiAsyncStatusChangeWatcher != null)
@@ -947,7 +950,7 @@ namespace MySql.Notifier.Classes
       catch (Exception ex)
       {
         success = false;
-        MySqlSourceTrace.WriteAppErrorToLog(ex, Resources.WMIEventsSubscriptionErrorTitle, Resources.WMIEventsSubscriptionErrorDetail, displayErrors);
+        Logger.LogException(ex, displayErrors, Resources.WMIEventsSubscriptionErrorDetail, Resources.WMIEventsSubscriptionErrorTitle);
       }
 
       return success;

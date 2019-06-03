@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -38,11 +38,11 @@ namespace MySql.Notifier.Classes.EventArguments
     /// <summary>
     /// Gets the error Exception thrown during a connection status test.
     /// </summary>
-    public Exception ErrorException { get; private set; }
+    public Exception ErrorException { get; }
 
     /// <summary>
     /// Gets the MySQL instance whose status changed.
     /// </summary>
-    public MySqlInstance Instance { get; private set; }
+    public MySqlInstance Instance { get; }
   }
 }

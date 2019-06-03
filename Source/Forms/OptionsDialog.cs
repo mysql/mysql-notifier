@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -19,9 +19,9 @@ using System;
 using System.Windows.Forms;
 using MySql.Notifier.Classes;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQLWorkbench;
-using MySQL.Utility.Forms;
+using MySql.Utility.Classes;
+using MySql.Utility.Classes.MySqlWorkbench;
+using MySql.Utility.Forms;
 
 namespace MySql.Notifier.Forms
 {
@@ -46,7 +46,7 @@ namespace MySql.Notifier.Forms
     /// <summary>
     /// The dialog's initial width.
     /// </summary>
-    private int _initialWidth;
+    private readonly int _initialWidth;
 
     #endregion Fields
 
@@ -65,23 +65,16 @@ namespace MySql.Notifier.Forms
     /// <summary>
     /// Gets a value indicating whether the <see cref="MigrateWorkbenchConnectionsButton"/> should be enabled.
     /// </summary>
-    private bool MigrateConnectionsButtonEnabled
-    {
-      get
-      {
-        return !Settings.Default.WorkbenchMigrationSucceeded &&
-               Settings.Default.WorkbenchMigrationLastAttempt != DateTime.MinValue &&
-               Settings.Default.WorkbenchMigrationRetryDelay != 0;
-      }
-    }
+    private bool MigrateConnectionsButtonEnabled => !Settings.Default.WorkbenchMigrationSucceeded &&
+                                                    Settings.Default.WorkbenchMigrationLastAttempt != DateTime.MinValue &&
+                                                    Settings.Default.WorkbenchMigrationRetryDelay != 0;
 
     /// <summary>
-    /// Icnreases the width of the dialog in case the <see cref="AutomaticMigrationDelayLabel"/> gets too big.
+    /// Increases the width of the dialog in case the <see cref="AutomaticMigrationDelayLabel"/> gets too big.
     /// </summary>
     private void SetAutomaticMigrationDelayText()
     {
       SuspendLayout();
-
       AutomaticMigrationDelayValueLabel.Text = MySqlWorkbench.GetConnectionsMigrationDelayText(Program.Notifier.NextAutomaticConnectionsMigration, Settings.Default.WorkbenchMigrationSucceeded);
       MigrateWorkbenchConnectionsButton.Enabled = MigrateConnectionsButtonEnabled;
       Width = _initialWidth;
@@ -152,7 +145,7 @@ namespace MySql.Notifier.Forms
       Settings.Default.AutoAddPattern = AutoAddRegexTextBox.Text.Trim();
       Settings.Default.UseColorfulStatusIcons = UseColorfulIconsCheckBox.Checked;
       Settings.Default.Save();
-      Utility.SetRunAtStartUp(Application.ProductName, RunAtStartupCheckBox.Checked);
+      Utilities.SetRunAtStartUp(Application.ProductName, RunAtStartupCheckBox.Checked);
 
       if (!updateTask)
       {
@@ -161,12 +154,12 @@ namespace MySql.Notifier.Forms
 
       if (Settings.Default.AutoCheckForUpdates && !string.IsNullOrEmpty(Program.InstallLocation))
       {
-        Utility.CreateScheduledTask(Classes.Notifier.DefaultTaskName, Classes.Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
+        Utilities.CreateScheduledTask(Classes.Notifier.DefaultTaskName, Classes.Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
       }
 
       if (deleteTask)
       {
-        Utility.DeleteScheduledTask(Classes.Notifier.DefaultTaskName);
+        Utilities.DeleteScheduledTask(Classes.Notifier.DefaultTaskName);
       }
     }
 
@@ -200,7 +193,7 @@ namespace MySql.Notifier.Forms
         UseColorfulIconsCheckBox.Checked = settings.UseColorfulStatusIcons;
       }
 
-      RunAtStartupCheckBox.Checked = Utility.GetRunAtStartUp(Application.ProductName);
+      RunAtStartupCheckBox.Checked = Utilities.GetRunAtStartUp(Application.ProductName);
     }
 
     /// <summary>

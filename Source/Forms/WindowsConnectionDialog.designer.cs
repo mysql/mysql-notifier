@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -220,8 +220,8 @@ namespace MySql.Notifier.Forms
       this.HostTextBox.Name = "HostTextBox";
       this.HostTextBox.Size = new System.Drawing.Size(225, 23);
       this.HostTextBox.TabIndex = 2;
-      this.HostTextBox.TextChanged += new System.EventHandler(this.Textbox_TextChanged);
-      this.HostTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.TextBox_Validating);
+      this.HostTextBox.TextChanged += new System.EventHandler(this.TextChangedHandler);
+      this.HostTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.ValidatingHandler);
       // 
       // UserTextBox
       // 
@@ -231,8 +231,8 @@ namespace MySql.Notifier.Forms
       this.UserTextBox.Name = "UserTextBox";
       this.UserTextBox.Size = new System.Drawing.Size(225, 23);
       this.UserTextBox.TabIndex = 4;
-      this.UserTextBox.TextChanged += new System.EventHandler(this.Textbox_TextChanged);
-      this.UserTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.TextBox_Validating);
+      this.UserTextBox.TextChanged += new System.EventHandler(this.TextChangedHandler);
+      this.UserTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.ValidatingHandler);
       // 
       // LogoPictureBox
       // 
@@ -265,8 +265,8 @@ namespace MySql.Notifier.Forms
       this.PasswordTextBox.Size = new System.Drawing.Size(225, 23);
       this.PasswordTextBox.TabIndex = 6;
       this.PasswordTextBox.UseSystemPasswordChar = true;
-      this.PasswordTextBox.TextChanged += new System.EventHandler(this.Textbox_TextChanged);
-      this.PasswordTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.TextBox_Validating);
+      this.PasswordTextBox.TextChanged += new System.EventHandler(this.TextChangedHandler);
+      this.PasswordTextBox.Validating += new System.ComponentModel.CancelEventHandler(this.ValidatingHandler);
       // 
       // HostLabel
       // 

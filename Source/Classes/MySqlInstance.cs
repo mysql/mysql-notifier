@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -24,8 +24,8 @@ using System.Windows.Forms;
 using System.Xml.Serialization;
 using MySql.Data.MySqlClient;
 using MySql.Notifier.Classes.EventArguments;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQLWorkbench;
+using MySql.Utility.Classes;
+using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes
 {
@@ -166,7 +166,8 @@ namespace MySql.Notifier.Classes
         {
           _worker.CancelAsync();
           ushort cancelAsyncWait = 0;
-          while (_worker.IsBusy && cancelAsyncWait < DEFAULT_CANCEL_ASYNC_WAIT)
+          while (_worker.IsBusy
+                 && cancelAsyncWait < DEFAULT_CANCEL_ASYNC_WAIT)
           {
             Thread.Sleep(DEFAULT_CANCEL_ASYNC_STEP);
             cancelAsyncWait += DEFAULT_CANCEL_ASYNC_STEP;
@@ -209,7 +210,7 @@ namespace MySql.Notifier.Classes
     public delegate void InstanceConnectionStatusTestErrorEventHandler(object sender, InstanceConnectionStatusTestErrorThrownArgs args);
 
     /// <summary>
-    /// Event ocurring when an error ocurred during a connection status test.
+    /// Event ocurring when an error occurred during a connection status test.
     /// </summary>
     public event InstanceConnectionStatusTestErrorEventHandler InstanceConnectionStatusTestErrorThrown;
 
@@ -221,31 +222,19 @@ namespace MySql.Notifier.Classes
     /// Gets a unique instance ID.
     /// </summary>
     [XmlIgnore]
-    public string InstanceId { get; private set; }
+    public string InstanceId { get; }
 
     /// <summary>
-    /// Gets the status of this isntance's connection.
+    /// Gets the status of this instance's connection.
     /// </summary>
     [XmlIgnore]
-    public MySqlWorkbenchConnection.ConnectionStatusType ConnectionStatus
-    {
-      get
-      {
-        return WorkbenchConnection != null ? WorkbenchConnection.ConnectionStatus : MySqlWorkbenchConnection.ConnectionStatusType.Unknown;
-      }
-    }
+    public MySqlWorkbenchConnection.ConnectionStatusType ConnectionStatus => WorkbenchConnection != null ? WorkbenchConnection.ConnectionStatus : MySqlWorkbenchConnection.ConnectionStatusType.Unknown;
 
     /// <summary>
     /// Gets a description on the status of this instance's connection.
     /// </summary>
     [XmlIgnore]
-    public string ConnectionStatusText
-    {
-      get
-      {
-        return WorkbenchConnection != null ? WorkbenchConnection.ConnectionStatusText : string.Empty;
-      }
-    }
+    public string ConnectionStatusText => WorkbenchConnection != null ? WorkbenchConnection.ConnectionStatusText : string.Empty;
 
     /// <summary>
     /// Gets or sets the name of the host of this MySQL instance.
@@ -257,13 +246,7 @@ namespace MySql.Notifier.Classes
     /// Gets an identifier for this instance composed of the host name and port normally.
     /// </summary>
     [XmlIgnore]
-    public string HostIdentifier
-    {
-      get
-      {
-        return WorkbenchConnection != null ? WorkbenchConnection.HostIdentifier : string.Empty;
-      }
-    }
+    public string HostIdentifier => WorkbenchConnection != null ? WorkbenchConnection.HostIdentifier : string.Empty;
 
     /// <summary>
     /// Gets a value indicating whether a connection test is still ongoing.
@@ -283,14 +266,10 @@ namespace MySql.Notifier.Classes
     [XmlAttribute(AttributeName = "MonitorAndNotifyStatus")]
     public bool MonitorAndNotifyStatus
     {
-      get
-      {
-        return _monitorAndNotifyStatus;
-      }
-
+      get => _monitorAndNotifyStatus;
       set
       {
-        bool lastValue = _monitorAndNotifyStatus;
+        var lastValue = _monitorAndNotifyStatus;
         _monitorAndNotifyStatus = value;
         if (lastValue == value)
         {
@@ -298,7 +277,7 @@ namespace MySql.Notifier.Classes
         }
 
         SecondsToMonitorInstance = MonitoringIntervalInSeconds;
-        OnPropertyChanged("MonitorAndNotifyStatus");
+        OnPropertyChanged(nameof(MonitorAndNotifyStatus));
       }
     }
 
@@ -308,14 +287,10 @@ namespace MySql.Notifier.Classes
     [XmlAttribute(AttributeName = "MonitoringInterval")]
     public uint MonitoringInterval
     {
-      get
-      {
-        return _monitoringInterval;
-      }
-
+      get => _monitoringInterval;
       set
       {
-        uint lastValue = _monitoringInterval;
+        var lastValue = _monitoringInterval;
         _monitoringInterval = value;
         if (lastValue == value)
         {
@@ -323,7 +298,7 @@ namespace MySql.Notifier.Classes
         }
 
         SecondsToMonitorInstance = MonitoringIntervalInSeconds;
-        OnPropertyChanged("MonitoringInterval");
+        OnPropertyChanged(nameof(MonitoringInterval));
       }
     }
 
@@ -331,13 +306,7 @@ namespace MySql.Notifier.Classes
     /// Gets the monitoring interval in seconds for this MySQL instance.
     /// </summary>
     [XmlIgnore]
-    public double MonitoringIntervalInSeconds
-    {
-      get
-      {
-        return TimeUtilities.ConvertToSeconds(_monitoringIntervalUnitOfMeasure, _monitoringInterval);
-      }
-    }
+    public double MonitoringIntervalInSeconds => TimeUtilities.ConvertToSeconds(_monitoringIntervalUnitOfMeasure, _monitoringInterval);
 
     /// <summary>
     /// Gets or sets the unit of measure used for this instance's monitoring instance.
@@ -345,14 +314,10 @@ namespace MySql.Notifier.Classes
     [XmlAttribute(AttributeName = "MonitoringIntervalUnitOfMeasure")]
     public TimeUtilities.IntervalUnitOfMeasure MonitoringIntervalUnitOfMeasure
     {
-      get
-      {
-        return _monitoringIntervalUnitOfMeasure;
-      }
-
+      get => _monitoringIntervalUnitOfMeasure;
       set
       {
-        TimeUtilities.IntervalUnitOfMeasure lastValue = _monitoringIntervalUnitOfMeasure;
+        var lastValue = _monitoringIntervalUnitOfMeasure;
         _monitoringIntervalUnitOfMeasure = value;
         if (lastValue == value)
         {
@@ -360,7 +325,7 @@ namespace MySql.Notifier.Classes
         }
 
         SecondsToMonitorInstance = MonitoringIntervalInSeconds;
-        OnPropertyChanged("MonitoringIntervalUnitOfMeasure");
+        OnPropertyChanged(nameof(MonitoringIntervalUnitOfMeasure));
       }
     }
 
@@ -374,7 +339,7 @@ namespace MySql.Notifier.Classes
     /// Gets a value indicating whether the instance is in the process of refreshing its connection status.
     /// </summary>
     [XmlIgnore]
-    public bool RefreshingStatus { get; private set; }
+    public bool RefreshingStatus { get; }
 
     /// <summary>
     /// Gets the list of Workbench connections that connect to this MySQL instance.
@@ -390,7 +355,7 @@ namespace MySql.Notifier.Classes
         }
 
         _relatedConnections = new List<MySqlWorkbenchConnection>();
-        bool isLocalInstance = MySqlWorkbenchConnection.IsHostLocal(HostName);
+        var isLocalInstance = MySqlWorkbenchConnection.IsHostLocal(HostName);
         foreach (var workbenchConnection in MySqlWorkbench.Connections.Where(workbenchConnection => workbenchConnection.Port == Port))
         {
           if (string.IsNullOrEmpty(workbenchConnection.Host) && string.IsNullOrEmpty(HostName))
@@ -399,7 +364,8 @@ namespace MySql.Notifier.Classes
             continue;
           }
 
-          if ((workbenchConnection.IsLocalConnection && isLocalInstance) || (workbenchConnection.Host.ToLowerInvariant() == HostName.ToLowerInvariant()))
+          if (workbenchConnection.IsLocalConnection && isLocalInstance
+              || string.Equals(workbenchConnection.Host, HostName, StringComparison.OrdinalIgnoreCase))
           {
             _relatedConnections.Add(workbenchConnection);
           }
@@ -415,11 +381,7 @@ namespace MySql.Notifier.Classes
     [XmlIgnore]
     public double SecondsToMonitorInstance
     {
-      get
-      {
-        return _secondsToMonitorInstance;
-      }
-
+      get => _secondsToMonitorInstance;
       set
       {
         _secondsToMonitorInstance = value;
@@ -428,7 +390,7 @@ namespace MySql.Notifier.Classes
           CheckInstanceStatus(true);
         }
 
-        OnPropertyChanged("SecondsToMonitorInstance");
+        OnPropertyChanged(nameof(SecondsToMonitorInstance));
       }
     }
 
@@ -438,15 +400,11 @@ namespace MySql.Notifier.Classes
     [XmlAttribute(AttributeName = "UpdateTrayIconOnStatusChange")]
     public bool UpdateTrayIconOnStatusChange
     {
-      get
-      {
-        return _updateTrayIconOnStatusChange;
-      }
-
+      get => _updateTrayIconOnStatusChange;
       set
       {
         _updateTrayIconOnStatusChange = value;
-        OnPropertyChanged("UpdateTrayIconOnStatusChange");
+        OnPropertyChanged(nameof(UpdateTrayIconOnStatusChange));
       }
     }
 
@@ -456,11 +414,7 @@ namespace MySql.Notifier.Classes
     [XmlIgnore]
     public MySqlWorkbenchConnection WorkbenchConnection
     {
-      get
-      {
-        return _workbenchConnection;
-      }
-
+      get => _workbenchConnection;
       set
       {
         // If the connection is null maybe it was not found anymore so we fallback to use the first found related connection.
@@ -474,7 +428,7 @@ namespace MySql.Notifier.Classes
         }
 
         SetupMenuGroup();
-        OnPropertyChanged("WorkbenchConnection");
+        OnPropertyChanged(nameof(WorkbenchConnection));
       }
     }
 
@@ -484,11 +438,7 @@ namespace MySql.Notifier.Classes
     [XmlAttribute(AttributeName = "WorkbenchConnectionId")]
     public string WorkbenchConnectionId
     {
-      get
-      {
-        return _workbenchConnectionId;
-      }
-
+      get => _workbenchConnectionId;
       set
       {
         _workbenchConnectionId = value;
@@ -497,7 +447,7 @@ namespace MySql.Notifier.Classes
           WorkbenchConnection = MySqlWorkbench.Connections.FirstOrDefault(conn => conn.Id == _workbenchConnectionId);
         }
 
-        OnPropertyChanged("WorkbenchConnectionId");
+        OnPropertyChanged(nameof(WorkbenchConnectionId));
       }
     }
 
@@ -505,13 +455,7 @@ namespace MySql.Notifier.Classes
     /// Gets a <see cref="MySqlWorkbenchServer"/> object related to this instance's Workbench connection.
     /// </summary>
     [XmlIgnore]
-    public MySqlWorkbenchServer WorkbenchServer
-    {
-      get
-      {
-        return MySqlWorkbench.Servers.FirstOrDefault(s => s.ConnectionId == WorkbenchConnectionId);
-      }
-    }
+    public MySqlWorkbenchServer WorkbenchServer => MySqlWorkbench.Servers.FirstOrDefault(s => s.ConnectionId == WorkbenchConnectionId);
 
     #endregion Properties
 
@@ -521,7 +465,9 @@ namespace MySql.Notifier.Classes
     /// <returns><c>true</c> if the background connection test was cancelled, <c>false</c> otherwise</returns>
     public void CancelAsynchronousStatusCheck()
     {
-      if (_worker != null && _worker.WorkerSupportsCancellation && (InstanceStatusCheckInProgress || _worker.IsBusy))
+      if (_worker != null
+          && _worker.WorkerSupportsCancellation
+          && (InstanceStatusCheckInProgress || _worker.IsBusy))
       {
         _worker.CancelAsync();
       }
@@ -534,8 +480,8 @@ namespace MySql.Notifier.Classes
     public void CheckInstanceStatus(bool asynchronous)
     {
       _secondsToMonitorInstance = MonitoringIntervalInSeconds;
-
-      if (WorkbenchConnection == null || InstanceStatusCheckInProgress)
+      if (WorkbenchConnection == null
+          || InstanceStatusCheckInProgress)
       {
         return;
       }
@@ -564,8 +510,9 @@ namespace MySql.Notifier.Classes
     /// <returns><c>true</c> if the operation was cancelled by the passed background worker, <c>false</c> otherwise.</returns>
     public bool RefreshStatus(ref BackgroundWorker worker)
     {
-      // If user cancells before even checking the connection status, then return.
-      if (worker != null && worker.CancellationPending)
+      // If user cancels before even checking the connection status, then return.
+      if (worker != null
+          && worker.CancellationPending)
       {
         return true;
       }
@@ -613,10 +560,7 @@ namespace MySql.Notifier.Classes
     /// <param name="oldInstanceStatus">Old instance status.</param>
     protected virtual void OnInstanceStatusChanged(MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
     {
-      if (InstanceStatusChanged != null)
-      {
-        InstanceStatusChanged(this, new InstanceStatusChangedArgs(this, oldInstanceStatus));
-      }
+      InstanceStatusChanged?.Invoke(this, new InstanceStatusChangedArgs(this, oldInstanceStatus));
     }
 
     /// <summary>
@@ -625,10 +569,7 @@ namespace MySql.Notifier.Classes
     /// <param name="ex">Exception thrown by a connection status test.</param>
     protected virtual void OnInstanceStatusTestErrorThrown(Exception ex)
     {
-      if (InstanceConnectionStatusTestErrorThrown != null)
-      {
-        InstanceConnectionStatusTestErrorThrown(this, new InstanceConnectionStatusTestErrorThrownArgs(this, ex));
-      }
+      InstanceConnectionStatusTestErrorThrown?.Invoke(this, new InstanceConnectionStatusTestErrorThrownArgs(this, ex));
     }
 
     /// <summary>
@@ -637,10 +578,7 @@ namespace MySql.Notifier.Classes
     /// <param name="propertyName">The name of the property that changed.</param>
     protected virtual void OnPropertyChanged(string propertyName)
     {
-      if (PropertyChanged != null)
-      {
-        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-      }
+      PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     /// <summary>
@@ -650,7 +588,8 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void CheckInstanceStatusWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
     {
-      if (!e.Cancelled && ConnectionStatus != _oldInstanceStatus)
+      if (!e.Cancelled
+          && ConnectionStatus != _oldInstanceStatus)
       {
         OnInstanceStatusChanged(_oldInstanceStatus);
       }
@@ -665,22 +604,26 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void CheckInstanceStatusWorkerDoWork(object sender, DoWorkEventArgs e)
     {
-      BackgroundWorker worker = sender as BackgroundWorker;
-      Exception ex;
-      WorkbenchConnection.TestConnectionSilently(out ex);
-      if (worker != null && worker.CancellationPending)
+      if (!(sender is BackgroundWorker worker))
+      {
+        return;
+      }
+          
+      if (worker.CancellationPending)
       {
         e.Cancel = true;
         return;
       }
 
-      if (ex == null || !(ex is MySqlException))
+      WorkbenchConnection.TestConnectionSilently(out var ex);
+      if (!(ex is MySqlException mySqlEx))
       {
         return;
       }
 
-      MySqlException mySqlEx = ex as MySqlException;
-      int errorNumber = mySqlEx.Number > 0 ? mySqlEx.Number : (mySqlEx.InnerException != null && mySqlEx.InnerException is MySqlException ? (mySqlEx.InnerException as MySqlException).Number : 0);
+      var errorNumber = mySqlEx.Number > 0
+        ? mySqlEx.Number
+        : mySqlEx.InnerException is MySqlException mySqlInnerEx ? mySqlInnerEx.Number : 0;
       switch (errorNumber)
       {
         case 1042:

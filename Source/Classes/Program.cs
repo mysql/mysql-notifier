@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -26,17 +25,22 @@ using System.Xml;
 using System.Xml.Linq;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQL;
-using MySQL.Utility.Classes.MySQLInstaller;
-using MySQL.Utility.Classes.MySQLWorkbench;
-using MySQL.Utility.Forms;
+using MySql.Utility.Classes;
+using MySql.Utility.Classes.Logging;
+using MySql.Utility.Classes.MySqlInstaller;
+using MySql.Utility.Classes.MySqlWorkbench;
+using MySql.Utility.Forms;
 
 namespace MySql.Notifier.Classes
 {
   internal static class Program
   {
     #region Constants
+
+    /// <summary>
+    /// The application name without spaces.
+    /// </summary>
+    public const string APP_NAME_NO_SPACES = "MySqlNotifier";
 
     /// <summary>
     /// The relative path of the Notifier's connections file under the application data directory.
@@ -78,24 +82,12 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Gets an instance of the <see cref="Notifier"/> class.
     /// </summary>
-    public static Notifier Notifier
-    {
-      get
-      {
-        return _applicationContext.NotifierInstance;
-      }
-    }
+    public static Notifier Notifier => _applicationContext.NotifierInstance;
 
     /// <summary>
     /// Gets the environment's application data directory.
     /// </summary>
-    public static string EnvironmentApplicationDataDirectory
-    {
-      get
-      {
-        return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-      }
-    }
+    public static string EnvironmentApplicationDataDirectory => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
     /// <summary>
     /// Gets the installation path where the MySQL Notifier executable is located.
@@ -109,7 +101,7 @@ namespace MySql.Notifier.Classes
     /// <param name="args"><see cref="ThreadExceptionEventArgs"/> arguments.</param>
     private static void MySQLNotifierThreadExceptionEventHandler(object sender, ThreadExceptionEventArgs args)
     {
-      MySqlSourceTrace.WriteAppErrorToLog(args.Exception, null, null, true, SourceLevels.Critical);
+      Logger.LogException(args.Exception, true, null, null, true);
     }
 
     /// <summary>
@@ -119,7 +111,7 @@ namespace MySql.Notifier.Classes
     /// <param name="args"><see cref="UnhandledExceptionEventArgs"/> arguments.</param>
     private static void MySQLNotifierAppExceptionHandler(object sender, UnhandledExceptionEventArgs args)
     {
-      MySqlSourceTrace.WriteAppErrorToLog(args.ExceptionObject as Exception, null, null, true, SourceLevels.Critical);
+      Logger.LogException(args.ExceptionObject as Exception, true, null, null, true);
     }
 
     /// <summary>
@@ -130,13 +122,10 @@ namespace MySql.Notifier.Classes
     {
       try
       {
-        // Initialize error handler settings
-        MySqlSourceTrace.LogFilePath = EnvironmentApplicationDataDirectory + ERROR_LOG_FILE_RELATIVE_PATH;
-        MySqlSourceTrace.SourceTraceClass = "MySqlNotifier";
-        MySqlSourceTrace.ErrorDialogAutoCloseSeconds = 60;
+        InitializeLogger();
 
         // Static initializations
-        InstallLocation = Utility.GetMySqlAppInstallLocation(AssemblyInfo.AssemblyTitle);
+        InstallLocation = Utilities.GetMySqlAppInstallLocation(AssemblyInfo.AssemblyTitle);
         InitializeStaticSettings();
         CustomizeInfoDialog();
 
@@ -170,7 +159,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.MainApplicationErrorDetail, true);
+        Logger.LogException(ex, true, Resources.MainApplicationErrorDetail);
       }
 
       SingleInstance.Stop();
@@ -188,7 +177,7 @@ namespace MySql.Notifier.Classes
     }
 
     /// <summary>
-    /// Customizes the looks of the <see cref="MySQL.Utility.Forms.InfoDialog"/> form for the MySQL Notifier.
+    /// Customizes the looks of the <see cref="InfoDialog"/> form for the MySQL Notifier.
     /// </summary>
     private static void CustomizeInfoDialog()
     {
@@ -201,7 +190,16 @@ namespace MySql.Notifier.Classes
     }
 
     /// <summary>
-    /// Initializes settings for the <see cref="MySqlWorkbench"/>, <see cref="MySqlSourceTrace"/>, <see cref="MySqlWorkbenchPasswordVault"/> and <see cref="MySqlInstaller"/> classes.
+    /// Initializes the <see cref="Logger"/> class with its required information.
+    /// </summary>
+    private static void InitializeLogger()
+    {
+      Logger.Initialize(EnvironmentApplicationDataDirectory + SETTINGS_DIRECTORY_RELATIVE_PATH, APP_NAME_NO_SPACES, false, false, APP_NAME_NO_SPACES);
+      Logger.PrependUserNameToLogFileName = true;
+    }
+
+    /// <summary>
+    /// Initializes settings for the <see cref="MySqlWorkbench"/>, <see cref="MySqlWorkbenchPasswordVault"/> and <see cref="MySqlInstaller"/> classes.
     /// </summary>
     private static void InitializeStaticSettings()
     {
@@ -222,12 +220,7 @@ namespace MySql.Notifier.Classes
     /// <param name="rootElement">The root element of the configuration file.</param>
     private static void UpdateMachineServicesInSettingsFromXml(XElement rootElement)
     {
-      if (rootElement == null)
-      {
-        return;
-      }
-
-      var machineListElement = rootElement.Element("MachineList");
+      var machineListElement = rootElement?.Element("MachineList");
       if (machineListElement == null || string.IsNullOrEmpty(machineListElement.Value))
       {
         return;
@@ -277,17 +270,14 @@ namespace MySql.Notifier.Classes
 
           service.DisplayName = serviceNode.Attributes["DisplayName"].Value;
 
-          bool parsedNotifyOnStatusChange;
-          if (bool.TryParse(serviceNode.Attributes["NotifyOnStatusChange"].Value, out parsedNotifyOnStatusChange))
+          if (bool.TryParse(serviceNode.Attributes["NotifyOnStatusChange"].Value, out var parsedNotifyOnStatusChange))
           {
             service.NotifyOnStatusChange = parsedNotifyOnStatusChange;
           }
 
           service.ServiceName = serviceNode.Attributes["ServiceName"].Value;
-
-          bool parsedUpdateTrayIconOnStatusChange;
           if (bool.TryParse(serviceNode.Attributes["UpdateTrayIconOnStatusChange"].Value,
-            out parsedUpdateTrayIconOnStatusChange))
+            out var parsedUpdateTrayIconOnStatusChange))
           {
             service.UpdateTrayIconOnStatusChange = parsedUpdateTrayIconOnStatusChange;
           }
@@ -313,12 +303,7 @@ namespace MySql.Notifier.Classes
     /// <param name="rootElement">The root element of the configuration file.</param>
     private static void UpdateMySqlInstancesInSettingsFromXml(XElement rootElement)
     {
-      if (rootElement == null)
-      {
-        return;
-      }
-
-      var mySqlInstancesListElement = rootElement.Element("MySQLInstancesList");
+      var mySqlInstancesListElement = rootElement?.Element("MySQLInstancesList");
       if (mySqlInstancesListElement == null || string.IsNullOrEmpty(mySqlInstancesListElement.Value))
       {
         return;
@@ -344,35 +329,31 @@ namespace MySql.Notifier.Classes
           continue;
         }
 
-        var instance = new MySqlInstance();
-        instance.HostName = instanceNode.Attributes["HostName"].Value;
-
-        bool parsedMonitorAndNotifyStatus;
-        if (bool.TryParse(instanceNode.Attributes["MonitorAndNotifyStatus"].Value, out parsedMonitorAndNotifyStatus))
+        var instance = new MySqlInstance
+        {
+          HostName = instanceNode.Attributes["HostName"].Value
+        };
+        if (bool.TryParse(instanceNode.Attributes["MonitorAndNotifyStatus"].Value, out var parsedMonitorAndNotifyStatus))
         {
           instance.MonitorAndNotifyStatus = parsedMonitorAndNotifyStatus;
         }
 
-        uint parsedInterval;
-        if (uint.TryParse(instanceNode.Attributes["MonitoringInterval"].Value, out parsedInterval))
+        if (uint.TryParse(instanceNode.Attributes["MonitoringInterval"].Value, out var parsedInterval))
         {
           instance.MonitoringInterval = parsedInterval;
         }
 
-        TimeUtilities.IntervalUnitOfMeasure parsedIntervalUnitOfMeasure;
-        if (Enum.TryParse(instanceNode.Attributes["MonitoringIntervalUnitOfMeasure"].Value, out parsedIntervalUnitOfMeasure))
+        if (Enum.TryParse(instanceNode.Attributes["MonitoringIntervalUnitOfMeasure"].Value, out TimeUtilities.IntervalUnitOfMeasure parsedIntervalUnitOfMeasure))
         {
           instance.MonitoringIntervalUnitOfMeasure = parsedIntervalUnitOfMeasure;
         }
 
-        uint parsedPort;
-        if (uint.TryParse(instanceNode.Attributes["Port"].Value, out parsedPort))
+        if (uint.TryParse(instanceNode.Attributes["Port"].Value, out var parsedPort))
         {
           instance.Port = parsedPort;
         }
 
-        bool parsedUpdateTrayIconOnStatusChange;
-        if (bool.TryParse(instanceNode.Attributes["UpdateTrayIconOnStatusChange"].Value, out parsedUpdateTrayIconOnStatusChange))
+        if (bool.TryParse(instanceNode.Attributes["UpdateTrayIconOnStatusChange"].Value, out var parsedUpdateTrayIconOnStatusChange))
         {
           instance.UpdateTrayIconOnStatusChange = parsedUpdateTrayIconOnStatusChange;
         }
@@ -407,8 +388,8 @@ namespace MySql.Notifier.Classes
         // Make a copy of the configuration file before attempting to fix the root element name from MySQLForExcel to MySQLNotifier
         File.Copy(settingsFilePath, settingsCopyFileName, true);
 
-        XDocument xdoc = XDocument.Load(settingsFilePath);
-        var element = xdoc.Elements(WRONG_SETTINGS_FILE_ROOT_ELEMENT_NAME).FirstOrDefault();
+        var xDocument = XDocument.Load(settingsFilePath);
+        var element = xDocument.Elements(WRONG_SETTINGS_FILE_ROOT_ELEMENT_NAME).FirstOrDefault();
         if (element == null)
         {
           return;
@@ -416,7 +397,7 @@ namespace MySql.Notifier.Classes
 
         // Change MySQLForExcel for MySQLNotifier
         element.Name = AssemblyInfo.AssemblyTitle.Replace(" ", string.Empty);
-        xdoc.Save(settingsFilePath);
+        xDocument.Save(settingsFilePath);
         NotifierSettings.RootElementName = null;
 
         // For some reason collections are not loaded from the modified file, so we need to read them manually and feed them again to the settings object
@@ -425,7 +406,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.FixMySqlForExcelMainElementWarningText, false, SourceLevels.Warning);
+        Logger.LogException(ex, false, Resources.FixMySqlForExcelMainElementWarningText);
 
         // Revert back the settings.config file from the copy we made.
         NotifierSettings.RootElementName = WRONG_SETTINGS_FILE_ROOT_ELEMENT_NAME;

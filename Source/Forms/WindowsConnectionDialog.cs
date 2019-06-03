@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -20,9 +20,9 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using MySql.Notifier.Classes;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQLWorkbench;
-using MySQL.Utility.Forms;
+using MySql.Utility.Classes;
+using MySql.Utility.Classes.MySqlWorkbench;
+using MySql.Utility.Forms;
 
 namespace MySql.Notifier.Forms
 {
@@ -31,7 +31,7 @@ namespace MySql.Notifier.Forms
     #region Constants
 
     /// <summary>
-    /// Regular expresion for a valid computer's IP address.
+    /// Regular expression for a valid computer's IP address.
     /// </summary>
     private const string VALID_IP_REGEX = @"^((?<FirstToThird>2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(?<Last>2[0-4]\d|25[0-5]|[01]?\d\d?)$";
 
@@ -64,7 +64,7 @@ namespace MySql.Notifier.Forms
     private const string VALID_LOGON_NAME_REGEX = @"(?<LogonName>(?![\x20.]+$)([^\\@]{1,64}))";
 
     /// <summary>
-    /// Regular expresion for a valid down-level logon name.
+    /// Regular expression for a valid down-level logon name.
     /// </summary>
     /// <remarks>
     /// Rules as per these links:
@@ -74,7 +74,7 @@ namespace MySql.Notifier.Forms
     private const string VALID_DOWN_LEVEL_LOGON_NAME_REGEX = @"^(?<NetBiosDomainName>(?![\x20.]+$)([^\\/:\*\?""<>|\.]{1,15})(?<Separator>\\))?" + VALID_LOGON_NAME_REGEX + "$";
 
     /// <summary>
-    /// Regular expresion for a valid user principal name.
+    /// Regular expression for a valid user principal name.
     /// </summary>
     /// <remarks>
     /// Rules as per these links:
@@ -96,9 +96,9 @@ namespace MySql.Notifier.Forms
     /// <summary>
     /// Initializes a new instance of the <see cref="WindowsConnectionDialog"/> class.
     /// </summary>
-    /// <param name="machineslist">List of the machines already being added to monitor services.</param>
+    /// <param name="machinesList">List of the machines already being added to monitor services.</param>
     /// <param name="currentMachine">Current machine for editing purposes.</param>
-    public WindowsConnectionDialog(MachinesList machineslist, Machine currentMachine)
+    public WindowsConnectionDialog(MachinesList machinesList, Machine currentMachine)
       : this()
     {
       Text = currentMachine == null ? Text : Resources.EditMachineText;
@@ -129,38 +129,35 @@ namespace MySql.Notifier.Forms
         EditMode = false;
       }
 
-      if (machineslist == null)
+      if (machinesList?.Machines != null)
       {
-        return;
-      }
-
-      if (machineslist.Machines != null)
-      {
-        MachinesList = machineslist;
+        MachinesList = machinesList;
       }
     }
 
-    public override sealed string Text
+    #region Properties
+
+    public sealed override string Text
     {
-      get { return base.Text; }
-      set { base.Text = value; }
+      get => base.Text;
+      set => base.Text = value;
     }
 
     /// <summary>
     /// Gets a value indicating whether the dialog is in edit mode VS add mode.
     /// </summary>
-    public bool EditMode { get; private set; }
+    public bool EditMode { get; }
 
     /// <summary>
     /// Gets a value indicating whether the user entries seem valid credentials to perform a connection test.
     /// </summary>
-    public bool EntriesAreValid
-    {
-      get
-      {
-        return !(hostErrorSign.Visible || userErrorSign.Visible || string.IsNullOrEmpty(HostTextBox.Text) || string.IsNullOrEmpty(UserTextBox.Text) || string.IsNullOrEmpty(PasswordTextBox.Text));
-      }
-    }
+    public bool EntriesAreValid => !(hostErrorSign.Visible
+                                     || userErrorSign.Visible
+                                     || string.IsNullOrEmpty(HostTextBox.Text)
+                                     || string.IsNullOrEmpty(UserTextBox.Text)
+                                     || string.IsNullOrEmpty(PasswordTextBox.Text));
+
+    #endregion Properties
 
     /// <summary>
     /// Event delegate method fired when the <see cref="MachineAutoTestConnectionIntervalNumericUpDown"/> value changes.
@@ -194,7 +191,8 @@ namespace MySql.Notifier.Forms
         return false;
       }
 
-      if (forceTest || !NewMachine.IsOnline)
+      if (forceTest
+          || !NewMachine.IsOnline)
       {
         NewMachine.TestConnection(true, false);
       }
@@ -228,7 +226,7 @@ namespace MySql.Notifier.Forms
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
-    private void Textbox_TextChanged(object sender, EventArgs e)
+    private void TextChangedHandler(object sender, EventArgs e)
     {
       timerTextChanged.Stop();
       timerTextChanged.Start();
@@ -239,7 +237,7 @@ namespace MySql.Notifier.Forms
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
-    private void TextBox_Validating(object sender, System.ComponentModel.CancelEventArgs e)
+    private void ValidatingHandler(object sender, System.ComponentModel.CancelEventArgs e)
     {
       timerTextChanged_Tick(timerTextChanged, EventArgs.Empty);
     }

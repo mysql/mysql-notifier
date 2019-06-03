@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -22,8 +22,8 @@ using System.Linq;
 using System.Management;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQLWorkbench;
+using MySql.Utility.Classes;
+using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes
 {
@@ -83,6 +83,8 @@ namespace MySql.Notifier.Classes
 
     #endregion Events
 
+    #region Properties
+
     /// <summary>
     /// Gets default local machine instance.
     /// </summary>
@@ -91,18 +93,14 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Gets or sets a list of all machines saved in the settings file.
     /// </summary>
-    public List<Machine> Machines { get; private set; }
+    public List<Machine> Machines { get; }
 
     /// <summary>
     /// Gets the number of services monitored from all machines in the machines list.
     /// </summary>
-    public int ServicesCount
-    {
-      get
-      {
-        return Machines != null ? Machines.Sum(m => m.Services.Count) : 0;
-      }
-    }
+    public int ServicesCount => Machines?.Sum(m => m.Services.Count) ?? 0;
+
+    #endregion Properties
 
     /// <summary>
     /// Adds or removes machines from the machines list.
@@ -160,7 +158,7 @@ namespace MySql.Notifier.Classes
         // Free managed resources
         if (Machines != null)
         {
-          foreach (Machine machine in Machines.Where(machine => machine != null))
+          foreach (var machine in Machines.Where(machine => machine != null))
           {
             machine.Dispose();
           }
@@ -188,7 +186,9 @@ namespace MySql.Notifier.Classes
     /// <returns>The machine matching the given name.</returns>
     public Machine GetMachineByName(string machineName)
     {
-      return Machines.Count == 0 ? null : Machines.Find(m => string.Compare(m.Name, machineName, StringComparison.OrdinalIgnoreCase) == 0);
+      return Machines.Count == 0
+        ? null
+        : Machines.Find(m => string.Compare(m.Name, machineName, StringComparison.OrdinalIgnoreCase) == 0);
     }
 
     /// <summary>
@@ -219,10 +219,8 @@ namespace MySql.Notifier.Classes
       LocalMachine = GetMachineByName(MySqlWorkbenchConnection.DEFAULT_HOSTNAME) ?? new Machine();
       LocalMachine.LoadServicesParameters(true);
       OnMachineListChanged(LocalMachine, ListChangeType.AutoAdd);
-
       RecreateInvalidScheduledTask();
       MigrateOldServices();
-
       if (!Settings.Default.FirstRun)
       {
         return;
@@ -231,7 +229,7 @@ namespace MySql.Notifier.Classes
       CreateScheduledTask();
       AutoAddLocalServices();
       Settings.Default.FirstRun = false;
-      SavetoFile();
+      SaveToFile();
     }
 
     /// <summary>
@@ -250,9 +248,9 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private void CreateScheduledTask()
     {
-      if (Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0 && !String.IsNullOrEmpty(AssemblyInfo.AssemblyTitle))
+      if (Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0 && !string.IsNullOrEmpty(AssemblyInfo.AssemblyTitle))
       {
-        Utility.CreateScheduledTask(Notifier.DefaultTaskName, Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
+        Utilities.CreateScheduledTask(Notifier.DefaultTaskName, Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
       }
     }
 
@@ -262,7 +260,7 @@ namespace MySql.Notifier.Classes
     public void LoadMachinesServices()
     {
       var machineIdsList = Machines.ConvertAll(machine => machine.MachineId);
-      foreach (Machine machine in machineIdsList.Select(GetMachineById).Where(machine => machine != null))
+      foreach (var machine in machineIdsList.Select(GetMachineById).Where(machine => machine != null))
       {
         OnMachineListChanged(machine, ListChangeType.AddByLoad);
         machine.LoadServicesParameters(false);
@@ -272,7 +270,7 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Saves the list of machines in the settings.config file.
     /// </summary>
-    public void SavetoFile()
+    public void SaveToFile()
     {
       Settings.Default.MachineList = Machines;
       Settings.Default.Save();
@@ -296,12 +294,13 @@ namespace MySql.Notifier.Classes
     /// <param name="listChangeType">Machine list change type.</param>
     protected virtual void OnMachineListChanged(Machine machine, ListChangeType listChangeType)
     {
-      if (listChangeType == ListChangeType.RemoveByEvent || listChangeType == ListChangeType.RemoveByUser)
+      if (listChangeType == ListChangeType.RemoveByEvent
+          || listChangeType == ListChangeType.RemoveByUser)
       {
         int removedServicesQuantity = machine.RemoveAllServices();
         if (removedServicesQuantity > 0)
         {
-          SavetoFile();
+          SaveToFile();
         }
 
         if (machine != LocalMachine)
@@ -316,7 +315,7 @@ namespace MySql.Notifier.Classes
       {
         if (listChangeType == ListChangeType.Updated)
         {
-          SavetoFile();
+          SaveToFile();
         }
 
         machine.MachineStatusChanged -= OnMachineStatusChanged;
@@ -331,10 +330,7 @@ namespace MySql.Notifier.Classes
         machine.WorkbenchInstallationChanged += OnWorkbenchInstallationChanged;
       }
 
-      if (MachineListChanged != null)
-      {
-        MachineListChanged(machine, listChangeType);
-      }
+      MachineListChanged?.Invoke(machine, listChangeType);
     }
 
     /// <summary>
@@ -349,11 +345,7 @@ namespace MySql.Notifier.Classes
       {
         case ListChangeType.RemoveByEvent:
         case ListChangeType.RemoveByUser:
-          if (MachineServiceListChanged != null)
-          {
-            MachineServiceListChanged(machine, service, listChangeType);
-          }
-
+          MachineServiceListChanged?.Invoke(machine, service, listChangeType);
           if (machine.Services.Count == 0)
           {
             ChangeMachine(machine, ListChangeType.RemoveByEvent);
@@ -367,23 +359,15 @@ namespace MySql.Notifier.Classes
             ChangeMachine(machine, ListChangeType.AutoAdd);
           }
 
-          if (MachineServiceListChanged != null)
-          {
-            MachineServiceListChanged(machine, service, listChangeType);
-          }
-
+          MachineServiceListChanged?.Invoke(machine, service, listChangeType);
           break;
 
         default:
-          if (MachineServiceListChanged != null)
-          {
-            MachineServiceListChanged(machine, service, listChangeType);
-          }
-
+          MachineServiceListChanged?.Invoke(machine, service, listChangeType);
           break;
       }
 
-      SavetoFile();
+      SaveToFile();
     }
 
     /// <summary>
@@ -393,10 +377,7 @@ namespace MySql.Notifier.Classes
     /// <param name="service">MySQLService instance.</param>
     protected virtual void OnMachineServiceStatusChanged(Machine machine, MySqlService service)
     {
-      if (MachineServiceStatusChanged != null)
-      {
-        MachineServiceStatusChanged(machine, service);
-      }
+      MachineServiceStatusChanged?.Invoke(machine, service);
     }
 
     /// <summary>
@@ -407,10 +388,7 @@ namespace MySql.Notifier.Classes
     /// <param name="ex">Exception thrown while trying to change the service's status.</param>
     protected virtual void OnMachineServiceStatusChangeError(Machine machine, MySqlService service, Exception ex)
     {
-      if (MachineServiceStatusChangeError != null)
-      {
-        MachineServiceStatusChangeError(machine, service, ex);
-      }
+      MachineServiceStatusChangeError?.Invoke(machine, service, ex);
     }
 
     /// <summary>
@@ -420,22 +398,16 @@ namespace MySql.Notifier.Classes
     /// <param name="oldConnectionStatus">Old connection status.</param>
     protected virtual void OnMachineStatusChanged(Machine machine, Machine.ConnectionStatusType oldConnectionStatus)
     {
-      if (MachineStatusChanged != null)
-      {
-        MachineStatusChanged(machine, oldConnectionStatus);
-      }
+      MachineStatusChanged?.Invoke(machine, oldConnectionStatus);
     }
 
     /// <summary>
     /// Event delegate method that is fired when Workbench installation changed.
     /// </summary>
-    /// <param name="remoteservice">The remoteservice.</param>
-    protected virtual void OnWorkbenchInstallationChanged(ManagementBaseObject remoteservice)
+    /// <param name="remoteService">The remote service.</param>
+    protected virtual void OnWorkbenchInstallationChanged(ManagementBaseObject remoteService)
     {
-      if (WorkbenchInstallationChanged != null)
-      {
-        WorkbenchInstallationChanged(remoteservice);
-      }
+      WorkbenchInstallationChanged?.Invoke(remoteService);
     }
 
     /// <summary>
@@ -444,9 +416,9 @@ namespace MySql.Notifier.Classes
     private void AutoAddLocalServices()
     {
       // Verify if MySQL services are present on the local machine
-      string autoAddPattern = Settings.Default.AutoAddPattern;
-      ManagementObjectCollection localServicesList = LocalMachine.GetWmiServices(autoAddPattern, true, false);
-      List<ManagementObject> servicesToAddList = localServicesList.Cast<ManagementObject>().Where(mo => mo != null && Service.IsRealMySqlService(mo.Properties["Name"].Value.ToString())).ToList();
+      var autoAddPattern = Settings.Default.AutoAddPattern;
+      var localServicesList = LocalMachine.GetWmiServices(autoAddPattern, true, false);
+      var servicesToAddList = localServicesList.Cast<ManagementObject>().Where(mo => mo != null && Service.IsRealMySqlService(mo.Properties["Name"].Value.ToString())).ToList();
 
       // If we found some services we will try to add the local machine to the list...
       if (servicesToAddList.Count <= 0)
@@ -457,7 +429,7 @@ namespace MySql.Notifier.Classes
       ChangeMachine(LocalMachine, ListChangeType.AutoAdd);
 
       // Try to add the services we found on it.
-      foreach (MySqlService service in servicesToAddList.Select(mo => new MySqlService(mo.Properties["Name"].Value.ToString(), true, true, LocalMachine)))
+      foreach (var service in servicesToAddList.Select(mo => new MySqlService(mo.Properties["Name"].Value.ToString(), true, true, LocalMachine)))
       {
         service.SetServiceParameters(true);
         LocalMachine.ChangeService(service, ListChangeType.AutoAdd);
@@ -498,7 +470,7 @@ namespace MySql.Notifier.Classes
       ChangeMachine(LocalMachine, ListChangeType.AutoAdd);
 
       // Copy services from old schema to the Local machine
-      foreach (MySqlService service in services)
+      foreach (var service in services)
       {
         service.Host = LocalMachine;
         service.SetServiceParameters(true);
@@ -507,7 +479,7 @@ namespace MySql.Notifier.Classes
 
       // Clear the old list of services to erase the duplicates on the newer schema
       services.Clear();
-      SavetoFile();
+      SaveToFile();
     }
 
     /// <summary>

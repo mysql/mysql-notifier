@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -24,19 +24,23 @@ using System.Windows.Forms;
 using MySql.Notifier.Classes;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Forms;
+using MySql.Utility.Classes;
+using MySql.Utility.Forms;
 
 namespace MySql.Notifier.Forms
 {
   public partial class AddServiceDialog : MachineAwareForm
   {
-    public bool HasChanges { get; private set; }
+    #region Fields
+
     private int _sortColumn;
-    public AddServiceDialog(MachinesList machineslist)
+
+    #endregion Fields
+
+    public AddServiceDialog(MachinesList machinesList)
     {
       _sortColumn = -1;
-      MachinesList = machineslist;
+      MachinesList = machinesList;
       HasChanges = false;
 
       InitializeComponent();
@@ -45,9 +49,15 @@ namespace MySql.Notifier.Forms
       MachineSelectionComboBox.SelectedIndex = 0;
     }
 
+    #region Properties
+
+    public bool HasChanges { get; private set; }
+
     public Machine.LocationType MachineLocationType { get; set; }
 
     public List<MySqlService> ServicesToAdd { get; set; }
+
+    #endregion Properties
 
     /// <summary>
     /// Event delegate method fired when the <see cref="DeleteButton"/> is clicked.
@@ -70,7 +80,7 @@ namespace MySql.Notifier.Forms
 
       HasChanges = true;
       MachinesList.ChangeMachine(NewMachine, ListChangeType.RemoveByUser);
-      int removedMachineIndex = MachineSelectionComboBox.SelectedIndex;
+      var removedMachineIndex = MachineSelectionComboBox.SelectedIndex;
       MachineSelectionComboBox.SelectedIndex = 0;
       MachineSelectionComboBox.Items.RemoveAt(removedMachineIndex);
     }
@@ -94,8 +104,8 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void EditButton_Click(object sender, EventArgs e)
     {
-      string oldUser = NewMachine.User;
-      string oldPassword = NewMachine.Password;
+      var oldUser = NewMachine.User;
+      var oldPassword = NewMachine.Password;
       using (var windowsConnectionDialog = new WindowsConnectionDialog(MachinesList, NewMachine))
       {
         if (windowsConnectionDialog.ShowDialog() == DialogResult.Cancel)
@@ -127,12 +137,12 @@ namespace MySql.Notifier.Forms
 
     private void InsertMachinesIntoComboBox()
     {
-      if (MachinesList == null || MachinesList.Machines == null)
+      if (MachinesList?.Machines == null)
       {
         return;
       }
 
-      foreach (Machine machine in MachinesList.Machines)
+      foreach (var machine in MachinesList.Machines)
       {
         if (machine.IsLocal)
         {
@@ -158,9 +168,9 @@ namespace MySql.Notifier.Forms
       {
         case 0:
           MachineLocationType = Machine.LocationType.Local;
-          if (MachineSelectionComboBox.SelectedItem is Machine)
+          if (MachineSelectionComboBox.SelectedItem is Machine machine)
           {
-            NewMachine = MachineSelectionComboBox.SelectedItem as Machine;
+            NewMachine = machine;
           }
           else
           {
@@ -181,10 +191,10 @@ namespace MySql.Notifier.Forms
             {
               NewMachine = windowsConnectionDialog.NewMachine;
               NewMachine.LoadServicesParameters(false);
-              int index = -1;
-              for (int machineIndex = 3; machineIndex < MachineSelectionComboBox.Items.Count && index < 0; machineIndex++)
+              var index = -1;
+              for (var machineIndex = 3; machineIndex < MachineSelectionComboBox.Items.Count && index < 0; machineIndex++)
               {
-                string machineName = MachineSelectionComboBox.Items[machineIndex].ToString();
+                var machineName = MachineSelectionComboBox.Items[machineIndex].ToString();
                 if (machineName == NewMachine.Name)
                 {
                   index = machineIndex;
@@ -211,10 +221,10 @@ namespace MySql.Notifier.Forms
             return;
           }
 
-          int mIndex = -1;
-          for (int machineIndex = 3; machineIndex < MachineSelectionComboBox.Items.Count; machineIndex++)
+          var mIndex = -1;
+          for (var machineIndex = 3; machineIndex < MachineSelectionComboBox.Items.Count; machineIndex++)
           {
-            string machineName = MachineSelectionComboBox.Items[machineIndex].ToString();
+            var machineName = MachineSelectionComboBox.Items[machineIndex].ToString();
             if (machineName == NewMachine.Name)
             {
               mIndex = machineIndex;
@@ -253,7 +263,7 @@ namespace MySql.Notifier.Forms
       }
 
       ServicesListView.Enabled = NewMachine.IsOnline;
-      Machine servicesMachine = ServicesListView.Tag as Machine;
+      var servicesMachine = ServicesListView.Tag as Machine;
       if (servicesMachine != NewMachine)
       {
         RefreshList();
@@ -269,7 +279,8 @@ namespace MySql.Notifier.Forms
       ServicesListView.Tag = NewMachine;
 
       ServicesListView.Items.Clear();
-      if (NewMachine == null || !NewMachine.IsOnline)
+      if (NewMachine == null
+          || !NewMachine.IsOnline)
       {
         return;
       }
@@ -277,14 +288,15 @@ namespace MySql.Notifier.Forms
       Cursor = Cursors.WaitCursor;
       try
       {
-        string currentFilter = FilterCheckBox.Checked
+        var currentFilter = FilterCheckBox.Checked
           ? Settings.Default.AutoAddPattern.Trim()
           : FilterTextBox.Text.ToLower();
         ServicesListView.BeginUpdate();
-        List<ManagementObject> services = new List<ManagementObject>();
-        if (NewMachine != null && MachineLocationType == Machine.LocationType.Remote)
+        var services = new List<ManagementObject>();
+        if (NewMachine != null
+            && MachineLocationType == Machine.LocationType.Remote)
         {
-          ManagementObjectCollection machineServicesCollection = NewMachine.GetWmiServices(true);
+          var machineServicesCollection = NewMachine.GetWmiServices(true);
           if (machineServicesCollection != null)
           {
             services.AddRange(machineServicesCollection.Cast<ManagementObject>());
@@ -298,18 +310,18 @@ namespace MySql.Notifier.Forms
         services = services.OrderBy(x => x.Properties["DisplayName"].Value).ToList();
         if (!string.IsNullOrEmpty(currentFilter))
         {
-          services =
-            services.Where(f => f.Properties["DisplayName"].Value.ToString().ToLowerInvariant().Contains(currentFilter))
-              .ToList();
+          services = services.Where(f => f.Properties["DisplayName"].Value.ToString().ToLowerInvariant().Contains(currentFilter)).ToList();
         }
 
-        foreach (ManagementObject item in services)
+        foreach (var item in services)
         {
-          string serviceName = item.Properties["Name"].Value.ToString();
+          var serviceName = item.Properties["Name"].Value.ToString();
           var displayName = item.Properties["DisplayName"].Value;
           var newItem = new ListViewItem
           {
-            Text = displayName != null ? displayName.ToString() : serviceName,
+            Text = displayName != null
+              ? displayName.ToString()
+              : serviceName,
             Tag = serviceName
           };
 
@@ -333,7 +345,9 @@ namespace MySql.Notifier.Forms
       }
       else
       {
-        ServicesListView.Sorting = ServicesListView.Sorting == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
+        ServicesListView.Sorting = ServicesListView.Sorting == SortOrder.Ascending
+          ? SortOrder.Descending
+          : SortOrder.Ascending;
       }
 
       ServicesListView.Sort();
@@ -359,8 +373,12 @@ namespace MySql.Notifier.Forms
 
       public int Compare(object x, object y)
       {
-        var returnVal = string.CompareOrdinal(((ListViewItem)x).SubItems[_col].Text, ((ListViewItem)y).SubItems[_col].Text);
-        return _order == SortOrder.Descending ? returnVal * -1 : returnVal;
+        var xItem = x as ListViewItem;
+        var yItem = y as ListViewItem;
+        var returnVal = string.CompareOrdinal(xItem?.SubItems[_col].Text, yItem?.SubItems[_col].Text);
+        return _order == SortOrder.Descending
+          ? returnVal * -1
+          : returnVal;
       }
     }
   }

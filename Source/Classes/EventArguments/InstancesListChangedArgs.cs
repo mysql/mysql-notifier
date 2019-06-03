@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -39,11 +39,11 @@ namespace MySql.Notifier.Classes.EventArguments
     /// <summary>
     /// Gets the MySQL instance that caused the list change.
     /// </summary>
-    public MySqlInstance Instance { get; private set; }
+    public MySqlInstance Instance { get; }
 
     /// <summary>
     /// Gets the type of change done to the list.
     /// </summary>
-    public ListChangedType ListChange { get; private set; }
+    public ListChangedType ListChange { get; }
   }
 }

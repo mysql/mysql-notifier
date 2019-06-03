@@ -104,7 +104,7 @@ namespace MySql.Notifier.Forms
       this.CopyrightLabel.Name = "CopyrightLabel";
       this.CopyrightLabel.Size = new System.Drawing.Size(304, 11);
       this.CopyrightLabel.TabIndex = 4;
-      this.CopyrightLabel.Text = "Copyright © 2008, 2016 Oracle and/or its affiliates. All Rights Reserved.";
+      this.CopyrightLabel.Text = "Copyright © 2008, 2019 Oracle and/or its affiliates. All Rights Reserved.";
       // 
       // VersionLabel
       // 

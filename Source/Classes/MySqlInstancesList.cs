@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -22,7 +22,7 @@ using System.ComponentModel;
 using System.Linq;
 using MySql.Notifier.Classes.EventArguments;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes.MySQLWorkbench;
+using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes
 {
@@ -75,7 +75,7 @@ namespace MySql.Notifier.Classes
         // Free managed resources
         if (InstancesList != null)
         {
-          foreach (MySqlInstance instance in InstancesList.Where(instance => instance != null))
+          foreach (var instance in InstancesList.Where(instance => instance != null))
           {
             instance.Dispose();
           }
@@ -103,7 +103,7 @@ namespace MySql.Notifier.Classes
     public event MySqlInstance.InstanceStatusChangedEventHandler InstanceStatusChanged;
 
     /// <summary>
-    /// Event ocurring when an error ocurred during a connection status test.
+    /// Event ocurring when an error occurred during a connection status test.
     /// </summary>
     public event MySqlInstance.InstanceConnectionStatusTestErrorEventHandler InstanceConnectionStatusTestErrorThrown;
 
@@ -114,7 +114,7 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Gets or sets a list of <see cref="MySqlInstance"/> objects representing instances being monitored.
     /// </summary>
-    public List<MySqlInstance> InstancesList { get; private set; }
+    public List<MySqlInstance> InstancesList { get; }
 
     #endregion Properties
 
@@ -123,24 +123,12 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Gets the number of elements actually contained in the list.
     /// </summary>
-    public int Count
-    {
-      get
-      {
-        return (InstancesList == null) ? 0 : InstancesList.Count;
-      }
-    }
+    public int Count => InstancesList?.Count ?? 0;
 
     /// <summary>
     /// Gets a value indicating whether the collection is read-only
     /// </summary>
-    public bool IsReadOnly
-    {
-      get
-      {
-        return false;
-      }
-    }
+    public bool IsReadOnly => false;
 
     /// <summary>
     /// Gets or sets the element at the specified index.
@@ -149,11 +137,7 @@ namespace MySql.Notifier.Classes
     /// <returns>A <see cref="MySqlInstance"/> object at the given index position.</returns>
     public MySqlInstance this[int index]
     {
-      get
-      {
-        return InstancesList[index];
-      }
-
+      get => InstancesList[index];
       set
       {
         InstancesList[index] = value;
@@ -167,6 +151,11 @@ namespace MySql.Notifier.Classes
     /// <param name="item">A <see cref="MySqlInstance"/> object to add.</param>
     public void Add(MySqlInstance item)
     {
+      if (item == null)
+      {
+        return;
+      }
+
       InstancesList.Add(item);
       item.InstanceStatusChanged += SingleInstanceStatusChanged;
       item.PropertyChanged += SingleInstancePropertyChanged;
@@ -244,6 +233,11 @@ namespace MySql.Notifier.Classes
     /// <param name="item">The <see cref="MySqlInstance"/> object to insert to the list.</param>
     public void Insert(int index, MySqlInstance item)
     {
+      if (item == null)
+      {
+        return;
+      }
+
       InstancesList.Insert(index, item);
       item.InstanceStatusChanged += SingleInstanceStatusChanged;
       item.PropertyChanged += SingleInstancePropertyChanged;
@@ -259,8 +253,8 @@ namespace MySql.Notifier.Classes
     /// <returns><c>true</c> if <seealso cref="item"/> is successfully removed; otherwise, <c>false</c>. This method also returns <c>false</c> if <seealso cref="item"/> was not found in the list.</returns>
     public bool Remove(MySqlInstance item)
     {
-      int index = IndexOf(item);
-      bool success = index >= 0;
+      var index = IndexOf(item);
+      var success = index >= 0;
       if (!success)
       {
         return false;
@@ -285,8 +279,8 @@ namespace MySql.Notifier.Classes
     /// <returns><c>true</c> if the instance is successfully removed; otherwise, <c>false</c>. This method also returns <c>false</c> if the instance was not found in the list.</returns>
     public bool Remove(string connectionId)
     {
-      int index = InstancesList.FindIndex(ins => ins.WorkbenchConnectionId == connectionId);
-      bool success = index >= 0;
+      var index = InstancesList.FindIndex(ins => ins.WorkbenchConnectionId == connectionId);
+      var success = index >= 0;
       if (!success)
       {
         return false;
@@ -310,7 +304,7 @@ namespace MySql.Notifier.Classes
     /// <param name="index">The zero-based index of the element to remove.</param>
     public void RemoveAt(int index)
     {
-      MySqlInstance instance = InstancesList[index];
+      var instance = InstancesList[index];
       InstancesList.RemoveAt(index);
       SaveToFile();
       OnInstancesListChanged(instance, ListChangedType.ItemDeleted);
@@ -347,7 +341,7 @@ namespace MySql.Notifier.Classes
         _instanceMonitoringTimeouts.Add(instance.WorkbenchConnectionId, instance.SecondsToMonitorInstance);
       }
 
-      for (int instanceIndex = 0; instanceIndex < InstancesList.Count; instanceIndex++)
+      for (var instanceIndex = 0; instanceIndex < InstancesList.Count; instanceIndex++)
       {
         // Unsubscribe events as a safeguard.
         var instance = InstancesList[instanceIndex];
@@ -362,7 +356,7 @@ namespace MySql.Notifier.Classes
         }
         else
         {
-          MySqlWorkbenchConnection connectionInDisk = MySqlWorkbench.Connections.GetConnectionForId(instance.WorkbenchConnection.Id);
+          var connectionInDisk = MySqlWorkbench.Connections.GetConnectionForId(instance.WorkbenchConnection.Id);
           if (connectionInDisk != null && !instance.WorkbenchConnection.Equals(connectionInDisk))
           {
             instance.WorkbenchConnection.Sync(connectionInDisk, false);
@@ -429,10 +423,7 @@ namespace MySql.Notifier.Classes
     /// <param name="listChange">Type of change done to the list.</param>
     protected virtual void OnInstancesListChanged(MySqlInstance instance, ListChangedType listChange)
     {
-      if (InstancesListChanged != null)
-      {
-        InstancesListChanged(this, new InstancesListChangedArgs(instance, listChange));
-      }
+      InstancesListChanged?.Invoke(this, new InstancesListChangedArgs(instance, listChange));
     }
 
     /// <summary>
@@ -442,10 +433,7 @@ namespace MySql.Notifier.Classes
     /// <param name="oldInstanceStatus">Old instance status.</param>
     protected virtual void OnInstanceStatusChanged(MySqlInstance instance, MySqlWorkbenchConnection.ConnectionStatusType oldInstanceStatus)
     {
-      if (InstanceStatusChanged != null)
-      {
-        InstanceStatusChanged(this, new InstanceStatusChangedArgs(instance, oldInstanceStatus));
-      }
+      InstanceStatusChanged?.Invoke(this, new InstanceStatusChangedArgs(instance, oldInstanceStatus));
     }
 
     /// <summary>
@@ -455,10 +443,7 @@ namespace MySql.Notifier.Classes
     /// <param name="ex">Exception thrown by a connection status test.</param>
     protected virtual void OnInstanceConnectionStatusTestErrorThrown(MySqlInstance instance, Exception ex)
     {
-      if (InstanceConnectionStatusTestErrorThrown != null)
-      {
-        InstanceConnectionStatusTestErrorThrown(this, new InstanceConnectionStatusTestErrorThrownArgs(instance, ex));
-      }
+      InstanceConnectionStatusTestErrorThrown?.Invoke(this, new InstanceConnectionStatusTestErrorThrownArgs(instance, ex));
     }
 
     /// <summary>
@@ -468,7 +453,7 @@ namespace MySql.Notifier.Classes
     /// <param name="args">Event arguments.</param>
     private void SingleInstancePropertyChanged(object sender, PropertyChangedEventArgs args)
     {
-      MySqlInstance instance = sender as MySqlInstance;
+      var instance = sender as MySqlInstance;
       switch (args.PropertyName)
       {
         case "MonitorAndNotifyStatus":

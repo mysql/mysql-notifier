@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -23,9 +23,9 @@ using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Classes;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQLWorkbench;
-using MySQL.Utility.Forms;
+using MySql.Utility.Classes;
+using MySql.Utility.Classes.MySqlWorkbench;
+using MySql.Utility.Forms;
 
 namespace MySql.Notifier.Forms
 {
@@ -85,25 +85,19 @@ namespace MySql.Notifier.Forms
     /// Gets or sets the file path of the password vault file to be used.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public static string PasswordVaultFilePath
-    {
-      get
-      {
-        return Program.EnvironmentApplicationDataDirectory + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
-      }
-    }
+    public static string PasswordVaultFilePath => Program.EnvironmentApplicationDataDirectory + @"\Oracle\MySQL Notifier\notifier_user_data.dat";
 
     /// <summary>
     /// Gets a list of names of MySQL instance monitored by the Notifier.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public MySqlInstancesList MySqlInstancesList { get; private set; }
+    public MySqlInstancesList MySqlInstancesList { get; }
 
     /// <summary>
     /// Gets a list of <see cref="Machine"/> objects monitored by the Notifier.
     /// </summary>
     [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public MachinesList MachinesList { get; private set; }
+    public MachinesList MachinesList { get; }
 
     /// <summary>
     /// Gets the Workbench connection selected to be monitored.
@@ -142,7 +136,8 @@ namespace MySql.Notifier.Forms
     private void AddWorkbenchConnectionToConnectionsList(MySqlWorkbenchConnection workbenchConnection, bool showNonMonitoredConnections)
     {
       bool alreadyMonitored = IsWorkbenchConnectionAlreadyMonitored(workbenchConnection);
-      if (alreadyMonitored && !showNonMonitoredConnections)
+      if (alreadyMonitored
+          && !showNonMonitoredConnections)
       {
         return;
       }
@@ -180,8 +175,8 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      var workbenchConnection = WorkbenchConnectionsListView.SelectedItems[0].Tag as MySqlWorkbenchConnection;
-      if (workbenchConnection == null || !MySqlWorkbench.Connections.DeleteConnection(workbenchConnection.Id))
+      if (!(WorkbenchConnectionsListView.SelectedItems[0].Tag is MySqlWorkbenchConnection workbenchConnection)
+          || !MySqlWorkbench.Connections.DeleteConnection(workbenchConnection.Id))
       {
         return;
       }
@@ -215,8 +210,7 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      var workbenchConnection = WorkbenchConnectionsListView.SelectedItems[0].Tag as MySqlWorkbenchConnection;
-      if (workbenchConnection == null)
+      if (!(WorkbenchConnectionsListView.SelectedItems[0].Tag is MySqlWorkbenchConnection workbenchConnection))
       {
         return;
       }
@@ -236,7 +230,7 @@ namespace MySql.Notifier.Forms
     }
 
     /// <summary>
-    /// Event delegate method fired when the <see cref="FilterTextBox"/> textbox's text changes.
+    /// Event delegate method fired when the <see cref="FilterTextBox"/> text box text changes.
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
@@ -247,7 +241,7 @@ namespace MySql.Notifier.Forms
     }
 
     /// <summary>
-    /// Event delegate method fired when the <see cref="FilterTextBox"/> textbox was validated.
+    /// Event delegate method fired when the <see cref="FilterTextBox"/> text box was validated.
     /// </summary>
     /// <param name="sender">Sender object.</param>
     /// <param name="e">Event arguments.</param>
@@ -304,7 +298,10 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void MonitorMySQLServerInstancesDialog_FormClosing(object sender, FormClosingEventArgs e)
     {
-      if (DialogResult != DialogResult.OK || SelectedWorkbenchConnection == null || WorkbenchConnectionsListView.SelectedItems.Count <= 0 || WorkbenchConnectionsListView.SelectedItems[0].Checked)
+      if (DialogResult != DialogResult.OK
+          || SelectedWorkbenchConnection == null
+          || WorkbenchConnectionsListView.SelectedItems.Count <= 0
+          || WorkbenchConnectionsListView.SelectedItems[0].Checked)
       {
         ResetChangeCursorDelegate(false);
         return;
@@ -354,7 +351,8 @@ namespace MySql.Notifier.Forms
     /// <param name="forceRefresh">Flag indicating if the refresh must be done although filters haven't changed.</param>
     private void RefreshMySqlInstancesList(bool forceRefresh)
     {
-      if (_lastServicesNameFilter != null && _lastServicesNameFilter != FilterTextBox.Text)
+      if (_lastServicesNameFilter != null
+          && _lastServicesNameFilter != FilterTextBox.Text)
       {
         _lastServicesNameFilter = FilterTextBox.Text;
       }

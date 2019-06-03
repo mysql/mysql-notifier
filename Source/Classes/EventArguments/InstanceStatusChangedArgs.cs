@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -16,7 +16,7 @@
 // 02110-1301  USA
 
 using System;
-using MySQL.Utility.Classes.MySQLWorkbench;
+using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes.EventArguments
 {
@@ -36,47 +36,33 @@ namespace MySql.Notifier.Classes.EventArguments
       OldInstanceStatus = oldInstanceStatus;
     }
 
+    #region Properties
+
     /// <summary>
     /// Gets the MySQL instance whose status changed.
     /// </summary>
-    public MySqlInstance Instance { get; private set; }
+    public MySqlInstance Instance { get; }
 
     /// <summary>
     /// Gets the new status of the instance.
     /// </summary>
-    public MySqlWorkbenchConnection.ConnectionStatusType NewInstanceStatus
-    {
-      get
-      {
-        return Instance.ConnectionStatus;
-      }
-    }
+    public MySqlWorkbenchConnection.ConnectionStatusType NewInstanceStatus => Instance.ConnectionStatus;
 
     /// <summary>
     /// Gets a description on the new status of this connection.
     /// </summary>
-    public string NewInstanceStatusText
-    {
-      get
-      {
-        return Instance.ConnectionStatusText;
-      }
-    }
+    public string NewInstanceStatusText => Instance.ConnectionStatusText;
 
     /// <summary>
     /// Gets the old status of the instance.
     /// </summary>
-    public MySqlWorkbenchConnection.ConnectionStatusType OldInstanceStatus { get; private set; }
+    public MySqlWorkbenchConnection.ConnectionStatusType OldInstanceStatus { get; }
 
     /// <summary>
     /// Gets a description on the old status of this connection.
     /// </summary>
-    public string OldInstanceStatusText
-    {
-      get
-      {
-        return MySqlWorkbenchConnection.GetConnectionStatusDisplayText(OldInstanceStatus);
-      }
-    }
+    public string OldInstanceStatusText => MySqlWorkbenchConnection.GetConnectionStatusDisplayText(OldInstanceStatus);
+
+    #endregion Properties
   }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -21,8 +21,8 @@ using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
-using MySQL.Utility.Classes.MySQL;
-using MySQL.Utility.Classes.MySQLWorkbench;
+using MySql.Utility.Classes.Logging;
+using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes
 {
@@ -33,21 +33,21 @@ namespace MySql.Notifier.Classes
   {
     #region Fields
 
-    private MySqlService _boundService;
+    private readonly MySqlService _boundService;
 
     private ToolStripMenuItem _configureMenu;
 
     private ToolStripMenuItem _editorMenu;
 
-    private ToolStripMenuItem _restartMenu;
+    private readonly ToolStripMenuItem _restartMenu;
 
-    private ToolStripSeparator _separator;
+    private readonly ToolStripSeparator _separator;
 
-    private ToolStripMenuItem _startMenu;
+    private readonly ToolStripMenuItem _startMenu;
 
-    private ToolStripMenuItem _statusMenu;
+    private readonly ToolStripMenuItem _statusMenu;
 
-    private ToolStripMenuItem _stopMenu;
+    private readonly ToolStripMenuItem _stopMenu;
 
     #endregion Fields
 
@@ -60,7 +60,7 @@ namespace MySql.Notifier.Classes
       MenuItemsQuantity = 0;
       _boundService = mySqlBoundService;
 
-      _statusMenu = new ToolStripMenuItem(string.Format("{0} - {1}", _boundService.DisplayName, _boundService.Status))
+      _statusMenu = new ToolStripMenuItem($"{_boundService.DisplayName} - {_boundService.Status}")
       {
         Tag = _boundService.ServiceId
       };
@@ -73,40 +73,35 @@ namespace MySql.Notifier.Classes
       }
 
       _separator = new ToolStripSeparator();
-
       var menuItemFont = new Font(_statusMenu.Font, FontStyle.Bold);
       _statusMenu.Font = menuItemFont;
-
       _startMenu = new ToolStripMenuItem(Resources.StartText, Resources.play);
       _startMenu.Click += start_Click;
-
       _stopMenu = new ToolStripMenuItem(Resources.StopText, Resources.stop);
       _stopMenu.Click += stop_Click;
-
       _restartMenu = new ToolStripMenuItem(Resources.RestartText, Resources.restart);
       _restartMenu.Click += restart_Click;
-
       Update();
     }
 
-    public string BoundServiceName
-    {
-      get { return _boundService.ServiceName; }
-    }
+    #region Properties
+
+    public string BoundServiceName => _boundService.ServiceName;
 
     public int MenuItemsQuantity { get; private set; }
+
+    #endregion Properties
 
     /// <summary>
     /// Finds the menu item's index within a context menu strip corresponding to the menu item with the given text.
     /// </summary>
     /// <param name="menu"><see cref="ContextMenuStrip"/> containing the itemText to find.</param>
     /// <param name="menuItemId">Menu item ID.</param>
-    /// <returns>Index of the dound menu itemText, -1 if  not found.</returns>
+    /// <returns>Index of the found menu itemText, -1 if  not found.</returns>
     public static int FindMenuItemWithinMenuStrip(ContextMenuStrip menu, string menuItemId)
     {
-      int index = -1;
-
-      for (int i = 0; i < menu.Items.Count; i++)
+      var index = -1;
+      for (var i = 0; i < menu.Items.Count; i++)
       {
         if (menu.Items[i].Tag == null || !menu.Items[i].Tag.Equals(menuItemId))
         {
@@ -166,7 +161,7 @@ namespace MySql.Notifier.Classes
     /// <returns>A new ToolStripMenuItem object</returns>
     public static ToolStripMenuItem ToolStripMenuItemWithHandler(string displayText, Image image, EventHandler eventHandler, bool enable)
     {
-      return ToolStripMenuItemWithHandler(displayText, String.Format("mnu{0}", displayText.Replace(" ", String.Empty)), image, eventHandler, enable);
+      return ToolStripMenuItemWithHandler(displayText, $"mnu{displayText.Replace(" ", string.Empty)}", image, eventHandler, enable);
     }
 
     /// <summary>
@@ -216,8 +211,8 @@ namespace MySql.Notifier.Classes
       }
       else
       {
-        int index = FindMenuItemWithinMenuStrip(menu, _boundService.Host.MachineId);
-        int servicesMenusCount = _boundService.Host.Services != null ? _boundService.Host.Services.Sum(s => s != _boundService && s.MenuGroup != null ? s.MenuGroup.MenuItemsQuantity : 0) : 0;
+        var index = FindMenuItemWithinMenuStrip(menu, _boundService.Host.MachineId);
+        var servicesMenusCount = _boundService.Host.Services?.Sum(s => s != _boundService && s.MenuGroup != null ? s.MenuGroup.MenuItemsQuantity : 0) ?? 0;
         index += servicesMenusCount;
         if (index < 0)
         {
@@ -281,8 +276,7 @@ namespace MySql.Notifier.Classes
         }
 
         _boundService.FindMatchingWbConnections();
-
-        int index = FindMenuItemWithinMenuStrip(menu, _boundService.ServiceId);
+        var index = FindMenuItemWithinMenuStrip(menu, _boundService.ServiceId);
         if (index < 0)
         {
           return;
@@ -337,9 +331,9 @@ namespace MySql.Notifier.Classes
       }
       else
       {
-        string[] menuItems = new string[4];
+        var menuItems = new string[4];
 
-        if (_boundService == null || _boundService.StartupParameters == null)
+        if (_boundService?.StartupParameters == null)
         {
           return;
         }
@@ -357,7 +351,7 @@ namespace MySql.Notifier.Classes
           menuItems[1] = _statusMenu.Text;
         }
 
-        int index = FindMenuItemWithinMenuStrip(menu, _boundService.ServiceId);
+        var index = FindMenuItemWithinMenuStrip(menu, _boundService.ServiceId);
         if (index <= 0)
         {
           return;
@@ -369,7 +363,7 @@ namespace MySql.Notifier.Classes
           menu.Items[index - 1].Visible = menu.Items[index + 1].BackColor != SystemColors.MenuText;
         }
 
-        foreach (int plusItem in from item in menuItems where !string.IsNullOrEmpty(item) select item.Equals(_statusMenu.Text) ? 0 : 1)
+        foreach (var plusItem in from item in menuItems where !string.IsNullOrEmpty(item) select item.Equals(_statusMenu.Text) ? 0 : 1)
         {
           menu.Items.RemoveAt(index + plusItem);
         }
@@ -390,7 +384,7 @@ namespace MySql.Notifier.Classes
       }
       else
       {
-        _statusMenu.Text = String.Format("{0} - {1}", _boundService.DisplayName, _boundService.Status);
+        _statusMenu.Text = $@"{_boundService.DisplayName} - {_boundService.Status}";
         Image image = null;
         switch (_boundService.Status)
         {
@@ -430,7 +424,7 @@ namespace MySql.Notifier.Classes
           _configureMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement;
         }
 
-        bool actionMenusAvailable = _boundService.Host.IsOnline;
+        var actionMenusAvailable = _boundService.Host.IsOnline;
         if (actionMenusAvailable && _statusMenu.DropDownItems.Count == 0)
         {
           _statusMenu.DropDownItems.Add(_startMenu);
@@ -455,40 +449,13 @@ namespace MySql.Notifier.Classes
         try
         {
           // Free managed resources
-          if (_editorMenu != null)
-          {
-            _editorMenu.Dispose();
-          }
-
-          if (_restartMenu != null)
-          {
-            _restartMenu.Dispose();
-          }
-
-          if (_separator != null)
-          {
-            _separator.Dispose();
-          }
-
-          if (_startMenu != null)
-          {
-            _startMenu.Dispose();
-          }
-
-          if (_statusMenu != null)
-          {
-            _statusMenu.Dispose();
-          }
-
-          if (_stopMenu != null)
-          {
-            _stopMenu.Dispose();
-          }
-
-          if (_configureMenu != null)
-          {
-            _configureMenu.Dispose();
-          }
+          _editorMenu?.Dispose();
+          _restartMenu?.Dispose();
+          _separator?.Dispose();
+          _startMenu?.Dispose();
+          _statusMenu?.Dispose();
+          _stopMenu?.Dispose();
+          _configureMenu?.Dispose();
         }
         catch
         {
@@ -506,12 +473,12 @@ namespace MySql.Notifier.Classes
     {
       try
       {
-        MySqlWorkbenchServer server = MySqlWorkbench.Servers.FindByServiceName(_boundService.ServiceName);
+        var server = MySqlWorkbench.Servers.FindByServiceName(_boundService.ServiceName);
         MySqlWorkbench.LaunchConfigure(server);
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.FailureToLaunchWorkbench, true);
+        Logger.LogException(ex, true, Resources.FailureToLaunchWorkbench);
       }
     }
 
@@ -524,8 +491,11 @@ namespace MySql.Notifier.Classes
       _editorMenu.Click -= workbenchConnection_Clicked;
 
       // If there are no connections then we disable the SQL Editor menu.
-      _editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && _boundService.WorkbenchConnections != null && _boundService.WorkbenchConnections.Count > 0;
-      if (!_editorMenu.Enabled || _boundService.WorkbenchConnections == null)
+      _editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement
+                            && _boundService.WorkbenchConnections != null
+                            && _boundService.WorkbenchConnections.Count > 0;
+      if (!_editorMenu.Enabled
+          || _boundService.WorkbenchConnections == null)
       {
         return;
       }
@@ -574,7 +544,7 @@ namespace MySql.Notifier.Classes
         }
         else
         {
-          for (int x = 0; x < _editorMenu.DropDownItems.Count; x++)
+          for (var x = 0; x < _editorMenu.DropDownItems.Count; x++)
           {
             if (sender == _editorMenu.DropDownItems[x])
             {
@@ -585,7 +555,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        MySqlSourceTrace.WriteAppErrorToLog(ex, null, Resources.FailureToLaunchWorkbench, true);
+        Logger.LogException(ex, true, Resources.FailureToLaunchWorkbench);
       }
     }
   }

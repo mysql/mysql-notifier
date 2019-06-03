@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -18,29 +18,23 @@
 using System;
 using System.Reflection;
 using System.Windows.Forms;
-using MySQL.Utility.Classes;
-using MySQL.Utility.Classes.MySQLInstaller;
+using MySql.Utility.Classes;
+using MySql.Utility.Classes.MySqlInstaller;
 
 namespace MySql.Notifier.Forms
 {
   public partial class AboutDialog : Form
   {
-    private string[] Version
-    {
-      get
-      {
-        return Assembly.GetExecutingAssembly().GetName().Version.ToString().Split('.');
-      }
-    }
+    private string[] Version => Assembly.GetExecutingAssembly().GetName().Version.ToString().Split('.');
 
     public AboutDialog()
     {
       InitializeComponent();
-      NotifierVersionLabel.Text = string.Format("{0} {1}.{2}.{3}", AssemblyInfo.AssemblyTitle, Version[0], Version[1], Version[2]);
+      NotifierVersionLabel.Text = $@"{AssemblyInfo.AssemblyTitle} {Version[0]}.{Version[1]}.{Version[2]}";
       if (MySqlInstaller.IsInstalled)
       {
         var installerVersion = MySqlInstaller.Version.Split('.');
-        InstallerVersionLabel.Text = string.Format("MySQL Installer {0}.{1}", installerVersion[0], installerVersion[1]);
+        InstallerVersionLabel.Text = $@"MySQL Installer {installerVersion[0]}.{installerVersion[1]}";
       }
     }
 
