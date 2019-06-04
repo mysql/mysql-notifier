@@ -560,4 +560,7 @@ Please make sure the connections.xml file is not open by another program.</value
   <data name="SetServiceErrorDetail" xml:space="preserve">
     <value>Error setting parameters for Service '{0}'.</value>
   </data>
+  <data name="OperationCancelledByUser" xml:space="preserve">
+    <value>The operation was canceled by the user</value>
+  </data>
 </root>

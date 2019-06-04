@@ -864,15 +864,25 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void LaunchInstallerItem_Click(object sender, EventArgs e)
     {
-      var path = MySqlInstaller.Path;
-      if (string.IsNullOrEmpty(path))
+      try
       {
-        // This should not happen since our menu itemText is enabled
-        return;
+        var startInfo = new ProcessStartInfo { FileName = MySqlInstaller.ExeFilePath };
+        Process.Start(startInfo);
       }
+      catch (Win32Exception win32Ex)
+      {
+        if (win32Ex.Message.Equals(Resources.OperationCancelledByUser, StringComparison.OrdinalIgnoreCase))
+        {
+          // Do nothing, the user cancelled the UAT prompt, so the error is expected.
+          return;
+        }
 
-      var startInfo = new ProcessStartInfo { FileName = $@"{path}\MySQLInstaller.exe"};
-      Process.Start(startInfo);
+        Logger.LogException(win32Ex, true);
+      }
+      catch (Exception ex)
+      {
+        Logger.LogException(ex, true);
+      }
     }
 
     /// <summary>

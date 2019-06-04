@@ -1,3 +1,8 @@
+1.1.8
+- Fixed the display of an unhandled exception when the user does not accept the UAT dialog shown when launching MySQL Installer. If the user
+  cancels nothing happens, but if any other exception happens when launching it is displayed to users and logged.
+  (MySQL Bug #86738, Bug #26301469 - UNHANDLED EXCEPTION)
+
 1.1.7
 - Enhanced the logic that migrates stored MySQL connections to the MySQL Workbench connections.xml file. In previous versions the migration was
   offered and if not done at that moment, the dialog to migrate was shown again periodically, but there was no way to choose to remain storing

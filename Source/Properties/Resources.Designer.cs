@@ -930,6 +930,15 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The operation was canceled by the user.
+        /// </summary>
+        internal static string OperationCancelledByUser {
+            get {
+                return ResourceManager.GetString("OperationCancelledByUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Options....
         /// </summary>
         internal static string OptionsMenuText {
