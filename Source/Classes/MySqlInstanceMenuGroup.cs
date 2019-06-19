@@ -217,15 +217,15 @@ namespace MySql.Notifier.Classes
           SqlEditorMenuItem.DropDownItems.Clear();
         }
 
+        SqlEditorMenuItem.Enabled = BoundInstance.WorkbenchConnection != null
+                                    || BoundInstance.RelatedConnections.Count > 1;
+
         // If there are 0 or 1 connections then the single menu will suffice.
         if (BoundInstance.RelatedConnections.Count <= 1)
         {
-          SqlEditorMenuItem.Enabled = true;
           SqlEditorMenuItem.Click += SqlEditorMenuItem_Click;
           return;
         }
-
-        SqlEditorMenuItem.Enabled = false;
 
         // We have more than 1 connection so we create a submenu.
         foreach (var conn in BoundInstance.RelatedConnections)

@@ -901,6 +901,16 @@ namespace MySql.Notifier.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap NotifierSecurityImage {
+            get {
+                object obj = ResourceManager.GetObject("NotifierSecurityImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap NotifierWarningImage {
             get {
                 object obj = ResourceManager.GetObject("NotifierWarningImage", resourceCulture);

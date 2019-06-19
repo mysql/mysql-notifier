@@ -563,4 +563,7 @@ Please make sure the connections.xml file is not open by another program.</value
   <data name="OperationCancelledByUser" xml:space="preserve">
     <value>The operation was canceled by the user</value>
   </data>
+  <data name="NotifierSecurityImage" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MySQLNotifier_SecurityImage.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

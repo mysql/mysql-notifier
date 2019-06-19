@@ -276,15 +276,12 @@
     <None Include="Resources\SplashScreen.png" />
     <None Include="Resources\RefreshStatus.png" />
     <None Include="Resources\refresh.png" />
-    <None Include="Resources\NotifierSplashWindow.png" />
     <None Include="Resources\delete.png" />
     <None Include="Resources\CancelRefresh.png" />
     <None Include="Resources\edit.png" />
-    <Content Include="Resources\iconDB.jpg" />
     <None Include="Resources\stop.png" />
     <None Include="Resources\play.png" />
     <Content Include="Resources\LaunchUtilities.png" />
-    <Content Include="Resources\logo-mysql.png" />
     <None Include="Resources\NotifierIconStoppedAlert.png" />
     <None Include="Resources\NotifierIconStartingAlert.png" />
     <None Include="Resources\NotifierIconRunningAlert.png" />
@@ -302,7 +299,7 @@
     <None Include="Resources\MySQLNotifier_Starting_Strong.png" />
     <None Include="Resources\MySQLNotifier_Stopped_Alert_Strong.png" />
     <None Include="Resources\MySQLNotifier_Stopped_Strong.png" />
-    <Content Include="Resources\mySQL_Dock_Icon_by_Presto_X.png" />
+    <None Include="Resources\MySQLNotifier_SecurityImage.png" />
     <None Include="Resources\signal-yellow.gif" />
   </ItemGroup>
   <ItemGroup />

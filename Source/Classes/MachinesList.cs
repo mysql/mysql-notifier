@@ -212,7 +212,7 @@ namespace MySql.Notifier.Classes
     }
 
     /// <summary>
-    /// Performs load operations that had to be done after the settings file was de-serialized.
+    /// Performs load operations that have to be done after the settings file was de-serialized.
     /// </summary>
     public void InitialLoad()
     {
@@ -221,15 +221,46 @@ namespace MySql.Notifier.Classes
       OnMachineListChanged(LocalMachine, ListChangeType.AutoAdd);
       RecreateInvalidScheduledTask();
       MigrateOldServices();
+      AutoAddLocalServices();
       if (!Settings.Default.FirstRun)
       {
         return;
       }
 
       CreateScheduledTask();
-      AutoAddLocalServices();
       Settings.Default.FirstRun = false;
       SaveToFile();
+    }
+
+    /// <summary>
+    /// Checks if a Workbench connection is being monitored already by a <see cref="MySqlService"/> in any of the <see cref="Machines"/>.
+    /// </summary>
+    /// <param name="connection">A Workbench connection to check for.</param>
+    /// <returns><c>true</c> if the connection is already being monitored, <c>false</c> otherwise.</returns>
+    public bool IsWorkbenchConnectionAlreadyMonitored(MySqlWorkbenchConnection connection)
+    {
+      if (connection == null)
+      {
+        return false;
+      }
+
+      foreach (var machine in Machines)
+      {
+        foreach (var mySqlService in machine.Services)
+        {
+          if (mySqlService.WorkbenchConnections == null)
+          {
+            continue;
+          }
+
+          if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Id == connection.Id))
+          {
+            return true;
+          }
+        }
+      }
+
+      return false;
     }
 
     /// <summary>
@@ -411,14 +442,16 @@ namespace MySql.Notifier.Classes
     }
 
     /// <summary>
-    /// Adds the local computer and local services found with a specific pattern specified by users.
+    /// Adds local services found with a specific pattern specified by users.
     /// </summary>
     private void AutoAddLocalServices()
     {
       // Verify if MySQL services are present on the local machine
       var autoAddPattern = Settings.Default.AutoAddPattern;
       var localServicesList = LocalMachine.GetWmiServices(autoAddPattern, true, false);
-      var servicesToAddList = localServicesList.Cast<ManagementObject>().Where(mo => mo != null && Service.IsRealMySqlService(mo.Properties["Name"].Value.ToString())).ToList();
+      var servicesToAddList = localServicesList.Cast<ManagementObject>().Where(mo => mo != null
+                                                                                     && Service.IsRealMySqlService(mo.Properties["Name"].Value.ToString())
+                                                                                     && !LocalMachine.ContainsServiceByName(mo.Properties["Name"].Value.ToString())).ToList();
 
       // If we found some services we will try to add the local machine to the list...
       if (servicesToAddList.Count <= 0)

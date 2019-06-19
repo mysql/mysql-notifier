@@ -194,7 +194,12 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private static void InitializeLogger()
     {
-      Logger.Initialize(EnvironmentApplicationDataDirectory + SETTINGS_DIRECTORY_RELATIVE_PATH, APP_NAME_NO_SPACES, false, false, APP_NAME_NO_SPACES);
+      Logger.Initialize(EnvironmentApplicationDataDirectory + SETTINGS_DIRECTORY_RELATIVE_PATH,
+                        APP_NAME_NO_SPACES,
+                        false,
+                        false,
+                        APP_NAME_NO_SPACES,
+                        true);
       Logger.PrependUserNameToLogFileName = true;
     }
 
@@ -212,6 +217,14 @@ namespace MySql.Notifier.Classes
       MySqlWorkbench.LoadServers();
       MySqlInstaller.InstallerLegacyDllPath = InstallLocation;
       MySqlInstaller.LoadData();
+      InfoDialog.ApplicationName = AssemblyInfo.AssemblyTitle;
+      InfoDialog.SuccessLogo = Resources.ApplicationLogo;
+      InfoDialog.ErrorLogo = Resources.NotifierErrorImage;
+      InfoDialog.WarningLogo = Resources.NotifierWarningImage;
+      InfoDialog.InformationLogo = Resources.ApplicationLogo;
+      AutoStyleableBaseForm.HandleDpiSizeConversions = true;
+      PasswordDialog.ApplicationIcon = Resources.MySqlNotifierIcon;
+      PasswordDialog.SecurityLogo = Resources.NotifierSecurityImage;
     }
 
     /// <summary>

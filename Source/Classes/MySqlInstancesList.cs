@@ -20,9 +20,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Management;
 using MySql.Notifier.Classes.EventArguments;
+using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
+using MySql.Utility.Classes.MySql;
+using MySql.Utility.Classes.MySqlRouter;
 using MySql.Utility.Classes.MySqlWorkbench;
+using MySql.Utility.Forms;
 
 namespace MySql.Notifier.Classes
 {
@@ -311,6 +316,162 @@ namespace MySql.Notifier.Classes
     }
 
     #endregion IList implementation
+
+    /// <summary>
+    /// Loads from disk all <see cref="MySqlWorkbenchConnection"/>s.
+    /// </summary>
+    public static void LoadMySqlWorkbenchConnections()
+    {
+      MySqlWorkbench.Connections.Load(MySqlWorkbench.Connections == MySqlWorkbench.ExternalConnections
+                                      && MySqlWorkbench.ExternalApplicationsConnectionsFileRetryLoadOrRecreate);
+    }
+
+    /// <summary>
+    /// Adds a <see cref="MySqlWorkbenchConnection"/> to the list of monitored instances.
+    /// </summary>
+    /// <param name="connection">A <see cref="MySqlWorkbenchConnection"/> instance.</param>
+    /// <returns>
+    /// A tuple with a <see cref="MySqlInstance"/> that was already being monitored and the given connection was one of its related connections or a new one otherwise,
+    /// and a flag indicating if the <see cref="MySqlInstance"/> is an existing one (<c>true</c>) or if it was created (<c>false</c>).
+    /// </returns>
+    public Tuple<MySqlInstance, bool> AddConnectionToMonitor(MySqlWorkbenchConnection connection)
+    {
+      if (connection == null
+          || IsWorkbenchConnectionAlreadyMonitored(connection))
+      {
+        return null;
+      }
+
+      // Refresh the connection status if its status is unknown
+      if (connection.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.Unknown)
+      {
+        connection.TestConnectionSilently(out _);
+      }
+
+      var connectionAlreadyInInstance = false;
+      var instance = InstancesList.FirstOrDefault(inst => inst.RelatedConnections.Exists(conn => conn.Id == connection.Id));
+      if (instance != null)
+      {
+        // The connection exists for an already monitored instance but it is not its main connection, so replace the main connection with this one.
+        instance.WorkbenchConnection = connection;
+        connectionAlreadyInInstance = true;
+      }
+      else
+      {
+        // The connection is not in an already monitored instance, so create a new instance and add it to the collection.
+        instance = new MySqlInstance(connection);
+        Add(instance);
+      }
+
+      var instanceAndAlreadyInList = new Tuple<MySqlInstance, bool>(instance, connectionAlreadyInInstance);
+      return instanceAndAlreadyInList;
+    }
+
+    /// <summary>
+    /// Adds MySQL Server instances automatically.
+    /// </summary>
+    public void AutoAddLocalInstances()
+    {
+      // Add router service instance
+      using (var localMachine = new Machine())
+      {
+        var filteredServices = localMachine.GetWmiServices(RouterStartupParameters.DEFAULT_ROUTER_SERVICE_DISPLAY_NAME, true, false);
+        var routerService = filteredServices.Cast<ManagementObject>().FirstOrDefault(mo => mo != null
+                                                                                           && string.Equals(mo.Properties["DisplayName"].Value.ToString(), RouterStartupParameters.DEFAULT_ROUTER_SERVICE_DISPLAY_NAME, StringComparison.OrdinalIgnoreCase));
+        if (routerService != null
+            && !InstancesList.Any(instance => instance.WorkbenchConnection != null
+                                              && string.Equals(instance.WorkbenchConnection.Name, RouterStartupParameters.DEFAULT_WORKBENCH_CONNECTION_NAME, StringComparison.OrdinalIgnoreCase)))
+        {
+          var routerServiceStatusText = routerService.Properties["State"].Value.ToString();
+          MySqlService.GetStatusFromText(routerServiceStatusText, out var routerServiceStatus);
+          var testConnection = routerServiceStatus == MySqlServiceStatus.Running;
+
+          // Refresh connections from disk.
+          LoadMySqlWorkbenchConnections();
+
+          // Check if there is already a "Local Instance MySQL Router" connection automatically created by MySQL Workbench, if so load that one.
+          var routerConnection = MySqlWorkbench.Connections.FirstOrDefault(conn => conn.Name.Equals(RouterStartupParameters.DEFAULT_WORKBENCH_CONNECTION_NAME, StringComparison.OrdinalIgnoreCase));
+          if (routerConnection != null)
+          {
+            // If the connection was created by Workbench, it may have the incorrect data, so test it.
+            if (routerConnection.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.Unknown
+                && testConnection)
+            {
+              routerConnection.TestConnectionSilently(out _);
+            }
+
+            if (routerConnection.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections)
+            {
+              var routerParams = RouterStartupParameters.GetStartupParameters();
+              if (routerParams != null)
+              {
+                var hasChanges = false;
+                if (routerConnection.Port != routerParams.ClassicRwPort)
+                {
+                  hasChanges = true;
+                  routerConnection.Port = routerParams.ClassicRwPort;
+                }
+
+                if (!string.Equals(routerConnection.UserName, routerParams.Username, StringComparison.Ordinal))
+                {
+                  hasChanges = true;
+                  routerConnection.UserName = routerParams.Username;
+                }
+
+                if (routerConnection.ConnectionMethod != MySqlWorkbenchConnection.ConnectionMethodType.Tcp)
+                {
+                  hasChanges = true;
+                  routerConnection.ConnectionMethod = MySqlWorkbenchConnection.ConnectionMethodType.Tcp;
+                }
+
+                if (string.IsNullOrEmpty(routerConnection.Password)
+                    && string.Equals(routerConnection.UserName, MySqlServerUser.ROOT_USERNAME, StringComparison.Ordinal))
+                {
+                  using (var passwordDialog = new PasswordDialog(routerConnection, testConnection, false))
+                  {
+                    // If the user types in a password, it's automatically assigned to the connection.
+                    passwordDialog.ShowDialog();
+                  }
+                }
+
+                if (hasChanges)
+                {
+                  routerConnection.SavedStatus = MySqlWorkbenchConnection.SavedStatusType.Updated;
+                  MySqlWorkbench.Connections.SaveConnection(routerConnection);
+                }
+              }
+            }
+
+            AddConnectionToMonitor(routerConnection);
+          }
+          else
+          {
+            // Create the Workbench connection and add it.
+            var routerParams = RouterStartupParameters.GetStartupParameters();
+            if (routerParams != null)
+            {
+              routerConnection = routerParams.GetWorkbenchConnection(true, true);
+              if (routerConnection != null)
+              {
+                AddConnectionToMonitor(routerConnection);
+                MySqlWorkbench.Connections.SaveConnection(routerConnection);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    /// <summary>
+    /// Checks if a Workbench connection is being monitored already by a <see cref="MySqlInstance"/>.
+    /// </summary>
+    /// <param name="connection">A Workbench connection to check for.</param>
+    /// <returns><c>true</c> if the connection is already being monitored, <c>false</c> otherwise.</returns>
+    public bool IsWorkbenchConnectionAlreadyMonitored(MySqlWorkbenchConnection connection)
+    {
+      return connection != null
+             && this.Any(mySqlInstance => mySqlInstance.RelatedConnections.Exists(wbConn => wbConn.Id == connection.Id));
+    }
 
     /// <summary>
     /// Refreshes the instances list and subscribes to events.

@@ -229,7 +229,7 @@ namespace MySql.Notifier.Classes
     /// Gets the parameters used to initialize a MySQL server instance.
     /// </summary>
     [XmlIgnore]
-    public MySqlStartupParameters StartupParameters { get; private set; }
+    public MySqlServerStartupParameters StartupParameters { get; private set; }
 
     /// <summary>
     /// Gets the current status of this service.
@@ -273,18 +273,33 @@ namespace MySql.Notifier.Classes
     #endregion Properties
 
     /// <summary>
+    /// Converts a service status text extracted from the Service's state property to a <see cref="MySqlServiceStatus"/> enumeration value.
+    /// </summary>
+    /// <param name="statusText">Service's state property text.</param>
+    /// <param name="convertedStatus">A <see cref="MySqlServiceStatus"/> enumeration value if a matching one was found.</param>
+    /// <returns>true if a matching enumeration value is found for the given status text, false otherwise.</returns>
+    public static bool GetStatusFromText(string statusText, out MySqlServiceStatus convertedStatus)
+    {
+      statusText = statusText.Replace(" ", string.Empty);
+      var parsed = Enum.TryParse(statusText, out convertedStatus);
+      return parsed;
+    }
+
+    /// <summary>
     /// Finds the related Workbench connections that connect to this MySQL service, only for services running on local computers.
     /// </summary>
     public void FindMatchingWbConnections()
     {
-      if (!Host.IsLocal || ServiceManagementObject == null)
+      if (!Host.IsLocal
+          || ServiceManagementObject == null)
       {
         return;
       }
 
       // Discover what StartupParameters we were started with for local connections
-      StartupParameters = MySqlStartupParameters.GetStartupParameters(new ServiceController(ServiceName, Host.Name));
-      if (string.IsNullOrEmpty(StartupParameters.HostName) || !StartupParameters.IsRealMySqlService)
+      StartupParameters = MySqlServerStartupParameters.GetStartupParameters(new ServiceController(ServiceName, Host.Name));
+      if (string.IsNullOrEmpty(StartupParameters.HostName)
+          || !StartupParameters.IsRealMySqlService)
       {
         return;
       }
@@ -373,10 +388,10 @@ namespace MySql.Notifier.Classes
         // Set the new status since it is different to the previous status.
         SetStatus(newStatusText);
       }
-      else if (MenuGroup != null)
+      else
       {
         // Force the update of the UI even if the previous status is the same as the new status.
-        MenuGroup.Update();
+        MenuGroup?.Update();
       }
     }
 
@@ -493,19 +508,6 @@ namespace MySql.Notifier.Classes
       worker.DoWork += WorkerDoWork;
       worker.RunWorkerCompleted += WorkerRunWorkerCompleted;
       worker.RunWorkerAsync(action);
-    }
-
-    /// <summary>
-    /// Converts a service status text extracted from the Service's state property to a <see cref="MySqlServiceStatus"/> enumeration value.
-    /// </summary>
-    /// <param name="statusText">Service's state property text.</param>
-    /// <param name="convertedStatus">A <see cref="MySqlServiceStatus"/> enumeration value if a matching one was found.</param>
-    /// <returns>true if a matching enumeration value is found for the given status text, false otherwise.</returns>
-    private static bool GetStatusFromText(string statusText, out MySqlServiceStatus convertedStatus)
-    {
-      statusText = statusText.Replace(" ", string.Empty);
-      var parsed = Enum.TryParse(statusText, out convertedStatus);
-      return parsed;
     }
 
     /// <summary>

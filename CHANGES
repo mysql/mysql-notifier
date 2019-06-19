@@ -2,6 +2,10 @@
 - Fixed the display of an unhandled exception when the user does not accept the UAT dialog shown when launching MySQL Installer. If the user
   cancels nothing happens, but if any other exception happens when launching it is displayed to users and logged.
   (MySQL Bug #86738, Bug #26301469 - UNHANDLED EXCEPTION)
+- Added logic to automatically add a monitored MySQL Instance for a locally running MySQL Router Windows service when MySQL Notifier starts.
+  Also changed the behavior when automatically adding local MySQL Windows services to the monitoring list so every time Notifier is started
+  it checks if it needs to add newly added MySQL Windows services, as opposed to past behavior when this was done only the very first time
+  MySQL Notifer was run. (MySQL Bug #91518, Bug #28277456 - MYSQL NOTIFIER DOES NOT LIST ROUTER SERVICES)
 
 1.1.7
 - Enhanced the logic that migrates stored MySQL connections to the MySQL Workbench connections.xml file. In previous versions the migration was

@@ -135,9 +135,9 @@ namespace MySql.Notifier.Classes
     private ToolStripMenuItem _refreshStatusMenuItem;
     private ToolStripSeparator _refreshStatusSeparator;
     private FileSystemWatcher _serversFileWatcher;
-    private FileSystemWatcher _settingsFileWatcher;
+    private readonly FileSystemWatcher _settingsFileWatcher;
     private ContextMenuStrip _staticMenu;
-    private FileSystemWatcher _workbechAppDataDirWatcher;
+    private readonly FileSystemWatcher _workbenchAppDataDirWatcher;
 
     /// <summary>
     /// Background worker that performs the refresh of machines, services and MySQL instances.
@@ -159,7 +159,7 @@ namespace MySql.Notifier.Classes
       _manageItemsDialog = null;
       _migratingStoredConnections = false;
       _aboutDialog = null;
-      _workbechAppDataDirWatcher = null;
+      _workbenchAppDataDirWatcher = null;
       _serversFileWatcher = null;
       _connectionsFileWatcher = null;
       _settingsFileWatcher = null;
@@ -196,6 +196,7 @@ namespace MySql.Notifier.Classes
 
       // Setup instances list
       _mySqlInstancesList = new MySqlInstancesList();
+      _mySqlInstancesList.AutoAddLocalInstances();
       _mySqlInstancesList.InstanceStatusChanged += MySqlInstanceStatusChanged;
       _mySqlInstancesList.InstancesListChanged += MySqlInstancesListChanged;
       _mySqlInstancesList.InstanceConnectionStatusTestErrorThrown += MySqlInstanceConnectionStatusTestErrorThrown;
@@ -213,11 +214,11 @@ namespace MySql.Notifier.Classes
       StartGlobalTimer();
 
       // Monitor creation/deletion of the Workbench application data directory
-      _workbechAppDataDirWatcher = StartWatcherForFile(Program.EnvironmentApplicationDataDirectory + @"\MySQL\", WorkbenchAppDataDirectoryChanged);
+      _workbenchAppDataDirWatcher = StartWatcherForFile(Program.EnvironmentApplicationDataDirectory + @"\MySQL\", WorkbenchAppDataDirectoryChanged);
 
       // Create watcher for Workbench servers.xml and connections.xml files
       var wbDirArgs = new FileSystemEventArgs(MySqlWorkbench.IsInstalled ? WatcherChangeTypes.Created : WatcherChangeTypes.Deleted, MySqlWorkbench.WorkbenchDataDirectory, string.Empty);
-      WorkbenchAppDataDirectoryChanged(_workbechAppDataDirWatcher, wbDirArgs);
+      WorkbenchAppDataDirectoryChanged(_workbenchAppDataDirWatcher, wbDirArgs);
 
       // Create watcher for Notifier settings.config file
       _settingsFileWatcher = StartWatcherForFile(Program.EnvironmentApplicationDataDirectory + Program.SETTINGS_FILE_RELATIVE_PATH, SettingsFileChanged);
@@ -357,11 +358,11 @@ namespace MySql.Notifier.Classes
 
       // Turn off the watcher monitoring the %APPDATA% directory and save its state.
       var workbenchAppDataDirWatcherRaisingEvents = false;
-      if (_workbechAppDataDirWatcher != null
-          && _workbechAppDataDirWatcher.EnableRaisingEvents)
+      if (_workbenchAppDataDirWatcher != null
+          && _workbenchAppDataDirWatcher.EnableRaisingEvents)
       {
-        workbenchAppDataDirWatcherRaisingEvents = _workbechAppDataDirWatcher.EnableRaisingEvents;
-        _workbechAppDataDirWatcher.EnableRaisingEvents = false;
+        workbenchAppDataDirWatcherRaisingEvents = _workbenchAppDataDirWatcher.EnableRaisingEvents;
+        _workbenchAppDataDirWatcher.EnableRaisingEvents = false;
       }
 
       // Turn off the watcher monitoring the Workbench's connections.xml file and save its state.
@@ -407,9 +408,9 @@ namespace MySql.Notifier.Classes
       Settings.Default.Save();
 
       // Revert the status of the watcher monitoring the %APPDATA% directory if needed.
-      if (_workbechAppDataDirWatcher != null && workbenchAppDataDirWatcherRaisingEvents)
+      if (_workbenchAppDataDirWatcher != null && workbenchAppDataDirWatcherRaisingEvents)
       {
-        _workbechAppDataDirWatcher.EnableRaisingEvents = true;
+        _workbenchAppDataDirWatcher.EnableRaisingEvents = true;
       }
 
       // Revert the status of the watcher monitoring the Workbench's connections.xml file if needed.
@@ -529,7 +530,7 @@ namespace MySql.Notifier.Classes
       _mySqlInstancesList?.Dispose();
       _machinesList?.Dispose();
       _notifyIcon?.Dispose();
-      _workbechAppDataDirWatcher?.Dispose();
+      _workbenchAppDataDirWatcher?.Dispose();
       _connectionsFileWatcher?.Dispose();
       _serversFileWatcher?.Dispose();
       _settingsFileWatcher?.Dispose();

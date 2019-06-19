@@ -671,7 +671,7 @@ namespace MySql.Notifier.Classes
         case ListChangeType.AutoAdd:
           if (listChangeType == ListChangeType.AutoAdd
               || listChangeType == ListChangeType.AddByUser
-                 && GetServiceByName(service.ServiceName) == null)
+                 && !ContainsService(service))
           {
             service.NotifyOnStatusChange = Settings.Default.NotifyOfStatusChange;
             service.UpdateTrayIconOnStatusChange = true;
@@ -706,8 +706,18 @@ namespace MySql.Notifier.Classes
     /// Used to see if service is already on the list.
     /// </summary>
     /// <param name="service">MySQLService instance to look for.</param>
-    /// <returns>True if current machine contains it already.</returns>
+    /// <returns><c>true</c> if current machine contains it already, <c>false</c> otherwise.</returns>
     public bool ContainsService(MySqlService service)
+    {
+      return ContainsServiceByName(service.ServiceName);
+    }
+
+    /// <summary>
+    /// Used to see if service is already on the list.
+    /// </summary>
+    /// <param name="serviceName">MySQLService instance name</param>
+    /// <returns><c>true</c> if current machine contains it already, <c>false</c> otherwise.</returns>
+    public bool ContainsServiceByName(string serviceName)
     {
       if (Services == null
           || Services.Count == 0)
@@ -715,7 +725,7 @@ namespace MySql.Notifier.Classes
         return false;
       }
 
-      return GetServiceByName(service.ServiceName) != null;
+      return GetServiceByName(serviceName) != null;
     }
 
     /// <summary>

@@ -272,23 +272,8 @@ namespace MySql.Notifier.Forms
     /// <returns><c>true</c> if the connection is already being monitored, <c>false</c> otherwise.</returns>
     private bool IsWorkbenchConnectionAlreadyMonitored(MySqlWorkbenchConnection connection)
     {
-      foreach (var machine in MachinesList.Machines)
-      {
-        foreach (var mySqlService in machine.Services)
-        {
-          if (mySqlService.WorkbenchConnections == null)
-          {
-            continue;
-          }
-
-          if (mySqlService.WorkbenchConnections.Exists(wbConn => wbConn.Id == connection.Id))
-          {
-            return true;
-          }
-        }
-      }
-
-      return MySqlInstancesList.Any(mySqlInstance => mySqlInstance.RelatedConnections.Exists(wbConn => wbConn.Id == connection.Id));
+      return MachinesList.IsWorkbenchConnectionAlreadyMonitored(connection)
+             || MySqlInstancesList.IsWorkbenchConnectionAlreadyMonitored(connection);
     }
 
     /// <summary>
@@ -360,7 +345,7 @@ namespace MySql.Notifier.Forms
       _lastShowMonitoredServices = ShowMonitoredInstancesCheckBox.Checked;
       if (forceRefresh)
       {
-        MySqlWorkbench.Connections.Load(MySqlWorkbench.Connections == MySqlWorkbench.ExternalConnections && MySqlWorkbench.ExternalApplicationsConnectionsFileRetryLoadOrRecreate);
+        MySqlInstancesList.LoadMySqlWorkbenchConnections();
       }
 
       RefreshMySqlInstancesList(_lastServicesNameFilter, _lastShowMonitoredServices);

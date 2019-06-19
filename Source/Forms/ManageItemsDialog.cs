@@ -334,43 +334,25 @@ namespace MySql.Notifier.Forms
         if (monitorInstancesDialog.ShowDialog() == DialogResult.OK)
         {
           selectedConnection = monitorInstancesDialog.SelectedWorkbenchConnection;
-          if (selectedConnection != null)
+          var mySqlInstanceAndExistingFlag = InstancesList.AddConnectionToMonitor(selectedConnection);
+          if (mySqlInstanceAndExistingFlag != null)
           {
-            var connectionAlreadyInInstance = false;
-
-            // If the selected connection exists for an already monitored instance but it is not its main connection, replace the main connection with this one.
-            foreach (var instance in InstancesList.Where(inst => inst.RelatedConnections.Exists(conn => conn.Id == selectedConnection.Id)))
+            var instance = mySqlInstanceAndExistingFlag.Item1;
+            var instanceAlreadyExists = mySqlInstanceAndExistingFlag.Item2;
+            if (instanceAlreadyExists)
             {
-              if (selectedConnection.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.Unknown)
+              var correspondingListViewItem = MonitoredInstancesListView.Items.OfType<ListViewItem>().FirstOrDefault(lvi => lvi.Tag is MySqlInstance existingInstance
+                                                                                                                            && existingInstance == instance);
+              if (correspondingListViewItem != null)
               {
-                selectedConnection.TestConnectionSilently(out _);
+                correspondingListViewItem.Text = instance.HostIdentifier;
+                correspondingListViewItem.SubItems[1].Text = instance.WorkbenchConnection.ConnectionMethod.GetDescription();
+                correspondingListViewItem.SubItems[2].Text = instance.ConnectionStatusText;
               }
-
-              instance.WorkbenchConnection = selectedConnection;
-              connectionAlreadyInInstance = true;
-              foreach (ListViewItem lvi in MonitoredInstancesListView.Items)
-              {
-                var existingInstance = lvi.Tag as MySqlInstance;
-                if (existingInstance != instance)
-                {
-                  continue;
-                }
-
-                lvi.Text = instance.HostIdentifier;
-                lvi.SubItems[1].Text = instance.WorkbenchConnection.ConnectionMethod.GetDescription();
-                lvi.SubItems[2].Text = instance.ConnectionStatusText;
-                break;
-              }
-
-              break;
             }
-
-            if (!connectionAlreadyInInstance)
+            else
             {
-              var newInstance = new MySqlInstance(selectedConnection);
-              InstancesList.Add(newInstance);
-              AddInstance(newInstance, true);
-              InstancesList.SaveToFile();
+              AddInstance(instance, true);
             }
           }
         }
