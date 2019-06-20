@@ -25,6 +25,7 @@ using System.Xml.Serialization;
 using MySql.Data.MySqlClient;
 using MySql.Notifier.Classes.EventArguments;
 using MySql.Utility.Classes;
+using MySql.Utility.Classes.MySql;
 using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes
@@ -198,7 +199,7 @@ namespace MySql.Notifier.Classes
     public delegate void InstanceStatusChangedEventHandler(object sender, InstanceStatusChangedArgs args);
 
     /// <summary>
-    /// Event ocurring when the status of the current instance changes.
+    /// Event occurring when the status of the current instance changes.
     /// </summary>
     public event InstanceStatusChangedEventHandler InstanceStatusChanged;
 
@@ -210,7 +211,7 @@ namespace MySql.Notifier.Classes
     public delegate void InstanceConnectionStatusTestErrorEventHandler(object sender, InstanceConnectionStatusTestErrorThrownArgs args);
 
     /// <summary>
-    /// Event ocurring when an error occurred during a connection status test.
+    /// Event occurring when an error occurred during a connection status test.
     /// </summary>
     public event InstanceConnectionStatusTestErrorEventHandler InstanceConnectionStatusTestErrorThrown;
 
@@ -246,7 +247,7 @@ namespace MySql.Notifier.Classes
     /// Gets an identifier for this instance composed of the host name and port normally.
     /// </summary>
     [XmlIgnore]
-    public string HostIdentifier => WorkbenchConnection != null ? WorkbenchConnection.HostIdentifier : string.Empty;
+    public string DisplayConnectionSummaryText => WorkbenchConnection != null ? WorkbenchConnection.DisplayConnectionSummaryText : string.Empty;
 
     /// <summary>
     /// Gets a value indicating whether a connection test is still ongoing.
@@ -354,23 +355,7 @@ namespace MySql.Notifier.Classes
           return _relatedConnections;
         }
 
-        _relatedConnections = new List<MySqlWorkbenchConnection>();
-        var isLocalInstance = MySqlWorkbenchConnection.IsHostLocal(HostName);
-        foreach (var workbenchConnection in MySqlWorkbench.Connections.Where(workbenchConnection => workbenchConnection.Port == Port))
-        {
-          if (string.IsNullOrEmpty(workbenchConnection.Host) && string.IsNullOrEmpty(HostName))
-          {
-            _relatedConnections.Add(workbenchConnection);
-            continue;
-          }
-
-          if (workbenchConnection.IsLocalConnection && isLocalInstance
-              || string.Equals(workbenchConnection.Host, HostName, StringComparison.OrdinalIgnoreCase))
-          {
-            _relatedConnections.Add(workbenchConnection);
-          }
-        }
-
+        _relatedConnections = MySqlWorkbench.Connections.GetSimilarConnections(WorkbenchConnection);
         return _relatedConnections;
       }
     }
@@ -420,13 +405,7 @@ namespace MySql.Notifier.Classes
         // If the connection is null maybe it was not found anymore so we fallback to use the first found related connection.
         _workbenchConnection = value ?? RelatedConnections.FirstOrDefault();
 
-        if (_workbenchConnection != null)
-        {
-          _workbenchConnectionId = _workbenchConnection.Id;
-          HostName = _workbenchConnection.Host;
-          Port = _workbenchConnection.Port;
-        }
-
+        SetHostAndPortFromWorkbenchConnection();
         SetupMenuGroup();
         OnPropertyChanged(nameof(WorkbenchConnection));
       }
@@ -642,6 +621,25 @@ namespace MySql.Notifier.Classes
           OnInstanceStatusTestErrorThrown(ex);
           break;
       }
+    }
+
+    /// <summary>
+    /// Sets the <seealso cref="HostName"/> and <seealso cref="Port"/> values from the <seealso cref="_workbenchConnection"/>;
+    /// </summary>
+    private void SetHostAndPortFromWorkbenchConnection()
+    {
+      if (_workbenchConnection == null)
+      {
+        return;
+      }
+
+      _workbenchConnectionId = _workbenchConnection.Id;
+      HostName = _workbenchConnection.IsSshConnection
+        ? _workbenchConnection.SshHostName
+        : _workbenchConnection.Host;
+      Port = _workbenchConnection.IsSshConnection
+        ? _workbenchConnection.SshPort
+        : _workbenchConnection.Port;
     }
 
     /// <summary>

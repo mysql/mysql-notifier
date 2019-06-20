@@ -161,7 +161,7 @@ namespace MySql.Notifier.Classes
           index = 0;
         }
 
-        InstanceMenuItem.Text = BoundInstance.HostIdentifier + @" - " + BoundInstance.ConnectionStatusText;
+        InstanceMenuItem.Text = $@"{BoundInstance.DisplayConnectionSummaryText} - {BoundInstance.ConnectionStatusText}";
         menu.Items.Insert(index++, InstanceMenuItem);
         if (BoundInstance.WorkbenchConnection != null)
         {
@@ -322,7 +322,10 @@ namespace MySql.Notifier.Classes
 
       else
       {
-        InstanceMenuItem.Text = BoundInstance.HostIdentifier + (refreshing ? Resources.RefreshingStatusText : " - " + BoundInstance.ConnectionStatusText);
+        var suffix = refreshing
+          ? Resources.RefreshingStatusText
+          : $" - {BoundInstance.ConnectionStatusText}";
+        InstanceMenuItem.Text = BoundInstance.DisplayConnectionSummaryText + suffix;
         switch (BoundInstance.ConnectionStatus)
         {
           case MySqlWorkbenchConnection.ConnectionStatusType.AcceptingConnections:

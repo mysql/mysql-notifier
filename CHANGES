@@ -1,4 +1,6 @@
 1.1.8
+- SSH tunneled connections can now created within MySQL Notifier or pulled from MySQL Workbench to be monitored.
+  (MySQL Bug #87079, Bug #26446338 - HIGH SEVERITY ERROR ON MYSQL NOTIFIER - UNHANDLED EXCEPTIONMETHOD NOT FOUND)
 - Fixed the display of an unhandled exception when the user does not accept the UAT dialog shown when launching MySQL Installer. If the user
   cancels nothing happens, but if any other exception happens when launching it is displayed to users and logged.
   (MySQL Bug #86738, Bug #26301469 - UNHANDLED EXCEPTION)

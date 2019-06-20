@@ -133,7 +133,10 @@ namespace MySql.Notifier.Forms
     /// <param name="setPage">Flag indicating if the Instances tab must be focused.</param>
     private void AddInstance(MySqlInstance instance, bool setPage)
     {
-      var newItem = new ListViewItem(instance.HostIdentifier) { Tag = instance };
+      var newItem = new ListViewItem(instance.DisplayConnectionSummaryText)
+      {
+        Tag = instance
+      };
       newItem.SubItems.Add(instance.WorkbenchConnection.ConnectionMethod.GetDescription());
       newItem.SubItems.Add(instance.ConnectionStatusText);
       MonitoredInstancesListView.Items.Add(newItem);
@@ -345,7 +348,7 @@ namespace MySql.Notifier.Forms
                                                                                                                             && existingInstance == instance);
               if (correspondingListViewItem != null)
               {
-                correspondingListViewItem.Text = instance.HostIdentifier;
+                correspondingListViewItem.Text = instance.DisplayConnectionSummaryText;
                 correspondingListViewItem.SubItems[1].Text = instance.WorkbenchConnection.ConnectionMethod.GetDescription();
                 correspondingListViewItem.SubItems[2].Text = instance.ConnectionStatusText;
               }

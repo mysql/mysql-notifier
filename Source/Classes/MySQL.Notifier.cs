@@ -1085,7 +1085,7 @@ namespace MySql.Notifier.Classes
     /// <param name="args">Event arguments.</param>
     private void MySqlInstanceConnectionStatusTestErrorThrown(object sender, InstanceConnectionStatusTestErrorThrownArgs args)
     {
-      ShowTooltip(true, Resources.ErrorTitle, string.Format(Resources.BalloonTextFailedStatusCheck, args.Instance.HostIdentifier, args.ErrorException.Message));
+      ShowTooltip(true, Resources.ErrorTitle, string.Format(Resources.BalloonTextFailedStatusCheck, args.Instance.DisplayConnectionSummaryText, args.ErrorException.Message));
       Logger.LogException(args.ErrorException, false, Resources.UpdateInstanceStatusError);
     }
 
@@ -1148,7 +1148,7 @@ namespace MySql.Notifier.Classes
           && args.Instance.MonitorAndNotifyStatus
           && Settings.Default.NotifyOfStatusChange)
       {
-        ShowTooltip(false, Resources.BalloonTitleInstanceStatus, string.Format(Resources.BalloonTextInstanceStatus, args.Instance.HostIdentifier, args.NewInstanceStatusText));
+        ShowTooltip(false, Resources.BalloonTitleInstanceStatus, string.Format(Resources.BalloonTextInstanceStatus, args.Instance.DisplayConnectionSummaryText, args.NewInstanceStatusText));
       }
 
       if (args.Instance.UpdateTrayIconOnStatusChange)

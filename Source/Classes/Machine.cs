@@ -29,6 +29,7 @@ using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
 using MySql.Utility.Classes;
 using MySql.Utility.Classes.Logging;
+using MySql.Utility.Classes.MySql;
 using MySql.Utility.Classes.MySqlWorkbench;
 using MySql.Utility.Forms;
 
@@ -155,7 +156,7 @@ namespace MySql.Notifier.Classes
     {
       _autoTestConnectionInterval = DEFAULT_AUTO_TEST_CONNECTION_INTERVAL;
       _autoTestConnectionIntervalUnitOfMeasure = DEFAULT_AUTO_TEST_CONNECTION_UOM;
-      _name = MySqlWorkbenchConnection.DEFAULT_HOSTNAME;
+      SetName(MySqlWorkbenchConnection.DEFAULT_HOSTNAME);
       _connectionStatus = ConnectionStatusType.Unknown;
       _connectionTestCancelled = false;
       _wmiConnectionOptions = null;
@@ -190,9 +191,7 @@ namespace MySql.Notifier.Classes
     public Machine(string name, string user, string password)
       : this()
     {
-      _name = MySqlWorkbenchConnection.IsHostLocal(name)
-        ? name
-        : name.ToUpper();
+      SetName(name);
       _connectionStatus = IsLocal
         ? ConnectionStatusType.Online
         : ConnectionStatusType.Unknown;
@@ -484,7 +483,7 @@ namespace MySql.Notifier.Classes
     /// Gets a value indicating whether the machine is a local host.
     /// </summary>
     [XmlIgnore]
-    public LocationType Location => MySqlWorkbenchConnection.IsHostLocal(Name) ? LocationType.Local : LocationType.Remote;
+    public LocationType Location { get; private set; }
 
     /// <summary>
     /// Gets or sets a unique ID for this machine.
@@ -508,7 +507,7 @@ namespace MySql.Notifier.Classes
       set
       {
         var oldName = _name;
-        _name = value;
+        SetName(value);
         if (string.Compare(oldName, _name, StringComparison.OrdinalIgnoreCase) != 0)
         {
           ConnectionStatus = IsLocal ? ConnectionStatusType.Online : ConnectionStatusType.Unknown;
@@ -1407,6 +1406,20 @@ namespace MySql.Notifier.Classes
 
       _workbenchWasInstalled = MySqlWorkbench.IsInstalled;
       WorkbenchInstallationChanged(remoteService);
+    }
+
+    /// <summary>
+    /// Runs some logic when setting the machine name.
+    /// </summary>
+    /// <param name="machineName"></param>
+    private void SetName(string machineName)
+    {
+      Location = MySqlServerInstance.IsHostLocal(machineName)
+        ? LocationType.Local
+        : LocationType.Remote;
+      _name = Location == LocationType.Local
+        ? machineName
+        : machineName.ToUpper();
     }
 
     /// <summary>
