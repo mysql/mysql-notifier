@@ -1,5 +1,5 @@
 1.1.8
-- SSH tunneled connections can now created within MySQL Notifier or pulled from MySQL Workbench to be monitored.
+- SSH tunneled connections can now be created within MySQL Notifier or pulled from MySQL Workbench to be monitored.
   (MySQL Bug #87079, Bug #26446338 - HIGH SEVERITY ERROR ON MYSQL NOTIFIER - UNHANDLED EXCEPTIONMETHOD NOT FOUND)
 - Fixed the display of an unhandled exception when the user does not accept the UAT dialog shown when launching MySQL Installer. If the user
   cancels nothing happens, but if any other exception happens when launching it is displayed to users and logged.
@@ -8,6 +8,8 @@
   Also changed the behavior when automatically adding local MySQL Windows services to the monitoring list so every time Notifier is started
   it checks if it needs to add newly added MySQL Windows services, as opposed to past behavior when this was done only the very first time
   MySQL Notifer was run. (MySQL Bug #91518, Bug #28277456 - MYSQL NOTIFIER DOES NOT LIST ROUTER SERVICES)
+- Fixed a bug in the detection of the "Run at Windows startup" setting and also a bug in the Options dialog that was applying changes even
+  when cancelling the dialog. (MySQL Bug #95250, Bug #29740645 - MYSQL NOTIFIER OPTIONS RUN AT WINDOWS STARTUP OPTION ISSUE)
 
 1.1.7
 - Enhanced the logic that migrates stored MySQL connections to the MySQL Workbench connections.xml file. In previous versions the migration was

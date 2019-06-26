@@ -62,12 +62,21 @@ namespace MySql.Notifier.Forms
       SetAutomaticMigrationDelayText();
     }
 
+    #region Properties
+
+    /// <summary>
+    /// Gets a value indicating whether the program is set to run at Windows startup.
+    /// </summary>
+    public bool RunAtStartUp { get; private set; }
+
     /// <summary>
     /// Gets a value indicating whether the <see cref="MigrateWorkbenchConnectionsButton"/> should be enabled.
     /// </summary>
     private bool MigrateConnectionsButtonEnabled => !Settings.Default.WorkbenchMigrationSucceeded &&
                                                     Settings.Default.WorkbenchMigrationLastAttempt != DateTime.MinValue &&
                                                     Settings.Default.WorkbenchMigrationRetryDelay != 0;
+
+    #endregion Properties
 
     /// <summary>
     /// Increases the width of the dialog in case the <see cref="AutomaticMigrationDelayLabel"/> gets too big.
@@ -132,9 +141,15 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void OptionsDialog_FormClosing(object sender, FormClosingEventArgs e)
     {
+      if (DialogResult == DialogResult.Cancel)
+      {
+        return;
+      }
+
       var updateTask = AutoCheckUpdatesCheckBox.Checked != Settings.Default.AutoCheckForUpdates
                         || Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(CheckUpdatesWeeksNumericUpDown.Value);
-      var deleteTask = !AutoCheckUpdatesCheckBox.Checked && Settings.Default.AutoCheckForUpdates;
+      var deleteTask = !AutoCheckUpdatesCheckBox.Checked
+                       && Settings.Default.AutoCheckForUpdates;
 
       Settings.Default.NotifyOfAutoServiceAddition = NotifyOfAutoAddCheckBox.Checked;
       Settings.Default.NotifyOfStatusChange = NotifyOfStatusChangeCheckBox.Checked;
@@ -145,7 +160,10 @@ namespace MySql.Notifier.Forms
       Settings.Default.AutoAddPattern = AutoAddRegexTextBox.Text.Trim();
       Settings.Default.UseColorfulStatusIcons = UseColorfulIconsCheckBox.Checked;
       Settings.Default.Save();
-      Utilities.SetRunAtStartUp(Application.ProductName, RunAtStartupCheckBox.Checked);
+      if (RunAtStartUp != RunAtStartupCheckBox.Checked)
+      {
+        Utilities.SetRunAtStartUp(Application.ProductName, RunAtStartupCheckBox.Checked);
+      }
 
       if (!updateTask)
       {
@@ -193,7 +211,8 @@ namespace MySql.Notifier.Forms
         UseColorfulIconsCheckBox.Checked = settings.UseColorfulStatusIcons;
       }
 
-      RunAtStartupCheckBox.Checked = Utilities.GetRunAtStartUp(Application.ProductName);
+      RunAtStartUp = Utilities.GetRunAtStartUp(Application.ProductName);
+      RunAtStartupCheckBox.Checked = RunAtStartUp;
     }
 
     /// <summary>
