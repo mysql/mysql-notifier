@@ -363,12 +363,7 @@ namespace MySql.Notifier.Classes
     {
       try
       {
-        MySqlWorkbenchServer server = null;
-        if (MySqlWorkbench.Servers.Any(s => s.ConnectionId == BoundInstance.WorkbenchConnectionId))
-        {
-          server = MySqlWorkbench.Servers.First(s => s.ConnectionId == BoundInstance.WorkbenchConnectionId);
-        }
-
+        var server = MySqlWorkbench.Servers.FirstOrDefault(s => s.ConnectionId == BoundInstance.WorkbenchConnectionId);
         MySqlWorkbench.LaunchConfigure(server);
       }
       catch (Exception ex)

@@ -10,6 +10,9 @@
   MySQL Notifer was run. (MySQL Bug #91518, Bug #28277456 - MYSQL NOTIFIER DOES NOT LIST ROUTER SERVICES)
 - Fixed a bug in the detection of the "Run at Windows startup" setting and also a bug in the Options dialog that was applying changes even
   when cancelling the dialog. (MySQL Bug #95250, Bug #29740645 - MYSQL NOTIFIER OPTIONS RUN AT WINDOWS STARTUP OPTION ISSUE)
+- Fixed the way MySQL Workbench is being opened to use a double-dash when using its command line options, so that it is opened on the right
+  server configuration page if an entry in Workbench's server_instances.xml file matches the service or instance being monitored.
+  (MySQL Bug #95715, Bug #29891284 - MANAGE INSTANCE OPTION DOES NOT OPEN WORKBENCH ON THE RIGHT PAGE)
 
 1.1.7
 - Enhanced the logic that migrates stored MySQL connections to the MySQL Workbench connections.xml file. In previous versions the migration was
