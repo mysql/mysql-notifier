@@ -17,7 +17,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Classes;
@@ -71,31 +70,6 @@ namespace MySql.Notifier.Forms
       SetDialogControlsAvailability();
     }
 
-    #region Enums
-
-    /// <summary>
-    /// Specifies the monitored item type.
-    /// </summary>
-    public enum MonitoredItemType
-    {
-      /// <summary>
-      /// Local or remote Windows service.
-      /// </summary>
-      Service = 0,
-
-      /// <summary>
-      /// MySQL server instance.
-      /// </summary>
-      MySqlInstance = 1,
-
-      /// <summary>
-      /// Default value.
-      /// </summary>
-      None = -1
-    }
-
-    #endregion Enums
-
     #region Properties
 
     /// <summary>
@@ -119,11 +93,21 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void AddButton_Click(object sender, EventArgs e)
     {
-      var screenPoint = AddButton.PointToScreen(new Point(AddButton.Left, AddButton.Bottom));
-      AddButtonContextMenuStrip.Show(AddButton,
-        screenPoint.Y + AddButtonContextMenuStrip.Size.Height > Screen.PrimaryScreen.WorkingArea.Height
-          ? new Point(0, -AddButtonContextMenuStrip.Size.Height)
-          : new Point(0, AddButton.Height));
+      switch (ItemsTabControl.SelectedIndex)
+      {
+        case 0:
+          // Services tab selected
+          AddServiceClick();
+          break;
+
+        case 1:
+          // Instances tab selected
+          AddInstanceClick();
+          break;
+
+        default:
+          return;
+      }
     }
 
     /// <summary>
@@ -147,6 +131,72 @@ namespace MySql.Notifier.Forms
 
       ItemsTabControl.SelectedIndex = 1;
       newItem.Selected = true;
+    }
+
+    /// <summary>
+    /// Performs logic when clicking the Add button for instances.
+    /// </summary>
+    private void AddInstanceClick()
+    {
+      Cursor.Current = Cursors.WaitCursor;
+      MonitoredServicesListView.BeginUpdate();
+      MySqlWorkbenchConnection selectedConnection = null;
+
+      using (var monitorInstancesDialog = new MonitorMySqlServerInstancesDialog(MachinesList, InstancesList))
+      {
+        if (monitorInstancesDialog.ShowDialog() == DialogResult.OK)
+        {
+          selectedConnection = monitorInstancesDialog.SelectedWorkbenchConnection;
+          var mySqlInstanceAndExistingFlag = InstancesList.AddConnectionToMonitor(selectedConnection);
+          if (mySqlInstanceAndExistingFlag != null)
+          {
+            var instance = mySqlInstanceAndExistingFlag.Item1;
+            var instanceAlreadyExists = mySqlInstanceAndExistingFlag.Item2;
+            if (instanceAlreadyExists)
+            {
+              var correspondingListViewItem = MonitoredInstancesListView.Items.OfType<ListViewItem>().FirstOrDefault(lvi => lvi.Tag is MySqlInstance existingInstance
+                                                                                                                            && existingInstance == instance);
+              if (correspondingListViewItem != null)
+              {
+                correspondingListViewItem.Text = instance.DisplayConnectionSummaryText;
+                correspondingListViewItem.SubItems[1].Text = instance.WorkbenchConnection.ConnectionMethod.GetDescription();
+                correspondingListViewItem.SubItems[2].Text = instance.ConnectionStatusText;
+              }
+            }
+            else
+            {
+              AddInstance(instance, true);
+            }
+          }
+        }
+
+        // Workbench connections may have been edited so we may need to refresh the items in the list.
+        foreach (ListViewItem lvi in MonitoredInstancesListView.Items)
+        {
+          if (!(lvi.Tag is MySqlInstance existingInstance)
+              || selectedConnection != null
+                 && existingInstance.WorkbenchConnection.Id == selectedConnection.Id)
+          {
+            continue;
+          }
+
+          var connectionInDisk = MySqlWorkbench.Connections.GetConnectionForId(existingInstance.WorkbenchConnection.Id);
+          if (connectionInDisk == null
+              || connectionInDisk.Equals(existingInstance.WorkbenchConnection))
+          {
+            continue;
+          }
+
+          lvi.Text = connectionInDisk.HostIdentifier;
+          lvi.SubItems[1].Text = connectionInDisk.ConnectionMethod.GetDescription();
+          lvi.SubItems[2].Text = connectionInDisk.ConnectionStatusText;
+        }
+
+        InstancesListChanged = monitorInstancesDialog.InstancesListChanged;
+      }
+
+      MonitoredServicesListView.EndUpdate();
+      Cursor.Current = Cursors.Default;
     }
 
     /// <summary>
@@ -180,6 +230,46 @@ namespace MySql.Notifier.Forms
 
       ItemsTabControl.SelectedIndex = 0;
       newItem.Selected = true;
+    }
+
+    /// <summary>
+    /// Performs logic when clicking the Add button for Services.
+    /// </summary>
+    private void AddServiceClick()
+    {
+      using (var dialog = new AddServiceDialog(MachinesList))
+      {
+        if (dialog.ShowDialog() == DialogResult.OK)
+        {
+          if (dialog.NewMachine != null && dialog.ServicesToAdd != null && dialog.ServicesToAdd.Count > 0)
+          {
+            NewMachine = MachinesList.GetMachineById(dialog.NewMachine.MachineId);
+            if (NewMachine == null)
+            {
+              MachinesList.ChangeMachine(dialog.NewMachine, ListChangeType.AddByUser);
+              NewMachine = dialog.NewMachine;
+            }
+
+            foreach (var service in dialog.ServicesToAdd)
+            {
+              if (NewMachine.ContainsService(service))
+              {
+                InfoDialog.ShowDialog(InfoDialogProperties.GetWarningDialogProperties(Resources.WarningText, Resources.ServiceAlreadyInListWarningText));
+              }
+              else
+              {
+                NewMachine.ChangeService(service, ListChangeType.AddByUser);
+                AddService(service, NewMachine, true);
+              }
+            }
+          }
+        }
+
+        if (dialog.HasChanges)
+        {
+          RefreshServicesAndInstancesListViews();
+        }
+      }
     }
 
     /// <summary>
@@ -322,74 +412,6 @@ namespace MySql.Notifier.Forms
     }
 
     /// <summary>
-    /// Event delegate method fired when the <see cref="MySQLInstanceToolStripMenuItem"/> context menu item is clicked.
-    /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="e">Event arguments.</param>
-    private void MySQLInstanceToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-      Cursor.Current = Cursors.WaitCursor;
-      MonitoredServicesListView.BeginUpdate();
-      MySqlWorkbenchConnection selectedConnection = null;
-
-      using (var monitorInstancesDialog = new MonitorMySqlServerInstancesDialog(MachinesList, InstancesList))
-      {
-        if (monitorInstancesDialog.ShowDialog() == DialogResult.OK)
-        {
-          selectedConnection = monitorInstancesDialog.SelectedWorkbenchConnection;
-          var mySqlInstanceAndExistingFlag = InstancesList.AddConnectionToMonitor(selectedConnection);
-          if (mySqlInstanceAndExistingFlag != null)
-          {
-            var instance = mySqlInstanceAndExistingFlag.Item1;
-            var instanceAlreadyExists = mySqlInstanceAndExistingFlag.Item2;
-            if (instanceAlreadyExists)
-            {
-              var correspondingListViewItem = MonitoredInstancesListView.Items.OfType<ListViewItem>().FirstOrDefault(lvi => lvi.Tag is MySqlInstance existingInstance
-                                                                                                                            && existingInstance == instance);
-              if (correspondingListViewItem != null)
-              {
-                correspondingListViewItem.Text = instance.DisplayConnectionSummaryText;
-                correspondingListViewItem.SubItems[1].Text = instance.WorkbenchConnection.ConnectionMethod.GetDescription();
-                correspondingListViewItem.SubItems[2].Text = instance.ConnectionStatusText;
-              }
-            }
-            else
-            {
-              AddInstance(instance, true);
-            }
-          }
-        }
-
-        // Workbench connections may have been edited so we may need to refresh the items in the list.
-        foreach (ListViewItem lvi in MonitoredInstancesListView.Items)
-        {
-          if (!(lvi.Tag is MySqlInstance existingInstance)
-              || selectedConnection != null
-                 && existingInstance.WorkbenchConnection.Id == selectedConnection.Id)
-          {
-            continue;
-          }
-
-          var connectionInDisk = MySqlWorkbench.Connections.GetConnectionForId(existingInstance.WorkbenchConnection.Id);
-          if (connectionInDisk == null
-              || connectionInDisk.Equals(existingInstance.WorkbenchConnection))
-          {
-            continue;
-          }
-
-          lvi.Text = connectionInDisk.HostIdentifier;
-          lvi.SubItems[1].Text = connectionInDisk.ConnectionMethod.GetDescription();
-          lvi.SubItems[2].Text = connectionInDisk.ConnectionStatusText;
-        }
-
-        InstancesListChanged = monitorInstancesDialog.InstancesListChanged;
-      }
-
-      MonitoredServicesListView.EndUpdate();
-      Cursor.Current = Cursors.Default;
-    }
-
-    /// <summary>
     /// Event delegate method fired when the <see cref="NotifyOnStatusChangeCheckBox"/> checked status changes.
     /// </summary>
     /// <param name="sender">Sender object.</param>
@@ -460,48 +482,6 @@ namespace MySql.Notifier.Forms
 
       // Revert cursor back to normal and paint changes in list.
       Cursor.Current = Cursors.Default;
-    }
-
-    /// <summary>
-    /// Event delegate method fired when the <see cref="ServiceToolStripMenuItem"/> context menu item is clicked.
-    /// </summary>
-    /// <param name="sender">Sender object.</param>
-    /// <param name="e">Event arguments.</param>
-    private void ServiceToolStripMenuItem_Click(object sender, EventArgs e)
-    {
-      using (var dialog = new AddServiceDialog(MachinesList))
-      {
-        if (dialog.ShowDialog() == DialogResult.OK)
-        {
-          if (dialog.NewMachine != null && dialog.ServicesToAdd != null && dialog.ServicesToAdd.Count > 0)
-          {
-            NewMachine = MachinesList.GetMachineById(dialog.NewMachine.MachineId);
-            if (NewMachine == null)
-            {
-              MachinesList.ChangeMachine(dialog.NewMachine, ListChangeType.AddByUser);
-              NewMachine = dialog.NewMachine;
-            }
-
-            foreach (var service in dialog.ServicesToAdd)
-            {
-              if (NewMachine.ContainsService(service))
-              {
-                InfoDialog.ShowDialog(InfoDialogProperties.GetWarningDialogProperties(Resources.WarningText, Resources.ServiceAlreadyInListWarningText));
-              }
-              else
-              {
-                NewMachine.ChangeService(service, ListChangeType.AddByUser);
-                AddService(service, NewMachine, true);
-              }
-            }
-          }
-        }
-
-        if (dialog.HasChanges)
-        {
-          RefreshServicesAndInstancesListViews();
-        }
-      }
     }
 
     /// <summary>

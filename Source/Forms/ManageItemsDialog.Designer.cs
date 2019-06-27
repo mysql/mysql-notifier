@@ -45,11 +45,7 @@ namespace MySql.Notifier.Forms
     /// </summary>
     private void InitializeComponent()
     {
-      this.components = new System.ComponentModel.Container();
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageItemsDialog));
-      this.AddButtonContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-      this.ServiceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-      this.MySQLInstanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
       this.CloseButton = new System.Windows.Forms.Button();
       this.ItemsTabControl = new System.Windows.Forms.TabControl();
       this.MonitoredServicesTabPage = new System.Windows.Forms.TabPage();
@@ -75,7 +71,6 @@ namespace MySql.Notifier.Forms
       this.MonitoredItemsLabel = new System.Windows.Forms.Label();
       this.ContentAreaPanel.SuspendLayout();
       this.CommandAreaPanel.SuspendLayout();
-      this.AddButtonContextMenuStrip.SuspendLayout();
       this.ItemsTabControl.SuspendLayout();
       this.MonitoredServicesTabPage.SuspendLayout();
       this.MonitoredInstancesTabPage.SuspendLayout();
@@ -104,28 +99,6 @@ namespace MySql.Notifier.Forms
       this.CommandAreaPanel.Controls.Add(this.CloseButton);
       this.CommandAreaPanel.Location = new System.Drawing.Point(0, 456);
       this.CommandAreaPanel.Size = new System.Drawing.Size(596, 45);
-      // 
-      // AddButtonContextMenuStrip
-      // 
-      this.AddButtonContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ServiceToolStripMenuItem,
-            this.MySQLInstanceToolStripMenuItem});
-      this.AddButtonContextMenuStrip.Name = "contextMenuStrip1";
-      this.AddButtonContextMenuStrip.Size = new System.Drawing.Size(164, 48);
-      // 
-      // ServiceToolStripMenuItem
-      // 
-      this.ServiceToolStripMenuItem.Name = "ServiceToolStripMenuItem";
-      this.ServiceToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
-      this.ServiceToolStripMenuItem.Text = "Windows Service";
-      this.ServiceToolStripMenuItem.Click += new System.EventHandler(this.ServiceToolStripMenuItem_Click);
-      // 
-      // MySQLInstanceToolStripMenuItem
-      // 
-      this.MySQLInstanceToolStripMenuItem.Name = "MySQLInstanceToolStripMenuItem";
-      this.MySQLInstanceToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
-      this.MySQLInstanceToolStripMenuItem.Text = "MySQL Instance";
-      this.MySQLInstanceToolStripMenuItem.Click += new System.EventHandler(this.MySQLInstanceToolStripMenuItem_Click);
       // 
       // CloseButton
       // 
@@ -378,13 +351,9 @@ namespace MySql.Notifier.Forms
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Manage Items";
       this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ManageItemsDialog_FormClosed);
-      this.Controls.SetChildIndex(this.ContentAreaPanel, 0);
-      this.Controls.SetChildIndex(this.FootnoteAreaPanel, 0);
-      this.Controls.SetChildIndex(this.CommandAreaPanel, 0);
       this.ContentAreaPanel.ResumeLayout(false);
       this.ContentAreaPanel.PerformLayout();
       this.CommandAreaPanel.ResumeLayout(false);
-      this.AddButtonContextMenuStrip.ResumeLayout(false);
       this.ItemsTabControl.ResumeLayout(false);
       this.MonitoredServicesTabPage.ResumeLayout(false);
       this.MonitoredInstancesTabPage.ResumeLayout(false);
@@ -396,10 +365,6 @@ namespace MySql.Notifier.Forms
     }
 
     #endregion
-
-    private System.Windows.Forms.ContextMenuStrip AddButtonContextMenuStrip;
-    private System.Windows.Forms.ToolStripMenuItem ServiceToolStripMenuItem;
-    private System.Windows.Forms.ToolStripMenuItem MySQLInstanceToolStripMenuItem;
     private System.Windows.Forms.TabControl ItemsTabControl;
     private System.Windows.Forms.TabPage MonitoredServicesTabPage;
     private System.Windows.Forms.ListView MonitoredServicesListView;

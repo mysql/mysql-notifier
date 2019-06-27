@@ -13,6 +13,10 @@
 - Fixed the way MySQL Workbench is being opened to use a double-dash when using its command line options, so that it is opened on the right
   server configuration page if an entry in Workbench's server_instances.xml file matches the service or instance being monitored.
   (MySQL Bug #95715, Bug #29891284 - MANAGE INSTANCE OPTION DOES NOT OPEN WORKBENCH ON THE RIGHT PAGE)
+- Changed the behavior of the "Add..." button of the "Manage Items" dialog, so when clicked it calls either the "Add Service" or the "Monitor
+  MySQL Server Instance" dialog depending on the currently selected tab page "Services" or "Instances". This is a more intuitive UX and removes
+  the need to click a context menu option when clicking "Add...".
+  (MySQL Bug #95638, Bug #29868378 - ADD AND DELETE BUTTON IN MANAGE ITEMS DIALOG ARE NOT CONSISTENT)
 
 1.1.7
 - Enhanced the logic that migrates stored MySQL connections to the MySQL Workbench connections.xml file. In previous versions the migration was
