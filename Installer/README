@@ -1,24 +1,18 @@
-MySQL Notifier 1.1
-
-This is a release of MySQL Notifier, Oracle's dual-
-license utility application for simple monitoring of MySQL
-servers on Windows.  For the avoidance of
-doubt, this particular copy of the software is released
-under the version 2 of the GNU General Public License.
-MySQL Notifier is brought to you by Oracle.
-
 Copyright (c) 2012, 2019, Oracle and/or its affiliates. All rights reserved.
 
-License information can be found in the COPYING file.
+This is a release of MySQL Notifier, an application for Windows that enables developers and DBAs to easily monitor, start and stop all their MySQL database instances.
+It provides a familiar Microsoft SQL Server look and feel, and integrates with MySQL Workbench and MySQL Installer.
 
-GPLv2 Disclaimer
-For the avoidance of doubt, except that if any license choice
-other than GPL or LGPL is available it will apply instead, 
-Oracle elects to use only the General Public License version 2 
-(GPLv2) at this time for any software where a choice of GPL 
-license versions is made available with the language indicating 
-that GPLv2 or any later version may be used, or where a choice 
-of which version of the GPL is applied is otherwise unspecified.
+License information can be found in the LICENSE file. 
+This distribution may include materials developed by third parties. For license 
+and attribution notices for these materials, please refer to the LICENSE file. 
 
-This software is OSI Certified Open Source Software.
-OSI Certified is a certification mark of the Open Source Initiative.
+For more information on MySQL Notifier visit
+https://www.mysql.com/why-mysql/windows/notifier/
+or
+https://dev.mysql.com/doc/refman/en/windows-notifier.html
+
+For additional downloads and the source of MySQL Notifier visit
+https://dev.mysql.com/downloads/windows/notifier/
+
+MySQL Notifier is brought to you by the MySQL team at Oracle.

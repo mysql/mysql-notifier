@@ -25,29 +25,27 @@
       NOT NEWERVERSIONDETECTED OR Installed
     </Condition>
 
-    <!-- First make sure that .NET is installed -->
-    <PropertyRef Id="NETFRAMEWORK40CLIENT"/>
-    <PropertyRef Id="NETFRAMEWORK40FULL"/>
-    <Condition Message="This application requires .NET Framework 4.0. Please install the .NET Framework then run this installer again.  For more information, please see http://go.microsoft.com/fwlink/?LinkId=181012">
-      <![CDATA[Installed OR NETFRAMEWORK40FULL OR NETFRAMEWORK40CLIENT]]>
+    <!-- Check if .NET FW 4.5.2 or greater is installed -->
+    <PropertyRef Id="WIX_IS_NETFRAMEWORK_452_OR_LATER_INSTALLED"/>
+    <Condition Message="This application requires .NET Framework 4.5.2. Please install the .NET Framework then run this installer again.  For more information, please see https://www.microsoft.com/en-us/download/details.aspx?id=42642">
+      <![CDATA[Installed OR WIX_IS_NETFRAMEWORK_452_OR_LATER_INSTALLED]]>
     </Condition>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder" Name='PFiles'>
-        <Directory Id='CompanyDir' Name='MySQL'>
+      <Directory Id="ProgramFilesFolder" Name="PFiles">
+        <Directory Id="CompanyDir" Name="MySQL">
           <Directory Id="INSTALLDIR" Name="$(var.ProductName)">
-            <Component Id='MainExecutable' Guid='1e9fb57a-62e3-45cf-a896-686e33407606'>
-              <File Id='MySqlNotifierEXE' Name='MySQLNotifier.exe' Source='..\Source\bin\Release\MySqlNotifier.exe' Vital='yes' />
-              <File Id='MySQLUtilityDll' Name='MySQL.Utility.dll' Source='..\Source\Lib\MySQL.Utility.dll' Vital='yes' />
-              <File Id='MySqlDataDll' Name='MySql.Data.dll' Source='..\Source\Lib\MySql.Data.dll' Vital='yes' />
-              <File Id='MySQLInstallerCore' Name='MySQLInstaller.Core.dll' Source='..\Source\Lib\MySQLInstaller.Core.dll' Vital='yes' />
-              <File Id='ReleaseNotes' Name='Release Notes.txt' Source='Release Notes.txt'/>
+            <Component Id="MainExecutable" Guid="1e9fb57a-62e3-45cf-a896-686e33407606">
+              <File Id="MySqlNotifierEXE" Name="MySQLNotifier.exe" Source="..\Source\bin\Release\MySqlNotifier.exe" Vital="yes" />
+              <File Id="MySQLUtilityDll" Name="MySQL.Utility.dll" Source="..\Source\Lib\MySQL.Utility.dll" Vital="yes" />
+              <File Id="MySqlDataDll" Name="MySql.Data.dll" Source="..\Source\Lib\MySql.Data.dll" Vital="yes" />
+              <File Id="ReleaseNotes" Name="Release Notes.txt" Source="Release Notes.txt"/>
               <?if $(var.IsGPL) = 1?>
-              <File Id='ReadMe' Name='README' Source='README' DiskId="1"/>
-              <File Id="COPYING" Name="COPYING" Source="COPYING" DiskId="1" />
+              <File Id="ReadMeGpl" Name="README" Source="README" DiskId="1"/>
+              <File Id="LicenseGpl" Name="LICENSE" Source="LICENSE" DiskId="1" />
               <?else?>
-              <File Id="README2" Name="README" Source="README-Commercial" DiskId="1"/>
-              <File Id="LICENSE" Name="LICENSE" Source="LICENSE" DiskId="1" />
+              <File Id="ReadMeCom" Name="README" Source="README-Commercial" DiskId="1"/>
+              <File Id="LicenseCom" Name="LICENSE" Source="LICENSE-Commercial" DiskId="1" />
               <?endif?>
               <RemoveFolder Id="INSTALLDIR" On="uninstall" />
             </Component>
@@ -56,7 +54,7 @@
       </Directory>
 
       <Directory Id="ProgramMenuFolder" Name="PMFolder">
-        <Directory Id='PMCompanyDir' Name='MySQL'>
+        <Directory Id="PMCompanyDir" Name="MySQL">
           <Directory Id="ShortCutDir" Name="$(var.ProductName)"/>
         </Directory>
       </Directory>

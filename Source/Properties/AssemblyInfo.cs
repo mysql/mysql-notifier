@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("MySQL Notifier")]
-[assembly: AssemblyDescription("MySQL Notifier is an application for Windows enables developers and DBAs to easily monitor, start and stop all their MySQL database instances. It provides a familiar Microsoft SQL Server look and feel and integrates with MySQL Workbench.")]
+[assembly: AssemblyDescription("MySQL Notifier is an application for Windows enables developers and DBAs to easily monitor, start and stop all their MySQL database instances. It provides a familiar Microsoft SQL Server look and feel, and integrates with MySQL Workbench and MySQL Installer.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Oracle Corporation")]
 [assembly: AssemblyProduct("MySQL Notifier")]
