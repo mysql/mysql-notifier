@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2016, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -17,26 +17,39 @@
 
 namespace MySql.Notifier.Enumerations
 {
+  /// <summary>
+  /// Specifies options to check for updates.
+  /// </summary>
   public enum SoftwareUpdateStatus
   {
     /// <summary>
     /// Not Available means the check for updates cannot be performed or failed when attempted.
     /// </summary>
-    NotAvailable = 0,
+    NotAvailable,
 
     /// <summary>
-    /// The check for updates is being performed.
+    /// Check updates for community products has been requested.
     /// </summary>
-    Checking = 1,
+    CheckForCommunity,
+
+    /// <summary>
+    /// Check updates for commercial products has been requested.
+    /// </summary>
+    CheckForCommercial,
+
+    /// <summary>
+    /// Check updates for community and commercial products has been requested.
+    /// </summary>
+    CheckForUpdates,
 
     /// <summary>
     /// There are available software updates online.
     /// </summary>
-    HasUpdates = 2,
+    HasUpdates,
 
     /// <summary>
-    /// The user has been notified if updates are available or if its software is up to date.
+    /// A notification has been sent about updates being available.
     /// </summary>
-    Notified = 4
+    Notified
   }
 }

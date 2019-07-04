@@ -103,7 +103,7 @@ namespace MySql.Notifier.Forms
     /// <param name="e">Event arguments.</param>
     private void AutoCheckUpdatesCheckBox_CheckedChanged(object sender, EventArgs e)
     {
-      CheckUpdatesWeeksNumericUpDown.Enabled = AutoCheckUpdatesCheckBox.Checked;
+      CheckUpdatesDaysNumericUpDown.Enabled = AutoCheckUpdatesCheckBox.Checked;
     }
 
     /// <summary>
@@ -147,14 +147,14 @@ namespace MySql.Notifier.Forms
       }
 
       var updateTask = AutoCheckUpdatesCheckBox.Checked != Settings.Default.AutoCheckForUpdates
-                        || Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(CheckUpdatesWeeksNumericUpDown.Value);
+                        || Settings.Default.CheckForUpdatesFrequency != Convert.ToInt32(CheckUpdatesDaysNumericUpDown.Value);
       var deleteTask = !AutoCheckUpdatesCheckBox.Checked
                        && Settings.Default.AutoCheckForUpdates;
 
       Settings.Default.NotifyOfAutoServiceAddition = NotifyOfAutoAddCheckBox.Checked;
       Settings.Default.NotifyOfStatusChange = NotifyOfStatusChangeCheckBox.Checked;
       Settings.Default.AutoCheckForUpdates = AutoCheckUpdatesCheckBox.Checked;
-      Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(CheckUpdatesWeeksNumericUpDown.Value);
+      Settings.Default.CheckForUpdatesFrequency = Convert.ToInt32(CheckUpdatesDaysNumericUpDown.Value);
       Settings.Default.PingServicesIntervalInSeconds = Convert.ToInt32(PingMonitoredInstancesNumericUpDown.Value);
       Settings.Default.AutoAddServicesToMonitor = AutoAddServicesCheckBox.Checked;
       Settings.Default.AutoAddPattern = AutoAddRegexTextBox.Text.Trim();
@@ -170,9 +170,10 @@ namespace MySql.Notifier.Forms
         return;
       }
 
-      if (Settings.Default.AutoCheckForUpdates && !string.IsNullOrEmpty(Program.InstallLocation))
+      if (Settings.Default.AutoCheckForUpdates
+          && !string.IsNullOrEmpty(Program.InstallLocation))
       {
-        Utilities.CreateScheduledTask(Classes.Notifier.DefaultTaskName, Classes.Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
+        Classes.Notifier.CreateScheduledTask();
       }
 
       if (deleteTask)
@@ -193,7 +194,7 @@ namespace MySql.Notifier.Forms
         NotifyOfAutoAddCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("NotifyOfAutoServiceAddition");
         NotifyOfStatusChangeCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("NotifyOfStatusChange");
         AutoCheckUpdatesCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("AutoCheckForUpdates");
-        CheckUpdatesWeeksNumericUpDown.Value = settings.GetPropertyDefaultValueByName<int>("CheckForUpdatesFrequency");
+        CheckUpdatesDaysNumericUpDown.Value = settings.GetPropertyDefaultValueByName<int>("CheckForUpdatesFrequency");
         PingMonitoredInstancesNumericUpDown.Value = settings.GetPropertyDefaultValueByName<int>("PingServicesIntervalInSeconds");
         AutoAddServicesCheckBox.Checked = settings.GetPropertyDefaultValueByName<bool>("AutoAddServicesToMonitor");
         AutoAddRegexTextBox.Text = settings.GetPropertyDefaultValueByName<string>("AutoAddPattern");
@@ -204,7 +205,7 @@ namespace MySql.Notifier.Forms
         NotifyOfAutoAddCheckBox.Checked = settings.NotifyOfAutoServiceAddition;
         NotifyOfStatusChangeCheckBox.Checked = settings.NotifyOfStatusChange;
         AutoCheckUpdatesCheckBox.Checked = settings.AutoCheckForUpdates;
-        CheckUpdatesWeeksNumericUpDown.Value = settings.CheckForUpdatesFrequency;
+        CheckUpdatesDaysNumericUpDown.Value = settings.CheckForUpdatesFrequency;
         PingMonitoredInstancesNumericUpDown.Value = settings.PingServicesIntervalInSeconds;
         AutoAddServicesCheckBox.Checked = settings.AutoAddServicesToMonitor;
         AutoAddRegexTextBox.Text = settings.AutoAddPattern;

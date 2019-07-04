@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -59,8 +59,8 @@ namespace MySql.Notifier.Forms
       this.NotifyOfAutoAddCheckBox = new System.Windows.Forms.CheckBox();
       this.AutoAddRegexTextBox = new System.Windows.Forms.TextBox();
       this.AutoAddServicesCheckBox = new System.Windows.Forms.CheckBox();
-      this.WeeksLabel = new System.Windows.Forms.Label();
-      this.CheckUpdatesWeeksNumericUpDown = new System.Windows.Forms.NumericUpDown();
+      this.DaysLabel = new System.Windows.Forms.Label();
+      this.CheckUpdatesDaysNumericUpDown = new System.Windows.Forms.NumericUpDown();
       this.AutoCheckUpdatesCheckBox = new System.Windows.Forms.CheckBox();
       this.RunAtStartupCheckBox = new System.Windows.Forms.CheckBox();
       this.GeneralOptionsLabel = new System.Windows.Forms.Label();
@@ -76,7 +76,7 @@ namespace MySql.Notifier.Forms
       this.SecondsLabel = new System.Windows.Forms.Label();
       this.ContentAreaPanel.SuspendLayout();
       this.CommandAreaPanel.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.CheckUpdatesWeeksNumericUpDown)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.CheckUpdatesDaysNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.PingMonitoredInstancesNumericUpDown)).BeginInit();
       this.SuspendLayout();
       // 
@@ -103,9 +103,9 @@ namespace MySql.Notifier.Forms
       this.ContentAreaPanel.Controls.Add(this.NotifyOfAutoAddCheckBox);
       this.ContentAreaPanel.Controls.Add(this.AutoCheckUpdatesCheckBox);
       this.ContentAreaPanel.Controls.Add(this.AutoAddRegexTextBox);
-      this.ContentAreaPanel.Controls.Add(this.CheckUpdatesWeeksNumericUpDown);
+      this.ContentAreaPanel.Controls.Add(this.CheckUpdatesDaysNumericUpDown);
       this.ContentAreaPanel.Controls.Add(this.AutoAddServicesCheckBox);
-      this.ContentAreaPanel.Controls.Add(this.WeeksLabel);
+      this.ContentAreaPanel.Controls.Add(this.DaysLabel);
       this.ContentAreaPanel.Size = new System.Drawing.Size(464, 501);
       // 
       // CommandAreaPanel
@@ -215,27 +215,42 @@ namespace MySql.Notifier.Forms
       this.AutoAddServicesCheckBox.UseVisualStyleBackColor = true;
       this.AutoAddServicesCheckBox.CheckedChanged += new System.EventHandler(this.AutoAddServicesCheckBox_CheckedChanged);
       // 
-      // WeeksLabel
+      // DaysLabel
       // 
-      this.WeeksLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.WeeksLabel.AutoSize = true;
-      this.WeeksLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.WeeksLabel.Location = new System.Drawing.Point(366, 136);
-      this.WeeksLabel.Name = "WeeksLabel";
-      this.WeeksLabel.Size = new System.Drawing.Size(42, 15);
-      this.WeeksLabel.TabIndex = 6;
-      this.WeeksLabel.Text = "weeks.";
+      this.DaysLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+      this.DaysLabel.AutoSize = true;
+      this.DaysLabel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.DaysLabel.Location = new System.Drawing.Point(366, 136);
+      this.DaysLabel.Name = "DaysLabel";
+      this.DaysLabel.Size = new System.Drawing.Size(34, 15);
+      this.DaysLabel.TabIndex = 6;
+      this.DaysLabel.Text = "days.";
       // 
-      // CheckUpdatesWeeksNumericUpDown
+      // CheckUpdatesDaysNumericUpDown
       // 
-      this.CheckUpdatesWeeksNumericUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.CheckUpdatesDaysNumericUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-      this.CheckUpdatesWeeksNumericUpDown.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.CheckUpdatesWeeksNumericUpDown.Location = new System.Drawing.Point(322, 134);
-      this.CheckUpdatesWeeksNumericUpDown.Name = "CheckUpdatesWeeksNumericUpDown";
-      this.CheckUpdatesWeeksNumericUpDown.Size = new System.Drawing.Size(42, 23);
-      this.CheckUpdatesWeeksNumericUpDown.TabIndex = 5;
-      this.HelpToolTip.SetToolTip(this.CheckUpdatesWeeksNumericUpDown, "Number of weeks to check for updates for installed MySQL products.");
+      this.CheckUpdatesDaysNumericUpDown.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.CheckUpdatesDaysNumericUpDown.Location = new System.Drawing.Point(322, 134);
+      this.CheckUpdatesDaysNumericUpDown.Maximum = new decimal(new int[] {
+            365,
+            0,
+            0,
+            0});
+      this.CheckUpdatesDaysNumericUpDown.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+      this.CheckUpdatesDaysNumericUpDown.Name = "CheckUpdatesDaysNumericUpDown";
+      this.CheckUpdatesDaysNumericUpDown.Size = new System.Drawing.Size(42, 23);
+      this.CheckUpdatesDaysNumericUpDown.TabIndex = 5;
+      this.HelpToolTip.SetToolTip(this.CheckUpdatesDaysNumericUpDown, "Number of days between checking for updates of installed MySQL products.");
+      this.CheckUpdatesDaysNumericUpDown.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
       // 
       // AutoCheckUpdatesCheckBox
       // 
@@ -415,7 +430,7 @@ namespace MySql.Notifier.Forms
       this.ContentAreaPanel.ResumeLayout(false);
       this.ContentAreaPanel.PerformLayout();
       this.CommandAreaPanel.ResumeLayout(false);
-      ((System.ComponentModel.ISupportInitialize)(this.CheckUpdatesWeeksNumericUpDown)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.CheckUpdatesDaysNumericUpDown)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.PingMonitoredInstancesNumericUpDown)).EndInit();
       this.ResumeLayout(false);
 
@@ -432,9 +447,9 @@ namespace MySql.Notifier.Forms
     private System.Windows.Forms.CheckBox NotifyOfAutoAddCheckBox;
     private System.Windows.Forms.CheckBox AutoCheckUpdatesCheckBox;
     private System.Windows.Forms.TextBox AutoAddRegexTextBox;
-    private System.Windows.Forms.NumericUpDown CheckUpdatesWeeksNumericUpDown;
+    private System.Windows.Forms.NumericUpDown CheckUpdatesDaysNumericUpDown;
     private System.Windows.Forms.CheckBox AutoAddServicesCheckBox;
-    private System.Windows.Forms.Label WeeksLabel;
+    private System.Windows.Forms.Label DaysLabel;
     private System.Windows.Forms.Button DialogCancelButton;
     private System.Windows.Forms.Button DialogAcceptButton;
     private System.Windows.Forms.ToolTip HelpToolTip;

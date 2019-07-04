@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="CheckForUpdatesFrequency" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">4</Value>
+      <Value Profile="(Default)">7</Value>
     </Setting>
     <Setting Name="AutoAddServicesToMonitor" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
@@ -52,6 +52,12 @@
     </Setting>
     <Setting Name="PingServicesIntervalInSeconds" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">30</Value>
+    </Setting>
+    <Setting Name="SettingsRootNodeNeedsPatching" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="CheckForUpdatesFrequencyPatched" Provider="MySql.Notifier.Classes.NotifierSettings" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

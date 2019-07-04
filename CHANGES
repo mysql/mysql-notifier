@@ -17,6 +17,12 @@
   MySQL Server Instance" dialog depending on the currently selected tab page "Services" or "Instances". This is a more intuitive UX and removes
   the need to click a context menu option when clicking "Add...".
   (MySQL Bug #95638, Bug #29868378 - ADD AND DELETE BUTTON IN MANAGE ITEMS DIALOG ARE NOT CONSISTENT)
+- Changed the "Automatically check for MySQL updates" option to perform the check every X days instead of weeks, this offers a better frequency
+  for users. The valid values for the option are between 1 and 365. Any previously saved value will be automatically converted from weeks to
+  days when launching a version of MySQL Notifer >= 1.1.8. Changed the behavior of the "Check for Updates..." menu item to immediately query
+  MySQL Installer for updates on products, in the same way the scheduled task queries MySQL Installer for updates, instead of just launching
+  MySQL Installer. NOTE: Checking for updates needs MySQL Installer to be upgraded to the version 1.4.31 or greater.
+  (MySQL Bug #95637, Bug #29868329 - CHECK FOR UPDATES ACTION LAUNCHES MYSQL INSTALLER INSTEAD OF CHECKING FOR UPDATE)
 
 1.1.7
 - Enhanced the logic that migrates stored MySQL connections to the MySQL Workbench connections.xml file. In previous versions the migration was

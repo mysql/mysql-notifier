@@ -18,7 +18,7 @@
 using System;
 using System.Reflection;
 using System.Windows.Forms;
-using MySql.Utility.Classes;
+using MySql.Utility.Classes.Assemblies;
 using MySql.Utility.Classes.MySqlInstaller;
 
 namespace MySql.Notifier.Forms

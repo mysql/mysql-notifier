@@ -26,9 +26,11 @@ using System.Xml.Linq;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
 using MySql.Utility.Classes;
+using MySql.Utility.Classes.Assemblies;
 using MySql.Utility.Classes.Logging;
 using MySql.Utility.Classes.MySqlInstaller;
 using MySql.Utility.Classes.MySqlWorkbench;
+using MySql.Utility.Classes.Options;
 using MySql.Utility.Forms;
 
 namespace MySql.Notifier.Classes
@@ -135,7 +137,7 @@ namespace MySql.Notifier.Classes
         // In case the .exe is being run just for the sake of checking updates
         if (args.Length > 0)
         {
-          CheckForUpdates(args[0]);
+          CheckForUpdates(args);
         }
 
         if (!SingleInstance.Start())
@@ -165,14 +167,34 @@ namespace MySql.Notifier.Classes
       SingleInstance.Stop();
     }
 
+    /// <summary>
+    /// Replaces an old value for the pattern to check for updates with a new one.
+    /// </summary>
     private static void ChangeAutoAddPatternDefaultValue()
     {
-      if (Settings.Default.AutoAddPattern != ".*mysqld.*")
+      if (!string.Equals(Settings.Default.AutoAddPattern, ".*mysqld.*", StringComparison.OrdinalIgnoreCase))
       {
         return;
       }
 
       Settings.Default.AutoAddPattern = "mysql";
+      Settings.Default.Save();
+    }
+
+    /// <summary>
+    /// Replaces the value of the check for updates frequency in weeks with a new one in days.
+    /// </summary>
+    private static void ChangeAutoCheckForUpdatesFrequency()
+    {
+      if (Settings.Default.CheckForUpdatesFrequencyPatched
+          || Settings.Default.FirstRun)
+      {
+        return;
+      }
+
+      var weeklyFrequency = Settings.Default.CheckForUpdatesFrequency;
+      Settings.Default.CheckForUpdatesFrequency = Math.Min(weeklyFrequency * 7, 365);
+      Settings.Default.CheckForUpdatesFrequencyPatched = true;
       Settings.Default.Save();
     }
 
@@ -216,7 +238,7 @@ namespace MySql.Notifier.Classes
       MySqlWorkbench.LoadData();
       MySqlWorkbench.LoadServers();
       MySqlInstaller.InstallerLegacyDllPath = InstallLocation;
-      MySqlInstaller.LoadData();
+      MySqlInstaller.LoadData(true);
       InfoDialog.ApplicationName = AssemblyInfo.AssemblyTitle;
       InfoDialog.SuccessLogo = Resources.ApplicationLogo;
       InfoDialog.ErrorLogo = Resources.NotifierErrorImage;
@@ -389,6 +411,12 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private static void FixMySqlForExcelMainElement()
     {
+      if (!Settings.Default.SettingsRootNodeNeedsPatching)
+      {
+        return;
+      }
+
+      Settings.Default.SettingsRootNodeNeedsPatching = false;
       var settingsFilePath = NotifierSettings.SettingsFilePath;
       if (!File.Exists(settingsFilePath))
       {
@@ -426,11 +454,12 @@ namespace MySql.Notifier.Classes
         if (File.Exists(settingsCopyFileName))
         {
           File.Copy(settingsCopyFileName, settingsFilePath, true);
-          Settings.Default.Save();
         }
       }
       finally
       {
+        Settings.Default.Save();
+
         // Delete the backup file.
         if (File.Exists(settingsCopyFileName))
         {
@@ -446,16 +475,27 @@ namespace MySql.Notifier.Classes
     {
       FixMySqlForExcelMainElement();
       ChangeAutoAddPatternDefaultValue();
+      ChangeAutoCheckForUpdatesFrequency();
     }
 
-    private static void CheckForUpdates(string arg)
+    /// <summary>
+    /// Updates the settings file to a "checking" state.
+    /// </summary>
+    /// <param name="args">Command line arguments.</param>
+    private static void CheckForUpdates(string[] args)
     {
-      if (arg != "--c" || arg != "--x")
+      var updateFlag = SoftwareUpdateStatus.NotAvailable;
+      var options = new CommandLineOptions
+      {
+        new CommandLineOption("c|x", arg => updateFlag = SoftwareUpdateStatus.CheckForUpdates)
+      };
+      options.Parse(args);
+      if (updateFlag == SoftwareUpdateStatus.NotAvailable)
       {
         return;
       }
 
-      Settings.Default.UpdateCheck = (int)SoftwareUpdateStatus.Checking;
+      Settings.Default.UpdateCheck = (int)updateFlag;
       Settings.Default.Save();
     }
   }

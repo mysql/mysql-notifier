@@ -26,7 +26,7 @@ namespace MySql.Notifier.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.Classes.NotifierSettings))]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        [global::System.Configuration.DefaultSettingValueAttribute("7")]
         public int CheckForUpdatesFrequency {
             get {
                 return ((int)(this["CheckForUpdatesFrequency"]));
@@ -237,6 +237,32 @@ namespace MySql.Notifier.Properties {
             }
             set {
                 this["PingServicesIntervalInSeconds"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.Classes.NotifierSettings))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool SettingsRootNodeNeedsPatching {
+            get {
+                return ((bool)(this["SettingsRootNodeNeedsPatching"]));
+            }
+            set {
+                this["SettingsRootNodeNeedsPatching"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.SettingsProviderAttribute(typeof(MySql.Notifier.Classes.NotifierSettings))]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CheckForUpdatesFrequencyPatched {
+            get {
+                return ((bool)(this["CheckForUpdatesFrequencyPatched"]));
+            }
+            set {
+                this["CheckForUpdatesFrequencyPatched"] = value;
             }
         }
     }

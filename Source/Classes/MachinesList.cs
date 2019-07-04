@@ -17,7 +17,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using MySql.Notifier.Enumerations;
@@ -227,7 +226,7 @@ namespace MySql.Notifier.Classes
         return;
       }
 
-      CreateScheduledTask();
+      Notifier.CreateScheduledTask();
       Settings.Default.FirstRun = false;
       SaveToFile();
     }
@@ -268,20 +267,11 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private void RecreateInvalidScheduledTask()
     {
-      if (!Settings.Default.FirstRun && Settings.Default.AutoCheckForUpdates && !VerifyScheduledTaskExists(Notifier.DefaultTaskName))
+      if (!Settings.Default.FirstRun
+          && Settings.Default.AutoCheckForUpdates
+          && !Utilities.ScheduledTaskExists(Notifier.DefaultTaskName))
       {
-        CreateScheduledTask();
-      }
-    }
-
-    /// <summary>
-    /// Creates the scheduled task. If the task already exists it is deleted first.
-    /// </summary>
-    private void CreateScheduledTask()
-    {
-      if (Settings.Default.AutoCheckForUpdates && Settings.Default.CheckForUpdatesFrequency > 0 && !string.IsNullOrEmpty(AssemblyInfo.AssemblyTitle))
-      {
-        Utilities.CreateScheduledTask(Notifier.DefaultTaskName, Notifier.DefaultTaskPath, "--c", Settings.Default.CheckForUpdatesFrequency);
+        Notifier.CreateScheduledTask();
       }
     }
 
@@ -513,40 +503,6 @@ namespace MySql.Notifier.Classes
       // Clear the old list of services to erase the duplicates on the newer schema
       services.Clear();
       SaveToFile();
-    }
-
-    /// <summary>
-    /// Verifies a task with the given name exists in the current machine.
-    /// </summary>
-    /// <param name="scheduledTaskToFind">The scheduled task name to be found.</param>
-    /// <returns>
-    ///   <c>true</c> if the schedule task is already created.
-    /// </returns>
-    public bool VerifyScheduledTaskExists(string scheduledTaskToFind)
-    {
-      var schtasks = new ProcessStartInfo
-      {
-        FileName = "schtasks.exe",
-        UseShellExecute = false,
-        CreateNoWindow = true,
-        WindowStyle = ProcessWindowStyle.Hidden,
-        Arguments = "/query /TN " + scheduledTaskToFind,
-        RedirectStandardOutput = true
-      };
-
-      using (var process = Process.Start(schtasks))
-      {
-        if (process == null)
-        {
-          return false;
-        }
-
-        using (var reader = process.StandardOutput)
-        {
-          var stdout = reader.ReadToEnd();
-          return stdout.Contains(scheduledTaskToFind);
-        }
-      }
     }
   }
 }

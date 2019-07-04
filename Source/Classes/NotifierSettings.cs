@@ -16,6 +16,7 @@
 // 02110-1301  USA
 
 using MySql.Utility.Classes;
+using MySql.Utility.Classes.Assemblies;
 
 namespace MySql.Notifier.Classes
 {
