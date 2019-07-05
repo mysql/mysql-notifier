@@ -1,3 +1,32 @@
+MySQL Notifier 1.1.8 Release Notes
+------------------------------------
+
+Welcome to the release notes for MySQL Notifier 1.1.8
+
+* Connections to MySQL Server 8.0 using strong password authentication (via the caching_sha2_password authentication plugin) are now supported.
+* Connections using SSL are now supported. These connections may be created from MySQL Workbench or directly in MySQL Notifier
+* SSH tunneled connections are also supported now, the tunnel is created automatically and no need to have an intermediate software to create
+  the tunnel, just the way also MySQL Workbench transparently works.
+* Fixed the display of an unhandled exception when the user does not accept the UAT dialog shown when launching MySQL Installer. If the user
+  cancels nothing happens, but if any other exception happens when launching it is displayed to users and logged.
+* Changed the "Automatically check for MySQL updates" option to perform the check every X days instead of weeks, this offers a better frequency
+  for users. The valid values for the option are between 1 and 365. Any previously saved value will be automatically converted from weeks to
+  days when launching a version of MySQL Notifer >= 1.1.8. Changed the behavior of the "Check for Updates..." menu item to immediately query
+  MySQL Installer for updates on products, in the same way the scheduled task queries MySQL Installer for updates, instead of just launching
+  MySQL Installer. NOTE: Checking for updates needs MySQL Installer to be upgraded to the version 1.4.31 or greater.
+* Added logic to automatically add a monitored MySQL Instance for a locally running MySQL Router Windows service when MySQL Notifier starts.
+  Also changed the behavior when automatically adding local MySQL Windows services to the monitoring list so every time Notifier is started
+  it checks if it needs to add newly added MySQL Windows services, as opposed to past behavior when this was done only the very first time
+  MySQL Notifer was run.
+* Fixed a bug in the detection of the "Run at Windows startup" setting and also a bug in the Options dialog that was applying changes even
+  when cancelling the dialog.
+* Fixed the way MySQL Workbench is being opened to use a double-dash when using its command line options, so that it is opened on the right
+  server configuration page if an entry in Workbench's server_instances.xml file matches the service or instance being monitored.
+* Changed the behavior of the "Add..." button of the "Manage Items" dialog, so when clicked it calls either the "Add Service" or the "Monitor
+  MySQL Server Instance" dialog depending on the currently selected tab page "Services" or "Instances". This is a more intuitive UX and removes
+  the need to click a context menu option when clicking "Add...".
+
+
 MySQL Notifier 1.1.7 Release Notes
 ------------------------------------
 
