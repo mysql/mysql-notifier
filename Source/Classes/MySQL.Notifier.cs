@@ -101,7 +101,6 @@ namespace MySql.Notifier.Classes
     private ToolStripMenuItem _checkForCommunityUpdatesMenuItem;
     private ToolStripMenuItem _checkForUpdatesMenuItem;
     private bool _closing;
-    private FileSystemWatcher _connectionsFileWatcher;
     private ToolStripMenuItem _exitMenuItem;
 
     /// <summary>
@@ -119,6 +118,7 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private Timer _globalTimer;
 
+    private bool _ignoreWorkbenchConnectionsFileChangedEvent;
     private ToolStripSeparator _hasUpdatesSeparator;
     private ToolStripMenuItem _ignoreAvailableUpdateMenuItem;
     private ToolStripMenuItem _installAvailableUpdatesMenuItem;
@@ -137,10 +137,8 @@ namespace MySql.Notifier.Classes
     private int _previousMachineCount;
     private ToolStripMenuItem _refreshStatusMenuItem;
     private ToolStripSeparator _refreshStatusSeparator;
-    private FileSystemWatcher _serversFileWatcher;
     private readonly FileSystemWatcher _settingsFileWatcher;
     private ContextMenuStrip _staticMenu;
-    private readonly FileSystemWatcher _workbenchAppDataDirWatcher;
 
     /// <summary>
     /// Background worker that performs the refresh of machines, services and MySQL instances.
@@ -161,9 +159,6 @@ namespace MySql.Notifier.Classes
       _optionsDialog = null;
       _manageItemsDialog = null;
       _migratingStoredConnections = false;
-      _workbenchAppDataDirWatcher = null;
-      _serversFileWatcher = null;
-      _connectionsFileWatcher = null;
       _settingsFileWatcher = null;
       _refreshStatusSeparator = null;
       _refreshStatusMenuItem = null;
@@ -177,6 +172,7 @@ namespace MySql.Notifier.Classes
       _actionsMenuItem = null;
       _staticMenu = null;
       _worker = null;
+      _ignoreWorkbenchConnectionsFileChangedEvent = false;
       StatusRefreshInProgress = false;
 
       SetChangeCursorDelegate();
@@ -215,15 +211,14 @@ namespace MySql.Notifier.Classes
       _mySqlInstancesList.RefreshInstances(true);
       StartGlobalTimer();
 
-      // Monitor creation/deletion of the Workbench application data directory
-      _workbenchAppDataDirWatcher = StartWatcherForFile(Program.EnvironmentApplicationDataDirectory + @"\MySQL\", WorkbenchAppDataDirectoryChanged);
-
-      // Create watcher for Workbench servers.xml and connections.xml files
-      var wbDirArgs = new FileSystemEventArgs(MySqlWorkbench.IsInstalled ? WatcherChangeTypes.Created : WatcherChangeTypes.Deleted, MySqlWorkbench.WorkbenchDataDirectory, string.Empty);
-      WorkbenchAppDataDirectoryChanged(_workbenchAppDataDirWatcher, wbDirArgs);
+      // Subscribe to watchers for Workbench's application data directory, and connections and servers XML files.
+      MySqlWorkbench.StartFileSystemWatchers();
+      MySqlWorkbench.AppDataDirectoryChanged += WorkbenchAppDataDirectoryChanged;
+      MySqlWorkbench.ConnectionsFileChanged += ConnectionsFileChanged;
+      MySqlWorkbench.ServersFileChanged += ServersFileChanged;
 
       // Create watcher for Notifier settings.config file
-      _settingsFileWatcher = StartWatcherForFile(Program.EnvironmentApplicationDataDirectory + Program.SETTINGS_FILE_RELATIVE_PATH, SettingsFileChanged);
+      _settingsFileWatcher = Utilities.StartWatcherForFile(Program.EnvironmentApplicationDataDirectory + Program.SETTINGS_FILE_RELATIVE_PATH, SettingsFileChanged);
 
       // Refresh the Notifier tray icon according to the status of services and instances.
       RefreshNotifierIcon();
@@ -370,24 +365,6 @@ namespace MySql.Notifier.Classes
         _optionsDialog.Dispose();
       }
 
-      // Turn off the watcher monitoring the %APPDATA% directory and save its state.
-      var workbenchAppDataDirWatcherRaisingEvents = false;
-      if (_workbenchAppDataDirWatcher != null
-          && _workbenchAppDataDirWatcher.EnableRaisingEvents)
-      {
-        workbenchAppDataDirWatcherRaisingEvents = _workbenchAppDataDirWatcher.EnableRaisingEvents;
-        _workbenchAppDataDirWatcher.EnableRaisingEvents = false;
-      }
-
-      // Turn off the watcher monitoring the Workbench's connections.xml file and save its state.
-      var connectionsFileWatcherRaisingEvents = false;
-      if (_connectionsFileWatcher != null
-          && _connectionsFileWatcher.EnableRaisingEvents)
-      {
-        connectionsFileWatcherRaisingEvents = _connectionsFileWatcher.EnableRaisingEvents;
-        _connectionsFileWatcher.EnableRaisingEvents = false;
-      }
-
       // Attempt to perform the migration
       // If the call comes from another thread (when the global Synchronization Context is not null), the execution of the method that migrates connections must be
       // dispatched to the main thread (stored in the global Synchronization Context). For example if this execution comes from the global timer thread.
@@ -420,19 +397,6 @@ namespace MySql.Notifier.Classes
       }
 
       Settings.Default.Save();
-
-      // Revert the status of the watcher monitoring the %APPDATA% directory if needed.
-      if (_workbenchAppDataDirWatcher != null && workbenchAppDataDirWatcherRaisingEvents)
-      {
-        _workbenchAppDataDirWatcher.EnableRaisingEvents = true;
-      }
-
-      // Revert the status of the watcher monitoring the Workbench's connections.xml file if needed.
-      if (_connectionsFileWatcher != null && connectionsFileWatcherRaisingEvents)
-      {
-        _connectionsFileWatcher.EnableRaisingEvents = true;
-      }
-
       _migratingStoredConnections = false;
     }
 
@@ -544,9 +508,6 @@ namespace MySql.Notifier.Classes
       _mySqlInstancesList?.Dispose();
       _machinesList?.Dispose();
       _notifyIcon?.Dispose();
-      _workbenchAppDataDirWatcher?.Dispose();
-      _connectionsFileWatcher?.Dispose();
-      _serversFileWatcher?.Dispose();
       _settingsFileWatcher?.Dispose();
 
       if (_worker != null)
@@ -714,6 +675,11 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void ConnectionsFileChanged(object sender, FileSystemEventArgs e)
     {
+      if (_ignoreWorkbenchConnectionsFileChangedEvent)
+      {
+        return;
+      }
+
       // Wait 3 seconds after being notified the connections file changed since at the moment of the notification Workbench may not have finished regenerating its contents which
       // causes the reload below not to catch any connections at all.  In very slow systems like VMs the full 3 seconds may be needed.
       Thread.Sleep(3000);
@@ -1320,24 +1286,18 @@ namespace MySql.Notifier.Classes
     /// <summary>
     /// Resume background connection activities like connection tests, etc.
     /// </summary>
-    /// <param name="instancesListChanged">Flag indicating whether MySQL instances were added or deleted shile background actions were paused.</param>
+    /// <param name="instancesListChanged">Flag indicating whether MySQL instances were added or deleted while background actions were paused.</param>
     private void ResumeBackgroundActions(bool instancesListChanged)
     {
       // Resume the global timer.
       _globalTimer.Start();
 
-      // Resume the connections file watcher and refresh manually if a change on instances took place.
-      if (_connectionsFileWatcher == null)
-      {
-        return;
-      }
-
+      // Listen again to the connections file changed event and refresh manually if a change on instances took place.
+      _ignoreWorkbenchConnectionsFileChangedEvent = false;
       if (instancesListChanged)
       {
         ConnectionsFileChanged(this, new FileSystemEventArgs(WatcherChangeTypes.Changed, string.Empty, string.Empty));
       }
-
-      _connectionsFileWatcher.EnableRaisingEvents = true;
     }
 
     /// <summary>
@@ -1639,41 +1599,6 @@ namespace MySql.Notifier.Classes
     }
 
     /// <summary>
-    /// Sets up and runs a watcher to monitor changes in a file or directory.
-    /// </summary>
-    /// <param name="filePath">The file (with a full path) to monitor, if a directory is to be monitored the last character must be a backslash.</param>
-    /// <param name="method">The delegate method to associate with a change, deletion or creation.</param>
-    /// <returns>A <see cref="FileSystemWatcher"/> object that monitors the file or directory.</returns>
-    private FileSystemWatcher StartWatcherForFile(string filePath, FileSystemEventHandler method)
-    {
-      if (string.IsNullOrEmpty(filePath))
-      {
-        return null;
-      }
-
-      var isDirectory = filePath.EndsWith(@"\");
-      var monitorPath = Path.GetDirectoryName(isDirectory ? filePath.Substring(0, filePath.Length - 1) : filePath);
-      if (string.IsNullOrEmpty(monitorPath))
-      {
-        return null;
-      }
-
-      var watcher = new FileSystemWatcher
-      {
-        Path = monitorPath,
-        Filter = isDirectory ? "*.*" : Path.GetFileName(filePath),
-        IncludeSubdirectories = isDirectory,
-        NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.DirectoryName
-      };
-
-      watcher.Changed += method;
-      watcher.Deleted += method;
-      watcher.Created += method;
-      watcher.EnableRaisingEvents = true;
-      return watcher;
-    }
-
-    /// <summary>
     /// Delegate method that reports the asynchronous operation to refresh the services and instances statuses has completed.
     /// </summary>
     /// <param name="sender">Sender object.</param>
@@ -1790,11 +1715,8 @@ namespace MySql.Notifier.Classes
         instance.CancelAsynchronousStatusCheck();
       }
 
-      // Stop the connections file watcher while users maintain services and instances.
-      if (_connectionsFileWatcher != null)
-      {
-        _connectionsFileWatcher.EnableRaisingEvents = false;
-      }
+      // Ignore the connections file changed event while users maintain services and instances.
+      _ignoreWorkbenchConnectionsFileChangedEvent = true;
     }
 
     /// <summary>
@@ -1860,45 +1782,19 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void WorkbenchAppDataDirectoryChanged(object sender, FileSystemEventArgs e)
     {
-      if (e.FullPath != MySqlWorkbench.WorkbenchDataDirectory && e.FullPath != MySqlWorkbench.WorkbenchDataDirectory.TrimEnd('\\'))
-      {
-        return;
-      }
-
       switch (e.ChangeType)
       {
         case WatcherChangeTypes.Created:
         case WatcherChangeTypes.Renamed:
-          if (Directory.Exists(MySqlWorkbench.WorkbenchDataDirectory) && MySqlWorkbench.AllowsExternalConnectionsManagement)
+          if (MySqlWorkbench.WorkbenchDataDirectoryExists
+              && MySqlWorkbench.AllowsExternalConnectionsManagement)
           {
-            if (_connectionsFileWatcher == null)
-            {
-              _connectionsFileWatcher = StartWatcherForFile(MySqlWorkbench.ConnectionsFilePath, ConnectionsFileChanged);
-            }
-
-            if (_serversFileWatcher == null)
-            {
-              _serversFileWatcher = StartWatcherForFile(MySqlWorkbench.ServersFilePath, ServersFileChanged);
-            }
-
             // Check if it's time to display the dialog for connections migration.
             CheckForNextAutomaticConnectionsMigration(false);
           }
           break;
 
         case WatcherChangeTypes.Deleted:
-          if (_connectionsFileWatcher != null && _connectionsFileWatcher.Filter == MySqlWorkbench.ConnectionsFilePath)
-          {
-            _connectionsFileWatcher.Dispose();
-            _connectionsFileWatcher = null;
-          }
-
-          if (_serversFileWatcher != null)
-          {
-            _serversFileWatcher.Dispose();
-            _serversFileWatcher = null;
-          }
-
           // Check if it's time to display the dialog for connections migration.
           CheckForNextAutomaticConnectionsMigration(false);
           break;

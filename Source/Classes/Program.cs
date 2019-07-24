@@ -125,14 +125,7 @@ namespace MySql.Notifier.Classes
       try
       {
         InitializeLogger();
-
-        // Static initializations
-        InstallLocation = Utilities.GetMySqlAppInstallLocation(AssemblyInfo.AssemblyTitle);
-        InitializeStaticSettings();
-        CustomizeInfoDialog();
-
-        // Update settings file
-        UpdateSettingsFile();
+        InitializeInfoDialog();
 
         // In case the .exe is being run just for the sake of checking updates
         if (args.Length > 0)
@@ -145,6 +138,12 @@ namespace MySql.Notifier.Classes
           return;
         }
 
+        // Static initializations
+        InstallLocation = Utilities.GetMySqlAppInstallLocation(AssemblyInfo.AssemblyTitle);
+
+        // Update settings file
+        UpdateSettingsFile();
+
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
         Application.ThreadException += MySQLNotifierThreadExceptionEventHandler;
@@ -154,6 +153,9 @@ namespace MySql.Notifier.Classes
 
         // For non-UI thread exceptions
         AppDomain.CurrentDomain.UnhandledException += MySQLNotifierAppExceptionHandler;
+
+        // Initialize other static settings related to MySQL Installer and MySQL Workbench
+        InitializeStaticSettings();
 
         // Initialize app context and run
         _applicationContext = new NotifierApplicationContext();
@@ -199,9 +201,9 @@ namespace MySql.Notifier.Classes
     }
 
     /// <summary>
-    /// Customizes the looks of the <see cref="InfoDialog"/> form for the MySQL Notifier.
+    /// Initializes the looks of the <see cref="InfoDialog"/> form for the MySQL Notifier.
     /// </summary>
-    private static void CustomizeInfoDialog()
+    private static void InitializeInfoDialog()
     {
       InfoDialog.ApplicationName = AssemblyInfo.AssemblyTitle;
       InfoDialog.SuccessLogo = Resources.ApplicationLogo;
@@ -230,21 +232,16 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private static void InitializeStaticSettings()
     {
+      AutoStyleableBaseForm.HandleDpiSizeConversions = true;
       MySqlWorkbench.ExternalApplicationName = AssemblyInfo.AssemblyTitle;
       MySqlWorkbenchPasswordVault.ApplicationPasswordVaultFilePath = EnvironmentApplicationDataDirectory + PASSWORDS_VAULT_FILE_RELATIVE_PATH;
-      MySqlWorkbench.ExternalConnections.CreateDefaultConnections = !MySqlWorkbench.ConnectionsFileExists && MySqlWorkbench.Connections.Count == 0;
+      MySqlWorkbench.ExternalConnections.CreateDefaultConnections = !MySqlWorkbench.ConnectionsFileExists
+                                                                    && MySqlWorkbench.Connections.Count == 0;
       MySqlWorkbench.ExternalApplicationsConnectionsFileRetryLoadOrRecreate = true;
       MySqlWorkbench.ExternalApplicationConnectionsFilePath = EnvironmentApplicationDataDirectory + CONNECTIONS_FILE_RELATIVE_PATH;
       MySqlWorkbench.LoadData();
-      MySqlWorkbench.LoadServers();
       MySqlInstaller.InstallerLegacyDllPath = InstallLocation;
       MySqlInstaller.LoadData(true);
-      InfoDialog.ApplicationName = AssemblyInfo.AssemblyTitle;
-      InfoDialog.SuccessLogo = Resources.ApplicationLogo;
-      InfoDialog.ErrorLogo = Resources.NotifierErrorImage;
-      InfoDialog.WarningLogo = Resources.NotifierWarningImage;
-      InfoDialog.InformationLogo = Resources.ApplicationLogo;
-      AutoStyleableBaseForm.HandleDpiSizeConversions = true;
       PasswordDialog.ApplicationIcon = Resources.MySqlNotifierIcon;
       PasswordDialog.SecurityLogo = Resources.NotifierSecurityImage;
     }
