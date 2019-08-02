@@ -219,7 +219,7 @@ namespace MySql.Notifier.Forms
       this.DescriptionLabel.Name = "DescriptionLabel";
       this.DescriptionLabel.Size = new System.Drawing.Size(448, 37);
       this.DescriptionLabel.TabIndex = 2;
-      this.DescriptionLabel.Text = "Local MySQL services will be automatically added. Press Add to monitor other Wind" +
+      this.DescriptionLabel.Text = "Local MySQL services will be automatically added. Click Add to monitor other Wind" +
     "ows services or MySQL instances.";
       // 
       // SubTitleLabel

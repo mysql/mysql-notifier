@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2013, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -121,7 +121,7 @@ namespace MySql.Notifier.Forms
       this.ShowMonitoredInstancesCheckBox.Name = "ShowMonitoredInstancesCheckBox";
       this.ShowMonitoredInstancesCheckBox.Size = new System.Drawing.Size(286, 19);
       this.ShowMonitoredInstancesCheckBox.TabIndex = 4;
-      this.ShowMonitoredInstancesCheckBox.Text = "Show MySQL instances already being monitored?";
+      this.ShowMonitoredInstancesCheckBox.Text = "Show MySQL instances already being monitored";
       this.ShowMonitoredInstancesCheckBox.UseVisualStyleBackColor = true;
       this.ShowMonitoredInstancesCheckBox.CheckedChanged += new System.EventHandler(this.ShowMonitoredInstancesCheckBox_CheckedChanged);
       // 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+﻿// Copyright (c) 2012, 2019, Oracle and/or its affiliates. All rights reserved.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License as
@@ -207,7 +207,7 @@ namespace MySql.Notifier.Forms
       this.FilterCheckBox.Name = "FilterCheckBox";
       this.FilterCheckBox.Size = new System.Drawing.Size(264, 17);
       this.FilterCheckBox.TabIndex = 10;
-      this.FilterCheckBox.Text = "Only show services that match auto-add filter?\r\n";
+      this.FilterCheckBox.Text = "Only show services that match auto-add filter";
       this.FilterCheckBox.UseVisualStyleBackColor = true;
       this.FilterCheckBox.CheckedChanged += new System.EventHandler(this.FilterCheckBox_CheckedChanged);
       // 
