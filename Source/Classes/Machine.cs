@@ -675,6 +675,7 @@ namespace MySql.Notifier.Classes
             service.NotifyOnStatusChange = Settings.Default.NotifyOfStatusChange;
             service.UpdateTrayIconOnStatusChange = true;
             Services.Add(service);
+            Services.Sort();
             OnServiceListChanged(service, listChangeType);
             if (IsLocal
                 && Services.Count == 1
@@ -1277,7 +1278,7 @@ namespace MySql.Notifier.Classes
 
       var notifyChange = Settings.Default.NotifyOfStatusChange;
       var service = new MySqlService(serviceName, notifyChange, notifyChange, this);
-      if (!Service.IsRealMySqlService(serviceName))
+      if (!Service.IsRealMySqlService(serviceName, false))
       {
         return;
       }

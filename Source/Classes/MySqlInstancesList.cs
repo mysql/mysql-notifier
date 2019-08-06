@@ -20,14 +20,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Management;
 using MySql.Notifier.Classes.EventArguments;
-using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
-using MySql.Utility.Classes.MySql;
-using MySql.Utility.Classes.MySqlRouter;
 using MySql.Utility.Classes.MySqlWorkbench;
-using MySql.Utility.Forms;
 
 namespace MySql.Notifier.Classes
 {
@@ -372,94 +367,7 @@ namespace MySql.Notifier.Classes
     /// </summary>
     public void AutoAddLocalInstances()
     {
-      // Add router service instance
-      using (var localMachine = new Machine())
-      {
-        var filteredServices = localMachine.GetWmiServices(RouterStartupParameters.DEFAULT_ROUTER_SERVICE_DISPLAY_NAME, true, false);
-        var routerService = filteredServices.Cast<ManagementObject>().FirstOrDefault(mo => mo != null
-                                                                                           && string.Equals(mo.Properties["DisplayName"].Value.ToString(), RouterStartupParameters.DEFAULT_ROUTER_SERVICE_DISPLAY_NAME, StringComparison.OrdinalIgnoreCase));
-        if (routerService != null
-            && !InstancesList.Any(instance => instance.WorkbenchConnection != null
-                                              && string.Equals(instance.WorkbenchConnection.Name, RouterStartupParameters.DEFAULT_WORKBENCH_CONNECTION_NAME, StringComparison.OrdinalIgnoreCase)))
-        {
-          var routerServiceStatusText = routerService.Properties["State"].Value.ToString();
-          MySqlService.GetStatusFromText(routerServiceStatusText, out var routerServiceStatus);
-          var testConnection = routerServiceStatus == MySqlServiceStatus.Running;
-
-          // Refresh connections from disk.
-          LoadMySqlWorkbenchConnections();
-
-          // Check if there is already a "Local Instance MySQL Router" connection automatically created by MySQL Workbench, if so load that one.
-          var routerConnection = MySqlWorkbench.Connections.FirstOrDefault(conn => conn.Name.Equals(RouterStartupParameters.DEFAULT_WORKBENCH_CONNECTION_NAME, StringComparison.OrdinalIgnoreCase));
-          if (routerConnection != null)
-          {
-            // If the connection was created by Workbench, it may have the incorrect data, so test it.
-            if (routerConnection.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.Unknown
-                && testConnection)
-            {
-              routerConnection.TestConnectionSilently(out _);
-            }
-
-            if (routerConnection.ConnectionStatus == MySqlWorkbenchConnection.ConnectionStatusType.RefusingConnections)
-            {
-              var routerParams = RouterStartupParameters.GetStartupParameters();
-              if (routerParams != null)
-              {
-                var hasChanges = false;
-                if (routerConnection.Port != routerParams.ClassicRwPort)
-                {
-                  hasChanges = true;
-                  routerConnection.Port = routerParams.ClassicRwPort;
-                }
-
-                if (!string.Equals(routerConnection.UserName, routerParams.Username, StringComparison.Ordinal))
-                {
-                  hasChanges = true;
-                  routerConnection.UserName = routerParams.Username;
-                }
-
-                if (routerConnection.ConnectionMethod != MySqlWorkbenchConnection.ConnectionMethodType.Tcp)
-                {
-                  hasChanges = true;
-                  routerConnection.ConnectionMethod = MySqlWorkbenchConnection.ConnectionMethodType.Tcp;
-                }
-
-                if (string.IsNullOrEmpty(routerConnection.Password)
-                    && string.Equals(routerConnection.UserName, MySqlServerUser.ROOT_USERNAME, StringComparison.Ordinal))
-                {
-                  using (var passwordDialog = new PasswordDialog(routerConnection, testConnection, false))
-                  {
-                    // If the user types in a password, it's automatically assigned to the connection.
-                    passwordDialog.ShowDialog();
-                  }
-                }
-
-                if (hasChanges)
-                {
-                  routerConnection.SavedStatus = MySqlWorkbenchConnection.SavedStatusType.Updated;
-                  MySqlWorkbench.Connections.SaveConnection(routerConnection);
-                }
-              }
-            }
-
-            AddConnectionToMonitor(routerConnection);
-          }
-          else
-          {
-            // Create the Workbench connection and add it.
-            var routerParams = RouterStartupParameters.GetStartupParameters();
-            if (routerParams != null)
-            {
-              routerConnection = routerParams.GetWorkbenchConnection(true, true);
-              if (routerConnection != null)
-              {
-                AddConnectionToMonitor(routerConnection);
-                MySqlWorkbench.Connections.SaveConnection(routerConnection);
-              }
-            }
-          }
-        }
-      }
+      // Add here code to automatically add instances to monitor if needed.
     }
 
     /// <summary>

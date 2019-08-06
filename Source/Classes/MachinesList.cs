@@ -440,7 +440,7 @@ namespace MySql.Notifier.Classes
       var autoAddPattern = Settings.Default.AutoAddPattern;
       var localServicesList = LocalMachine.GetWmiServices(autoAddPattern, true, false);
       var servicesToAddList = localServicesList.Cast<ManagementObject>().Where(mo => mo != null
-                                                                                     && Service.IsRealMySqlService(mo.Properties["Name"].Value.ToString())
+                                                                                     && Service.IsRealMySqlService(mo.Properties["Name"].Value.ToString(), false)
                                                                                      && !LocalMachine.ContainsServiceByName(mo.Properties["Name"].Value.ToString())).ToList();
 
       // If we found some services we will try to add the local machine to the list...
@@ -452,7 +452,9 @@ namespace MySql.Notifier.Classes
       ChangeMachine(LocalMachine, ListChangeType.AutoAdd);
 
       // Try to add the services we found on it.
-      foreach (var service in servicesToAddList.Select(mo => new MySqlService(mo.Properties["Name"].Value.ToString(), true, true, LocalMachine)))
+      var servicesList = servicesToAddList.Select(mo => new MySqlService(mo.Properties["Name"].Value.ToString(), true, true, LocalMachine)).ToList();
+      servicesList.Sort();
+      foreach (var service in servicesList)
       {
         service.SetServiceParameters(true);
         LocalMachine.ChangeService(service, ListChangeType.AutoAdd);

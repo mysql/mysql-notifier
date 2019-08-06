@@ -29,12 +29,13 @@ using MySql.Notifier.Properties;
 using MySql.Utility.Classes;
 using MySql.Utility.Classes.Logging;
 using MySql.Utility.Classes.MySql;
+using MySql.Utility.Classes.MySqlRouter;
 using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes
 {
   [Serializable]
-  public class MySqlService : IDisposable
+  public class MySqlService : IDisposable, IEquatable<MySqlService>, IComparable<MySqlService>
   {
     #region Fields
 
@@ -54,19 +55,29 @@ namespace MySql.Notifier.Classes
     private int _loops;
 
     /// <summary>
-    /// The WMI instance for this service.
-    /// </summary>
-    private ManagementObject _managementObject;
-
-    /// <summary>
     /// The current status of this service.
     /// </summary>
     private MySqlServiceStatus _currentStatus;
 
     /// <summary>
+    /// The name of this service (short name).
+    /// </summary>
+    private string _serviceName;
+
+    /// <summary>
+    /// The parameters used to initialize a MySQL product installation.
+    /// </summary>
+    private BaseStartupParameters _startupParameters;
+
+    /// <summary>
     /// Timer used to wait for a status change.
     /// </summary>
     private readonly Timer _statusChangeTimer;
+
+    /// <summary>
+    /// The list of Workbench connections that connect to this MySQL service.
+    /// </summary>
+    private List<MySqlWorkbenchConnection> _workbenchConnections;
 
     #endregion Fields
 
@@ -80,7 +91,11 @@ namespace MySql.Notifier.Classes
       _displayName = string.Empty;
       _isWaitingOnStatusChange = false;
       _loops = 0;
-      _managementObject = null;
+      _serviceName = null;
+      _startupParameters = null;
+      _workbenchConnections = null;
+      ServiceManagementObject = null;
+      CompareByDisplayName = false;
       MenuGroup = null;
       PreviousStatus = MySqlServiceStatus.Unavailable;
       ServiceId = Guid.NewGuid().ToString("B");
@@ -97,33 +112,6 @@ namespace MySql.Notifier.Classes
       UpdateTrayIconOnStatusChange = updatesTrayIcon;
       ServiceName = serviceName;
       SetServiceParameters(false);
-    }
-
-    /// <summary>
-    /// Releases all resources used by the <see cref="MySqlService"/> class
-    /// </summary>
-    public void Dispose()
-    {
-      Dispose(true);
-      GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Releases all resources used by the <see cref="MySqlService"/> class
-    /// </summary>
-    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
-    protected virtual void Dispose(bool disposing)
-    {
-      if (disposing)
-      {
-        // Free managed resources
-        _statusChangeTimer?.Dispose();
-        _managementObject?.Dispose();
-        MenuGroup?.Dispose();
-      }
-
-      // Add class finalizer if unmanaged resources are added to the class
-      // Free unmanaged resources if there are any
     }
 
     #region Events
@@ -156,10 +144,9 @@ namespace MySql.Notifier.Classes
     #region Properties
 
     /// <summary>
-    /// Gets a unique service ID.
+    /// Gets or sets a value indicating if comparisons are done using the display name instead of the service name.
     /// </summary>
-    [XmlIgnore]
-    public string ServiceId { get; }
+    public bool CompareByDisplayName { get; set; }
 
     /// <summary>
     /// Gets or sets the display name of the service.
@@ -184,12 +171,6 @@ namespace MySql.Notifier.Classes
     public Machine Host { get; set; }
 
     /// <summary>
-    /// Gets a value indicating whether this service is bound to a real MySQL service.
-    /// </summary>
-    [XmlIgnore]
-    public bool IsRealMySqlService => StartupParameters?.IsRealMySqlService ?? _managementObject != null && Service.IsMySqlExecutable(_managementObject.Properties["PathName"].Value.ToString());
-
-    /// <summary>
     /// Gets the group of ToolStripMenuItem controls for each of the corresponding instance's context menu items.
     /// </summary>
     [XmlIgnore]
@@ -208,6 +189,12 @@ namespace MySql.Notifier.Classes
     public MySqlServiceStatus PreviousStatus { get; private set; }
 
     /// <summary>
+    /// Gets a unique service ID.
+    /// </summary>
+    [XmlIgnore]
+    public string ServiceId { get; }
+
+    /// <summary>
     /// Gets a value indicating if the WMI instance bound to this service exists.
     /// </summary>
     [XmlIgnore]
@@ -217,19 +204,55 @@ namespace MySql.Notifier.Classes
     /// Gets the WMI instance for this service.
     /// </summary>
     [XmlIgnore]
-    public ManagementObject ServiceManagementObject => _managementObject;
+    public ManagementObject ServiceManagementObject { get; private set; }
 
     /// <summary>
     /// Gets or sets the name of this service (short name).
     /// </summary>
     [XmlAttribute(AttributeName = "ServiceName")]
-    public string ServiceName { get; set; }
+    public string ServiceName
+    {
+      get => _serviceName;
+      set
+      {
+        if (!string.Equals(_serviceName, value))
+        {
+          _startupParameters = null;
+          _workbenchConnections = null;
+        }
 
-    /// <summary>
-    /// Gets the parameters used to initialize a MySQL server instance.
+        _serviceName = value;
+      }
+    }
+
+      /// <summary>
+    /// Gets the parameters used to initialize a MySQL product installation.
     /// </summary>
     [XmlIgnore]
-    public MySqlServerStartupParameters StartupParameters { get; private set; }
+    public BaseStartupParameters StartupParameters
+    {
+      get
+      {
+        if (_startupParameters == null)
+        {
+          if (ServiceName.Contains("router", StringComparison.OrdinalIgnoreCase))
+          {
+            _startupParameters = RouterStartupParameters.GetStartupParameters(ServiceName);
+          }
+          else
+          {
+            _startupParameters = MySqlServerStartupParameters.GetStartupParameters(ServiceName, Host.Name);
+          }
+
+          if (_startupParameters == null)
+          {
+            _startupParameters = new BaseStartupParameters(Host.Name);
+          }
+        }
+
+        return _startupParameters;
+      }
+    }
 
     /// <summary>
     /// Gets the current status of this service.
@@ -262,7 +285,7 @@ namespace MySql.Notifier.Classes
     /// Gets the list of Workbench connections that connect to this MySQL service.
     /// </summary>
     [XmlIgnore]
-    public List<MySqlWorkbenchConnection> WorkbenchConnections { get; private set; }
+    public List<MySqlWorkbenchConnection> WorkbenchConnections => _workbenchConnections ?? (_workbenchConnections = StartupParameters.GetRelatedWorkbenchConnections());
 
     /// <summary>
     /// Gets a value indicating if the service is done with a service status change operation.
@@ -286,82 +309,83 @@ namespace MySql.Notifier.Classes
     }
 
     /// <summary>
-    /// Finds the related Workbench connections that connect to this MySQL service, only for services running on local computers.
+    /// Compares the current instance with another object of the same type and returns an integer that indicates whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
     /// </summary>
-    public void FindMatchingWbConnections()
+    /// <param name="other">An object to compare with this instance.</param>
+    /// <returns>A value that indicates the relative order of the objects being compared.</returns>
+    public int CompareTo(MySqlService other)
     {
-      if (!Host.IsLocal
-          || ServiceManagementObject == null)
+      // A null value means that this object is greater.
+      if (other == null)
       {
-        return;
+        return 1;
       }
 
-      // Discover what StartupParameters we were started with for local connections
-      StartupParameters = MySqlServerStartupParameters.GetStartupParameters(new ServiceController(ServiceName, Host.Name));
-      if (string.IsNullOrEmpty(StartupParameters.HostName)
-          || !StartupParameters.IsRealMySqlService)
+      return CompareByDisplayName
+        ? string.Compare(DisplayName, other.DisplayName, StringComparison.Ordinal)
+        : string.Compare(ServiceName, other.ServiceName, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="MySqlService"/> class
+    /// </summary>
+    public void Dispose()
+    {
+      Dispose(true);
+      GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Determines whether the specified object is equal to the current object.
+    /// </summary>
+    /// <param name="other">The object to compare to the current object.</param>
+    /// <returns><c>true</c> if both objects are equal, <c>false</c> otherwise.</returns>
+    public override bool Equals(object other)
+    {
+      if (!(other is MySqlService otherService))
       {
-        return;
+        return false;
       }
 
-      if (WorkbenchConnections == null)
+      return Equals(otherService);
+    }
+
+    /// <summary>
+    /// Determines whether the specified <seealso cref="MySqlService"/> instance is equal to the current one.
+    /// </summary>
+    /// <param name="other">The <seealso cref="MySqlService"/> instance to compare to the current object.</param>
+    /// <returns><c>true</c> if both instances are equal, <c>false</c> otherwise.</returns>
+    public bool Equals(MySqlService other)
+    {
+      if (other == null)
       {
-        WorkbenchConnections = new List<MySqlWorkbenchConnection>();
+        return false;
       }
-      else
+
+      return CompareByDisplayName
+        ? Equals(DisplayName, other.DisplayName)
+        : Equals(ServiceName, other.ServiceName);
+    }
+
+    /// <summary>
+    /// Serves as the default hash function.
+    /// </summary>
+    /// <returns>A hash code for the current object.</returns>
+    public override int GetHashCode()
+    {
+      unchecked
       {
-        WorkbenchConnections.Clear();
-      }
-
-      var filteredConnections = MySqlWorkbench.WorkbenchConnections.Where(t => !string.IsNullOrEmpty(t.Name) && t.Port == StartupParameters.Port).ToList();
-      foreach (var c in filteredConnections)
-      {
-        switch (c.ConnectionMethod)
-        {
-          case MySqlWorkbenchConnection.ConnectionMethodType.LocalUnixSocketOrWindowsPipe:
-            if (!StartupParameters.NamedPipesEnabled
-                || string.Equals(c.UnixSocketOrWindowsPipe, StartupParameters.PipeName, StringComparison.OrdinalIgnoreCase))
-            {
-              continue;
-            }
-            break;
-
-          case MySqlWorkbenchConnection.ConnectionMethodType.Tcp:
-          case MySqlWorkbenchConnection.ConnectionMethodType.XProtocol:
-          case MySqlWorkbenchConnection.ConnectionMethodType.Ssh:
-            if (c.Port != StartupParameters.Port)
-            {
-              continue;
-            }
-            break;
-
-          case MySqlWorkbenchConnection.ConnectionMethodType.Unknown:
-            continue;
-        }
-
-        if (!Utilities.IsValidIpAddress(c.Host))
-        {
-          if (Utilities.GetIPv4ForHostName(c.Host) != StartupParameters.HostIPv4)
-          {
-            continue;
-          }
-        }
-        else
-        {
-          if (c.Host != StartupParameters.HostIPv4)
-          {
-            continue;
-          }
-        }
-
-        WorkbenchConnections.Add(c);
+        int hashCode = Utilities.HASHING_BASE;
+        hashCode = (hashCode * Utilities.HASHING_MULTIPLIER) ^ (DisplayName == null ? 0 : DisplayName.GetHashCode());
+        hashCode = (hashCode * Utilities.HASHING_MULTIPLIER) ^ (ServiceName == null ? 0 : ServiceName.GetHashCode());
+        return hashCode;
       }
     }
 
     /// <summary>
     /// Fetches the real service via WMI and its current status.
     /// </summary>
-    /// <param name="retryToGetServiceInstance">Flag indicating if the method will attempt to re-fetch the serice instance.</param>
+    /// <param name="retryToGetServiceInstance">Flag indicating if the method will attempt to re-fetch the service instance.</param>
     public void RefreshStatusAndName(bool retryToGetServiceInstance)
     {
       // If the WMI management object is not available, attempt to fetch it.
@@ -396,6 +420,14 @@ namespace MySql.Notifier.Classes
     }
 
     /// <summary>
+    /// Resets the already retrieved related Workbench connections so they are retrieved again.
+    /// </summary>
+    public void ResetWorkbenchConnections()
+    {
+      _workbenchConnections = null;
+    }
+
+    /// <summary>
     /// Attempts to stop and then start the current MySQL Service
     /// </summary>
     /// <returns>Flag indicating if the action completed successfully</returns>
@@ -420,9 +452,7 @@ namespace MySql.Notifier.Classes
       GetServiceInstance(doNotFetchInstanceIfOffline);
       try
       {
-        FindMatchingWbConnections();
         RefreshStatusAndName(false);
-
         if (MenuGroup == null)
         {
           MenuGroup = new ServiceMenuGroup(this);
@@ -430,7 +460,7 @@ namespace MySql.Notifier.Classes
       }
       catch (InvalidOperationException ioEx)
       {
-        _managementObject = null;
+        ServiceManagementObject = null;
         Logger.LogException(ioEx, true, string.Format(Resources.SetServiceErrorDetail, DisplayName));
       }
     }
@@ -481,6 +511,35 @@ namespace MySql.Notifier.Classes
     }
 
     /// <summary>
+    /// Returns a string that represents the current object.
+    /// </summary>
+    /// <returns>A string that represents the current object.</returns>
+    public override string ToString()
+    {
+      return CompareByDisplayName
+        ? DisplayName
+        : ServiceName;
+    }
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="MySqlService"/> class
+    /// </summary>
+    /// <param name="disposing">If true this is called by Dispose(), otherwise it is called by the finalizer</param>
+    protected virtual void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        // Free managed resources
+        _statusChangeTimer?.Dispose();
+        ServiceManagementObject?.Dispose();
+        MenuGroup?.Dispose();
+      }
+
+      // Add class finalizer if unmanaged resources are added to the class
+      // Free unmanaged resources if there are any
+    }
+
+    /// <summary>
     /// Fires the <see cref="StatusChanged"/> event.
     /// </summary>
     /// <param name="sender">Sender object.</param>
@@ -516,7 +575,7 @@ namespace MySql.Notifier.Classes
     /// <param name="doNotFetchIfOffline">Flag indicating whether no attempt should be made to connect to the real host if the related machine is offline.</param>
     private void GetServiceInstance(bool doNotFetchIfOffline)
     {
-      _managementObject = null;
+      ServiceManagementObject = null;
       if (doNotFetchIfOffline && !Host.IsOnline)
       {
         return;
@@ -531,7 +590,7 @@ namespace MySql.Notifier.Classes
 
       foreach (var mo in retObjectCollection.Cast<ManagementObject>().Where(mo => mo != null))
       {
-        _managementObject = mo;
+        ServiceManagementObject = mo;
         break;
       }
     }

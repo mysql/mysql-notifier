@@ -704,6 +704,7 @@ namespace MySql.Notifier.Classes
 
       foreach (var service in _machinesList.Machines.SelectMany(machine => machine.Services))
       {
+        service.ResetWorkbenchConnections();
         service.MenuGroup.RefreshMenu(_notifyIcon.ContextMenuStrip);
       }
 

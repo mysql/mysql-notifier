@@ -86,8 +86,6 @@ namespace MySql.Notifier.Classes
 
     #region Properties
 
-    public string BoundServiceName => _boundService.ServiceName;
-
     public int MenuItemsQuantity { get; private set; }
 
     #endregion Properties
@@ -212,7 +210,7 @@ namespace MySql.Notifier.Classes
       else
       {
         var index = FindMenuItemWithinMenuStrip(menu, _boundService.Host.MachineId);
-        var servicesMenusCount = _boundService.Host.Services?.Sum(s => s != _boundService && s.MenuGroup != null ? s.MenuGroup.MenuItemsQuantity : 0) ?? 0;
+        var servicesMenusCount = _boundService.Host.Services?.Sum(s => !ReferenceEquals(s, _boundService) && s.MenuGroup != null ? s.MenuGroup.MenuItemsQuantity : 0) ?? 0;
         index += servicesMenusCount;
         if (index < 0)
         {
@@ -228,9 +226,10 @@ namespace MySql.Notifier.Classes
         index++;
         menu.Items.Insert(index, _statusMenu);
         MenuItemsQuantity++;
-        if (_boundService.IsRealMySqlService)
+        if (_boundService.StartupParameters.IsForMySql)
         {
-          if (_configureMenu != null)
+          if (_boundService.StartupParameters.IsForMySqlServer
+              && _configureMenu != null)
           {
             menu.Items.Insert(++index, _configureMenu);
             MenuItemsQuantity++;
@@ -270,12 +269,11 @@ namespace MySql.Notifier.Classes
       }
       else
       {
-        if (!_boundService.IsRealMySqlService)
+        if (!_boundService.StartupParameters.IsForMySql)
         {
           return;
         }
 
-        _boundService.FindMatchingWbConnections();
         var index = FindMenuItemWithinMenuStrip(menu, _boundService.ServiceId);
         if (index < 0)
         {
@@ -338,7 +336,8 @@ namespace MySql.Notifier.Classes
           return;
         }
 
-        if (_boundService.IsRealMySqlService && MySqlWorkbench.AllowsExternalConnectionsManagement)
+        if (_boundService.StartupParameters.IsForMySql
+            && MySqlWorkbench.AllowsExternalConnectionsManagement)
         {
           menuItems[0] = Resources.ManageInstance;
           menuItems[1] = Resources.SQLEditor;
