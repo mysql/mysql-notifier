@@ -1316,6 +1316,15 @@ namespace MySql.Notifier.Classes
 
       MySqlWorkbench.Servers = new MySqlWorkbenchServerCollection();
       MySqlWorkbench.LoadServers();
+      foreach (var service in _machinesList.Machines.SelectMany(machine => machine.Services))
+      {
+        service.ResetWorkbenchServers();
+      }
+
+      foreach (var instance in _mySqlInstancesList)
+      {
+        instance.ResetRelatedWorkbenchServers();
+      }
     }
 
     /// <summary>

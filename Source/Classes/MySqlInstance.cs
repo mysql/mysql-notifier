@@ -25,7 +25,6 @@ using System.Xml.Serialization;
 using MySql.Data.MySqlClient;
 using MySql.Notifier.Classes.EventArguments;
 using MySql.Utility.Classes;
-using MySql.Utility.Classes.MySql;
 using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes
@@ -88,6 +87,11 @@ namespace MySql.Notifier.Classes
     private List<MySqlWorkbenchConnection> _relatedConnections;
 
     /// <summary>
+    /// The list of Workbench server instances related to this MySQL instance.
+    /// </summary>
+    private List<MySqlWorkbenchServer> _relatedServers;
+
+    /// <summary>
     /// The seconds remaining to the next connection test for the monitoring of this instance.
     /// </summary>
     private double _secondsToMonitorInstance;
@@ -124,6 +128,7 @@ namespace MySql.Notifier.Classes
       _monitoringIntervalUnitOfMeasure = DEFAULT_MONITORING_UOM;
       _monitorAndNotifyStatus = true;
       _relatedConnections = null;
+      _relatedServers = null;
       _oldInstanceStatus = MySqlWorkbenchConnection.ConnectionStatusType.Unknown;
       _updateTrayIconOnStatusChange = true;
       _workbenchConnection = null;
@@ -346,19 +351,13 @@ namespace MySql.Notifier.Classes
     /// Gets the list of Workbench connections that connect to this MySQL instance.
     /// </summary>
     [XmlIgnore]
-    public List<MySqlWorkbenchConnection> RelatedConnections
-    {
-      get
-      {
-        if (_relatedConnections != null)
-        {
-          return _relatedConnections;
-        }
+    public List<MySqlWorkbenchConnection> RelatedConnections => _relatedConnections ?? (_relatedConnections = MySqlWorkbench.Connections.GetSimilarConnections(WorkbenchConnection));
 
-        _relatedConnections = MySqlWorkbench.Connections.GetSimilarConnections(WorkbenchConnection);
-        return _relatedConnections;
-      }
-    }
+    /// <summary>
+    /// Gets the list of Workbench server instances related to this MySQL instance.
+    /// </summary>
+    [XmlIgnore]
+    public List<MySqlWorkbenchServer> RelatedServers => _relatedServers ?? (_relatedServers = MySqlWorkbench.Servers.Where(server => string.Equals(server.ConnectionId, WorkbenchConnectionId, StringComparison.Ordinal)).ToList());
 
     /// <summary>
     /// Gets or sets the seconds remaining to the next connection test for the monitoring of this instance.
@@ -429,12 +428,6 @@ namespace MySql.Notifier.Classes
         OnPropertyChanged(nameof(WorkbenchConnectionId));
       }
     }
-
-    /// <summary>
-    /// Gets a <see cref="MySqlWorkbenchServer"/> object related to this instance's Workbench connection.
-    /// </summary>
-    [XmlIgnore]
-    public MySqlWorkbenchServer WorkbenchServer => MySqlWorkbench.Servers.FirstOrDefault(s => s.ConnectionId == WorkbenchConnectionId);
 
     #endregion Properties
 
@@ -520,6 +513,14 @@ namespace MySql.Notifier.Classes
     public void ResetRelatedWorkbenchConnections()
     {
       _relatedConnections = null;
+    }
+
+    /// <summary>
+    /// Resets the already retrieved related Workbench servers so they are retrieved again.
+    /// </summary>
+    public void ResetRelatedWorkbenchServers()
+    {
+      _relatedServers = null;
     }
 
     /// <summary>

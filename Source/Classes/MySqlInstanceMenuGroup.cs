@@ -345,11 +345,17 @@ namespace MySql.Notifier.Classes
         {
           SqlEditorMenuItem.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement
                                       && BoundInstance.WorkbenchConnection != null;
+          SqlEditorMenuItem.ToolTipText = SqlEditorMenuItem.Enabled
+            ? null
+            : string.Format(Resources.NoWorkbenchConnectionsFound, "instance");
         }
 
         if (ConfigureMenuItem != null)
         {
-          ConfigureMenuItem.Enabled = BoundInstance.WorkbenchServer != null;
+          ConfigureMenuItem.Enabled = BoundInstance.RelatedServers.Count > 0;
+          ConfigureMenuItem.ToolTipText = ConfigureMenuItem.Enabled
+            ? null
+            : string.Format(Resources.NoWorkbenchServersFound, "instance");
         }
       }
     }
@@ -361,15 +367,8 @@ namespace MySql.Notifier.Classes
     /// <param name="e">Event arguments.</param>
     private void ConfigureMenuItem_Click(object sender, EventArgs e)
     {
-      try
-      {
-        var server = MySqlWorkbench.Servers.FirstOrDefault(s => s.ConnectionId == BoundInstance.WorkbenchConnectionId);
-        MySqlWorkbench.LaunchConfigure(server);
-      }
-      catch (Exception ex)
-      {
-        Logger.LogException(ex, true, Resources.FailureToLaunchWorkbench);
-      }
+      var server = BoundInstance.RelatedServers.FirstOrDefault();
+      MySqlWorkbench.LaunchConfigure(server);
     }
 
     /// <summary>
@@ -402,7 +401,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        Logger.LogException(ex, true, Resources.FailureToLaunchWorkbench);
+        Logger.LogException(ex);
       }
     }
 

@@ -510,15 +510,6 @@ namespace MySql.Notifier.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Workbench failed to launch with an error (see more information for details)..
-        /// </summary>
-        internal static string FailureToLaunchWorkbench {
-            get {
-                return ResourceManager.GetString("FailureToLaunchWorkbench", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Could not fix configuration file&apos;s root element name because of an Exception, reverting back to how it was..
         /// </summary>
         internal static string FixMySqlForExcelMainElementWarningText {
@@ -924,6 +915,24 @@ namespace MySql.Notifier.Properties {
         internal static string NoUpdatesFound {
             get {
                 return ResourceManager.GetString("NoUpdatesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are no MySQL Workbench server connections found related to this MySQL {0}..
+        /// </summary>
+        internal static string NoWorkbenchConnectionsFound {
+            get {
+                return ResourceManager.GetString("NoWorkbenchConnectionsFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are no MySQL Workbench server instances found related to this MySQL {0}..
+        /// </summary>
+        internal static string NoWorkbenchServersFound {
+            get {
+                return ResourceManager.GetString("NoWorkbenchServersFound", resourceCulture);
             }
         }
         

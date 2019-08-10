@@ -377,7 +377,8 @@ namespace MySql.Notifier.Classes
     public void Update()
     {
       var notifierMenu = _statusMenu.GetCurrentParent();
-      if (notifierMenu != null && notifierMenu.InvokeRequired)
+      if (notifierMenu != null
+          && notifierMenu.InvokeRequired)
       {
         notifierMenu.Invoke(new MethodInvoker(Update));
       }
@@ -415,22 +416,33 @@ namespace MySql.Notifier.Classes
 
         if (_editorMenu != null)
         {
-          _editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement && _boundService.WorkbenchConnections != null && _boundService.WorkbenchConnections.Count > 0;
+          _editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement
+                                && _boundService.WorkbenchConnections != null
+                                && _boundService.WorkbenchConnections.Count > 0;
+          _editorMenu.ToolTipText = _editorMenu.Enabled
+            ? null
+            : string.Format(Resources.NoWorkbenchConnectionsFound, "service");
         }
 
         if (_configureMenu != null)
         {
-          _configureMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement;
+          _configureMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement
+                                   && _boundService.WorkbenchServers.Count > 0;
+          _configureMenu.ToolTipText = _configureMenu.Enabled
+            ? null
+            : string.Format(Resources.NoWorkbenchServersFound, "service");
         }
 
         var actionMenusAvailable = _boundService.Host.IsOnline;
-        if (actionMenusAvailable && _statusMenu.DropDownItems.Count == 0)
+        if (actionMenusAvailable
+            && _statusMenu.DropDownItems.Count == 0)
         {
           _statusMenu.DropDownItems.Add(_startMenu);
           _statusMenu.DropDownItems.Add(_stopMenu);
           _statusMenu.DropDownItems.Add(_restartMenu);
         }
-        else if (!actionMenusAvailable && _statusMenu.DropDownItems.Count > 0)
+        else if (!actionMenusAvailable
+                 && _statusMenu.DropDownItems.Count > 0)
         {
           _statusMenu.DropDownItems.Clear();
         }
@@ -470,15 +482,8 @@ namespace MySql.Notifier.Classes
 
     private void configureInstanceItem_Click(object sender, EventArgs e)
     {
-      try
-      {
-        var server = MySqlWorkbench.Servers.FindByServiceName(_boundService.ServiceName);
-        MySqlWorkbench.LaunchConfigure(server);
-      }
-      catch (Exception ex)
-      {
-        Logger.LogException(ex, true, Resources.FailureToLaunchWorkbench);
-      }
+      var server = _boundService.WorkbenchServers.FirstOrDefault();
+      MySqlWorkbench.LaunchConfigure(server);
     }
 
     /// <summary>
@@ -554,7 +559,7 @@ namespace MySql.Notifier.Classes
       }
       catch (Exception ex)
       {
-        Logger.LogException(ex, true, Resources.FailureToLaunchWorkbench);
+        Logger.LogException(ex);
       }
     }
   }

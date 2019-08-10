@@ -79,6 +79,11 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private List<MySqlWorkbenchConnection> _workbenchConnections;
 
+    /// <summary>
+    /// The list of Workbench servers related to this MySQL service.
+    /// </summary>
+    private List<MySqlWorkbenchServer> _workbenchServers;
+
     #endregion Fields
 
     /// <summary>
@@ -94,6 +99,7 @@ namespace MySql.Notifier.Classes
       _serviceName = null;
       _startupParameters = null;
       _workbenchConnections = null;
+      _workbenchServers = null;
       ServiceManagementObject = null;
       CompareByDisplayName = false;
       MenuGroup = null;
@@ -198,7 +204,8 @@ namespace MySql.Notifier.Classes
     /// Gets a value indicating if the WMI instance bound to this service exists.
     /// </summary>
     [XmlIgnore]
-    public bool ServiceInstanceExists => !Host.IsOnline || ServiceManagementObject != null;
+    public bool ServiceInstanceExists => !Host.IsOnline
+                                         || ServiceManagementObject != null;
 
     /// <summary>
     /// Gets the WMI instance for this service.
@@ -286,6 +293,12 @@ namespace MySql.Notifier.Classes
     /// </summary>
     [XmlIgnore]
     public List<MySqlWorkbenchConnection> WorkbenchConnections => _workbenchConnections ?? (_workbenchConnections = StartupParameters.GetRelatedWorkbenchConnections());
+
+    /// <summary>
+    /// Gets the list of Workbench servers related to this MySQL service.
+    /// </summary>
+    [XmlIgnore]
+    public List<MySqlWorkbenchServer> WorkbenchServers => _workbenchServers ?? (_workbenchServers = MySqlWorkbench.Servers.Where(server => string.Compare(server.ServiceName, ServiceName, StringComparison.OrdinalIgnoreCase) == 0).ToList());
 
     /// <summary>
     /// Gets a value indicating if the service is done with a service status change operation.
@@ -425,6 +438,14 @@ namespace MySql.Notifier.Classes
     public void ResetWorkbenchConnections()
     {
       _workbenchConnections = null;
+    }
+
+    /// <summary>
+    /// Resets the already retrieved related Workbench servers so they are retrieved again.
+    /// </summary>
+    public void ResetWorkbenchServers()
+    {
+      _workbenchServers = null;
     }
 
     /// <summary>

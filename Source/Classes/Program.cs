@@ -139,7 +139,7 @@ namespace MySql.Notifier.Classes
         }
 
         // Static initializations
-        InstallLocation = Utilities.GetMySqlAppInstallLocation(AssemblyInfo.AssemblyTitle);
+        InstallLocation = Utilities.GetProductInstallLocation(AssemblyInfo.AssemblyTitle);
 
         // Update settings file
         UpdateSettingsFile();
@@ -240,7 +240,6 @@ namespace MySql.Notifier.Classes
       MySqlWorkbench.ExternalApplicationsConnectionsFileRetryLoadOrRecreate = true;
       MySqlWorkbench.ExternalApplicationConnectionsFilePath = EnvironmentApplicationDataDirectory + CONNECTIONS_FILE_RELATIVE_PATH;
       MySqlWorkbench.LoadData();
-      MySqlInstaller.InstallerLegacyDllPath = InstallLocation;
       MySqlInstaller.LoadData(true);
       PasswordDialog.ApplicationIcon = Resources.MySqlNotifierIcon;
       PasswordDialog.SecurityLogo = Resources.NotifierSecurityImage;
