@@ -20,7 +20,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Properties;
-using MySql.Utility.Classes.Logging;
 using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes
@@ -219,11 +218,16 @@ namespace MySql.Notifier.Classes
 
         SqlEditorMenuItem.Enabled = BoundInstance.WorkbenchConnection != null
                                     || BoundInstance.RelatedConnections.Count > 1;
-
-        // If there are 0 or 1 connections then the single menu will suffice.
-        if (BoundInstance.RelatedConnections.Count <= 1)
+        if (BoundInstance.RelatedConnections.Count == 0)
         {
+          return;
+        }
+
+        if (BoundInstance.RelatedConnections.Count == 1)
+        {
+          SqlEditorMenuItem.Click -= SqlEditorMenuItem_Click;
           SqlEditorMenuItem.Click += SqlEditorMenuItem_Click;
+          SqlEditorMenuItem.Tag = BoundInstance.WorkbenchConnection;
           return;
         }
 
@@ -237,6 +241,7 @@ namespace MySql.Notifier.Classes
             menu.Font = boldFont;
           }
 
+          menu.Tag = conn;
           menu.Click += SqlEditorMenuItem_Click;
           SqlEditorMenuItem.DropDownItems.Add(menu);
         }
@@ -378,31 +383,13 @@ namespace MySql.Notifier.Classes
     /// <param name="e"></param>
     private void SqlEditorMenuItem_Click(object sender, EventArgs e)
     {
-      try
+      if (!(sender is ToolStripMenuItem menuItem)
+          || (!(menuItem.Tag is MySqlWorkbenchConnection connection)))
       {
-        if (BoundInstance.RelatedConnections.Count == 0)
-        {
-          MySqlWorkbench.LaunchSqlEditor(null);
-        }
-        else if (!SqlEditorMenuItem.HasDropDownItems)
-        {
-          MySqlWorkbench.LaunchSqlEditor(BoundInstance.WorkbenchConnection.Name);
-        }
-        else
-        {
-          for (var i = 0; i < SqlEditorMenuItem.DropDownItems.Count; i++)
-          {
-            if (sender == SqlEditorMenuItem.DropDownItems[i])
-            {
-              MySqlWorkbench.LaunchSqlEditor(BoundInstance.RelatedConnections[i].Name);
-            }
-          }
-        }
+        return;
       }
-      catch (Exception ex)
-      {
-        Logger.LogException(ex);
-      }
+
+      MySqlWorkbench.LaunchSqlEditor(connection.Name);
     }
 
     /// <summary>

@@ -21,7 +21,6 @@ using System.Linq;
 using System.Windows.Forms;
 using MySql.Notifier.Enumerations;
 using MySql.Notifier.Properties;
-using MySql.Utility.Classes.Logging;
 using MySql.Utility.Classes.MySqlWorkbench;
 
 namespace MySql.Notifier.Classes
@@ -228,8 +227,7 @@ namespace MySql.Notifier.Classes
         MenuItemsQuantity++;
         if (_boundService.StartupParameters.IsForMySql)
         {
-          if (_boundService.StartupParameters.IsForMySqlServer
-              && _configureMenu != null)
+          if (_configureMenu != null)
           {
             menu.Items.Insert(++index, _configureMenu);
             MenuItemsQuantity++;
@@ -491,13 +489,13 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private void CreateEditorMenus()
     {
-      _editorMenu = new ToolStripMenuItem(Resources.SQLEditor);
-      _editorMenu.Click -= workbenchConnection_Clicked;
-
-      // If there are no connections then we disable the SQL Editor menu.
-      _editorMenu.Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement
-                            && _boundService.WorkbenchConnections != null
-                            && _boundService.WorkbenchConnections.Count > 0;
+      _editorMenu = new ToolStripMenuItem(Resources.SQLEditor)
+      {
+        // If there are no connections then we disable the SQL Editor menu.
+        Enabled = MySqlWorkbench.AllowsExternalConnectionsManagement
+                  && _boundService.WorkbenchConnections != null
+                  && _boundService.WorkbenchConnections.Count > 0
+      };
       if (!_editorMenu.Enabled
           || _boundService.WorkbenchConnections == null)
       {
@@ -507,12 +505,13 @@ namespace MySql.Notifier.Classes
       // If there is only 1 connection then we open Workbench directly from the SQL Editor menu.
       if (_boundService.WorkbenchConnections.Count == 1)
       {
+        _editorMenu.Tag = _boundService.WorkbenchConnections[0];
         _editorMenu.Click += workbenchConnection_Clicked;
         return;
       }
 
       // We have more than 1 connection so we create a submenu
-      foreach (var menu in _boundService.WorkbenchConnections.Select(c => new ToolStripMenuItem(c.Name)))
+      foreach (var menu in _boundService.WorkbenchConnections.Select(c => new ToolStripMenuItem(c.Name) { Tag = c }))
       {
         menu.Click += workbenchConnection_Clicked;
         _editorMenu.DropDownItems.Add(menu);
@@ -536,31 +535,13 @@ namespace MySql.Notifier.Classes
 
     private void workbenchConnection_Clicked(object sender, EventArgs e)
     {
-      try
+      if (!(sender is ToolStripMenuItem menuItem)
+          || (!(menuItem.Tag is MySqlWorkbenchConnection connection)))
       {
-        if (_boundService.WorkbenchConnections.Count == 0)
-        {
-          MySqlWorkbench.LaunchSqlEditor(null);
-        }
-        else if (!_editorMenu.HasDropDownItems)
-        {
-          MySqlWorkbench.LaunchSqlEditor(_boundService.WorkbenchConnections[0].Name);
-        }
-        else
-        {
-          for (var x = 0; x < _editorMenu.DropDownItems.Count; x++)
-          {
-            if (sender == _editorMenu.DropDownItems[x])
-            {
-              MySqlWorkbench.LaunchSqlEditor(_boundService.WorkbenchConnections[x].Name);
-            }
-          }
-        }
+        return;
       }
-      catch (Exception ex)
-      {
-        Logger.LogException(ex);
-      }
+
+      MySqlWorkbench.LaunchSqlEditor(connection.Name);
     }
   }
 }
