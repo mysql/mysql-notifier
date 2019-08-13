@@ -217,6 +217,14 @@ namespace MySql.Notifier.Classes
       MySqlWorkbench.ConnectionsFileChanged += ConnectionsFileChanged;
       MySqlWorkbench.ServersFileChanged += ServersFileChanged;
 
+      if (MySqlWorkbench.IsInstalled
+          && MySqlWorkbench.WorkbenchDataDirectoryExists
+          && MySqlWorkbench.AllowsExternalConnectionsManagement)
+      {
+        // Check if it's time to display the dialog for connections migration.
+        CheckForNextAutomaticConnectionsMigration(false);
+      }
+
       // Create watcher for Notifier settings.config file
       _settingsFileWatcher = Utilities.StartWatcherForFile(Program.EnvironmentApplicationDataDirectory + Program.SETTINGS_FILE_RELATIVE_PATH, SettingsFileChanged);
 
@@ -609,7 +617,8 @@ namespace MySql.Notifier.Classes
       // Check if the next connections migration is due now.
       var doMigration = true;
       var nextMigrationAttempt = NextAutomaticConnectionsMigration;
-      if (Settings.Default.WorkbenchMigrationSucceeded && !MySqlWorkbench.ExternalApplicationConnectionsFileExists)
+      if (Settings.Default.WorkbenchMigrationSucceeded
+          && !MySqlWorkbench.ExternalApplicationConnectionsFileExists)
       {
         doMigration = false;
       }
@@ -689,6 +698,7 @@ namespace MySql.Notifier.Classes
           && Settings.Default.WorkbenchMigrationSucceeded)
       {
         Settings.Default.WorkbenchMigrationSucceeded = false;
+        Settings.Default.WorkbenchMigrationLastAttempt = DateTime.MinValue;
         Settings.Default.Save();
       }
 
@@ -1802,11 +1812,6 @@ namespace MySql.Notifier.Classes
             // Check if it's time to display the dialog for connections migration.
             CheckForNextAutomaticConnectionsMigration(false);
           }
-          break;
-
-        case WatcherChangeTypes.Deleted:
-          // Check if it's time to display the dialog for connections migration.
-          CheckForNextAutomaticConnectionsMigration(false);
           break;
       }
     }
