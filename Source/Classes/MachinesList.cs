@@ -436,6 +436,11 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private void AutoAddLocalServices()
     {
+      if (!Settings.Default.AutoAddServicesToMonitor)
+      {
+        return;
+      }
+
       // Verify if MySQL services are present on the local machine
       var autoAddPattern = Settings.Default.AutoAddPattern;
       var localServicesList = LocalMachine.GetWmiServices(autoAddPattern, true, false);
