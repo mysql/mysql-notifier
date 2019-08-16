@@ -14,7 +14,7 @@ Welcome to the release notes for MySQL Notifier 1.1.8
   days when launching a version of MySQL Notifer >= 1.1.8. Changed the behavior of the "Check for Updates..." menu item to immediately query
   MySQL Installer for updates on products, in the same way the scheduled task queries MySQL Installer for updates, instead of just launching
   MySQL Installer. NOTE: Checking for updates needs MySQL Installer to be upgraded to the version 1.4.31 or greater.
-* Added logic to automatically add a monitored MySQL Instance for a locally running MySQL Router Windows service when MySQL Notifier starts.
+* Notifier now adds automatically a monitoring entry for a locally running MySQL Router Windows service when MySQL Notifier starts.
   Also changed the behavior when automatically adding local MySQL Windows services to the monitoring list so every time Notifier is started
   it checks if it needs to add newly added MySQL Windows services, as opposed to past behavior when this was done only the very first time
   MySQL Notifer was run.

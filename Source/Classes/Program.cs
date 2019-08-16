@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -188,13 +189,24 @@ namespace MySql.Notifier.Classes
     /// </summary>
     private static void ChangeAutoCheckForUpdatesFrequency()
     {
-      if (Settings.Default.CheckForUpdatesFrequencyPatched
-          || Settings.Default.FirstRun)
+      if (Settings.Default.FirstRun)
+      {
+        Settings.Default.CheckForUpdatesFrequencyPatched = true;
+        Settings.Default.Save();
+        return;
+      }
+
+      if (Settings.Default.CheckForUpdatesFrequencyPatched)
       {
         return;
       }
 
-      var weeklyFrequency = Settings.Default.CheckForUpdatesFrequency;
+      const int PREVIOUS_DEFAULT_UPGRADE_FREQUENCY_IN_WEEKS = 4;
+      var checkForUpdatesFrequencyPropertyValue = Settings.Default.PropertyValues.OfType<SettingsPropertyValue>().FirstOrDefault(pv => pv.Name == "CheckForUpdatesFrequency");
+      var weeklyFrequency = checkForUpdatesFrequencyPropertyValue != null &&
+                            checkForUpdatesFrequencyPropertyValue.UsingDefaultValue
+        ? PREVIOUS_DEFAULT_UPGRADE_FREQUENCY_IN_WEEKS
+        : Settings.Default.CheckForUpdatesFrequency;
       Settings.Default.CheckForUpdatesFrequency = Math.Min(weeklyFrequency * 7, 365);
       Settings.Default.CheckForUpdatesFrequencyPatched = true;
       Settings.Default.Save();
