@@ -204,8 +204,9 @@ namespace MySql.Notifier.Classes
     /// Gets a value indicating if the WMI instance bound to this service exists.
     /// </summary>
     [XmlIgnore]
-    public bool ServiceInstanceExists => !Host.IsOnline
-                                         || ServiceManagementObject != null;
+    public bool ServiceInstanceExists => Host != null
+                                         && (!Host.IsOnline
+                                             || ServiceManagementObject != null);
 
     /// <summary>
     /// Gets the WMI instance for this service.
@@ -474,7 +475,8 @@ namespace MySql.Notifier.Classes
       try
       {
         RefreshStatusAndName(false);
-        if (MenuGroup == null)
+        if (MenuGroup == null
+            && ServiceInstanceExists)
         {
           MenuGroup = new ServiceMenuGroup(this);
         }

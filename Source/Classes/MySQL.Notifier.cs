@@ -945,7 +945,7 @@ namespace MySql.Notifier.Classes
         case ListChangeType.Cleared:
         case ListChangeType.RemoveByUser:
         case ListChangeType.RemoveByEvent:
-          service.MenuGroup.RemoveFromContextMenu(_notifyIcon.ContextMenuStrip);
+          service.MenuGroup?.RemoveFromContextMenu(_notifyIcon.ContextMenuStrip);
           if (listChangeType == ListChangeType.RemoveByEvent)
           {
             ShowTooltip(false, Resources.BalloonTitleServiceList, string.Format(Resources.BalloonTextServiceRemoved, service.ServiceName));

@@ -1237,7 +1237,8 @@ namespace MySql.Notifier.Classes
       service.StatusChanged -= OnServiceStatusChanged;
       service.StatusChangeError -= OnServiceStatusChangeError;
 
-      if (IsOnline && !service.ServiceInstanceExists)
+      if (IsOnline
+          && !service.ServiceInstanceExists)
       {
         ChangeService(service, ListChangeType.RemoveByEvent);
       }
